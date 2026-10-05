@@ -35,6 +35,10 @@ We have conducted a comprehensive investigation divided into two core research d
    - How CSP Lua unlocks mid-track spawns, rolling launches, instant session restarts, collision hooks, 3D gate rendering, and custom audio.
    - Complete software architecture blueprint and feasibility matrix.
 
+3. **[Kunos Official Resources Catalog (All DLCs)](docs/03_kunos_official_resources_catalog.md)**
+   * Complete inventory of **19 circuit locations (over 45 unique layouts)** and **178 official vehicles** from *Assetto Corsa: Ultimate Edition*.
+   * Technical categorization by track characteristics, surface types, vehicle classes, drivetrains (FWD, RWD, AWD), power, weight, and motorsport eras.
+
 ---
 
 ## 🏗️ Proposed System Architecture
