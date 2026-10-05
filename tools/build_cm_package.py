@@ -53,13 +53,21 @@ from typing import Dict, List, Optional, Tuple
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULT_OUTPUT_ZIP = os.path.join(REPO_ROOT, "release", "AssettoCorsa_GT_Licenses.zip")
 
-DEFAULT_MANIFEST_INI = """[MODE]
+DEFAULT_MANIFEST_INI = """[ABOUT]
 NAME = Gran Turismo Licenses
-DESCRIPTION = Gran Turismo style driving school licenses, sectors, and sector tests
 AUTHOR = Assetto Corsa GT-Like Licenses Team
 VERSION = {version}
-TYPE = SCENARIO
-REQUIRED_CSP = 0.2.0
+DESCRIPTION = Gran Turismo style driving school licenses, sector tests, and graduation hot laps.
+
+[RULES]
+BASE_MODE = PRACTICE
+PENALTIES = 1
+START_TYPE = PIT
+
+[TWEAKS]
+IMMEDIATE_START = 1
+DISABLE_FLAGS = YELLOW, BLUE
+HIDE_PITCREW = 1
 """
 
 DEFAULT_SCENARIO_LUA = """-- ==============================================================================
@@ -103,7 +111,7 @@ class CMPackageBuilder:
 
         gt_mode_base = "extension/lua/new-modes/gt-license"
 
-        # 1. Manifest and Scenario
+        # 1. Manifest and Scenario / Mode scripts
         lua_manifest = os.path.join(self.repo_root, "lua", "manifest.ini")
         if os.path.isfile(lua_manifest):
             self.entries.append((lua_manifest, f"{gt_mode_base}/manifest.ini"))
@@ -115,8 +123,10 @@ class CMPackageBuilder:
         lua_scenario = os.path.join(self.repo_root, "lua", "scenario.lua")
         if os.path.isfile(lua_scenario):
             self.entries.append((lua_scenario, f"{gt_mode_base}/scenario.lua"))
+            self.entries.append((lua_scenario, f"{gt_mode_base}/mode.lua"))
         else:
             self.synthetic_files[f"{gt_mode_base}/scenario.lua"] = DEFAULT_SCENARIO_LUA
+            self.synthetic_files[f"{gt_mode_base}/mode.lua"] = DEFAULT_SCENARIO_LUA
 
         # 2. Lua Engine scripts
         engine_src = os.path.join(self.repo_root, "lua", "engine")
