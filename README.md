@@ -45,6 +45,13 @@ We have conducted a comprehensive investigation divided into two core research d
    * Every test specified with exact car/track IDs, start type (standing, stop-box, rolling at $X$ km/h), target medal times (Gold, Silver, Bronze), failure rules, and driving lessons.
    * Progressive tier unlocks (Bronze or better) and Gold mastery certifications.
 
+5. **[AI-Agent Autonomous Development Blueprint](docs/05_ai_agent_development_blueprint.md)**
+   * Technical skills, knowledge domains, and architectural patterns required for an AI agent to build the mod completely autonomously.
+   * **Schema-First Design**: Complete JSON Schema (`test_definition.schema.json`) for declarative, machine-generated test definitions.
+   * **AI Calibration Engine**: Automated coordinate extraction from track `.ai` spline files, eliminating manual driving.
+   * **Engine vs. Data Architecture**: Universal CSP Lua runtime (`gt_license_engine.lua`) decoupled from test data.
+   * **Custom Antigravity Agent Skill Specification** (`ac-license-modding`) and 5-step autonomous execution plan.
+
 ---
 
 ## 🏗️ Proposed System Architecture
