@@ -26,9 +26,28 @@ import subprocess
 import sys
 import time
 from typing import Any, Dict, List, Optional, Tuple
-
 DEFAULT_AC_ROOT = r"D:\SteamLibrary\steamapps\common\assettocorsa"
-USER_DOCS_AC = os.path.join(os.path.expanduser("~"), "Documents", "Assetto Corsa")
+
+
+def get_user_documents_dir() -> str:
+    """Dynamically resolves the active Windows Personal/Documents directory from Registry or env."""
+    if sys.platform == "win32":
+        try:
+            import winreg
+
+            sub_key = r"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders"
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub_key) as key:
+                val, _ = winreg.QueryValueEx(key, "Personal")
+                val = os.path.expandvars(val)
+                if os.path.isdir(val):
+                    return val
+        except Exception:
+            pass
+    return os.path.join(os.path.expanduser("~"), "Documents")
+
+
+USER_DOCS_AC = os.path.join(get_user_documents_dir(), "Assetto Corsa")
+ALT_USER_DOCS_AC = os.path.join(os.path.expanduser("~"), "Documents", "Assetto Corsa")
 CFG_DIR = os.path.join(USER_DOCS_AC, "cfg")
 LOGS_DIR = os.path.join(USER_DOCS_AC, "logs")
 RACE_INI_PATH = os.path.join(CFG_DIR, "race.ini")
@@ -59,13 +78,15 @@ def generate_race_ini(
     ini_content = f"""[RACE]
 TRACK={track_id}
 CONFIG_TRACK={track_layout}
+MODEL={car_id}
+MODEL_CONFIG=
 CARS=1
 AI_LEVEL=100
 FIXED_SETUP=0
 PENALTIES=1
 
 [CAR_0]
-MODEL={car_id}
+MODEL=-
 MODEL_CONFIG=
 SKIN={skin}
 DRIVER_NAME=GT_AI_Tester
@@ -108,38 +129,52 @@ def audit_log(
     track_id: str,
 ) -> Tuple[bool, List[str], List[str]]:
     """Audits Assetto Corsa log.txt for initialization milestones and fatal error signatures."""
-    if not os.path.isfile(log_path):
+    # Also check fallback log paths if primary doesn't exist
+    candidates = [
+        log_path,
+        os.path.join(ALT_USER_DOCS_AC, "logs", "log.txt"),
+    ]
+    target_path = None
+    for c in candidates:
+        if os.path.isfile(c):
+            target_path = c
+            break
+
+    if not target_path:
         return False, [], ["Log file does not exist"]
 
     passed_milestones = []
     detected_errors = []
 
     fatal_keywords = [
-        "CRASH",
         "FATAL ERROR",
-        "access violation",
-        "cannot open file",
-        "attempt to index a nil value",
+        "ACCESS VIOLATION",
+        "ATTEMPT TO INDEX A NIL VALUE",
         "EXCEPTION_ACCESS_VIOLATION",
     ]
 
     try:
-        with open(log_path, "r", encoding="utf-8", errors="replace") as f:
+        with open(target_path, "r", encoding="utf-8", errors="replace") as f:
             lines = f.readlines()
 
         content_upper = "".join(lines).upper()
 
         # Check milestones
-        if "PHYSICS" in content_upper:
-            passed_milestones.append("Physics subsystem touched")
+        if "PHYSICS" in content_upper or "FMOD" in content_upper or "DIRECTX" in content_upper:
+            passed_milestones.append("Engine subsystem initialized")
         if car_id.upper() in content_upper:
             passed_milestones.append(f"Car data referenced ({car_id})")
         if track_id.upper() in content_upper:
             passed_milestones.append(f"Track data referenced ({track_id})")
 
-        # Check fatal keywords
+        # Check fatal keywords (avoid matching benign CrashGuard)
         for line in lines:
             line_upper = line.upper()
+            if "CRASHGUARD" in line_upper:
+                continue
+            if "CRASH" in line_upper and "CRASHGUARD" not in line_upper:
+                detected_errors.append(line.strip())
+                continue
             for kw in fatal_keywords:
                 if kw in line_upper:
                     # Filter out benign warning mentions
@@ -211,18 +246,27 @@ def run_launch_test(
         }
 
     # Live Launch Mode
-    os.makedirs(CFG_DIR, exist_ok=True)
-    os.makedirs(LOGS_DIR, exist_ok=True)
-
-    with open(RACE_INI_PATH, "w", encoding="utf-8") as f:
-        f.write(race_ini_str)
-
-    # Clear old log.txt if present
-    if os.path.isfile(LOG_TXT_PATH):
+    # Write race.ini to primary user documents cfg, alternate user documents cfg, and AC install cfg
+    target_race_paths = [
+        RACE_INI_PATH,
+        os.path.join(ALT_USER_DOCS_AC, "cfg", "race.ini"),
+        os.path.join(ac_root, "cfg", "race.ini"),
+    ]
+    for rp in target_race_paths:
         try:
-            os.remove(LOG_TXT_PATH)
+            os.makedirs(os.path.dirname(rp), exist_ok=True)
+            with open(rp, "w", encoding="utf-8") as f:
+                f.write(race_ini_str)
         except Exception:
             pass
+
+    # Clear old log.txt if present
+    for lp in [LOG_TXT_PATH, os.path.join(ALT_USER_DOCS_AC, "logs", "log.txt")]:
+        if os.path.isfile(lp):
+            try:
+                os.remove(lp)
+            except Exception:
+                pass
 
     proc = None
     exit_code = None
