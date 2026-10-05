@@ -58,6 +58,11 @@ We have conducted a comprehensive investigation divided into two core research d
    * Conflict prevention safeguards: strict directory topology, contract-first schema, and automated verification gates.
    * Sequential vs. parallel performance comparison (~3.5x speedup with higher context fidelity).
 
+7. **[Directory Structure & Packaging Specification](docs/07_directory_structure_and_packaging_spec.md)**
+   * Exact directory trees for the Git repository, the Assetto Corsa installation target, and the Content Manager distribution zip.
+   * File-by-file breakdown with naming conventions, audio formats, image resolutions, and subagent write boundaries.
+   * Automated one-click drag-and-drop packaging protocol for Content Manager.
+
 ---
 
 ## 🏗️ Proposed System Architecture
