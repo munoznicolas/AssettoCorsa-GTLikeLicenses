@@ -65,6 +65,21 @@ def compute_curvature_radius(
     return max(5.0, min(10000.0, radius))
 
 
+def segments_intersect_2d(p1, p2, p3, p4) -> bool:
+    """Checks if line segment (p1, p2) intersects with (p3, p4) in X-Z ground plane."""
+    x1, z1 = p1[0], p1[2]
+    x2, z2 = p2[0], p2[2]
+    x3, z3 = p3[0], p3[2]
+    x4, z4 = p4[0], p4[2]
+
+    def ccw(ax, az, bx, bz, cx, cz):
+        return (cz - az) * (bx - ax) > (bz - az) * (cx - ax)
+
+    return ccw(x1, z1, x3, z3, x4, z4) != ccw(x2, z2, x3, z3, x4, z4) and ccw(
+        x1, z1, x2, z2, x3, z3
+    ) != ccw(x1, z1, x2, z2, x4, z4)
+
+
 def generate_ghost_profile(
     test_json_path: str,
     ac_root: str = DEFAULT_AC_ROOT,
@@ -92,12 +107,11 @@ def generate_ghost_profile(
     if spline_path and os.path.isfile(spline_path):
         try:
             parser = SplineParser(spline_path)
-            parser.parse()
-            spline_waypoints = parser.ideal_line or parser.waypoints
+            spline_waypoints = parser.waypoints
         except Exception:
             spline_waypoints = []
 
-    # If spline waypoints found, sample path from start gate to finish gate
+    # Timing gates and stop box
     start_gate = test_data.get("timing", {}).get("start_gate", {})
     finish_gate = test_data.get("timing", {}).get("finish_gate", {})
     stop_box = test_data.get("timing", {}).get("stop_box")
@@ -112,44 +126,106 @@ def generate_ghost_profile(
         0.5 * (finish_gate["p1"][1] + finish_gate["p2"][1]),
         0.5 * (finish_gate["p1"][2] + finish_gate["p2"][2]),
     ]
+    spawn_pos = spawn.get("position", p_start_center)
 
     path_points = []
 
     if spline_waypoints and len(spline_waypoints) > 20:
-        # Find closest waypoint indices to start and finish centers
+        n_wps = len(spline_waypoints)
+
         def dist_sq(wp, target):
             return (wp.x - target[0]) ** 2 + (wp.z - target[2]) ** 2
 
-        idx_start = min(range(len(spline_waypoints)), key=lambda i: dist_sq(spline_waypoints[i], p_start_center))
-        idx_finish = min(range(len(spline_waypoints)), key=lambda i: dist_sq(spline_waypoints[i], p_finish_center))
+        idx_start = min(range(n_wps), key=lambda i: dist_sq(spline_waypoints[i], spawn_pos))
 
-        n_wps = len(spline_waypoints)
-        if idx_finish >= idx_start:
-            indices = list(range(idx_start, idx_finish + 1))
+        is_full_lap = (
+            start_mode == "FLYING_LAP"
+            or "Full Lap" in test_data.get("title", "")
+            or "Graduation" in test_data.get("title", "")
+            or test_id.startswith("S-")
+        )
+
+        # Detect gate crossings along spline segments
+        sg_cross = [
+            i
+            for i in range(n_wps)
+            if segments_intersect_2d(
+                (spline_waypoints[i].x, spline_waypoints[i].y, spline_waypoints[i].z),
+                (spline_waypoints[(i + 1) % n_wps].x, spline_waypoints[(i + 1) % n_wps].y, spline_waypoints[(i + 1) % n_wps].z),
+                start_gate["p1"],
+                start_gate["p2"],
+            )
+        ]
+        fg_cross = [
+            i
+            for i in range(n_wps)
+            if segments_intersect_2d(
+                (spline_waypoints[i].x, spline_waypoints[i].y, spline_waypoints[i].z),
+                (spline_waypoints[(i + 1) % n_wps].x, spline_waypoints[(i + 1) % n_wps].y, spline_waypoints[(i + 1) % n_wps].z),
+                finish_gate["p1"],
+                finish_gate["p2"],
+            )
+        ]
+
+        if fg_cross:
+            # Pick crossing based on forward progress from idx_start
+            def fg_cost(c):
+                st = (c - idx_start) % n_wps
+                if is_full_lap and st < n_wps // 2:
+                    st += n_wps
+                return st
+
+            c_fg = min(fg_cross, key=fg_cost)
+            steps = (c_fg - idx_start) % n_wps
+            if is_full_lap and steps < n_wps // 2:
+                steps += n_wps
+            steps += 4
+            indices = [(idx_start + i) % n_wps for i in range(steps)]
         else:
-            # Wrap around circuit finish line
-            indices = list(range(idx_start, n_wps)) + list(range(0, idx_finish + 1))
+            idx_finish = min(range(n_wps), key=lambda i: dist_sq(spline_waypoints[i], p_finish_center))
+            steps = (idx_finish - idx_start) % n_wps
+            if is_full_lap and steps < n_wps // 2:
+                steps += n_wps
+            steps += 4
+            indices = [(idx_start + i) % n_wps for i in range(steps)]
 
-        # Sample at least 30 waypoints along path
-        step = max(1, len(indices) // 100)
-        selected = [indices[i] for i in range(0, len(indices), step)]
-        if indices[-1] not in selected:
-            selected.append(indices[-1])
+        # Sample waypoints preserving high resolution
+        step = max(1, len(indices) // 150)
+        selected = set(indices[i] for i in range(0, len(indices), step))
+        # Ensure exact gate crossing segment endpoints are included
+        if sg_cross:
+            for c in sg_cross:
+                selected.add(c)
+                selected.add((c + 1) % n_wps)
+        if fg_cross:
+            for c in fg_cross:
+                selected.add(c)
+                selected.add((c + 1) % n_wps)
 
-        for idx in selected:
+        ordered = [idx for idx in indices if idx in selected]
+        cleaned = [ordered[0]]
+        for idx in ordered[1:]:
+            if idx != cleaned[-1]:
+                cleaned.append(idx)
+
+        for idx in cleaned:
             wp = spline_waypoints[idx]
             path_points.append([float(wp.x), float(wp.y), float(wp.z)])
     else:
-        # Fallback linear interpolation with curve perturbation between start and finish
-        n_steps = 50
-        spawn_pos = spawn.get("position", p_start_center)
+        # Fallback linear interpolation with points before start and after finish
+        n_steps = 60
         path_points.append(spawn_pos)
-        for i in range(1, n_steps + 1):
+        for i in range(0, n_steps + 1):
             alpha = i / n_steps
             px = p_start_center[0] + alpha * (p_finish_center[0] - p_start_center[0])
             py = p_start_center[1] + alpha * (p_finish_center[1] - p_start_center[1])
             pz = p_start_center[2] + alpha * (p_finish_center[2] - p_start_center[2])
             path_points.append([px, py, pz])
+        # Add 5m overshoot point beyond finish
+        fx = p_finish_center[0] - p_start_center[0]
+        fz = p_finish_center[2] - p_start_center[2]
+        flen = max(1e-4, math.hypot(fx, fz))
+        path_points.append([p_finish_center[0] + (fx / flen) * 8.0, p_finish_center[1], p_finish_center[2] + (fz / flen) * 8.0])
 
     # If stop box is present, add deceleration to stop box center
     if stop_box and stop_box.get("center"):
