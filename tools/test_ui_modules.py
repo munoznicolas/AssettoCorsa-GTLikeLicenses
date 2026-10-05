@@ -116,6 +116,21 @@ def test_lua_module_contracts():
         assert req in audio_code, f"gt_audio_manager.lua missing requirement: {req}"
     print("[OK] gt_audio_manager.lua satisfies all audio triggering contracts.")
 
+    # 4. gt_render_ghost.lua
+    ghost_path = Path("lua/ui/gt_render_ghost.lua")
+    assert ghost_path.is_file(), "Missing gt_render_ghost.lua"
+    ghost_code = ghost_path.read_text(encoding="utf-8")
+    for req in [
+        "GTRenderGhost.render",
+        "GTRenderGhost.reset",
+        "COLOR_BRAKE_ON",
+        "COLOR_PACER_GOLD",
+        "COLOR_TRAIL_RIBBON",
+        "draw3DLine",
+    ]:
+        assert req in ghost_code, f"gt_render_ghost.lua missing requirement: {req}"
+    print("[OK] gt_render_ghost.lua satisfies all 3D hologram & pacer rendering contracts.")
+
 def main():
     test_audio_assets()
     test_texture_assets()

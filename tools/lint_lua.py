@@ -81,9 +81,11 @@ def main():
         Path('lua/engine/gt_physics_hooks.lua'),
         Path('lua/engine/gt_adjudicator.lua'),
         Path('lua/engine/gt_session_reset.lua'),
+        Path('lua/engine/gt_ghost_manager.lua'),
         Path('lua/engine/gt_license_engine.lua'),
         Path('lua/ui/gt_license_hud.lua'),
         Path('lua/ui/gt_render_gates.lua'),
+        Path('lua/ui/gt_render_ghost.lua'),
         Path('lua/ui/gt_audio_manager.lua'),
     ]
     all_ok = True

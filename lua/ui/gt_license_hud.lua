@@ -273,6 +273,59 @@ local function drawStopwatchCluster(screenW, sessionTime, targets, currentState)
 end
 
 --------------------------------------------------------------------------------
+-- 2.1 LIVE GHOST / PACER DELTA WIDGET
+--------------------------------------------------------------------------------
+local function drawGhostDelta(screenW, ghostState)
+    if not ghostState or not ghostState.active then return end
+
+    local boxW = 280
+    local boxH = 34
+    local boxX = screenW - boxW - 30
+    local boxY = 194
+    local p1 = vec2(boxX, boxY)
+    local p2 = p1 + vec2(boxW, boxH)
+
+    ui.drawRectFilled(p1, p2, rgbm(0.06, 0.08, 0.12, 0.85), 4)
+    ui.drawRect(p1, p2, rgbm(0.2, 0.7, 1.0, 0.4), 4, ui.CornerFlags.All, 1)
+
+    local delta = ghostState.delta or 0.0
+    local deltaCol = delta >= 0 and COLORS.SUCCESS_GREEN or COLORS.FAIL_RED
+    local prefix = delta >= 0 and "+" or "-"
+    local absD = math.abs(delta)
+    local deltaStr = string.format("%s%.2fs", prefix, absD)
+    local label = string.format("GHOST [%s]:", ghostState.mode == 2 and "PACER" or "GOLD")
+
+    ui.pushFont(ui.Font.Tiny)
+    ui.drawText(label, p1 + vec2(10, 10), COLORS.ACCENT_CYAN)
+    ui.popFont()
+
+    ui.pushFont(ui.Font.Main)
+    ui.drawTextClipped(deltaStr, p1 + vec2(boxW - 90, 6), p2 - vec2(10, 6), deltaCol, vec2(1.0, 0.5))
+    ui.popFont()
+end
+
+--------------------------------------------------------------------------------
+-- 2.2 GHOST HOTKEY OSD BANNER
+--------------------------------------------------------------------------------
+local function drawGhostOSD(screenW, screenH, ghostState)
+    if not ghostState or not ghostState.osd_message then return end
+
+    local bannerW = 420
+    local bannerH = 40
+    local bannerX = (screenW - bannerW) * 0.5
+    local bannerY = screenH - 120
+    local p1 = vec2(bannerX, bannerY)
+    local p2 = p1 + vec2(bannerW, bannerH)
+
+    ui.drawRectFilled(p1, p2, rgbm(0.05, 0.07, 0.12, 0.92), 6)
+    ui.drawRect(p1, p2, COLORS.GOLD, 6, ui.CornerFlags.All, 1.5)
+
+    ui.pushFont(ui.Font.Main)
+    ui.drawTextClipped(ghostState.osd_message, p1, p2, COLORS.WHITE, vec2(0.5, 0.5))
+    ui.popFont()
+end
+
+--------------------------------------------------------------------------------
 -- 4. SPEED INDICATOR & TACHOMETER BAR
 --------------------------------------------------------------------------------
 local function drawSpeedIndicator(screenW, screenH, speedKmh)
@@ -536,7 +589,8 @@ end
 --- @param speedKmh number? Current vehicle speed
 --- @param medalAchieved string? 'gold'|'silver'|'bronze'
 --- @param callbacks table? { onRestart = fn, onNext = fn, onExit = fn }
-function GTLicenseHUD.draw(sessionTime, targetsOrConfig, currentState, failReason, speedKmh, medalAchieved, callbacks)
+--- @param ghostState table? Ghost state from GTGhostManager:getState()
+function GTLicenseHUD.draw(sessionTime, targetsOrConfig, currentState, failReason, speedKmh, medalAchieved, callbacks, ghostState)
     local uiState = ac.getUI and ac.getUI()
     local screenW = (uiState and uiState.windowSize and uiState.windowSize.x) or 1920
     local screenH = (uiState and uiState.windowSize and uiState.windowSize.y) or 1080
@@ -567,6 +621,16 @@ function GTLicenseHUD.draw(sessionTime, targetsOrConfig, currentState, failReaso
 
     -- 2. Stopwatch and Live Target Delta
     drawStopwatchCluster(screenW, sessionTime, targets, currentState)
+
+    -- 2.1 Live Ghost / Pace Car Delta Widget
+    if currentState == GTLicenseHUD.STATE.RUNNING and ghostState then
+        drawGhostDelta(screenW, ghostState)
+    end
+
+    -- 2.2 Ghost Hotkey OSD Notification Banner
+    if ghostState then
+        drawGhostOSD(screenW, screenH, ghostState)
+    end
 
     -- 3. Speed Indicator (visible during Countdown and Running)
     if currentState == GTLicenseHUD.STATE.COUNTDOWN or currentState == GTLicenseHUD.STATE.RUNNING then
@@ -603,7 +667,8 @@ function GTLicenseHUD.drawHUD(opts)
         opts.failReason,
         opts.speedKmh or 0,
         opts.medalAchieved,
-        opts.callbacks
+        opts.callbacks,
+        opts.ghostState
     )
 end
 

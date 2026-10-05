@@ -20,6 +20,7 @@ end
 local GTPhysicsHooks = safeRequire("gt_physics_hooks")
 local GTAdjudicator  = safeRequire("gt_adjudicator")
 local GTSessionReset = safeRequire("gt_session_reset")
+local GTGhostManager = safeRequire("gt_ghost_manager")
 
 local function tryRequireUI(name)
   local ok, mod = pcall(require, name)
@@ -33,6 +34,7 @@ end
 
 local GTLicenseHUD   = tryRequireUI("gt_license_hud")
 local GTRenderGates  = tryRequireUI("gt_render_gates")
+local GTRenderGhost  = tryRequireUI("gt_render_ghost")
 local GTAudioManager = tryRequireUI("gt_audio_manager")
 
 local GTLicenseEngine = {}
@@ -192,6 +194,13 @@ function GTLicenseEngine.new(testDefinition)
   -- Initialize Adjudicator
   self.adjudicator = GTAdjudicator.new(self.testConfig)
 
+  -- Initialize Ghost & Pace Car Manager
+  local ghostTrajectory = nil
+  if self.testConfig.ghost and self.testConfig.ghost.trajectory then
+    ghostTrajectory = self.testConfig.ghost.trajectory
+  end
+  self.ghostManager = GTGhostManager.new(self.testConfig, ghostTrajectory)
+
   -- Begin countdown immediately upon creation
   self:startCountdown()
 
@@ -331,6 +340,12 @@ end
 ---Called when GTSessionReset fires a reset.
 ---@param reason string
 function GTLicenseEngine:onSessionResetTriggered(reason)
+  if self.ghostManager then
+    self.ghostManager:reset()
+  end
+  if GTRenderGhost and GTRenderGhost.reset then
+    GTRenderGhost.reset()
+  end
   dispatchEvent(self, "reset", reason)
   self:startCountdown()
 end
@@ -402,7 +417,17 @@ function GTLicenseEngine:update(dt)
     -- Handled via UI input
   end
 
-  -- 3. Update audio cues if audio manager is loaded
+  -- 3. Update Ghost & Pace Car Manager
+  if self.ghostManager then
+    local carPos = nil
+    if car and car.position then
+      carPos = { car.position.x, car.position.y, car.position.z }
+    end
+    local gTime = (self.state == GTLicenseEngine.STATE.RUNNING) and self.sessionTime or 0.0
+    self.ghostManager:update(dt, gTime, carPos)
+  end
+
+  -- 4. Update audio cues if audio manager is loaded
   if GTAudioManager and GTAudioManager.update then
     GTAudioManager.update(dt, self:getNumericState(), self.countdownTimer, self.achievedMedal)
   end
@@ -469,6 +494,10 @@ function GTLicenseEngine:draw3D(dt)
     local speedKmh = car and car.speedKmh
     GTRenderGates.draw3D(dt, carPos, self:getNumericState(), speedKmh)
   end
+
+  if GTRenderGhost and GTRenderGhost.render and self.ghostManager then
+    GTRenderGhost.render(self.ghostManager:getState(), dt)
+  end
 end
 
 function GTLicenseEngine:drawUI()
@@ -478,6 +507,7 @@ function GTLicenseEngine:drawUI()
     local callbacks = {
       onRestart = function() self:restart() end
     }
+    local ghostState = self.ghostManager and self.ghostManager:getState() or nil
     GTLicenseHUD.draw(
       self.sessionTime,
       self.testConfig,
@@ -485,9 +515,14 @@ function GTLicenseEngine:drawUI()
       self.failReason,
       speedKmh,
       self.achievedMedal,
-      callbacks
+      callbacks,
+      ghostState
     )
   end
+end
+
+function GTLicenseEngine:getGhostState()
+  return self.ghostManager and self.ghostManager:getState() or nil
 end
 
 -- ==============================================================================
