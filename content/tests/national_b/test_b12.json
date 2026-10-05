@@ -1,0 +1,61 @@
+{
+  "test_id": "B-12",
+  "tier": "National B",
+  "title": "Graduation: Vallelunga Club Full Lap",
+  "description": "Comprehensive National B graduation trial. Connect Curva Grande, Campagnano, Tornantino, and the final sweeping bends cleanly without exceeding track boundaries or touching barriers.",
+  "lesson_objective": "Demonstrate mastery of all National B vehicle dynamics across a full flying lap.",
+  "car_id": "ks_toyota_gt86",
+  "track_id": "ks_vallelunga",
+  "track_layout": "club_circuit",
+  "start_mode": "FLYING_LAP",
+  "spawn": {
+    "position": [
+      335.345,
+      191.3,
+      215.671
+    ],
+    "forward_vector": [
+      -1.0,
+      -0.0061,
+      0.0073
+    ],
+    "initial_speed_kmh": 110.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        273.615,
+        190.977,
+        214.505
+      ],
+      "p2": [
+        273.68,
+        190.977,
+        227.545
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        283.788,
+        191.033,
+        214.418
+      ],
+      "p2": [
+        283.846,
+        191.033,
+        227.478
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 57.9,
+    "silver_seconds": 60.2,
+    "bronze_seconds": 64.5
+  }
+}

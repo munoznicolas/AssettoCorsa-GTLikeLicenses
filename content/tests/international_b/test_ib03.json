@@ -1,0 +1,61 @@
+{
+  "test_id": "IB-3",
+  "tier": "International B",
+  "title": "Downforce Commitment: Pouhon Double-Apex",
+  "description": "Tap brake lightly, tuck into the first apex at 170 km/h, float mid-track, and pull tight for apex 2.",
+  "lesson_objective": "High-speed aero downforce commitment through Spa's downhill double-left.",
+  "car_id": "lotus_2_eleven",
+  "track_id": "spa",
+  "track_layout": "",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      318.904,
+      59.706,
+      1069.133
+    ],
+    "forward_vector": [
+      -0.993,
+      -0.0747,
+      0.0915
+    ],
+    "initial_speed_kmh": 170.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        276.764,
+        55.113,
+        1038.538
+      ],
+      "p2": [
+        267.941,
+        55.113,
+        1043.516
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        187.497,
+        -3.347,
+        340.387
+      ],
+      "p2": [
+        185.315,
+        -3.347,
+        351.392
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 19.4,
+    "silver_seconds": 20.3,
+    "bronze_seconds": 22.0
+  }
+}

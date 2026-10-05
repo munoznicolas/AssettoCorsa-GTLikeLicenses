@@ -1,0 +1,61 @@
+{
+  "test_id": "S-8",
+  "tier": "Super License",
+  "title": "1,000 Horsepower Hybrid Attack: Red Bull Ring",
+  "description": "Capacitor boost down the uphill straights and massive speed through the final two sweepers.",
+  "lesson_objective": "Complete hot lap in Toyota's WEC World Championship LMP1 hybrid.",
+  "car_id": "ks_toyota_ts040",
+  "track_id": "ks_red_bull_ring",
+  "track_layout": "layout_gp",
+  "start_mode": "FLYING_LAP",
+  "spawn": {
+    "position": [
+      301.797,
+      -11.884,
+      301.799
+    ],
+    "forward_vector": [
+      -0.9607,
+      -0.0003,
+      0.2776
+    ],
+    "initial_speed_kmh": 190.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        232.166,
+        -11.851,
+        318.397
+      ],
+      "p2": [
+        235.649,
+        -11.851,
+        330.88
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        237.789,
+        -11.863,
+        316.885
+      ],
+      "p2": [
+        241.304,
+        -11.863,
+        329.359
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 78.5,
+    "silver_seconds": 82.0,
+    "bronze_seconds": 88.0
+  }
+}

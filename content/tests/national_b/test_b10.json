@@ -1,0 +1,61 @@
+{
+  "test_id": "B-10",
+  "tier": "National B",
+  "title": "High-Speed Carousel Feathering",
+  "description": "Long tightening carousel turn. Balancing the car on the edge of oversteer on low-grip factory tires; avoiding violent steering corrections that scrub time.",
+  "lesson_objective": "Feather throttle around a long sustained radius corner near lateral limits.",
+  "car_id": "ks_toyota_gt86",
+  "track_id": "ks_nurburgring",
+  "track_layout": "layout_sprint_a",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      -51.646,
+      51.061,
+      -124.48
+    ],
+    "forward_vector": [
+      -0.9951,
+      -0.0446,
+      -0.0878
+    ],
+    "initial_speed_kmh": 90.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        -79.345,
+        50.763,
+        -149.438
+      ],
+      "p2": [
+        -96.401,
+        50.763,
+        -139.843
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        -206.122,
+        48.801,
+        -101.249
+      ],
+      "p2": [
+        -216.166,
+        48.801,
+        -113.251
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 22.5,
+    "silver_seconds": 23.6,
+    "bronze_seconds": 25.4
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "test_id": "S-5",
+  "tier": "Super License",
+  "title": "The 4-Rotor Symphony: Silverstone GP",
+  "description": "Heel-toe downshifting without synchros and pinning throttle through Copse and Maggotts-Becketts.",
+  "lesson_objective": "1991 Le Mans-winning rotary prototype full lap mastery.",
+  "car_id": "ks_mazda_787b",
+  "track_id": "ks_silverstone",
+  "track_layout": "gp",
+  "start_mode": "FLYING_LAP",
+  "spawn": {
+    "position": [
+      -424.011,
+      -6.585,
+      286.307
+    ],
+    "forward_vector": [
+      0.5837,
+      0.006,
+      -0.812
+    ],
+    "initial_speed_kmh": 180.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        -383.844,
+        -5.99,
+        234.166
+      ],
+      "p2": [
+        -395.088,
+        -5.99,
+        226.166
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        -387.519,
+        -6.064,
+        239.639
+      ],
+      "p2": [
+        -398.965,
+        -6.064,
+        231.473
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 107.8,
+    "silver_seconds": 112.5,
+    "bronze_seconds": 120.0
+  }
+}

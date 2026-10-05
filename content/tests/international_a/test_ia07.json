@@ -1,0 +1,61 @@
+{
+  "test_id": "IA-7",
+  "tier": "International A",
+  "title": "Rear-Engine GT3 Pivot & Curb Launch",
+  "description": "Trail-braking downhill into tight chicane, bouncing over left curb, and hammering exit curb.",
+  "lesson_objective": "Rotating a rear-engine GT3 chassis under heavy trail-braking.",
+  "car_id": "ks_porsche_911_gt3_r_2016",
+  "track_id": "ks_nurburgring",
+  "track_layout": "layout_gp_a",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      -4.81,
+      63.684,
+      -716.812
+    ],
+    "forward_vector": [
+      -0.002,
+      -0.0059,
+      1.0
+    ],
+    "initial_speed_kmh": 170.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        -8.005,
+        63.282,
+        -661.802
+      ],
+      "p2": [
+        5.445,
+        63.282,
+        -661.85
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        -83.097,
+        50.93,
+        -158.849
+      ],
+      "p2": [
+        -101.105,
+        50.93,
+        -152.605
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 15.2,
+    "silver_seconds": 16.0,
+    "bronze_seconds": 17.4
+  }
+}

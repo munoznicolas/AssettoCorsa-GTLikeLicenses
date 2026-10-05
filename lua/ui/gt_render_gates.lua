@@ -106,7 +106,7 @@ end
 local function computeStopBoxCorners(center, size, rotationDeg)
     local cx, cy, cz = center.x, center.y + 0.05, center.z
     local halfW = (size.x or size[1] or 4.0) * 0.5
-    local halfL = (size.y or size[2] or 12.0) * 0.5
+    local halfL = (size.z or size[3] or size.y or size[2] or 12.0) * 0.5
 
     local rad = math.rad(rotationDeg or 0)
     local cosA = math.cos(rad)

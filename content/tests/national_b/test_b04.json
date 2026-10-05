@@ -1,0 +1,61 @@
+{
+  "test_id": "B-4",
+  "tier": "National B",
+  "title": "Front-Wheel Drive Understeer Management",
+  "description": "Understanding that aggressive throttle in FWD pushes the nose wide. Modulate throttle at 40\u201350% mid-corner until the front tires regain grip, then squeeze full throttle once the wheels are straightened.",
+  "lesson_objective": "Mitigate front tire scrub and understeer by feathering throttle mid-corner.",
+  "car_id": "ks_alfa_mito_qv",
+  "track_id": "magione",
+  "track_layout": "",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      121.184,
+      5.268,
+      241.175
+    ],
+    "forward_vector": [
+      0.2335,
+      -0.0047,
+      0.9723
+    ],
+    "initial_speed_kmh": 90.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        129.096,
+        5.288,
+        280.402
+      ],
+      "p2": [
+        139.294,
+        5.288,
+        278.029
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        24.503,
+        5.311,
+        381.065
+      ],
+      "p2": [
+        19.934,
+        5.311,
+        391.082
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 12.9,
+    "silver_seconds": 13.5,
+    "bronze_seconds": 14.6
+  }
+}

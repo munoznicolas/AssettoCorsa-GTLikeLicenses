@@ -1,0 +1,61 @@
+{
+  "test_id": "B-5",
+  "tier": "National B",
+  "title": "Low-Speed Weight Transfer & Transition",
+  "description": "Managing a classic live-axle rear-wheel drive chassis. Trail-braking into Brooklands, settling the suspension, and smoothly transferring lateral load across into the long looping Luffield radius.",
+  "lesson_objective": "Coordinate longitudinal braking and lateral weight transfer through linked corners.",
+  "car_id": "ks_toyota_ae86",
+  "track_id": "ks_silverstone",
+  "track_layout": "national",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      -92.464,
+      1.799,
+      -603.935
+    ],
+    "forward_vector": [
+      -0.7887,
+      -0.0121,
+      -0.6146
+    ],
+    "initial_speed_kmh": 100.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        -129.472,
+        1.199,
+        -638.925
+      ],
+      "p2": [
+        -137.197,
+        1.199,
+        -626.337
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        -344.847,
+        -0.051,
+        -607.823
+      ],
+      "p2": [
+        -360.401,
+        -0.051,
+        -614.659
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 19.4,
+    "silver_seconds": 20.2,
+    "bronze_seconds": 21.8
+  }
+}

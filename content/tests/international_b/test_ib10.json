@@ -1,0 +1,61 @@
+{
+  "test_id": "IB-10",
+  "tier": "International B",
+  "title": "High-Speed Parabolica Exit Momentum",
+  "description": "Trail-braking deep, hugging the inside line, and opening steering early to reach 260+ km/h.",
+  "lesson_objective": "Maximizing corner exit velocity onto Monza's main straight.",
+  "car_id": "ks_ferrari_488_gtb",
+  "track_id": "monza",
+  "track_layout": "",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      53.704,
+      -9.431,
+      561.852
+    ],
+    "forward_vector": [
+      -0.1004,
+      -0.0056,
+      0.9949
+    ],
+    "initial_speed_kmh": 180.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        45.393,
+        -9.763,
+        621.339
+      ],
+      "p2": [
+        55.481,
+        -9.763,
+        622.261
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        -208.119,
+        -8.973,
+        530.624
+      ],
+      "p2": [
+        -220.058,
+        -8.973,
+        530.445
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 17.2,
+    "silver_seconds": 18.0,
+    "bronze_seconds": 19.4
+  }
+}

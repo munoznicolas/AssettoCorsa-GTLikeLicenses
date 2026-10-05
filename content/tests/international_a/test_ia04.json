@@ -1,0 +1,61 @@
+{
+  "test_id": "IA-4",
+  "tier": "International A",
+  "title": "Classic DTM Aggressive Curb Hopping",
+  "description": "Launching over the high yellow curb stones with 12,000 RPM high-downforce AWD touring car.",
+  "lesson_objective": "Aggressive curb riding and immediate AWD landing stabilization.",
+  "car_id": "ks_alfa_romeo_155_v6",
+  "track_id": "imola",
+  "track_layout": "",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      -660.407,
+      -81.519,
+      -123.51
+    ],
+    "forward_vector": [
+      -0.3129,
+      0.0036,
+      0.9498
+    ],
+    "initial_speed_kmh": 180.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        -687.329,
+        -81.339,
+        -69.614
+      ],
+      "p2": [
+        -677.677,
+        -81.339,
+        -65.961
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        -931.528,
+        -75.195,
+        420.682
+      ],
+      "p2": [
+        -922.524,
+        -75.195,
+        426.806
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 13.9,
+    "silver_seconds": 14.6,
+    "bronze_seconds": 15.8
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "test_id": "S-9",
+  "tier": "Super License",
+  "title": "Formula 1 V10 Apex Velocity: Barcelona GP",
+  "description": "Pulling over 4.5G lateral cornering and 100m braking distances from 310 km/h with 19,000 RPM V10.",
+  "lesson_objective": "The benchmark Formula 1 car of all time at absolute qualifying limits.",
+  "car_id": "ks_ferrari_f2004",
+  "track_id": "ks_barcelona",
+  "track_layout": "layout_gp",
+  "start_mode": "FLYING_LAP",
+  "spawn": {
+    "position": [
+      414.794,
+      -17.636,
+      -261.937
+    ],
+    "forward_vector": [
+      -0.5734,
+      -0.0155,
+      0.8192
+    ],
+    "initial_speed_kmh": 220.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        366.752,
+        -18.539,
+        -195.835
+      ],
+      "p2": [
+        377.535,
+        -18.539,
+        -188.827
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        370.175,
+        -18.501,
+        -201.04
+      ],
+      "p2": [
+        380.941,
+        -18.501,
+        -194.005
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 74.2,
+    "silver_seconds": 77.5,
+    "bronze_seconds": 83.0
+  }
+}

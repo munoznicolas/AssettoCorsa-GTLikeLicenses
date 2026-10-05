@@ -1,0 +1,61 @@
+{
+  "test_id": "B-6",
+  "tier": "National B",
+  "title": "Threshold Braking from 190 km/h into Chicane",
+  "description": "Heavy braking at the 150m board down to 60 km/h. Downshifting with rev-matching, hopping the first right curb cleanly without unsettling the rear, and accelerating tight off the left exit.",
+  "lesson_objective": "Execute high-speed straight-line deceleration into a tight multi-apex chicane.",
+  "car_id": "bmw_m3_e30",
+  "track_id": "monza",
+  "track_layout": "",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      -140.916,
+      -4.621,
+      -292.853
+    ],
+    "forward_vector": [
+      0.0827,
+      0.0063,
+      -0.9966
+    ],
+    "initial_speed_kmh": 180.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        -133.185,
+        -4.257,
+        -362.446
+      ],
+      "p2": [
+        -142.91,
+        -4.257,
+        -363.265
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        -80.985,
+        -2.621,
+        -606.728
+      ],
+      "p2": [
+        -91.884,
+        -2.621,
+        -603.634
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 14.8,
+    "silver_seconds": 15.5,
+    "bronze_seconds": 16.8
+  }
+}

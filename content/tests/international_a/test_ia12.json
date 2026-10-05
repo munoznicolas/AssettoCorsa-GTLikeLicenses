@@ -1,0 +1,61 @@
+{
+  "test_id": "IA-12",
+  "tier": "International A",
+  "title": "Graduation: Circuit de Spa-Francorchamps Sector Trial",
+  "description": "Connecting Les Combes, Bruxelles, Pouhon, and Stavelot without a single tire exceeding track limits.",
+  "lesson_objective": "Complete high-speed GT3 sector mastery across Spa Sector 2.",
+  "car_id": "ks_ferrari_488_gt3",
+  "track_id": "spa",
+  "track_layout": "",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      466.267,
+      45.552,
+      135.726
+    ],
+    "forward_vector": [
+      0.3058,
+      0.0454,
+      0.951
+    ],
+    "initial_speed_kmh": 190.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        483.793,
+        48.485,
+        198.276
+      ],
+      "p2": [
+        494.427,
+        48.485,
+        194.891
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        -173.705,
+        -17.925,
+        776.321
+      ],
+      "p2": [
+        -172.562,
+        -17.925,
+        785.299
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 64.5,
+    "silver_seconds": 67.5,
+    "bronze_seconds": 72.0
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "test_id": "IB-2",
+  "tier": "International B",
+  "title": "Rear-Engine Pendulum Dynamics & Traction",
+  "description": "Trail-braking to pin front tires into Cimini 1 and utilizing rear traction out of Cimini 2.",
+  "lesson_objective": "Mastering 911 rear-engine weight distribution and exit drive.",
+  "car_id": "ks_porsche_911_gt3_rs",
+  "track_id": "ks_vallelunga",
+  "track_layout": "extended_circuit",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      92.605,
+      189.944,
+      228.426
+    ],
+    "forward_vector": [
+      -0.9787,
+      0.0017,
+      0.2052
+    ],
+    "initial_speed_kmh": 160.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        38.209,
+        189.931,
+        238.441
+      ],
+      "p2": [
+        41.788,
+        189.931,
+        249.685
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        -473.83,
+        180.866,
+        129.924
+      ],
+      "p2": [
+        -477.35,
+        180.866,
+        141.197
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 17.8,
+    "silver_seconds": 18.7,
+    "bronze_seconds": 20.1
+  }
+}

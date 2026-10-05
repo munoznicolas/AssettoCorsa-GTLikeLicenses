@@ -1,0 +1,61 @@
+{
+  "test_id": "A-8",
+  "tier": "National A",
+  "title": "High-Speed Blind Crest Commitment",
+  "description": "Commit flat out over the blind downhill crest of Scheivlak at Circuit Zandvoort in the Lotus Exige 240R, relying on mechanical downforce and committed steering.",
+  "lesson_objective": "Fast blind right-hander falling downhill. Trusting the mechanical grip of an aggressive track setup; carrying 160+ km/h through the crest without backing off.",
+  "car_id": "lotus_exige_240",
+  "track_id": "ks_zandvoort",
+  "track_layout": "",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      -261.302,
+      5.813,
+      217.098
+    ],
+    "forward_vector": [
+      -0.7345,
+      0.0553,
+      0.6763
+    ],
+    "initial_speed_kmh": 150.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        -329.749,
+        9.748,
+        256.454
+      ],
+      "p2": [
+        -326.001,
+        9.748,
+        264.46
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        -539.946,
+        6.082,
+        53.806
+      ],
+      "p2": [
+        -551.412,
+        6.082,
+        53.511
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 12.4,
+    "silver_seconds": 13.0,
+    "bronze_seconds": 14.2
+  }
+}

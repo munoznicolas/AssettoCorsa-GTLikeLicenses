@@ -1,0 +1,61 @@
+{
+  "test_id": "A-5",
+  "tier": "National A",
+  "title": "High-Speed Curb Bouncing Chicane",
+  "description": "Attack the high kerbs of Variante Alta at Imola in the BMW 1M, squaring up the steering to absorb the curb strikes without unsettling the short-wheelbase chassis.",
+  "lesson_objective": "Attacking high kerbs. Straightening the steering wheel just before mounting the high curbs so the wheels absorb the shock without kicking the rear bumper sideways.",
+  "car_id": "bmw_1m",
+  "track_id": "imola",
+  "track_layout": "",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      -61.309,
+      -61.018,
+      -7.774
+    ],
+    "forward_vector": [
+      0.9969,
+      0.0282,
+      -0.0732
+    ],
+    "initial_speed_kmh": 140.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        18.634,
+        -58.778,
+        -11.029
+      ],
+      "p2": [
+        17.887,
+        -58.778,
+        -21.312
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        444.782,
+        -58.447,
+        -69.253
+      ],
+      "p2": [
+        439.298,
+        -58.447,
+        -78.16
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 14.5,
+    "silver_seconds": 15.2,
+    "bronze_seconds": 16.4
+  }
+}

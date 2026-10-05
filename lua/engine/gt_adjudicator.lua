@@ -320,7 +320,7 @@ function GTAdjudicator:adjudicate(dt, sessionTime, car)
   end
 
   -- 6. Adjudicate finish line / Stop box logic
-  if self.finishGate and not self.hasCrossedFinishGate and self.previousCarPos then
+  if self.hasPassedStartGate and self.finishGate and not self.hasCrossedFinishGate and self.previousCarPos then
     if GTAdjudicator.segmentsIntersect2D(self.previousCarPos, currPos, self.finishGate.p1, self.finishGate.p2) then
       self.hasCrossedFinishGate = true
     end

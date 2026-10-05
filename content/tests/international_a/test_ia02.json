@@ -1,0 +1,61 @@
+{
+  "test_id": "IA-2",
+  "tier": "International A",
+  "title": "GT4 Trail-Braking & Weight Conservation",
+  "description": "Hard trail braking into Westfield, carrying momentum through the dip and clipping Dingle Dell.",
+  "lesson_objective": "Managing momentum and trail-braking with GT4 race slicks.",
+  "car_id": "ks_porsche_cayman_gt4_clubsport",
+  "track_id": "ks_brands_hatch",
+  "track_layout": "gp",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      -123.855,
+      2.114,
+      -102.298
+    ],
+    "forward_vector": [
+      0.9642,
+      0.0051,
+      0.2652
+    ],
+    "initial_speed_kmh": 140.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        -82.737,
+        2.261,
+        -82.993
+      ],
+      "p2": [
+        -80.171,
+        2.261,
+        -91.253
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        392.027,
+        6.57,
+        249.018
+      ],
+      "p2": [
+        401.179,
+        6.57,
+        250.427
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 18.4,
+    "silver_seconds": 19.3,
+    "bronze_seconds": 20.8
+  }
+}

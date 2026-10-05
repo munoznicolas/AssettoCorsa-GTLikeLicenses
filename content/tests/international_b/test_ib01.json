@@ -1,0 +1,61 @@
+{
+  "test_id": "IB-1",
+  "tier": "International B",
+  "title": "High-Speed Heavy Braking into Tamburello",
+  "description": "Hard initial brake hit from 250 km/h, bleed off pressure, and flick left-right across high curbs.",
+  "lesson_objective": "High-speed deceleration and curb compliance in a mid-engine supercar.",
+  "car_id": "ferrari_458",
+  "track_id": "imola",
+  "track_layout": "",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      -98.845,
+      -83.113,
+      -424.684
+    ],
+    "forward_vector": [
+      -0.9983,
+      0.0068,
+      -0.0576
+    ],
+    "initial_speed_kmh": 240.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        -178.974,
+        -82.706,
+        -428.04
+      ],
+      "p2": [
+        -178.331,
+        -82.706,
+        -417.81
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        -657.445,
+        -81.639,
+        -162.04
+      ],
+      "p2": [
+        -647.27,
+        -81.639,
+        -158.33
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 15.9,
+    "silver_seconds": 16.7,
+    "bronze_seconds": 18.0
+  }
+}

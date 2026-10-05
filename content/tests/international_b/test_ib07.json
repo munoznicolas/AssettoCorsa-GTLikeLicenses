@@ -1,0 +1,61 @@
+{
+  "test_id": "IB-7",
+  "tier": "International B",
+  "title": "Heavyweight Digital AWD Traction",
+  "description": "Braking in a straight line, letting ATTESA sort traction, and rocketing out of the final chicane.",
+  "lesson_objective": "Managing 1.7 tonnes of AWD supercar through tight chicane transitions.",
+  "car_id": "ks_nissan_gtr",
+  "track_id": "ks_nurburgring",
+  "track_layout": "layout_gp_a",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      -399.627,
+      32.145,
+      -341.766
+    ],
+    "forward_vector": [
+      0.1226,
+      -0.0,
+      -0.9925
+    ],
+    "initial_speed_kmh": 160.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        -379.564,
+        32.643,
+        -392.548
+      ],
+      "p2": [
+        -390.181,
+        32.643,
+        -396.268
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        -43.002,
+        64.403,
+        -997.576
+      ],
+      "p2": [
+        -36.58,
+        64.403,
+        -1008.844
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 19.1,
+    "silver_seconds": 20.0,
+    "bronze_seconds": 21.5
+  }
+}

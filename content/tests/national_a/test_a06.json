@@ -1,0 +1,61 @@
+{
+  "test_id": "A-6",
+  "tier": "National A",
+  "title": "Group B Rally Homologation AWD Handling",
+  "description": "Thread the Audi Sport quattro through the narrow stone walls and bridges of Highlands Short, initiating early turn-in to overcome understeer before powering out.",
+  "lesson_objective": "Taming a short-wheelbase front-heavy turbo AWD rally legend. Initiating turn-in early to overcome initial understeer, then powering through narrow stone-wall lined roads.",
+  "car_id": "ks_audi_sport_quattro",
+  "track_id": "ks_highlands",
+  "track_layout": "layout_short",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      609.169,
+      5.417,
+      540.761
+    ],
+    "forward_vector": [
+      -0.9694,
+      0.0028,
+      0.2455
+    ],
+    "initial_speed_kmh": 100.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        551.105,
+        5.405,
+        556.498
+      ],
+      "p2": [
+        554.413,
+        5.405,
+        565.414
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        691.288,
+        6.283,
+        377.361
+      ],
+      "p2": [
+        690.339,
+        6.283,
+        369.085
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 17.8,
+    "silver_seconds": 18.6,
+    "bronze_seconds": 20.0
+  }
+}

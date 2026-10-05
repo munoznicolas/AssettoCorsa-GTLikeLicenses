@@ -1,0 +1,61 @@
+{
+  "test_id": "A-7",
+  "tier": "National A",
+  "title": "Downhill Hairpin Trail-Braking",
+  "description": "Brake hard up the steep incline of the Red Bull Ring into the Remus hairpin, trailing off the brakes smoothly to rotate the Nissan 370Z NISMO down toward the exit.",
+  "lesson_objective": "Steep uphill braking followed by a sharp downhill drop. Trailing brake pressure smoothly past turn-in to keep weight on the front tires and tuck the nose into the apex.",
+  "car_id": "ks_nissan_370z",
+  "track_id": "ks_red_bull_ring",
+  "track_layout": "layout_gp",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      -379.355,
+      14.247,
+      -95.44
+    ],
+    "forward_vector": [
+      -0.517,
+      0.0499,
+      -0.8545
+    ],
+    "initial_speed_kmh": 170.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        -435.108,
+        21.062,
+        -178.338
+      ],
+      "p2": [
+        -444.054,
+        21.062,
+        -170.766
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        -359.255,
+        45.536,
+        -364.408
+      ],
+      "p2": [
+        -357.911,
+        45.536,
+        -376.01
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 16.9,
+    "silver_seconds": 17.7,
+    "bronze_seconds": 19.0
+  }
+}

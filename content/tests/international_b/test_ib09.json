@@ -1,0 +1,61 @@
+{
+  "test_id": "IB-9",
+  "tier": "International B",
+  "title": "Slipstream Drafting & Clean Overtake",
+  "description": "Tucking into the slipstream to gain 15 km/h, pulling out for a clean non-contact pass into Turn 3.",
+  "lesson_objective": "High-speed drafting and out-braking without body contact.",
+  "car_id": "ks_mazda_mx5_cup",
+  "track_id": "ks_red_bull_ring",
+  "track_layout": "layout_gp",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      -57.548,
+      2.02,
+      400.85
+    ],
+    "forward_vector": [
+      -0.9777,
+      0.0677,
+      -0.199
+    ],
+    "initial_speed_kmh": 120.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        -87.167,
+        5.038,
+        376.406
+      ],
+      "p2": [
+        -97.303,
+        5.038,
+        385.741
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        -578.459,
+        43.078,
+        -316.026
+      ],
+      "p2": [
+        -586.618,
+        43.078,
+        -307.501
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 24.0,
+    "silver_seconds": 25.2,
+    "bronze_seconds": 27.0
+  }
+}

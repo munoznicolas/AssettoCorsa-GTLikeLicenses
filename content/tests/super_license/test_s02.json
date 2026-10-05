@@ -1,0 +1,61 @@
+{
+  "test_id": "S-2",
+  "tier": "Super License",
+  "title": "British Heritage Time Attack: Brands Hatch GP",
+  "description": "Active aero and DRS deployment through narrow, barrier-lined woodland curves.",
+  "lesson_objective": "Full lap time attack in a 916 bhp hypercar around Brands Hatch GP.",
+  "car_id": "ks_mclaren_p1",
+  "track_id": "ks_brands_hatch",
+  "track_layout": "gp",
+  "start_mode": "FLYING_LAP",
+  "spawn": {
+    "position": [
+      -189.593,
+      -7.532,
+      -367.02
+    ],
+    "forward_vector": [
+      0.9125,
+      -0.0344,
+      -0.4077
+    ],
+    "initial_speed_kmh": 150.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        -136.651,
+        -7.661,
+        -387.201
+      ],
+      "p2": [
+        -141.115,
+        -7.661,
+        -397.875
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        -141.759,
+        -7.755,
+        -385.078
+      ],
+      "p2": [
+        -146.27,
+        -7.755,
+        -395.754
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 84.2,
+    "silver_seconds": 88.0,
+    "bronze_seconds": 94.0
+  }
+}

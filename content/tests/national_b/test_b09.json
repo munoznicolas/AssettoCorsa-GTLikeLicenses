@@ -1,0 +1,61 @@
+{
+  "test_id": "B-9",
+  "tier": "National B",
+  "title": "All-Wheel Drive Launch & Traction Cornering",
+  "description": "Aggressive standing AWD launch. Braking uphill deep into Turn 1, clipping the tall curb, and leveraging quattro all-wheel pull early out of the apex without inducing understeer push.",
+  "lesson_objective": "Exploit all-wheel drive traction on standing launch and corner exit acceleration.",
+  "car_id": "ks_audi_a1s1",
+  "track_id": "ks_red_bull_ring",
+  "track_layout": "layout_national",
+  "start_mode": "STANDING",
+  "spawn": {
+    "position": [
+      120.91,
+      -9.84,
+      355.659
+    ],
+    "forward_vector": [
+      -0.9582,
+      0.0305,
+      0.2845
+    ],
+    "initial_speed_kmh": 0.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        117.498,
+        -9.749,
+        354.7
+      ],
+      "p2": [
+        121.186,
+        -9.749,
+        367.124
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        -133.48,
+        6.971,
+        315.457
+      ],
+      "p2": [
+        -143.318,
+        6.971,
+        322.889
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 14.2,
+    "silver_seconds": 14.9,
+    "bronze_seconds": 16.1
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "test_id": "A-1",
+  "tier": "National A",
+  "title": "1000m Maximum Acceleration & High-Speed Stop",
+  "description": "Accelerate to maximum velocity along the 1000m drag strip and execute threshold braking to bring the BMW M3 E92 to a complete stop inside the designated stop box.",
+  "lesson_objective": "High-velocity braking from 225+ km/h. Managing the high inertia of a 1.6-tonne V8 coupe; brake smoothly to the threshold to stop cleanly inside the box without front-lock lockup.",
+  "car_id": "bmw_m3_e92",
+  "track_id": "ks_drag",
+  "track_layout": "drag1000",
+  "start_mode": "STANDING",
+  "spawn": {
+    "position": [
+      24.146,
+      -0.728,
+      -5.277
+    ],
+    "forward_vector": [
+      1.0,
+      0.0,
+      0.0
+    ],
+    "initial_speed_kmh": 0.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        24.638,
+        -0.725,
+        -14.487
+      ],
+      "p2": [
+        24.651,
+        -0.725,
+        0.193
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        1024.138,
+        -0.745,
+        10.495
+      ],
+      "p2": [
+        1024.16,
+        -0.745,
+        -9.555
+      ]
+    },
+    "stop_box": {
+      "center": [
+        1049.155,
+        1.255,
+        -5.216
+      ],
+      "size": [
+        15.0,
+        4.0,
+        50.0
+      ],
+      "rotation_deg": 90.0
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": true
+  },
+  "targets": {
+    "gold_seconds": 26.5,
+    "silver_seconds": 27.4,
+    "bronze_seconds": 29.0
+  }
+}

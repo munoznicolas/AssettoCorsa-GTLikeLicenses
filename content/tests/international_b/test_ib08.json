@@ -1,0 +1,61 @@
+{
+  "test_id": "IB-8",
+  "tier": "International B",
+  "title": "Blind Crest Downhill Esses: Casanova-Savelli",
+  "description": "Unloading suspension over Casanova crest, quick dab of brakes, and pitching left into Savelli.",
+  "lesson_objective": "Weight transfer control over crests and high-speed downhill transitions.",
+  "car_id": "ks_alfa_giulia_qv",
+  "track_id": "mugello",
+  "track_layout": "",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      -148.778,
+      27.051,
+      -230.326
+    ],
+    "forward_vector": [
+      0.88,
+      -0.0202,
+      -0.4746
+    ],
+    "initial_speed_kmh": 170.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        -106.551,
+        26.344,
+        -265.477
+      ],
+      "p2": [
+        -113.486,
+        26.344,
+        -272.144
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        519.529,
+        -10.279,
+        -69.036
+      ],
+      "p2": [
+        517.953,
+        -10.279,
+        -79.204
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 15.6,
+    "silver_seconds": 16.4,
+    "bronze_seconds": 17.8
+  }
+}

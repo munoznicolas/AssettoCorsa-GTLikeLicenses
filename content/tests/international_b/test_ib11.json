@@ -1,0 +1,61 @@
+{
+  "test_id": "IB-11",
+  "tier": "International B",
+  "title": "Historic High-Speed Drifting: Stowe & Club",
+  "description": "Controlling sustained 4-wheel slip angle through high-speed sweeping bends on vintage tires.",
+  "lesson_objective": "Managing high power-to-weight and four-wheel drift on vintage tires.",
+  "car_id": "shelby_cobra_427sc",
+  "track_id": "ks_silverstone1967",
+  "track_layout": "",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      18.194,
+      -0.798,
+      860.374
+    ],
+    "forward_vector": [
+      -0.6583,
+      0.0165,
+      0.7525
+    ],
+    "initial_speed_kmh": 150.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        -26.632,
+        0.081,
+        875.12
+      ],
+      "p2": [
+        -22.979,
+        0.081,
+        888.418
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        -371.462,
+        -5.941,
+        236.546
+      ],
+      "p2": [
+        -382.549,
+        -5.941,
+        227.658
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 23.5,
+    "silver_seconds": 24.6,
+    "bronze_seconds": 26.5
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "test_id": "S-3",
+  "tier": "Super License",
+  "title": "High-Downforce Aerodynamic Flow: Mugello",
+  "description": "Zero driving assists; connecting Casanova-Savelli and Arrabbiata 1 & 2 into one high-g rhythm.",
+  "lesson_objective": "Naturally aspirated V12 track special full circuit flow.",
+  "car_id": "pagani_zonda_r",
+  "track_id": "mugello",
+  "track_layout": "",
+  "start_mode": "FLYING_LAP",
+  "spawn": {
+    "position": [
+      6.537,
+      -0.129,
+      25.551
+    ],
+    "forward_vector": [
+      -0.9999,
+      0.0124,
+      -0.0037
+    ],
+    "initial_speed_kmh": 170.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        -54.957,
+        0.574,
+        17.575
+      ],
+      "p2": [
+        -55.165,
+        0.574,
+        32.163
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        -48.183,
+        0.494,
+        17.773
+      ],
+      "p2": [
+        -48.34,
+        0.494,
+        32.373
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 99.8,
+    "silver_seconds": 104.0,
+    "bronze_seconds": 111.0
+  }
+}

@@ -326,7 +326,7 @@ class SplineParser:
 
         return StopBoxDefinition(
             center=[round(pos[0], 3), round(pos[1] + height / 2.0, 3), round(pos[2], 3)],
-            size=[round(width, 1), round(length, 1), round(height, 1)],
+            size=[round(width, 1), round(height, 1), round(length, 1)],
             rotation_deg=round(yaw_deg, 2),
         )
 

@@ -1,0 +1,74 @@
+{
+  "test_id": "B-2",
+  "tier": "National B",
+  "title": "500m Acceleration & High-Speed Stop",
+  "description": "High-speed braking from 170+ km/h. Managing the heavier 1,390 kg curb weight; braking early enough to avoid triggering ABS wheel hop while stopping fully within the designated box.",
+  "lesson_objective": "Threshold braking from high speed with high-inertia chassis into a controlled stop.",
+  "car_id": "alfa_romeo_giulietta_qv",
+  "track_id": "ks_drag",
+  "track_layout": "drag500",
+  "start_mode": "STANDING",
+  "spawn": {
+    "position": [
+      31.146,
+      -0.72,
+      -5.264
+    ],
+    "forward_vector": [
+      1.0,
+      0.0001,
+      0.0028
+    ],
+    "initial_speed_kmh": 0.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        34.073,
+        -0.72,
+        10.398
+      ],
+      "p2": [
+        34.168,
+        -0.72,
+        -9.652
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        534.168,
+        -0.739,
+        10.323
+      ],
+      "p2": [
+        534.146,
+        -0.739,
+        -9.777
+      ]
+    },
+    "stop_box": {
+      "center": [
+        539.151,
+        1.26,
+        -5.331
+      ],
+      "size": [
+        12.0,
+        4.0,
+        20.0
+      ],
+      "rotation_deg": 90.05
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": true
+  },
+  "targets": {
+    "gold_seconds": 18.4,
+    "silver_seconds": 19.1,
+    "bronze_seconds": 20.5
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "test_id": "IA-8",
+  "tier": "International A",
+  "title": "GTE Aerodynamic Diffuser Suction",
+  "description": "Dab brake, turn in decisively at 230+ km/h through Copse, and ride the exit rumble strip.",
+  "lesson_objective": "Exploiting inverted mid-engine GTE diffuser downforce.",
+  "car_id": "ks_porsche_911_rsr_2017",
+  "track_id": "ks_silverstone",
+  "track_layout": "gp",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      -13.222,
+      0.082,
+      -841.527
+    ],
+    "forward_vector": [
+      0.9926,
+      0.0107,
+      -0.121
+    ],
+    "initial_speed_kmh": 220.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        61.476,
+        0.723,
+        -847.736
+      ],
+      "p2": [
+        59.967,
+        0.723,
+        -861.171
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        401.88,
+        4.323,
+        -553.649
+      ],
+      "p2": [
+        416.545,
+        4.323,
+        -554.798
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 10.9,
+    "silver_seconds": 11.5,
+    "bronze_seconds": 12.6
+  }
+}

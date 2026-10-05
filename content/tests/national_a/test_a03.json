@@ -1,0 +1,61 @@
+{
+  "test_id": "A-3",
+  "tier": "National A",
+  "title": "Turbo Torque Modulation on Corner Exit",
+  "description": "Negotiate the tight double hairpins of Magione, squeezing the throttle progressively to manage the 2JZ twin-turbo boost onset without breaking rear traction.",
+  "lesson_objective": "Managing sequential twin-turbo boost onset. Squeezing throttle progressively on corner exit; preventing sudden boost spikes from breaking rear traction into snap oversteer.",
+  "car_id": "ks_toyota_supra_mkiv",
+  "track_id": "magione",
+  "track_layout": "",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      -27.13,
+      5.301,
+      -276.708
+    ],
+    "forward_vector": [
+      -0.2474,
+      0.0011,
+      -0.9689
+    ],
+    "initial_speed_kmh": 80.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        -32.551,
+        5.32,
+        -327.725
+      ],
+      "p2": [
+        -43.033,
+        5.32,
+        -323.984
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        -10.922,
+        5.295,
+        -303.035
+      ],
+      "p2": [
+        0.051,
+        5.295,
+        -305.513
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 16.2,
+    "silver_seconds": 17.0,
+    "bronze_seconds": 18.5
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "test_id": "IA-5",
+  "tier": "International A",
+  "title": "Front-Mid GT3 Platform Stability",
+  "description": "Heavy braking into Turn 1/2 uphill flick followed immediately by the long Turn 3 sweeper.",
+  "lesson_objective": "Front-mid engine platform aero balance and tire heat conservation.",
+  "car_id": "ks_mercedes_amg_gt3",
+  "track_id": "ks_barcelona",
+  "track_layout": "layout_gp",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      310.28,
+      -18.654,
+      -103.01
+    ],
+    "forward_vector": [
+      -0.5437,
+      -0.0022,
+      0.8393
+    ],
+    "initial_speed_kmh": 220.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        266.45,
+        -18.667,
+        -42.044
+      ],
+      "p2": [
+        277.31,
+        -18.667,
+        -35.025
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        -253.569,
+        -22.851,
+        507.281
+      ],
+      "p2": [
+        -246.877,
+        -22.851,
+        517.732
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 22.0,
+    "silver_seconds": 23.0,
+    "bronze_seconds": 24.8
+  }
+}

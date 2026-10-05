@@ -1,0 +1,61 @@
+{
+  "test_id": "B-7",
+  "tier": "National B",
+  "title": "Slalom Rhythm & Transient Agility",
+  "description": "Steering cadence through 6 staggered cones. Throttle feathering in 2nd gear; using weight transfer to rotate the mid-engine chassis around each cone without scrubbing front tire grip or touching cones.",
+  "lesson_objective": "Develop precise steering rhythm and rapid transient weight shifting.",
+  "car_id": "lotus_elise_sc",
+  "track_id": "drift",
+  "track_layout": "karting",
+  "start_mode": "STANDING",
+  "spawn": {
+    "position": [
+      -65.718,
+      0.22,
+      97.154
+    ],
+    "forward_vector": [
+      -0.0928,
+      -0.0004,
+      -0.9957
+    ],
+    "initial_speed_kmh": 0.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        -64.003,
+        0.22,
+        93.767
+      ],
+      "p2": [
+        -75.575,
+        0.22,
+        96.02
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        -83.431,
+        0.221,
+        -69.883
+      ],
+      "p2": [
+        -86.151,
+        0.221,
+        -58.195
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 17.2,
+    "silver_seconds": 18.0,
+    "bronze_seconds": 19.6
+  }
+}

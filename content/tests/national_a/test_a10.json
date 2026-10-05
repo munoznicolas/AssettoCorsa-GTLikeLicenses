@@ -1,0 +1,61 @@
+{
+  "test_id": "A-10",
+  "tier": "National A",
+  "title": "Rotary Engine High-RPM Throttle Feathering",
+  "description": "Keep the twin-rotor Mazda RX-7 singing in its high-RPM powerband around the sweeping Curva Campagnano at Vallelunga, balancing throttle feathering with tire slip angle.",
+  "lesson_objective": "Long 180\u00b0 sweeping turn. Keeping the twin-rotary engine singing in its high-power powerband while feathering throttle to avoid burning the rear tires.",
+  "car_id": "ks_mazda_rx7_spirit_r",
+  "track_id": "ks_vallelunga",
+  "track_layout": "classic_circuit",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      -443.149,
+      181.539,
+      150.861
+    ],
+    "forward_vector": [
+      -0.9357,
+      -0.0205,
+      -0.3522
+    ],
+    "initial_speed_kmh": 130.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        -517.355,
+        180.258,
+        120.56
+      ],
+      "p2": [
+        -521.06,
+        180.258,
+        131.774
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        -467.133,
+        181.254,
+        -28.668
+      ],
+      "p2": [
+        -464.608,
+        181.254,
+        -41.421
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 15.5,
+    "silver_seconds": 16.3,
+    "bronze_seconds": 17.5
+  }
+}
