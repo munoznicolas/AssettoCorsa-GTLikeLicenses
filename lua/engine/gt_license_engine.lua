@@ -373,6 +373,14 @@ function GTLicenseEngine:update(dt)
       dispatchEvent(self, "countdownTick", currentStep)
     end
 
+    -- Maintain spawn position and rolling velocity vector during countdown
+    if self.testConfig and self.testConfig.spawn then
+      local initialSpeed = tonumber(self.testConfig.spawn.initial_speed_kmh) or 0
+      if initialSpeed > 0 then
+        GTPhysicsHooks.applyRollingVelocity(0, self.testConfig.spawn.forward_vector, initialSpeed)
+      end
+    end
+
     if self.countdownTimer <= 0 then
       -- Release control locks and launch test
       GTPhysicsHooks.unlockControls()
