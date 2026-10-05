@@ -92,29 +92,47 @@ We have conducted a comprehensive investigation divided into two core research d
 
 ---
 
-## 🗺️ Implementation Roadmap
+## 🚀 Project Status & Quick Start
 
-### Phase 1: Prototype Engine (Proof of Concept)
+The mod development is **100% complete across all 5 tiers (58 tests)**, fully integrated into Content Manager Career mode, and packaged as a ready-to-install archive.
 
-- [ ] Implement core CSP Lua script for a single test (e.g. B-1 400m Acceleration & Braking on Monza Straight or Vallelunga).
-- [ ] Implement stop-box spatial detector and 0 km/h velocity verification.
-- [ ] Implement instant off-track and wall contact fail triggers with audio cues.
-- [ ] Implement 1-key instant restart.
+### 📦 Installation (Drag & Drop into Content Manager)
+1. Locate the built archive: [`release/AssettoCorsa_GT_Licenses.zip`](file:///d:/Repositories/AssettoCorsa-GTLikeLicenses/release/AssettoCorsa_GT_Licenses.zip).
+2. Drag and drop the `.zip` archive into **Content Manager**.
+3. In the green installation pop-up in the top-right, click **Install**.
+4. Navigate to **Career $\rightarrow$ Gran Turismo Licenses** in Content Manager to begin!
 
-### Phase 2: National B License Pack (Default AC Content)
+### 🧪 Automated Verification & Tooling
+To run the automated validation suite locally:
+```bash
+# Validate all 58 tests across all tiers against official Kunos data and JSON schemas
+python tools/validate_curriculum.py --all --strict
 
-- [ ] Curate 10 National B tests using base Kunos cars (Abarth 500, Mazda Miata NA, Toyota GT86, Alfa Romeo Mito) and tracks (Magione, Vallelunga, Silverstone National, Monza).
-- [ ] Configure JSON test definitions with calibrated spawn coordinates, gate vectors, and target medal times.
-- [ ] Package into Content Manager Custom Career with custom UI banners and briefing texts.
+# Run Lua engine and UI unit tests
+python tools/lint_lua.py
+python tools/test_engine_math.py
+python tools/test_ui_modules.py
 
-### Phase 3: National A & International Tiers
-
-- [ ] Expand to intermediate corner complexes (Laguna Seca Corkscrew, Brands Hatch, Imola).
-- [ ] Implement rolling-start sector tests with pre-set velocities.
-- [ ] Add dynamic 3D driving line and ghost car playback.
+# Re-build Content Manager drag-and-drop distribution archive
+python tools/build_cm_package.py --validate
+```
 
 ---
 
-## 🤝 Getting Involved
+## 🗺️ Completed Milestones
 
-Contributions, track sector coordinates, car recommendations, and feedback on medal times are welcome! See the [docs](docs/) directory for detailed background research.
+- [x] **Phase 0: Schema Contracts & Specifications**: Formal JSON schemas (`test_definition.schema.json`, `career_manifest.schema.json`).
+- [x] **Phase 1: Simulation Engine & UI Layer**:
+  - [x] Dynamic 3D car teleportation and vector rolling launches (`gt_physics_hooks.lua`).
+  - [x] Real-time GT failure adjudicator (`gt_adjudicator.lua`).
+  - [x] Instant in-memory session reset (`gt_session_reset.lua`).
+  - [x] Gran Turismo vector canvas HUD and 3D ribbons (`gt_license_hud.lua`, `gt_render_gates.lua`).
+  - [x] PCM audio cue sound manager (`gt_audio_manager.lua`).
+- [x] **Phase 2: Full Curriculum Content (58 Tests)**:
+  - [x] **National B** (12 tests: acceleration, braking, stop-boxes, weight transfer, Vallelunga graduation).
+  - [x] **National A** (12 tests: Corkscrew, turbo modulation, snap oversteer, Brands Hatch graduation).
+  - [x] **International B** (12 tests: high-speed braking, downforce, slipstreaming, Red Bull Ring graduation).
+  - [x] **International A** (12 tests: GT3/DTM/GTE downforce, Spa sector graduation).
+  - [x] **Super License** (10 tests: full-lap trials at Laguna Seca, Brands Hatch, Mugello, Monza, Silverstone, Imola, Spa, Red Bull Ring, Barcelona, and Nordschleife).
+- [x] **Phase 3: Content Manager Career Integration**: 5 career series with progressive unlock prerequisites (`REQUIRES=`).
+- [x] **Phase 4: Release Packaging**: Self-contained `release/AssettoCorsa_GT_Licenses.zip` ready for distribution.
