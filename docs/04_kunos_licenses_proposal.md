@@ -25,9 +25,9 @@ Every test in this proposal is monitored under strict Gran Turismo rules:
 
 *Entry-level motorsport fundamentals: longitudinal braking perception, traction limits on corner exit, weight transfer across basic chicanes, and low-power momentum conservation.*
 
-**License Rewards**:
-* **All Bronze**: `ks_alfa_romeo_mito_qv` (Alfa Romeo MiTo Quadrifoglio Verde)
-* **All Gold**: `ks_toyota_gt86` (Toyota GT86)
+**Progression & Certification**:
+* **License Pass (Bronze or Better)**: Unlocks National A License
+* **License Mastery (All Gold)**: National B Gold Certification
 
 ---
 
@@ -159,9 +159,9 @@ Every test in this proposal is monitored under strict Gran Turismo rules:
 
 *Intermediate vehicle dynamics: high-speed chicanes, blind off-camber drops, mid-engine weight transfer, turbo torque delivery, and powerful rear-wheel-drive sports coupes.*
 
-**License Rewards**:
-* **All Bronze**: `ks_nissan_370z` (Nissan 370Z NISMO)
-* **All Gold**: `ks_porsche_718_cayman_s` (Porsche 718 Cayman S)
+**Progression & Certification**:
+* **License Pass (Bronze or Better)**: Unlocks International B License
+* **License Mastery (All Gold)**: National A Gold Certification
 
 ---
 
@@ -293,9 +293,9 @@ Every test in this proposal is monitored under strict Gran Turismo rules:
 
 *Advanced performance & high-speed commitment: aerodynamic downforce, supercars, slipstream overtaking, low-grip control, and high-speed chicanes.*
 
-**License Rewards**:
-* **All Bronze**: `ks_corvette_c7_stingray` (Chevrolet Corvette C7 Stingray)
-* **All Gold**: `ks_porsche_911_gt3_rs` (Porsche 911 GT3 RS)
+**Progression & Certification**:
+* **License Pass (Bronze or Better)**: Unlocks International A License
+* **License Mastery (All Gold)**: International B Gold Certification
 
 ---
 
@@ -428,9 +428,9 @@ Every test in this proposal is monitored under strict Gran Turismo rules:
 
 *Professional motorsport racecraft: GT3, GT4, and classic DTM race cars. Full slick tires, racing ABS/TC, high-downforce aero packages, multi-class clean overtakes, and curb discipline.*
 
-**License Rewards**:
-* **All Bronze**: `ks_porsche_cayman_gt4_clubsport` (Porsche Cayman GT4 Clubsport)
-* **All Gold**: `ks_ferrari_488_gt3` (Ferrari 488 GT3)
+**Progression & Certification**:
+* **License Pass (Bronze or Better)**: Unlocks Super License
+* **License Mastery (All Gold)**: International A Gold Certification
 
 ---
 
@@ -563,9 +563,9 @@ Every test in this proposal is monitored under strict Gran Turismo rules:
 
 *The ultimate test of speed, discipline, and endurance: full timed laps with zero margin for error across the world's most demanding circuits in Hypercars, Group C legends, LMP1 prototypes, and Formula 1 machinery.*
 
-**License Rewards**:
-* **All Bronze**: `pagani_zonda_r` (Pagani Zonda R)
-* **All Gold**: `ks_ferrari_f2004` (Ferrari F2004 Formula 1)
+**Progression & Certification**:
+* **License Pass (Bronze or Better)**: Driver Academy Graduate Certification
+* **License Mastery (All Gold)**: Master Driver Gold Distinction
 
 ---
 
@@ -666,15 +666,15 @@ Every test in this proposal is monitored under strict Gran Turismo rules:
 ## 7. Summary & Implementation Mapping
 
 ```
-+---------------------------------------------------------------------------------------------------+
-| TIER          | TESTS | THEMATIC FOCUS                                | PRIZE (BRONZE)  | PRIZE (GOLD)   |
-+---------------------------------------------------------------------------------------------------+
-| National B    |  12   | Kinematics, Braking, Out-In-Out, Low-Power FR | MiTo QV         | Toyota GT86    |
-| National A    |  12   | Complex Chicanes, Elevation, Turbo, Mid-Engine| Nissan 370Z     | Cayman S       |
-| Internat. B   |  12   | Supercars, Downforce, Overtaking, Low-Grip    | Corvette C7     | 911 GT3 RS     |
-| Internat. A   |  12   | GT3 / GT4 / DTM, Slick Tires, Multi-Class     | Cayman GT4 Club | 488 GT3        |
-| Super License |  10   | Full Circuit Time Trials, LMP1 & Formula 1    | Pagani Zonda R  | Ferrari F2004  |
-+---------------------------------------------------------------------------------------------------+
-| TOTAL TESTS   |  58   | 100% Kunos Official Content (Zero external mods required)                        |
-+---------------------------------------------------------------------------------------------------+
++---------------------------------------------------------------------------------------------------------+
+| TIER          | TESTS | THEMATIC FOCUS                                | UNLOCK CONDITION   | MASTERY    |
++---------------------------------------------------------------------------------------------------------+
+| National B    |  12   | Kinematics, Braking, Out-In-Out, Low-Power FR | Unlocked by Default| All Gold B |
+| National A    |  12   | Complex Chicanes, Elevation, Turbo, Mid-Engine| Pass all B tests   | All Gold A |
+| Internat. B   |  12   | Supercars, Downforce, Overtaking, Low-Grip    | Pass all A tests   | All Gold IB|
+| Internat. A   |  12   | GT3 / GT4 / DTM, Slick Tires, Multi-Class     | Pass all IB tests  | All Gold IA|
+| Super License |  10   | Full Circuit Time Trials, LMP1 & Formula 1    | Pass all IA tests  | All Gold S |
++---------------------------------------------------------------------------------------------------------+
+| TOTAL TESTS   |  58   | 100% Kunos Official Content (Zero external mods required)                       |
++---------------------------------------------------------------------------------------------------------+
 ```

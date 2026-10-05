@@ -43,7 +43,7 @@ We have conducted a comprehensive investigation divided into two core research d
    * Complete driver development curriculum designed with **100% official Kunos cars and tracks**.
    * 5 Progressive Tiers: **National B (12 tests)**, **National A (12 tests)**, **International B (12 tests)**, **International A (12 tests)**, and **Super License (10 full-lap tests)**.
    * Every test specified with exact car/track IDs, start type (standing, stop-box, rolling at $X$ km/h), target medal times (Gold, Silver, Bronze), failure rules, and driving lessons.
-   * Bronze and Gold prize car reward unlocks for each tier.
+   * Progressive tier unlocks (Bronze or better) and Gold mastery certifications.
 
 ---
 
@@ -54,7 +54,7 @@ We have conducted a comprehensive investigation divided into two core research d
 |               CONTENT MANAGER (Launcher & Career)           |
 |  - Custom License Tiers (B, A, IB, IA, S)                   |
 |  - Driving Briefings & Lesson Tips                          |
-|  - Medal Tracking (Gold/Silver/Bronze) & Car Unlocks        |
+|  - Medal Tracking (Gold/Silver/Bronze) & Tier Unlocks       |
 +-------------------------------------------------------------+
                               |
                      Launches AC session

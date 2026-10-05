@@ -9,7 +9,7 @@ To faithfully reproduce the Gran Turismo (GT) License Test experience in _Assett
 3. **Rapid Retry Loop**: Immediate test restarts within 1–2 seconds upon failure without reloading track assets or exiting the session.
 4. **Pedagogical Aids**: Ideal driving lines, 3D start/finish ribbons, apex markers, and demonstration ghost cars.
 5. **Presentation & Audio-Visuals**: GT-style HUD overlays (target medal times, live deltas, fail banners, gold/silver/bronze celebratory fanfares).
-6. **Career & License Progression**: Structured unlock trees where completing tests awards licenses and prize cars.
+6. **Career & License Progression**: Structured unlock trees where completing tests awards tier licenses and mastery certifications.
 
 This document investigates the capabilities, limitations, and architectural possibilities across **Vanilla Assetto Corsa**, the **Python API**, **Content Manager (CM)**, and the **Custom Shaders Patch (CSP) Lua framework**.
 
@@ -191,7 +191,7 @@ To deliver the best balance of maintainability, user experience, and visual fide
 |                        CONTENT MANAGER (UI LAYER)                       |
 |  - Custom Career / License Menu (License B, License A, IC, IB, IA, S)   |
 |  - Test Selection, Driver Briefing, Car/Track Mod Verification          |
-|  - Medal Tracking (Gold/Silver/Bronze) & License Completion Rewards     |
+|  - Medal Tracking (Gold/Silver/Bronze) & Tier Unlock Trees          |
 +-------------------------------------------------------------------------+
                                      |
                              Launches AC with
