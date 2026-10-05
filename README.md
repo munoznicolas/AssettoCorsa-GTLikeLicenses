@@ -52,6 +52,12 @@ We have conducted a comprehensive investigation divided into two core research d
    * **Engine vs. Data Architecture**: Universal CSP Lua runtime (`gt_license_engine.lua`) decoupled from test data.
    * **Custom Antigravity Agent Skill Specification** (`ac-license-modding`) and 5-step autonomous execution plan.
 
+6. **[Multi-Agent Parallelization Strategy](docs/06_multi_agent_parallel_strategy.md)**
+   * Work Breakdown Structure (WBS), concurrency dependency graph, and agent role roster.
+   * Parallel execution model: concurrent Lua engine, HUD/visuals, tooling, and 5-way content authoring swarm.
+   * Conflict prevention safeguards: strict directory topology, contract-first schema, and automated verification gates.
+   * Sequential vs. parallel performance comparison (~3.5x speedup with higher context fidelity).
+
 ---
 
 ## 🏗️ Proposed System Architecture
