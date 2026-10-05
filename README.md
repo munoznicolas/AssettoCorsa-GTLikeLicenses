@@ -39,6 +39,12 @@ We have conducted a comprehensive investigation divided into two core research d
    * Complete inventory of **19 circuit locations (over 45 unique layouts)** and **178 official vehicles** from *Assetto Corsa: Ultimate Edition*.
    * Technical categorization by track characteristics, surface types, vehicle classes, drivetrains (FWD, RWD, AWD), power, weight, and motorsport eras.
 
+4. **[Curriculum Proposal: 5 Licenses / 58 Tests](docs/04_kunos_licenses_proposal.md)**
+   * Complete driver development curriculum designed with **100% official Kunos cars and tracks**.
+   * 5 Progressive Tiers: **National B (12 tests)**, **National A (12 tests)**, **International B (12 tests)**, **International A (12 tests)**, and **Super License (10 full-lap tests)**.
+   * Every test specified with exact car/track IDs, start type (standing, stop-box, rolling at $X$ km/h), target medal times (Gold, Silver, Bronze), failure rules, and driving lessons.
+   * Bronze and Gold prize car reward unlocks for each tier.
+
 ---
 
 ## 🏗️ Proposed System Architecture
