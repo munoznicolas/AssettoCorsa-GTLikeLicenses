@@ -76,11 +76,15 @@ function GTPhysicsHooks.teleportCar(carIndex, position, forwardVector, verticalO
 
   local rawPos = GTPhysicsHooks.toVec3(position)
   local fwd = safeNormalize(GTPhysicsHooks.toVec3(forwardVector))
-
-  -- Apply slight vertical offset to avoid ground mesh penetration
   local targetPos = vec3(rawPos.x, rawPos.y + verticalOffset, rawPos.z)
 
-  -- Teleport car using CSP physics API
+  -- Teleport car using CSP physics APIs
+  if ac and ac.setCarPhysicPosition then
+    ac.setCarPhysicPosition(carIndex, targetPos)
+  end
+  if ac and ac.setCarPhysicHeading then
+    ac.setCarPhysicHeading(carIndex, fwd, vec3(0, 1, 0))
+  end
   if physics and physics.setCarPosition then
     physics.setCarPosition(carIndex, targetPos, fwd)
   end
@@ -104,11 +108,10 @@ function GTPhysicsHooks.applyRollingVelocity(carIndex, forwardVector, speedKmh)
 
   if speedKmh <= 0 then
     -- Standing start: ensure velocity is zeroed out
-    if physics and physics.setCarVelocity then
+    if ac and ac.setCarPhysicLinearVelocity then
+      ac.setCarPhysicLinearVelocity(carIndex, vec3(0, 0, 0))
+    elseif physics and physics.setCarVelocity then
       physics.setCarVelocity(carIndex, vec3(0, 0, 0))
-    end
-    if physics and physics.engageGear then
-      physics.engageGear(carIndex, 1)
     end
     return true
   end
@@ -118,13 +121,26 @@ function GTPhysicsHooks.applyRollingVelocity(carIndex, forwardVector, speedKmh)
   local vel = vec3(fwd.x * speedMs, fwd.y * speedMs, fwd.z * speedMs)
 
   -- Apply linear velocity vector to the car
-  if physics and physics.setCarVelocity then
+  if ac and ac.setCarPhysicLinearVelocity then
+    ac.setCarPhysicLinearVelocity(carIndex, vel)
+  elseif physics and physics.setCarVelocity then
     physics.setCarVelocity(carIndex, vel)
   end
 
-  -- Engage an appropriate gear for the rolling launch speed
+  -- Stabilize pitch/roll rotation at spawn
+  if ac and ac.setCarPhysicAngularVelocity then
+    ac.setCarPhysicAngularVelocity(carIndex, vec3(0, 0, 0))
+  end
+
+  -- Engage an appropriate gear and engine RPM for rolling launch speed
   local gear = GTPhysicsHooks.estimateStartingGear(speedKmh)
-  if physics and physics.engageGear then
+  if ac and ac.accessCarPhysics then
+    local phys = ac.accessCarPhysics(carIndex)
+    if phys then
+      pcall(function() phys:setGear(gear) end)
+      pcall(function() phys:setEngineRPM(3500) end)
+    end
+  elseif physics and physics.engageGear then
     physics.engageGear(carIndex, gear)
   end
 
