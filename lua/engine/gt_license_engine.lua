@@ -114,6 +114,36 @@ local function parseJSONSafe(str)
   return nil
 end
 
+local function getTestFilePath(testId)
+  if not testId or #testId == 0 then return nil end
+  local prefix, numStr = testId:match("^([%a]+)%-(%d+)$")
+  if not prefix or not numStr then return nil end
+  local num = tonumber(numStr)
+  if not num then return nil end
+  prefix = string.upper(prefix)
+  local numPadded = string.format("%02d", num)
+  local tierFolder, filePrefix
+  if prefix == "B" then
+    tierFolder = "national_b"
+    filePrefix = "b"
+  elseif prefix == "A" then
+    tierFolder = "national_a"
+    filePrefix = "a"
+  elseif prefix == "IB" then
+    tierFolder = "international_b"
+    filePrefix = "ib"
+  elseif prefix == "IA" then
+    tierFolder = "international_a"
+    filePrefix = "ia"
+  elseif prefix == "S" then
+    tierFolder = "super_license"
+    filePrefix = "s"
+  else
+    return nil
+  end
+  return string.format("%s/test_%s%s.json", tierFolder, filePrefix, numPadded)
+end
+
 ---Loads a JSON test definition file from disk.
 ---@param filepath string? @Path to test JSON file
 ---@return table testConfig
@@ -136,14 +166,44 @@ function GTLicenseEngine.loadTestConfig(filepath)
   -- Search standard CSP directory locations if no content yet
   if not content and ac and ac.getFolder then
     local scriptFolder = ac.getFolder(ac.FolderID.ExtScript)
-    local candidates = {
-      scriptFolder .. "/active_test.json",
-      scriptFolder .. "/data/active_test.json",
-      scriptFolder .. "/data/tests/active_test.json"
-    }
+
+    -- Try to determine active test ID from race.ini
+    local testId = nil
+    if ac.INIConfig and ac.INIConfig.raceConfig then
+      local ok, race = pcall(ac.INIConfig.raceConfig)
+      if ok and race then
+        testId = race:get("GTLICENSE", "TEST_ID", "")
+        if not testId or #testId == 0 then
+          local eventName = race:get("EVENT", "NAME", "")
+          testId = eventName:match("^([%w%-]+):")
+        end
+      end
+    end
+
+    local candidates = {}
+    if testId and #testId > 0 then
+      local relFile = getTestFilePath(testId)
+      if relFile then
+        table.insert(candidates, scriptFolder .. "/data/tests/" .. relFile)
+        table.insert(candidates, scriptFolder .. "/data/" .. relFile)
+        table.insert(candidates, scriptFolder .. "/" .. relFile)
+      end
+    end
+
+    table.insert(candidates, scriptFolder .. "/active_test.json")
+    table.insert(candidates, scriptFolder .. "/data/active_test.json")
+    table.insert(candidates, scriptFolder .. "/data/tests/active_test.json")
+
     for _, path in ipairs(candidates) do
       if io.load then
         content = io.load(path)
+      end
+      if not content then
+        local f = io.open(path, "r")
+        if f then
+          content = f:read("*all")
+          f:close()
+        end
       end
       if content and #content > 0 then break end
     end
@@ -563,18 +623,29 @@ end
 -- ==============================================================================
 -- If executed as the top-level CSP scenario script, wire directly into script.*
 if script ~= nil then
-  local activeEngine = nil
+  local activeEngine = GTLicenseEngine.new(nil)
+  if GTLicenseHUD and GTLicenseHUD.init then
+    GTLicenseHUD.init(activeEngine:getActiveTest())
+  end
+  if GTRenderGates and GTRenderGates.init then
+    GTRenderGates.init(activeEngine:getActiveTest())
+  end
+  if GTAudioManager and GTAudioManager.init then
+    GTAudioManager.init()
+  end
 
   function script.init()
-    activeEngine = GTLicenseEngine.new(nil)
-    if GTLicenseHUD and GTLicenseHUD.init then
-      GTLicenseHUD.init(activeEngine:getActiveTest())
-    end
-    if GTRenderGates and GTRenderGates.init then
-      GTRenderGates.init(activeEngine:getActiveTest())
-    end
-    if GTAudioManager and GTAudioManager.init then
-      GTAudioManager.init()
+    if not activeEngine then
+      activeEngine = GTLicenseEngine.new(nil)
+      if GTLicenseHUD and GTLicenseHUD.init then
+        GTLicenseHUD.init(activeEngine:getActiveTest())
+      end
+      if GTRenderGates and GTRenderGates.init then
+        GTRenderGates.init(activeEngine:getActiveTest())
+      end
+      if GTAudioManager and GTAudioManager.init then
+        GTAudioManager.init()
+      end
     end
   end
 

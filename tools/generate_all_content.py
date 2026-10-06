@@ -1172,6 +1172,7 @@ def generate_career() -> None:
         # 1. series.ini
         series_ini_path = os.path.join(s_folder, "series.ini")
         cp = configparser.ConfigParser(interpolation=None)
+        cp.optionxform = str
         cp["SERIES"] = {
             "CODE": s_meta["code"],
             "NAME": s_meta["name"],
@@ -1187,7 +1188,7 @@ def generate_career() -> None:
             "TIER3": "0",
         }
         with open(series_ini_path, "w", encoding="utf-8") as f:
-            cp.write(f)
+            cp.write(f, space_around_delimiters=False)
 
         # 2. preview.png badge
         badge_src = os.path.join(REPO_ROOT, "assets", "career_ui", s_meta["badge_asset"])
@@ -1207,6 +1208,7 @@ def generate_career() -> None:
             event_ini_path = os.path.join(event_dir, "event.ini")
 
             ecp = configparser.ConfigParser(interpolation=None)
+            ecp.optionxform = str
             ecp["EVENT"] = {
                 "NAME": f"{tdef['test_id']}: {tdef['title']}",
                 "DESCRIPTION": f"{tdef['description']}\n\nObjective: {tdef['lesson_objective']}",
@@ -1215,16 +1217,21 @@ def generate_career() -> None:
                 "TRACK": tdef["track_id"],
                 "CONFIG_TRACK": tdef["track_layout"],
                 "MODEL": tdef["car_id"],
+                "MODEL_CONFIG": "",
                 "CARS": "1",
                 "AI_LEVEL": "98",
                 "DRIFT_MODE": "0",
                 "FIXED_SETUP": "1",
                 "PENALTIES": "1",
+                "__CM_CUSTOM_MODE": "gt-license",
             }
             ecp["CAR_0"] = {
-                "MODEL": "-",
+                "MODEL": tdef["car_id"],
+                "MODEL_CONFIG": "",
                 "SETUP": "",
                 "SKIN": "",
+                "BALLAST": "0",
+                "RESTRICTOR": "0",
             }
             ecp["LIGHTING"] = {
                 "SUN_ANGLE": "48",
@@ -1233,7 +1240,7 @@ def generate_career() -> None:
             }
             ecp["SESSION_0"] = {
                 "NAME": "License Test",
-                "TYPE": "4",
+                "TYPE": "1",
                 "DURATION": "0",
                 "SPAWN_SET": "PIT",
             }
@@ -1253,7 +1260,7 @@ def generate_career() -> None:
             }
 
             with open(event_ini_path, "w", encoding="utf-8") as f:
-                ecp.write(f)
+                ecp.write(f, space_around_delimiters=False)
 
         print(f"  + Generated Series: {s_meta['folder']} ({len(tier_tests)} events)")
 

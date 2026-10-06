@@ -146,15 +146,12 @@ def main():
 
     if not args.dry_run:
         os.makedirs(gt_mode_base, exist_ok=True)
-        if not os.path.isfile(manifest_dst):
-            with open(manifest_dst, "w", encoding="utf-8") as f:
-                f.write(DEFAULT_MANIFEST_INI)
-        if not os.path.isfile(scenario_dst):
-            with open(scenario_dst, "w", encoding="utf-8") as f:
-                f.write(DEFAULT_SCENARIO_LUA)
-        if not os.path.isfile(mode_dst):
-            with open(mode_dst, "w", encoding="utf-8") as f:
-                f.write(DEFAULT_SCENARIO_LUA)
+        with open(manifest_dst, "w", encoding="utf-8") as f:
+            f.write(DEFAULT_MANIFEST_INI)
+        with open(scenario_dst, "w", encoding="utf-8") as f:
+            f.write(DEFAULT_SCENARIO_LUA)
+        with open(mode_dst, "w", encoding="utf-8") as f:
+            f.write(DEFAULT_SCENARIO_LUA)
         print(f"[SUCCESS] Synchronized {copied_count} file(s) to Assetto Corsa!")
     else:
         print(f"[DRY-RUN] Would synchronize {len(mappings)} file(s) to {gt_mode_base}.")
