@@ -59,47 +59,52 @@ Retrieves the telemetry and physics state table for a vehicle by zero-based inde
 
 ---
 
-## 3. Physics Manipulation & Direct State Hooks
+## 3. Physics Manipulation & Direct State Hooks (`physics.*`)
 
 > [!IMPORTANT]
-> Calling native CSP physics setters **once** on spawn is insufficient when in `COUNTDOWN` state because AC's native C++ engine resets car linear velocity to zero every frame while player controls are locked. Velocity setters MUST be invoked continuously inside `update(dt)`.
+> Calling native CSP physics setters **once** on spawn is insufficient when in `COUNTDOWN` state because AC's native C++ engine resets car linear velocity to zero every frame while player controls are locked. Velocity, gear, and engine RPM setters MUST be invoked continuously inside `update(dt)`.
 
-### `ac.setCarPhysicLinearVelocity(index: integer, velocity: vec3)`
+### `physics.setCarPosition(carIndex: integer, pos: vec3, dir: vec3)`
+Teleports the vehicle chassis directly to world position `pos` and orients it on the track surface.
+
+> [!WARNING]
+> **Orientation Inversion Rule**: Assetto Corsa's internal coordinate convention for `physics.setCarPosition` inverts the orientation direction vector relative to `car.look`. To orient the car's headlights forward along $\vec{fwd}$, you **must pass $-\vec{fwd}$**:
+> ```lua
+> physics.setCarPosition(carIndex, targetPos, vec3(-fwd.x, -fwd.y, -fwd.z))
+> ```
+> Passing $+\vec{fwd}$ points the car's headlights $180^\circ$ backwards. If forward velocity is then applied along $\vec{fwd}$, the vehicle will launch backwards in reverse!
+
+### `physics.setCarVelocity(carIndex: integer, velocity: vec3)`
 Directly sets the 3D linear velocity vector of the specified car in world space ($m/s$).
 
 ```lua
 -- Example: Apply 70 km/h rolling velocity along forward direction vector
 local speedMps = 70.0 / 3.6
-local forwardVec = vec3(0.0, 0.0, 1.0)
+local forwardVec = vec3(1.0, 0.0, 0.0)
 local velMps = vec3(forwardVec.x * speedMps, forwardVec.y * speedMps, forwardVec.z * speedMps)
 
-ac.setCarPhysicLinearVelocity(0, velMps)
+physics.setCarVelocity(0, velMps)
 ```
 
-### `ac.setCarPhysicAngularVelocity(index: integer, angularVel: vec3)`
-Directly sets the rotational velocity vector $(rad/s)$ of the vehicle chassis around its axes. Used to stabilize chassis pitch and roll on rolling launches.
+### `physics.engageGear(carIndex: integer, gear: integer)`
+Forces a specific gear to engage (`-1` = Reverse, `0` = Neutral, `1` = 1st, `2` = 2nd, etc.):
 
 ```lua
--- Zero out rotation to prevent unstable vehicle movement at spawn
-ac.setCarPhysicAngularVelocity(0, vec3(0, 0, 0))
+physics.engageGear(0, 2) -- Engage 2nd gear for rolling start launch
 ```
 
-### `ac.setCarPhysicPosition(index: integer, pos: vec3)`
-Teleports the vehicle chassis directly to world position `pos`.
-
-### `ac.setCarPhysicHeading(index: integer, forward: vec3, up: vec3)`
-Sets the directional orientation of the vehicle chassis using forward and up direction vectors.
-
-### `ac.accessCarPhysics(index: integer) -> CarPhysicsAccess`
-Returns a low-level physics mutation accessor allowing control lock overrides:
+### `physics.setEngineRPM(carIndex: integer, rpm: number)`
+Sets the active engine RPM to prevent engine stall or idle during rolling starts:
 
 ```lua
-local phys = ac.accessCarPhysics(0)
-if phys then
-  phys:setEngineRPM(3500)
-  phys:setGear(2) -- Engage 2nd gear for rolling start launch
-end
+physics.setEngineRPM(0, 3500)
 ```
+
+### `physics.lockUserControlsFor(seconds: number)`
+Locks user steering, throttle, and brake inputs for a specified duration (0 to unlock immediately).
+
+### `physics.forceUserBrakesFor(seconds: number, val: number)`
+Forces human player brake pedal input (`0.0` to `1.0`) during standing start countdowns.
 
 ---
 

@@ -171,7 +171,28 @@ function GTLicenseEngine.loadTestConfig(filepath)
 
   -- Search standard CSP directory locations if no content yet
   if not content and ac and ac.getFolder then
-    local scriptFolder = ac.getFolder(ac.FolderID.ExtScript)
+    local scriptFolders = {}
+    if ac.FolderID then
+      if ac.FolderID.ScriptOrigin then
+        local origin = ac.getFolder(ac.FolderID.ScriptOrigin)
+        if origin and #origin > 0 and not origin:find("AppData") then
+          table.insert(scriptFolders, origin)
+        end
+      end
+      if ac.FolderID.Root then
+        local root = ac.getFolder(ac.FolderID.Root)
+        if root and #root > 0 then
+          table.insert(scriptFolders, root .. "/extension/lua/new-modes/gt-license")
+        end
+      end
+      if ac.FolderID.ExtLua then
+        local extLua = ac.getFolder(ac.FolderID.ExtLua)
+        if extLua and #extLua > 0 then
+          table.insert(scriptFolders, extLua .. "/new-modes/gt-license")
+        end
+      end
+    end
+    table.insert(scriptFolders, "D:/SteamLibrary/steamapps/common/assettocorsa/extension/lua/new-modes/gt-license")
 
     -- Try to determine active test ID from race.ini
     local testId = nil
@@ -180,25 +201,40 @@ function GTLicenseEngine.loadTestConfig(filepath)
       if ok and race then
         testId = race:get("GTLICENSE", "TEST_ID", "")
         if not testId or #testId == 0 then
+          testId = race:get("RACE", "TEST_ID", "")
+        end
+        if not testId or #testId == 0 then
+          local sName = race:get("SESSION_0", "NAME", "")
+          testId = sName:match("([%a]+%-%d+)") or sName:match("^([%w%-]+):")
+        end
+        if not testId or #testId == 0 then
           local eventName = race:get("EVENT", "NAME", "")
-          testId = eventName:match("^([%w%-]+):")
+          testId = eventName:match("([%a]+%-%d+)") or eventName:match("^([%w%-]+):")
+        end
+        if not testId or #testId == 0 then
+          local raceName = race:get("RACE", "NAME", "")
+          testId = raceName:match("([%a]+%-%d+)")
         end
       end
     end
 
-    local candidates = {}
-    if testId and #testId > 0 then
-      local relFile = getTestFilePath(testId)
-      if relFile then
-        table.insert(candidates, scriptFolder .. "/data/tests/" .. relFile)
-        table.insert(candidates, scriptFolder .. "/data/" .. relFile)
-        table.insert(candidates, scriptFolder .. "/" .. relFile)
-      end
+    if ac and ac.log then
+      ac.log(string.format("[GTLicense] loadTestConfig: detected testId='%s'", tostring(testId)))
     end
 
-    table.insert(candidates, scriptFolder .. "/active_test.json")
-    table.insert(candidates, scriptFolder .. "/data/active_test.json")
-    table.insert(candidates, scriptFolder .. "/data/tests/active_test.json")
+    local candidates = {}
+    local relFile = (testId and #testId > 0) and getTestFilePath(testId) or nil
+
+    for _, baseFolder in ipairs(scriptFolders) do
+      if relFile then
+        table.insert(candidates, baseFolder .. "/data/tests/" .. relFile)
+        table.insert(candidates, baseFolder .. "/data/" .. relFile)
+        table.insert(candidates, baseFolder .. "/" .. relFile)
+      end
+      table.insert(candidates, baseFolder .. "/active_test.json")
+      table.insert(candidates, baseFolder .. "/data/active_test.json")
+      table.insert(candidates, baseFolder .. "/data/tests/active_test.json")
+    end
 
     for _, path in ipairs(candidates) do
       if io.load then
@@ -211,7 +247,12 @@ function GTLicenseEngine.loadTestConfig(filepath)
           f:close()
         end
       end
-      if content and #content > 0 then break end
+      if content and #content > 0 then
+        if ac and ac.log then
+          ac.log(string.format("[GTLicense] loadTestConfig: successfully loaded JSON from '%s' (%d bytes)", path, #content))
+        end
+        break
+      end
     end
   end
 
@@ -257,6 +298,15 @@ function GTLicenseEngine.new(testDefinition)
     self.testConfig = GTLicenseEngine.loadTestConfig(testDefinition)
   else
     self.testConfig = GTLicenseEngine.loadTestConfig(nil)
+  end
+
+  local initSpeed = (self.testConfig.spawn and self.testConfig.spawn.initial_speed_kmh) or 0
+  if ac and ac.log then
+    ac.log(string.format("[GTLicense] Initialized engine for test '%s' (%s) | Start Mode: %s | Initial Speed: %.1f km/h",
+      tostring(self.testConfig.test_id),
+      tostring(self.testConfig.title),
+      tostring(self.testConfig.start_mode),
+      tonumber(initSpeed) or 0))
   end
 
   -- State machine variables
@@ -374,6 +424,12 @@ function GTLicenseEngine:startCountdown()
 
   -- Lock controls during countdown
   GTPhysicsHooks.lockControls(3.0, isStanding)
+
+  if ac and ac.log then
+    ac.log(string.format("[GTLicense] Countdown started | start_mode=%s | isStanding=%s | initial_speed=%.1f km/h",
+      tostring(self.testConfig.start_mode), tostring(isStanding),
+      tonumber(self.testConfig.spawn and self.testConfig.spawn.initial_speed_kmh or 0) or 0))
+  end
 end
 
 ---Evaluates medal rank based on achieved session time.
@@ -446,6 +502,19 @@ function GTLicenseEngine:update(dt)
 
   local car = ac and ac.getCar and ac.getCar(0)
 
+  -- Ensure car is properly spawned and oriented on the first live simulation frame
+  if not self.spawnInitialized and car then
+    self.spawnInitialized = true
+    GTPhysicsHooks.setupSpawn(self.testConfig, 0)
+    local isStanding = (self.testConfig.start_mode == "STANDING")
+    GTPhysicsHooks.lockControls(3.0, isStanding)
+    if ac and ac.log then
+      ac.log(string.format("[GTLicense] First live frame spawn applied: pos=(%.2f, %.2f, %.2f), look=(%.2f, %.2f, %.2f), speed=%.2f km/h",
+        car.position.x, car.position.y, car.position.z,
+        car.look.x, car.look.y, car.look.z, car.speedKmh))
+    end
+  end
+
   -- 2. State machine evaluation
   if self.state == GTLicenseEngine.STATE.COUNTDOWN then
     self.countdownTimer = self.countdownTimer - dt
@@ -454,6 +523,14 @@ function GTLicenseEngine:update(dt)
     if currentStep >= 1 and currentStep < self.countdownLastStep then
       self.countdownLastStep = currentStep
       dispatchEvent(self, "countdownTick", currentStep)
+      if ac and ac.log then
+        local spd = car and car.speedKmh or 0
+        local gear = car and car.gear or 0
+        local lx = car and car.look and car.look.x or 0
+        local lz = car and car.look and car.look.z or 0
+        ac.log(string.format("[GTLicense] Countdown Tick %d | Mode=%s | Speed=%.2f km/h | Gear=%d | Look=(%.2f, %.2f)",
+          currentStep, tostring(self.testConfig.start_mode), spd, gear, lx, lz))
+      end
     end
 
     -- Maintain spawn position and rolling velocity vector during countdown
@@ -472,6 +549,50 @@ function GTLicenseEngine:update(dt)
       end
       dispatchEvent(self, "go")
       self:setState(GTLicenseEngine.STATE.RUNNING)
+      if ac and ac.log then
+        local spd = car and car.speedKmh or 0
+        local gear = car and car.gear or 0
+        ac.log(string.format("[GTLicense] Countdown GO! | Mode=%s | Telemetry: Speed=%.2f km/h, Gear=%d",
+          tostring(self.testConfig.start_mode), spd, gear))
+      end
+    end
+
+    -- Periodic telemetry sampling
+    if not self.telemetrySamples then
+      self.telemetrySamples = {}
+      self.lastTelemetrySampleTime = 0
+    end
+    self.lastTelemetrySampleTime = (self.lastTelemetrySampleTime or 0) + dt
+    if self.lastTelemetrySampleTime >= 0.25 then
+      self.lastTelemetrySampleTime = 0
+      if car then
+        table.insert(self.telemetrySamples, {
+          t = self.sessionTime,
+          countdown = self.countdownTimer,
+          state = self.state,
+          speedKmh = car.speedKmh,
+          posX = car.position.x,
+          posY = car.position.y,
+          posZ = car.position.z,
+          velX = car.velocity.x,
+          velY = car.velocity.y,
+          velZ = car.velocity.z,
+          gear = car.gear,
+          rpm = car.rpm
+        })
+        if io and io.save and JSON and JSON.stringify then
+          local dump = {
+            test_id = self.testConfig.test_id,
+            start_mode = self.testConfig.start_mode,
+            initial_speed_kmh = (self.testConfig.spawn and self.testConfig.spawn.initial_speed_kmh) or 0,
+            samples = self.telemetrySamples
+          }
+          local scriptFolder = ac and ac.getFolder and ac.getFolder(ac.FolderID.ExtScript)
+          if scriptFolder then
+            io.save(scriptFolder .. "/data/telemetry_eval.json", JSON.stringify(dump))
+          end
+        end
+      end
     end
 
   elseif self.state == GTLicenseEngine.STATE.RUNNING then

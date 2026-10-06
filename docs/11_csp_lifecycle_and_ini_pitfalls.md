@@ -185,6 +185,9 @@ When a test is launched through Content Manager (career mode or custom race), Co
 | `Can’t launch the race: invalid race configuration (require_track Line: 141)` | `race.ini` has lowercase `track=` or whitespace `TRACK = ` | Ensure `optionxform=str` and `space_around_delimiters=False` in INI generator. |
 | `Extension 'New Modes' disabled: not selected` | `race.ini` missing `__CM_CUSTOM_MODE=gt-license` in `[RACE]` | Add `__CM_CUSTOM_MODE=gt-license` to `event.ini` and `race.ini`. |
 | Car stationary at finish line or pit box | Engine initialized in non-existent `script.init()` or test config failed to load | Instantiate `activeEngine` at top level; check test ID regex in `loadTestConfig`. |
+| Car rolling start launches in reverse (tail-first) | `physics.setCarPosition` orientation direction convention is inverted relative to `car.look` | Pass `-fwd` (`vec3(-fwd.x, -fwd.y, -fwd.z)`) to `physics.setCarPosition` so headlights face $+fwd$. |
+| Car remains in pit box on live simulation start | `setupSpawn` only called during script load before `ac.getCar(0)` is live | Re-assert `setupSpawn` on the first live frame of `script.update(dt)`. |
+| Rolling start car has no drive / engine at idle (850 RPM) | Gearbox remains in neutral (`gear=0`) during countdown | Call `physics.engageGear(0, gear)` and `physics.setEngineRPM(0, 3500)` during `maintainRollingVelocity`. |
 | `KEY_NOT_FOUND: [CAR_0] BALLAST` / `RESTRICTOR` | Missing ballast/restrictor entries in `[CAR_0]` | Add `BALLAST=0` and `RESTRICTOR=0` to `[CAR_0]`. |
 | Car flips or sinks into road mesh on spawn | Spawn coordinates flush with road collision surface | Ensure `verticalOffset` (+0.05m to +0.10m) is applied during `teleportCar`. |
 | Rolling start car decelerates during countdown | AC native physics clear linear velocity before lights out | Call `maintainRollingVelocity` on every frame while in `COUNTDOWN` state. |

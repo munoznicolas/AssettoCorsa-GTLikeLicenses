@@ -1,0 +1,294 @@
+{
+  "test_id": "B-3",
+  "title": "Out-In-Out Hairpin Trajectory",
+  "curriculum_start_mode": "ROLLING",
+  "curriculum_target_speed_kmh": 70.0,
+  "curriculum_spawn_pos": [
+    113.989,
+    190.67,
+    86.987
+  ],
+  "curriculum_forward_vec": [
+    0.9984,
+    0.0032,
+    -0.0564
+  ],
+  "career_event_name": "License Test",
+  "career_track": "ks_vallelunga",
+  "career_car": "ks_mazda_miata",
+  "telemetry_samples_count": 57,
+  "telemetry_samples_preview": [
+    {
+      "packet_id": 1394,
+      "speed_kmh": 52.74,
+      "velocity": [
+        14.64,
+        0.34,
+        -0.32
+      ],
+      "gear": 0,
+      "rpms": 850,
+      "gas": 0.0,
+      "brake": 0.0,
+      "steer": 0.0,
+      "heading": 99.0,
+      "status": 0,
+      "pos": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "timestamp_rel": 0.0
+    },
+    {
+      "packet_id": 1394,
+      "speed_kmh": 52.74,
+      "velocity": [
+        14.64,
+        0.34,
+        -0.32
+      ],
+      "gear": 0,
+      "rpms": 850,
+      "gas": 0.0,
+      "brake": 0.0,
+      "steer": 0.0,
+      "heading": 99.0,
+      "status": 0,
+      "pos": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "timestamp_rel": 0.15
+    },
+    {
+      "packet_id": 1394,
+      "speed_kmh": 52.74,
+      "velocity": [
+        14.64,
+        0.34,
+        -0.32
+      ],
+      "gear": 0,
+      "rpms": 850,
+      "gas": 0.0,
+      "brake": 0.0,
+      "steer": 0.0,
+      "heading": 99.0,
+      "status": 0,
+      "pos": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "timestamp_rel": 0.3
+    },
+    {
+      "packet_id": 1394,
+      "speed_kmh": 52.74,
+      "velocity": [
+        14.64,
+        0.34,
+        -0.32
+      ],
+      "gear": 0,
+      "rpms": 850,
+      "gas": 0.0,
+      "brake": 0.0,
+      "steer": 0.0,
+      "heading": 99.0,
+      "status": 0,
+      "pos": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "timestamp_rel": 0.45
+    },
+    {
+      "packet_id": 1394,
+      "speed_kmh": 52.74,
+      "velocity": [
+        14.64,
+        0.34,
+        -0.32
+      ],
+      "gear": 0,
+      "rpms": 850,
+      "gas": 0.0,
+      "brake": 0.0,
+      "steer": 0.0,
+      "heading": 99.0,
+      "status": 0,
+      "pos": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "timestamp_rel": 0.61
+    },
+    {
+      "packet_id": 1394,
+      "speed_kmh": 52.74,
+      "velocity": [
+        14.64,
+        0.34,
+        -0.32
+      ],
+      "gear": 0,
+      "rpms": 850,
+      "gas": 0.0,
+      "brake": 0.0,
+      "steer": 0.0,
+      "heading": 99.0,
+      "status": 0,
+      "pos": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "timestamp_rel": 0.76
+    },
+    {
+      "packet_id": 1394,
+      "speed_kmh": 52.74,
+      "velocity": [
+        14.64,
+        0.34,
+        -0.32
+      ],
+      "gear": 0,
+      "rpms": 850,
+      "gas": 0.0,
+      "brake": 0.0,
+      "steer": 0.0,
+      "heading": 99.0,
+      "status": 0,
+      "pos": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "timestamp_rel": 0.91
+    },
+    {
+      "packet_id": 1394,
+      "speed_kmh": 52.74,
+      "velocity": [
+        14.64,
+        0.34,
+        -0.32
+      ],
+      "gear": 0,
+      "rpms": 850,
+      "gas": 0.0,
+      "brake": 0.0,
+      "steer": 0.0,
+      "heading": 99.0,
+      "status": 0,
+      "pos": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "timestamp_rel": 1.06
+    },
+    {
+      "packet_id": 1394,
+      "speed_kmh": 52.74,
+      "velocity": [
+        14.64,
+        0.34,
+        -0.32
+      ],
+      "gear": 0,
+      "rpms": 850,
+      "gas": 0.0,
+      "brake": 0.0,
+      "steer": 0.0,
+      "heading": 99.0,
+      "status": 0,
+      "pos": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "timestamp_rel": 1.21
+    },
+    {
+      "packet_id": 1394,
+      "speed_kmh": 52.74,
+      "velocity": [
+        14.64,
+        0.34,
+        -0.32
+      ],
+      "gear": 0,
+      "rpms": 850,
+      "gas": 0.0,
+      "brake": 0.0,
+      "steer": 0.0,
+      "heading": 99.0,
+      "status": 0,
+      "pos": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "timestamp_rel": 1.36
+    }
+  ],
+  "telemetry_latest_sample": {
+    "packet_id": 1362,
+    "speed_kmh": 52.96,
+    "velocity": [
+      14.71,
+      0.14,
+      -0.37
+    ],
+    "gear": 2,
+    "rpms": 3776,
+    "gas": 0.0,
+    "brake": 0.0,
+    "steer": 0.0,
+    "heading": 99.0,
+    "status": 0,
+    "pos": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "timestamp_rel": 8.48
+  },
+  "csp_log_entries": [
+    "ec7     M \u2705 [Lua: new_modes] [GTPhysicsHooks] Teleport AFTER: pos=(322.42, 190.81, 195.96), look=(-1.00, 0.00, 0.00), targetFwd=(1.00, 0.00, -0.06)",
+    "ec7     M \u2705 [Lua: new_modes] [GTPhysicsHooks] applyRollingVelocity car=0: targetSpeed=70.0 km/h, vel=(19.41, 0.06, -1.10), gear=2",
+    "ec7     M \u2705 [Lua: new_modes] [GTPhysicsHooks] setupSpawn car=0: start_mode=ROLLING, initial_speed=70.0 km/h, pos=(113.99, 190.67, 86.99)",
+    "ec7     M \u2705 [Lua: new_modes] [GTLicense] Countdown started | start_mode=ROLLING | isStanding=false | initial_speed=70.0 km/h",
+    "ec7     M \u2705 Lua: <New Modes> loaded and ready to run",
+    "ec7     M \ud83d\ude80 Loading Lua script [New Modes]: 68165.50 \u03bcs",
+    "11ce     M \u2705 [Lua: new_modes] [GTPhysicsHooks] Teleport BEFORE: pos=(113.92, 190.34, 86.99), look=(1.00, 0.01, -0.06)",
+    "11ce     M \u2705 [Lua: new_modes] [GTPhysicsHooks] Teleport AFTER: pos=(113.92, 190.34, 86.99), look=(1.00, 0.01, -0.06), targetFwd=(1.00, 0.00, -0.06)",
+    "11ce     M \u2705 [Lua: new_modes] [GTPhysicsHooks] applyRollingVelocity car=0: targetSpeed=70.0 km/h, vel=(19.41, 0.06, -1.10), gear=2",
+    "11ce     M \u2705 [Lua: new_modes] [GTPhysicsHooks] setupSpawn car=0: start_mode=ROLLING, initial_speed=70.0 km/h, pos=(113.99, 190.67, 86.99)",
+    "11ce     M \u2705 [Lua: new_modes] [GTLicense] First live frame spawn applied: pos=(113.92, 190.34, 86.99), look=(1.00, 0.01, -0.06), speed=0.03 km/h",
+    "11ce     M \u2705 [Lua: new_modes] [GTLicense] Countdown Tick 3 | Mode=ROLLING | Speed=0.03 km/h | Gear=0 | Look=(1.00, -0.06)",
+    "156f     M \u2705 [Lua: new_modes] [GTLicense] Countdown Tick 2 | Mode=ROLLING | Speed=70.00 km/h | Gear=2 | Look=(1.00, -0.06)",
+    "1956     M \u2705 [Lua: new_modes] [GTLicense] Countdown Tick 1 | Mode=ROLLING | Speed=69.98 km/h | Gear=2 | Look=(1.00, -0.06)",
+    "1d40     M \u2705 [Lua: new_modes] [GTLicense] Countdown GO! | Mode=ROLLING | Telemetry: Speed=69.99 km/h, Gear=2"
+  ],
+  "ac_log_milestones": [
+    "Loading lut content/cars/ks_mazda_miata/data/street_front.lut",
+    "Loading lut content/cars/ks_mazda_miata/data/street90_front.lut",
+    "Loading lut content/cars/ks_mazda_miata/data/street_front.lut",
+    "Loading lut content/cars/ks_mazda_miata/data/street90_rear.lut",
+    "Loading lut content/cars/ks_mazda_miata/data/street90_rear.lut",
+    "Loading lut content/cars/ks_mazda_miata/data/street_rear.lut",
+    "STARTING PHYSICS ENGINE",
+    "PhysicsAvatar:: SESSION INFO RECEIVED",
+    "Setup change for Car: ks_mazda_miata [0] Changing: TOE_OUT_LF from -0.000090 to -0.000100",
+    "ERROR: NO STAT FOR ks_mazda_miata"
+  ],
+  "lua_saved_telemetry_present": false
+}

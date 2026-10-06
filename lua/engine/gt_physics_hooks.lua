@@ -74,20 +74,26 @@ function GTPhysicsHooks.teleportCar(carIndex, position, forwardVector, verticalO
   local fwd = safeNormalize(GTPhysicsHooks.toVec3(forwardVector))
   local targetPos = vec3(rawPos.x, rawPos.y + verticalOffset, rawPos.z)
 
-  -- Teleport car using CSP physics APIs
-  if ac and ac.setCarPhysicPosition then
-    ac.setCarPhysicPosition(carIndex, targetPos)
-  end
-  if ac and ac.setCarPhysicHeading then
-    ac.setCarPhysicHeading(carIndex, fwd, vec3(0, 1, 0))
-  end
-  if physics and physics.setCarPosition then
-    physics.setCarPosition(carIndex, targetPos, fwd)
+  local carBefore = ac and ac.getCar and ac.getCar(carIndex)
+  if carBefore and ac and ac.log then
+    ac.log(string.format("[GTPhysicsHooks] Teleport BEFORE: pos=(%.2f, %.2f, %.2f), look=(%.2f, %.2f, %.2f)",
+      carBefore.position.x, carBefore.position.y, carBefore.position.z,
+      carBefore.look.x, carBefore.look.y, carBefore.look.z))
   end
 
-  -- Reset car physical condition (repairs damage, resets tire wear and temperatures)
-  if physics and physics.resetCarState then
-    physics.resetCarState(carIndex, 1.0)
+  -- Teleport car using CSP physics APIs
+  -- In Assetto Corsa physics, the orientation dir vector convention is inverted relative to car.look,
+  -- so passing -fwd aligns car.look directly with target forwardVector (+fwd).
+  if physics and physics.setCarPosition then
+    physics.setCarPosition(carIndex, targetPos, vec3(-fwd.x, -fwd.y, -fwd.z))
+  end
+
+  local carAfter = ac and ac.getCar and ac.getCar(carIndex)
+  if carAfter and ac and ac.log then
+    ac.log(string.format("[GTPhysicsHooks] Teleport AFTER: pos=(%.2f, %.2f, %.2f), look=(%.2f, %.2f, %.2f), targetFwd=(%.2f, %.2f, %.2f)",
+      carAfter.position.x, carAfter.position.y, carAfter.position.z,
+      carAfter.look.x, carAfter.look.y, carAfter.look.z,
+      fwd.x, fwd.y, fwd.z))
   end
 
   return true
@@ -138,6 +144,11 @@ function GTPhysicsHooks.applyRollingVelocity(carIndex, forwardVector, speedKmh)
     end
   elseif physics and physics.engageGear then
     physics.engageGear(carIndex, gear)
+  end
+
+  if ac and ac.log then
+    ac.log(string.format("[GTPhysicsHooks] applyRollingVelocity car=%d: targetSpeed=%.1f km/h, vel=(%.2f, %.2f, %.2f), gear=%d",
+      carIndex, speedKmh, vel.x, vel.y, vel.z, gear))
   end
 
   return true
@@ -210,6 +221,11 @@ function GTPhysicsHooks.setupSpawn(testConfig, carIndex)
     GTPhysicsHooks.applyRollingVelocity(carIndex, spawn.forward_vector, 0)
   end
 
+  if ac and ac.log then
+    ac.log(string.format("[GTPhysicsHooks] setupSpawn car=%d: start_mode=%s, initial_speed=%.1f km/h, pos=(%.2f, %.2f, %.2f)",
+      carIndex, tostring(testConfig.start_mode), initialSpeed, spawn.position[1], spawn.position[2], spawn.position[3]))
+  end
+
   return true
 end
 
@@ -228,10 +244,16 @@ function GTPhysicsHooks.maintainRollingVelocity(carIndex, forwardVector, speedKm
   local speedMs = speedKmh / 3.6
   local vel = vec3(fwd.x * speedMs, fwd.y * speedMs, fwd.z * speedMs)
 
-  if ac and ac.setCarPhysicLinearVelocity then
-    ac.setCarPhysicLinearVelocity(carIndex, vel)
-  elseif physics and physics.setCarVelocity then
+  if physics and physics.setCarVelocity then
     physics.setCarVelocity(carIndex, vel)
+  end
+
+  local gear = GTPhysicsHooks.estimateStartingGear(speedKmh)
+  if physics and physics.engageGear then
+    physics.engageGear(carIndex, gear)
+  end
+  if physics and physics.setEngineRPM then
+    physics.setEngineRPM(carIndex, 3500)
   end
 
   return true

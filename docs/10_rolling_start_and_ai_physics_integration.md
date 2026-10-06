@@ -160,8 +160,8 @@ end
   - Award Gold/Silver/Bronze based on precision of maintaining target gap ($\pm 3\text{m}$).
 
 ### 2. High-Speed Sector Rolling Starts (e.g. Eau Rouge / Parabolica Tests)
-- **Mechanism**: Spawn player car in motion upstream of the target sector.
-- **Velocity Enforcement**: During `COUNTDOWN` state, continuously call `ac.setCarPhysicLinearVelocity(0, forwardVec * targetSpeedMps)` while using `physics.forceUserThrottleFor` / `forceUserBrakesFor` to hold controls until `GO!`.
+- **Spawn & Orientation**: Spawn player car upstream of the target sector with `physics.setCarPosition(0, targetPos, vec3(-fwd.x, -fwd.y, -fwd.z))`. The negative forward vector is required to align Assetto Corsa's internal coordinate orientation with the forward track tangent.
+- **Velocity Enforcement**: During `COUNTDOWN` state, continuously call `physics.setCarVelocity(0, fwd * targetSpeedMps)`, `physics.engageGear(0, gear)`, and `physics.setEngineRPM(0, 3500)` while locking controls with `physics.lockUserControlsFor(3.0)` until `GO!`.
 
 ### 3. Overtaking & Traffic License Tests (IA / Super License)
 - **Mechanism**: Populate track with multiple AI cars.

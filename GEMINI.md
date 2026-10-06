@@ -43,14 +43,20 @@ The mod runs inside CSP's **New Modes** extension subsystem (`extension/lua/new-
   - `script.draw3D()`: 3D render hook (for gates, markers, trajectory ribbon).
   - `script.drawUI()`: 2D ImGui/HUD render hook.
 * **Top-Level Instantiation**: The master engine (`GTLicenseEngine.new()`) must be instantiated immediately at the top level when running under CSP (`if script ~= nil`). Never defer instantiation to a callback that CSP won't call.
-* **Dynamic Test Configuration Loading**:
+* **Dynamic Test Configuration Loading & Path Resolution**:
   - The Lua engine dynamically queries `ac.INIConfig.raceConfig()`.
-  - It extracts the active test code from `[GTLICENSE] TEST_ID` or regex parses `[EVENT] NAME` (e.g. `B-3: Out-In-Out Hairpin Trajectory` $\rightarrow$ `B-3`).
+  - It extracts the active test code from `[GTLICENSE] TEST_ID`, `[RACE] TEST_ID`, `[SESSION_0] NAME`, or `[EVENT] NAME` (e.g. `B-3: Out-In-Out Hairpin Trajectory` $\rightarrow$ `B-3`).
+  - It resolves base paths using official CSP FolderID enums: `ac.FolderID.ScriptOrigin` (1024), `ac.FolderID.Root` (4), and `ac.FolderID.ExtLua` (32). (Never use non-existent `ExtScript`, which points to `AppData/Roaming`).
   - It resolves the path `data/tests/<tier>/test_<num>.json` (e.g. `national_b/test_b03.json`).
 * **Physics & Rolling Starts**:
-  - Use official CSP APIs: `ac.setCarPhysicPosition()`, `ac.setCarPhysicHeading()`, `ac.setCarPhysicLinearVelocity()`.
-  - Use `ac.accessCarPhysics(0):setGear(gear)` and `:setEngineRPM(3500)`.
-  - During `COUNTDOWN`, continuously apply linear velocity via `maintainRollingVelocity` so the AC engine does not bleed off vehicle momentum.
+  - Use authoritative CSP physics APIs from `extension/internal/lua-sdk/ac_new_modes/lib.lua`:
+    - `physics.setCarPosition(carIndex, targetPos, vec3(-fwd.x, -fwd.y, -fwd.z))`
+      - **CRITICAL ORIENTATION INVERSION RULE**: Assetto Corsa's internal coordinate convention negates the orientation vector relative to `car.look`. To orient the car's headlights forward along $\vec{fwd}$, **pass $-\vec{fwd}$**. Passing $+\vec{fwd}$ faces the vehicle backwards, causing rolling starts to execute in reverse!
+    - `physics.setCarVelocity(carIndex, vel)`
+    - `physics.engageGear(carIndex, gear)`
+    - `physics.setEngineRPM(carIndex, 3500)`
+  - **Live Update Frame Spawn**: Because `ac.getCar(0)` is not fully initialized during initial script bytecode compilation, re-assert `setupSpawn` on the first frame of `script.update(dt)`.
+  - During `COUNTDOWN`, continuously maintain linear velocity, gear, and engine RPM via `maintainRollingVelocity` on every frame so AC does not bleed off momentum or drop into neutral/idle.
 
 ---
 
