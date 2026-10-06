@@ -147,26 +147,18 @@ end
 ---@param car table|ac.CarState
 ---@return boolean failed, string? reason
 function GTAdjudicator:checkWallCollision(car)
-  -- 1. Check physics collision array if available in CSP
-  if physics and physics.getCarCollisions then
-    local collisions = physics.getCarCollisions()
-    if collisions and #collisions > 0 then
-      for i = 1, #collisions do
-        local col = collisions[i]
-        local impactForce = col.force or col.impact or 0
-        if impactForce > self.wallCollisionThresholdN then
-          return true, string.format("Barrier Contact (Impact: %.0f N)", impactForce)
-        end
-      end
-    end
+  if not car then return false end
+
+  -- Evaluate collision depth and collision impact telemetry
+  local depth = car.collisionDepth or 0
+  local impact = car.lastCollisionImpact or 0
+
+  if depth > 0.05 then
+    return true, "Barrier Contact (Penetration Impact)"
   end
 
-  -- 2. Fallback check: car.collisionDepth and car.collidedWith
-  if car then
-    local depth = car.collisionDepth or 0
-    if depth > 0.08 then
-      return true, "Barrier Contact (Severe Impact)"
-    end
+  if impact > self.wallCollisionThresholdN then
+    return true, string.format("Barrier Contact (Impact: %.0f N)", impact)
   end
 
   return false

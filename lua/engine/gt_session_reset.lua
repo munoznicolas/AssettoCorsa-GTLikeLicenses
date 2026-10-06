@@ -71,13 +71,7 @@ function GTSessionReset:executeReset(reason)
     end
   end
 
-  -- 2. Execute CSP in-memory restart if available
-  if physics and physics.restart then
-    physics.restart()
-    return true
-  end
-
-  -- 3. Fallback to CSP session restart API
+  -- 2. Execute CSP session restart API if available
   if ac and ac.tryToRestartSession then
     local restarted = ac.tryToRestartSession()
     if restarted then
