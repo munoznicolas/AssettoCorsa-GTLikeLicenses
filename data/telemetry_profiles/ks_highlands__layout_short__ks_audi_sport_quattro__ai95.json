@@ -1,0 +1,8812 @@
+{
+  "track_id": "ks_highlands",
+  "track_layout": "layout_short",
+  "car_id": "ks_audi_sport_quattro",
+  "ai_level": 95,
+  "source": "spline_calibrated_ai95",
+  "total_track_length_m": 1707.44,
+  "lap_time_s": 55.22,
+  "sample_count": 1100,
+  "samples": [
+    {
+      "progress": 0.0,
+      "distance_m": 0.0,
+      "speed_kmh": 155.8,
+      "gear": 4,
+      "rpm": 6443,
+      "steer_norm": -0.01
+    },
+    {
+      "progress": 0.0009,
+      "distance_m": 1.58,
+      "speed_kmh": 156.4,
+      "gear": 4,
+      "rpm": 6478,
+      "steer_norm": -0.009
+    },
+    {
+      "progress": 0.0018,
+      "distance_m": 3.15,
+      "speed_kmh": 157.0,
+      "gear": 4,
+      "rpm": 6512,
+      "steer_norm": -0.009
+    },
+    {
+      "progress": 0.0028,
+      "distance_m": 4.7,
+      "speed_kmh": 157.7,
+      "gear": 4,
+      "rpm": 6546,
+      "steer_norm": -0.009
+    },
+    {
+      "progress": 0.0036,
+      "distance_m": 6.22,
+      "speed_kmh": 158.3,
+      "gear": 4,
+      "rpm": 6581,
+      "steer_norm": -0.01
+    },
+    {
+      "progress": 0.0045,
+      "distance_m": 7.72,
+      "speed_kmh": 158.9,
+      "gear": 4,
+      "rpm": 6615,
+      "steer_norm": -0.01
+    },
+    {
+      "progress": 0.0054,
+      "distance_m": 9.2,
+      "speed_kmh": 159.5,
+      "gear": 4,
+      "rpm": 6650,
+      "steer_norm": -0.01
+    },
+    {
+      "progress": 0.0063,
+      "distance_m": 10.68,
+      "speed_kmh": 160.2,
+      "gear": 5,
+      "rpm": 4807,
+      "steer_norm": -0.01
+    },
+    {
+      "progress": 0.0071,
+      "distance_m": 12.15,
+      "speed_kmh": 160.8,
+      "gear": 5,
+      "rpm": 4835,
+      "steer_norm": -0.011
+    },
+    {
+      "progress": 0.008,
+      "distance_m": 13.63,
+      "speed_kmh": 161.4,
+      "gear": 5,
+      "rpm": 4864,
+      "steer_norm": -0.011
+    },
+    {
+      "progress": 0.0088,
+      "distance_m": 15.11,
+      "speed_kmh": 162.0,
+      "gear": 5,
+      "rpm": 4892,
+      "steer_norm": -0.011
+    },
+    {
+      "progress": 0.0097,
+      "distance_m": 16.6,
+      "speed_kmh": 162.7,
+      "gear": 5,
+      "rpm": 4921,
+      "steer_norm": -0.011
+    },
+    {
+      "progress": 0.0106,
+      "distance_m": 18.09,
+      "speed_kmh": 163.1,
+      "gear": 5,
+      "rpm": 4940,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.0115,
+      "distance_m": 19.59,
+      "speed_kmh": 163.6,
+      "gear": 5,
+      "rpm": 4962,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.0124,
+      "distance_m": 21.1,
+      "speed_kmh": 164.2,
+      "gear": 5,
+      "rpm": 4989,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.0132,
+      "distance_m": 22.62,
+      "speed_kmh": 164.5,
+      "gear": 5,
+      "rpm": 5001,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.0141,
+      "distance_m": 24.13,
+      "speed_kmh": 165.1,
+      "gear": 5,
+      "rpm": 5028,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.015,
+      "distance_m": 25.66,
+      "speed_kmh": 165.5,
+      "gear": 5,
+      "rpm": 5048,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.0159,
+      "distance_m": 27.18,
+      "speed_kmh": 166.0,
+      "gear": 5,
+      "rpm": 5070,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.0168,
+      "distance_m": 28.72,
+      "speed_kmh": 166.6,
+      "gear": 5,
+      "rpm": 5097,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.0177,
+      "distance_m": 30.25,
+      "speed_kmh": 167.1,
+      "gear": 5,
+      "rpm": 5118,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.0186,
+      "distance_m": 31.79,
+      "speed_kmh": 167.8,
+      "gear": 5,
+      "rpm": 5151,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.0195,
+      "distance_m": 33.34,
+      "speed_kmh": 168.2,
+      "gear": 5,
+      "rpm": 5167,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.0204,
+      "distance_m": 34.89,
+      "speed_kmh": 168.6,
+      "gear": 5,
+      "rpm": 5188,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.0213,
+      "distance_m": 36.44,
+      "speed_kmh": 169.2,
+      "gear": 5,
+      "rpm": 5215,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.0241,
+      "distance_m": 41.23,
+      "speed_kmh": 169.4,
+      "gear": 5,
+      "rpm": 5224,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.0251,
+      "distance_m": 42.86,
+      "speed_kmh": 168.7,
+      "gear": 5,
+      "rpm": 5191,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0261,
+      "distance_m": 44.49,
+      "speed_kmh": 167.9,
+      "gear": 5,
+      "rpm": 5155,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.027,
+      "distance_m": 46.1,
+      "speed_kmh": 166.3,
+      "gear": 5,
+      "rpm": 5085,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0279,
+      "distance_m": 47.7,
+      "speed_kmh": 165.3,
+      "gear": 5,
+      "rpm": 5036,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0289,
+      "distance_m": 49.28,
+      "speed_kmh": 163.5,
+      "gear": 5,
+      "rpm": 4958,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0298,
+      "distance_m": 50.85,
+      "speed_kmh": 162.3,
+      "gear": 5,
+      "rpm": 4901,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0307,
+      "distance_m": 52.41,
+      "speed_kmh": 160.8,
+      "gear": 5,
+      "rpm": 4835,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0316,
+      "distance_m": 53.95,
+      "speed_kmh": 159.1,
+      "gear": 4,
+      "rpm": 6628,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0325,
+      "distance_m": 55.48,
+      "speed_kmh": 157.9,
+      "gear": 4,
+      "rpm": 6559,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0334,
+      "distance_m": 56.99,
+      "speed_kmh": 155.6,
+      "gear": 4,
+      "rpm": 6434,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0343,
+      "distance_m": 58.62,
+      "speed_kmh": 153.8,
+      "gear": 4,
+      "rpm": 6333,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0353,
+      "distance_m": 60.23,
+      "speed_kmh": 152.1,
+      "gear": 4,
+      "rpm": 6239,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0362,
+      "distance_m": 61.82,
+      "speed_kmh": 150.0,
+      "gear": 4,
+      "rpm": 6125,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0371,
+      "distance_m": 63.39,
+      "speed_kmh": 148.7,
+      "gear": 4,
+      "rpm": 6054,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.038,
+      "distance_m": 64.94,
+      "speed_kmh": 146.5,
+      "gear": 4,
+      "rpm": 5931,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0389,
+      "distance_m": 66.47,
+      "speed_kmh": 145.1,
+      "gear": 4,
+      "rpm": 5854,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0398,
+      "distance_m": 67.99,
+      "speed_kmh": 143.0,
+      "gear": 4,
+      "rpm": 5738,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0408,
+      "distance_m": 69.61,
+      "speed_kmh": 141.2,
+      "gear": 4,
+      "rpm": 5643,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0417,
+      "distance_m": 71.2,
+      "speed_kmh": 139.1,
+      "gear": 4,
+      "rpm": 5524,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0426,
+      "distance_m": 72.78,
+      "speed_kmh": 137.4,
+      "gear": 4,
+      "rpm": 5432,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0435,
+      "distance_m": 74.33,
+      "speed_kmh": 135.9,
+      "gear": 4,
+      "rpm": 5350,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0444,
+      "distance_m": 75.88,
+      "speed_kmh": 134.6,
+      "gear": 4,
+      "rpm": 5277,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0453,
+      "distance_m": 77.4,
+      "speed_kmh": 133.5,
+      "gear": 4,
+      "rpm": 5214,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0462,
+      "distance_m": 78.92,
+      "speed_kmh": 132.2,
+      "gear": 4,
+      "rpm": 5146,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0472,
+      "distance_m": 80.53,
+      "speed_kmh": 130.5,
+      "gear": 4,
+      "rpm": 5053,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0481,
+      "distance_m": 82.12,
+      "speed_kmh": 128.8,
+      "gear": 4,
+      "rpm": 4960,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.049,
+      "distance_m": 83.69,
+      "speed_kmh": 127.1,
+      "gear": 4,
+      "rpm": 4862,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0499,
+      "distance_m": 85.24,
+      "speed_kmh": 125.3,
+      "gear": 4,
+      "rpm": 4768,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0508,
+      "distance_m": 86.77,
+      "speed_kmh": 123.9,
+      "gear": 4,
+      "rpm": 4687,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0517,
+      "distance_m": 88.28,
+      "speed_kmh": 122.0,
+      "gear": 4,
+      "rpm": 4584,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0526,
+      "distance_m": 89.87,
+      "speed_kmh": 120.1,
+      "gear": 4,
+      "rpm": 4479,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0535,
+      "distance_m": 91.43,
+      "speed_kmh": 118.0,
+      "gear": 4,
+      "rpm": 4366,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0545,
+      "distance_m": 92.97,
+      "speed_kmh": 116.3,
+      "gear": 4,
+      "rpm": 4269,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0553,
+      "distance_m": 94.49,
+      "speed_kmh": 114.5,
+      "gear": 3,
+      "rpm": 6066,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0563,
+      "distance_m": 96.08,
+      "speed_kmh": 112.7,
+      "gear": 3,
+      "rpm": 5948,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0572,
+      "distance_m": 97.65,
+      "speed_kmh": 111.0,
+      "gear": 3,
+      "rpm": 5840,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.0581,
+      "distance_m": 99.2,
+      "speed_kmh": 109.7,
+      "gear": 3,
+      "rpm": 5752,
+      "steer_norm": -0.014
+    },
+    {
+      "progress": 0.059,
+      "distance_m": 100.73,
+      "speed_kmh": 108.3,
+      "gear": 3,
+      "rpm": 5664,
+      "steer_norm": -0.014
+    },
+    {
+      "progress": 0.0599,
+      "distance_m": 102.24,
+      "speed_kmh": 106.9,
+      "gear": 3,
+      "rpm": 5575,
+      "steer_norm": -0.014
+    },
+    {
+      "progress": 0.0608,
+      "distance_m": 103.82,
+      "speed_kmh": 105.5,
+      "gear": 3,
+      "rpm": 5481,
+      "steer_norm": -0.014
+    },
+    {
+      "progress": 0.0617,
+      "distance_m": 105.38,
+      "speed_kmh": 103.4,
+      "gear": 3,
+      "rpm": 5343,
+      "steer_norm": -0.014
+    },
+    {
+      "progress": 0.0626,
+      "distance_m": 106.9,
+      "speed_kmh": 101.5,
+      "gear": 3,
+      "rpm": 5223,
+      "steer_norm": -0.014
+    },
+    {
+      "progress": 0.0635,
+      "distance_m": 108.49,
+      "speed_kmh": 99.9,
+      "gear": 3,
+      "rpm": 5115,
+      "steer_norm": -0.014
+    },
+    {
+      "progress": 0.0645,
+      "distance_m": 110.05,
+      "speed_kmh": 98.0,
+      "gear": 3,
+      "rpm": 4997,
+      "steer_norm": -0.014
+    },
+    {
+      "progress": 0.0654,
+      "distance_m": 111.58,
+      "speed_kmh": 96.5,
+      "gear": 3,
+      "rpm": 4899,
+      "steer_norm": -0.014
+    },
+    {
+      "progress": 0.0662,
+      "distance_m": 113.1,
+      "speed_kmh": 95.3,
+      "gear": 3,
+      "rpm": 4820,
+      "steer_norm": -0.014
+    },
+    {
+      "progress": 0.0672,
+      "distance_m": 114.68,
+      "speed_kmh": 94.1,
+      "gear": 3,
+      "rpm": 4743,
+      "steer_norm": -0.015
+    },
+    {
+      "progress": 0.0681,
+      "distance_m": 116.23,
+      "speed_kmh": 93.0,
+      "gear": 3,
+      "rpm": 4669,
+      "steer_norm": -0.015
+    },
+    {
+      "progress": 0.069,
+      "distance_m": 117.78,
+      "speed_kmh": 92.1,
+      "gear": 3,
+      "rpm": 4611,
+      "steer_norm": -0.015
+    },
+    {
+      "progress": 0.0699,
+      "distance_m": 119.3,
+      "speed_kmh": 91.3,
+      "gear": 3,
+      "rpm": 4559,
+      "steer_norm": -0.015
+    },
+    {
+      "progress": 0.0708,
+      "distance_m": 120.82,
+      "speed_kmh": 90.5,
+      "gear": 3,
+      "rpm": 4508,
+      "steer_norm": -0.016
+    },
+    {
+      "progress": 0.0716,
+      "distance_m": 122.32,
+      "speed_kmh": 90.0,
+      "gear": 3,
+      "rpm": 4471,
+      "steer_norm": -0.016
+    },
+    {
+      "progress": 0.0726,
+      "distance_m": 123.9,
+      "speed_kmh": 89.4,
+      "gear": 3,
+      "rpm": 4433,
+      "steer_norm": -0.017
+    },
+    {
+      "progress": 0.0735,
+      "distance_m": 125.46,
+      "speed_kmh": 88.7,
+      "gear": 3,
+      "rpm": 4392,
+      "steer_norm": -0.017
+    },
+    {
+      "progress": 0.0744,
+      "distance_m": 127.01,
+      "speed_kmh": 88.2,
+      "gear": 3,
+      "rpm": 4355,
+      "steer_norm": -0.018
+    },
+    {
+      "progress": 0.0753,
+      "distance_m": 128.55,
+      "speed_kmh": 87.8,
+      "gear": 3,
+      "rpm": 4329,
+      "steer_norm": -0.019
+    },
+    {
+      "progress": 0.0762,
+      "distance_m": 130.09,
+      "speed_kmh": 87.4,
+      "gear": 3,
+      "rpm": 4305,
+      "steer_norm": -0.02
+    },
+    {
+      "progress": 0.0771,
+      "distance_m": 131.62,
+      "speed_kmh": 86.9,
+      "gear": 3,
+      "rpm": 4275,
+      "steer_norm": -0.021
+    },
+    {
+      "progress": 0.078,
+      "distance_m": 133.14,
+      "speed_kmh": 86.5,
+      "gear": 3,
+      "rpm": 4246,
+      "steer_norm": -0.022
+    },
+    {
+      "progress": 0.0789,
+      "distance_m": 134.65,
+      "speed_kmh": 86.1,
+      "gear": 3,
+      "rpm": 4218,
+      "steer_norm": -0.023
+    },
+    {
+      "progress": 0.0797,
+      "distance_m": 136.16,
+      "speed_kmh": 85.7,
+      "gear": 3,
+      "rpm": 4192,
+      "steer_norm": -0.024
+    },
+    {
+      "progress": 0.0807,
+      "distance_m": 137.73,
+      "speed_kmh": 85.2,
+      "gear": 3,
+      "rpm": 4164,
+      "steer_norm": -0.026
+    },
+    {
+      "progress": 0.0816,
+      "distance_m": 139.3,
+      "speed_kmh": 84.8,
+      "gear": 3,
+      "rpm": 4135,
+      "steer_norm": -0.027
+    },
+    {
+      "progress": 0.0825,
+      "distance_m": 140.86,
+      "speed_kmh": 84.3,
+      "gear": 3,
+      "rpm": 4106,
+      "steer_norm": -0.028
+    },
+    {
+      "progress": 0.0834,
+      "distance_m": 142.41,
+      "speed_kmh": 83.9,
+      "gear": 3,
+      "rpm": 4076,
+      "steer_norm": -0.029
+    },
+    {
+      "progress": 0.0843,
+      "distance_m": 143.95,
+      "speed_kmh": 83.5,
+      "gear": 3,
+      "rpm": 4049,
+      "steer_norm": -0.03
+    },
+    {
+      "progress": 0.0852,
+      "distance_m": 145.48,
+      "speed_kmh": 83.1,
+      "gear": 3,
+      "rpm": 4024,
+      "steer_norm": -0.031
+    },
+    {
+      "progress": 0.0861,
+      "distance_m": 147.01,
+      "speed_kmh": 82.7,
+      "gear": 3,
+      "rpm": 3999,
+      "steer_norm": -0.032
+    },
+    {
+      "progress": 0.087,
+      "distance_m": 148.53,
+      "speed_kmh": 82.3,
+      "gear": 3,
+      "rpm": 3972,
+      "steer_norm": -0.033
+    },
+    {
+      "progress": 0.0879,
+      "distance_m": 150.04,
+      "speed_kmh": 81.9,
+      "gear": 3,
+      "rpm": 3949,
+      "steer_norm": -0.034
+    },
+    {
+      "progress": 0.0888,
+      "distance_m": 151.55,
+      "speed_kmh": 81.5,
+      "gear": 3,
+      "rpm": 3923,
+      "steer_norm": -0.035
+    },
+    {
+      "progress": 0.0897,
+      "distance_m": 153.12,
+      "speed_kmh": 81.2,
+      "gear": 3,
+      "rpm": 3903,
+      "steer_norm": -0.036
+    },
+    {
+      "progress": 0.0906,
+      "distance_m": 154.68,
+      "speed_kmh": 80.8,
+      "gear": 3,
+      "rpm": 3877,
+      "steer_norm": -0.036
+    },
+    {
+      "progress": 0.0915,
+      "distance_m": 156.24,
+      "speed_kmh": 80.5,
+      "gear": 3,
+      "rpm": 3855,
+      "steer_norm": -0.037
+    },
+    {
+      "progress": 0.0924,
+      "distance_m": 157.78,
+      "speed_kmh": 80.1,
+      "gear": 3,
+      "rpm": 3829,
+      "steer_norm": -0.038
+    },
+    {
+      "progress": 0.0933,
+      "distance_m": 159.33,
+      "speed_kmh": 79.7,
+      "gear": 3,
+      "rpm": 3805,
+      "steer_norm": -0.039
+    },
+    {
+      "progress": 0.0942,
+      "distance_m": 160.86,
+      "speed_kmh": 79.3,
+      "gear": 3,
+      "rpm": 3780,
+      "steer_norm": -0.04
+    },
+    {
+      "progress": 0.0951,
+      "distance_m": 162.39,
+      "speed_kmh": 78.9,
+      "gear": 3,
+      "rpm": 3756,
+      "steer_norm": -0.04
+    },
+    {
+      "progress": 0.096,
+      "distance_m": 163.91,
+      "speed_kmh": 78.6,
+      "gear": 3,
+      "rpm": 3731,
+      "steer_norm": -0.041
+    },
+    {
+      "progress": 0.0969,
+      "distance_m": 165.42,
+      "speed_kmh": 78.2,
+      "gear": 3,
+      "rpm": 3705,
+      "steer_norm": -0.042
+    },
+    {
+      "progress": 0.0978,
+      "distance_m": 166.93,
+      "speed_kmh": 77.8,
+      "gear": 3,
+      "rpm": 3679,
+      "steer_norm": -0.043
+    },
+    {
+      "progress": 0.0987,
+      "distance_m": 168.49,
+      "speed_kmh": 77.4,
+      "gear": 3,
+      "rpm": 3654,
+      "steer_norm": -0.044
+    },
+    {
+      "progress": 0.0996,
+      "distance_m": 170.05,
+      "speed_kmh": 77.0,
+      "gear": 3,
+      "rpm": 3632,
+      "steer_norm": -0.044
+    },
+    {
+      "progress": 0.1005,
+      "distance_m": 171.6,
+      "speed_kmh": 76.8,
+      "gear": 3,
+      "rpm": 3617,
+      "steer_norm": -0.045
+    },
+    {
+      "progress": 0.1014,
+      "distance_m": 173.15,
+      "speed_kmh": 76.7,
+      "gear": 3,
+      "rpm": 3609,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.1023,
+      "distance_m": 174.7,
+      "speed_kmh": 77.0,
+      "gear": 3,
+      "rpm": 3627,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1032,
+      "distance_m": 176.26,
+      "speed_kmh": 77.5,
+      "gear": 3,
+      "rpm": 3661,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1041,
+      "distance_m": 177.76,
+      "speed_kmh": 78.2,
+      "gear": 3,
+      "rpm": 3710,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.105,
+      "distance_m": 179.28,
+      "speed_kmh": 79.0,
+      "gear": 3,
+      "rpm": 3759,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.1059,
+      "distance_m": 180.81,
+      "speed_kmh": 79.9,
+      "gear": 3,
+      "rpm": 3817,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.1068,
+      "distance_m": 182.37,
+      "speed_kmh": 80.9,
+      "gear": 3,
+      "rpm": 3881,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.1077,
+      "distance_m": 183.87,
+      "speed_kmh": 82.0,
+      "gear": 3,
+      "rpm": 3952,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.1086,
+      "distance_m": 185.39,
+      "speed_kmh": 83.1,
+      "gear": 3,
+      "rpm": 4027,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.1095,
+      "distance_m": 186.93,
+      "speed_kmh": 84.3,
+      "gear": 3,
+      "rpm": 4103,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.1104,
+      "distance_m": 188.5,
+      "speed_kmh": 85.0,
+      "gear": 3,
+      "rpm": 4151,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.1113,
+      "distance_m": 190.0,
+      "speed_kmh": 86.1,
+      "gear": 3,
+      "rpm": 4222,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.1122,
+      "distance_m": 191.52,
+      "speed_kmh": 87.1,
+      "gear": 3,
+      "rpm": 4287,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.1131,
+      "distance_m": 193.06,
+      "speed_kmh": 88.3,
+      "gear": 3,
+      "rpm": 4362,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.114,
+      "distance_m": 194.62,
+      "speed_kmh": 89.1,
+      "gear": 3,
+      "rpm": 4414,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.1149,
+      "distance_m": 196.19,
+      "speed_kmh": 90.3,
+      "gear": 3,
+      "rpm": 4492,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.1158,
+      "distance_m": 197.71,
+      "speed_kmh": 91.3,
+      "gear": 3,
+      "rpm": 4562,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.1167,
+      "distance_m": 199.24,
+      "speed_kmh": 92.5,
+      "gear": 3,
+      "rpm": 4635,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.1176,
+      "distance_m": 200.79,
+      "speed_kmh": 93.3,
+      "gear": 3,
+      "rpm": 4692,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.1185,
+      "distance_m": 202.36,
+      "speed_kmh": 94.3,
+      "gear": 3,
+      "rpm": 4756,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.1194,
+      "distance_m": 203.94,
+      "speed_kmh": 95.6,
+      "gear": 3,
+      "rpm": 4836,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.1203,
+      "distance_m": 205.46,
+      "speed_kmh": 96.6,
+      "gear": 3,
+      "rpm": 4903,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.1212,
+      "distance_m": 206.99,
+      "speed_kmh": 97.5,
+      "gear": 3,
+      "rpm": 4960,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.1221,
+      "distance_m": 208.54,
+      "speed_kmh": 98.4,
+      "gear": 3,
+      "rpm": 5024,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.1231,
+      "distance_m": 210.11,
+      "speed_kmh": 99.5,
+      "gear": 3,
+      "rpm": 5090,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.124,
+      "distance_m": 211.69,
+      "speed_kmh": 100.7,
+      "gear": 3,
+      "rpm": 5171,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.1249,
+      "distance_m": 213.2,
+      "speed_kmh": 101.8,
+      "gear": 3,
+      "rpm": 5244,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.1258,
+      "distance_m": 214.73,
+      "speed_kmh": 102.7,
+      "gear": 3,
+      "rpm": 5303,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.1267,
+      "distance_m": 216.27,
+      "speed_kmh": 103.5,
+      "gear": 3,
+      "rpm": 5352,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.1276,
+      "distance_m": 217.82,
+      "speed_kmh": 104.4,
+      "gear": 3,
+      "rpm": 5409,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.1285,
+      "distance_m": 219.39,
+      "speed_kmh": 105.6,
+      "gear": 3,
+      "rpm": 5486,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.1294,
+      "distance_m": 220.97,
+      "speed_kmh": 106.4,
+      "gear": 3,
+      "rpm": 5543,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.1303,
+      "distance_m": 222.47,
+      "speed_kmh": 107.3,
+      "gear": 3,
+      "rpm": 5599,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.1312,
+      "distance_m": 223.99,
+      "speed_kmh": 108.1,
+      "gear": 3,
+      "rpm": 5651,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.1321,
+      "distance_m": 225.51,
+      "speed_kmh": 109.0,
+      "gear": 3,
+      "rpm": 5712,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.133,
+      "distance_m": 227.05,
+      "speed_kmh": 110.1,
+      "gear": 3,
+      "rpm": 5779,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.1339,
+      "distance_m": 228.61,
+      "speed_kmh": 111.0,
+      "gear": 3,
+      "rpm": 5837,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.1348,
+      "distance_m": 230.17,
+      "speed_kmh": 111.5,
+      "gear": 3,
+      "rpm": 5872,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.1357,
+      "distance_m": 231.75,
+      "speed_kmh": 112.6,
+      "gear": 3,
+      "rpm": 5946,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.1367,
+      "distance_m": 233.34,
+      "speed_kmh": 113.7,
+      "gear": 3,
+      "rpm": 6015,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.1375,
+      "distance_m": 234.84,
+      "speed_kmh": 114.4,
+      "gear": 3,
+      "rpm": 6060,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.1384,
+      "distance_m": 236.35,
+      "speed_kmh": 115.3,
+      "gear": 4,
+      "rpm": 4214,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.1393,
+      "distance_m": 237.88,
+      "speed_kmh": 116.2,
+      "gear": 4,
+      "rpm": 4265,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.1402,
+      "distance_m": 239.42,
+      "speed_kmh": 117.3,
+      "gear": 4,
+      "rpm": 4325,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.1411,
+      "distance_m": 240.97,
+      "speed_kmh": 118.0,
+      "gear": 4,
+      "rpm": 4364,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.142,
+      "distance_m": 242.53,
+      "speed_kmh": 119.0,
+      "gear": 4,
+      "rpm": 4422,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.143,
+      "distance_m": 244.1,
+      "speed_kmh": 119.7,
+      "gear": 4,
+      "rpm": 4460,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.1439,
+      "distance_m": 245.68,
+      "speed_kmh": 120.3,
+      "gear": 4,
+      "rpm": 4490,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.1448,
+      "distance_m": 247.27,
+      "speed_kmh": 121.2,
+      "gear": 4,
+      "rpm": 4542,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.1458,
+      "distance_m": 248.88,
+      "speed_kmh": 122.2,
+      "gear": 4,
+      "rpm": 4593,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.1466,
+      "distance_m": 250.38,
+      "speed_kmh": 122.9,
+      "gear": 4,
+      "rpm": 4633,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.1475,
+      "distance_m": 251.9,
+      "speed_kmh": 123.9,
+      "gear": 4,
+      "rpm": 4687,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.1484,
+      "distance_m": 253.43,
+      "speed_kmh": 124.7,
+      "gear": 4,
+      "rpm": 4732,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.1493,
+      "distance_m": 254.96,
+      "speed_kmh": 125.5,
+      "gear": 4,
+      "rpm": 4776,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.1502,
+      "distance_m": 256.51,
+      "speed_kmh": 126.1,
+      "gear": 4,
+      "rpm": 4810,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.1511,
+      "distance_m": 258.07,
+      "speed_kmh": 126.8,
+      "gear": 4,
+      "rpm": 4847,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1521,
+      "distance_m": 259.63,
+      "speed_kmh": 127.7,
+      "gear": 4,
+      "rpm": 4896,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.153,
+      "distance_m": 261.21,
+      "speed_kmh": 128.6,
+      "gear": 4,
+      "rpm": 4945,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1539,
+      "distance_m": 262.79,
+      "speed_kmh": 129.5,
+      "gear": 4,
+      "rpm": 4998,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1548,
+      "distance_m": 264.39,
+      "speed_kmh": 130.1,
+      "gear": 4,
+      "rpm": 5027,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1558,
+      "distance_m": 265.99,
+      "speed_kmh": 130.8,
+      "gear": 4,
+      "rpm": 5067,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1567,
+      "distance_m": 267.61,
+      "speed_kmh": 131.7,
+      "gear": 4,
+      "rpm": 5118,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1576,
+      "distance_m": 269.12,
+      "speed_kmh": 132.8,
+      "gear": 4,
+      "rpm": 5179,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1585,
+      "distance_m": 270.64,
+      "speed_kmh": 133.4,
+      "gear": 4,
+      "rpm": 5210,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1594,
+      "distance_m": 272.16,
+      "speed_kmh": 134.2,
+      "gear": 4,
+      "rpm": 5255,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1603,
+      "distance_m": 273.7,
+      "speed_kmh": 135.0,
+      "gear": 4,
+      "rpm": 5302,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1612,
+      "distance_m": 275.25,
+      "speed_kmh": 135.6,
+      "gear": 4,
+      "rpm": 5334,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1621,
+      "distance_m": 276.8,
+      "speed_kmh": 136.4,
+      "gear": 4,
+      "rpm": 5377,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.163,
+      "distance_m": 278.36,
+      "speed_kmh": 137.0,
+      "gear": 4,
+      "rpm": 5408,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1639,
+      "distance_m": 279.93,
+      "speed_kmh": 137.9,
+      "gear": 4,
+      "rpm": 5462,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1649,
+      "distance_m": 281.51,
+      "speed_kmh": 138.5,
+      "gear": 4,
+      "rpm": 5493,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1658,
+      "distance_m": 283.1,
+      "speed_kmh": 139.4,
+      "gear": 4,
+      "rpm": 5542,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1667,
+      "distance_m": 284.69,
+      "speed_kmh": 140.3,
+      "gear": 4,
+      "rpm": 5594,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1677,
+      "distance_m": 286.3,
+      "speed_kmh": 141.0,
+      "gear": 4,
+      "rpm": 5632,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1686,
+      "distance_m": 287.91,
+      "speed_kmh": 141.1,
+      "gear": 4,
+      "rpm": 5634,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1696,
+      "distance_m": 289.52,
+      "speed_kmh": 141.0,
+      "gear": 4,
+      "rpm": 5627,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1705,
+      "distance_m": 291.13,
+      "speed_kmh": 140.8,
+      "gear": 4,
+      "rpm": 5619,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1714,
+      "distance_m": 292.73,
+      "speed_kmh": 140.7,
+      "gear": 4,
+      "rpm": 5613,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1724,
+      "distance_m": 294.34,
+      "speed_kmh": 140.6,
+      "gear": 4,
+      "rpm": 5605,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1733,
+      "distance_m": 295.94,
+      "speed_kmh": 140.4,
+      "gear": 4,
+      "rpm": 5599,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1743,
+      "distance_m": 297.55,
+      "speed_kmh": 141.4,
+      "gear": 4,
+      "rpm": 5653,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1752,
+      "distance_m": 299.17,
+      "speed_kmh": 142.1,
+      "gear": 4,
+      "rpm": 5689,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1761,
+      "distance_m": 300.67,
+      "speed_kmh": 142.7,
+      "gear": 4,
+      "rpm": 5724,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.177,
+      "distance_m": 302.18,
+      "speed_kmh": 143.4,
+      "gear": 4,
+      "rpm": 5763,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1779,
+      "distance_m": 303.69,
+      "speed_kmh": 144.2,
+      "gear": 4,
+      "rpm": 5805,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1788,
+      "distance_m": 305.22,
+      "speed_kmh": 144.7,
+      "gear": 4,
+      "rpm": 5833,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1797,
+      "distance_m": 306.74,
+      "speed_kmh": 145.4,
+      "gear": 4,
+      "rpm": 5870,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1806,
+      "distance_m": 308.28,
+      "speed_kmh": 146.1,
+      "gear": 4,
+      "rpm": 5909,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1815,
+      "distance_m": 309.82,
+      "speed_kmh": 146.3,
+      "gear": 4,
+      "rpm": 5919,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1824,
+      "distance_m": 311.37,
+      "speed_kmh": 146.9,
+      "gear": 4,
+      "rpm": 5954,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1833,
+      "distance_m": 312.92,
+      "speed_kmh": 147.4,
+      "gear": 4,
+      "rpm": 5983,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1842,
+      "distance_m": 314.47,
+      "speed_kmh": 148.2,
+      "gear": 4,
+      "rpm": 6025,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1851,
+      "distance_m": 316.04,
+      "speed_kmh": 148.8,
+      "gear": 4,
+      "rpm": 6060,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.186,
+      "distance_m": 317.61,
+      "speed_kmh": 149.2,
+      "gear": 4,
+      "rpm": 6079,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1869,
+      "distance_m": 319.18,
+      "speed_kmh": 148.2,
+      "gear": 4,
+      "rpm": 6028,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1878,
+      "distance_m": 320.73,
+      "speed_kmh": 147.1,
+      "gear": 4,
+      "rpm": 5963,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1887,
+      "distance_m": 322.27,
+      "speed_kmh": 145.5,
+      "gear": 4,
+      "rpm": 5879,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1896,
+      "distance_m": 323.79,
+      "speed_kmh": 144.1,
+      "gear": 4,
+      "rpm": 5800,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1905,
+      "distance_m": 325.31,
+      "speed_kmh": 143.1,
+      "gear": 4,
+      "rpm": 5746,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1915,
+      "distance_m": 326.92,
+      "speed_kmh": 141.0,
+      "gear": 4,
+      "rpm": 5631,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1924,
+      "distance_m": 328.52,
+      "speed_kmh": 139.3,
+      "gear": 4,
+      "rpm": 5538,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1933,
+      "distance_m": 330.1,
+      "speed_kmh": 137.5,
+      "gear": 4,
+      "rpm": 5438,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1942,
+      "distance_m": 331.66,
+      "speed_kmh": 135.7,
+      "gear": 4,
+      "rpm": 5339,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1951,
+      "distance_m": 333.19,
+      "speed_kmh": 133.6,
+      "gear": 4,
+      "rpm": 5222,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.196,
+      "distance_m": 334.7,
+      "speed_kmh": 132.1,
+      "gear": 4,
+      "rpm": 5138,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.197,
+      "distance_m": 336.31,
+      "speed_kmh": 130.0,
+      "gear": 4,
+      "rpm": 5023,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1979,
+      "distance_m": 337.9,
+      "speed_kmh": 128.7,
+      "gear": 4,
+      "rpm": 4956,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1988,
+      "distance_m": 339.46,
+      "speed_kmh": 126.5,
+      "gear": 4,
+      "rpm": 4832,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.1997,
+      "distance_m": 341.01,
+      "speed_kmh": 125.0,
+      "gear": 4,
+      "rpm": 4750,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.2006,
+      "distance_m": 342.52,
+      "speed_kmh": 122.6,
+      "gear": 4,
+      "rpm": 4616,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.2015,
+      "distance_m": 344.13,
+      "speed_kmh": 121.1,
+      "gear": 4,
+      "rpm": 4533,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.2025,
+      "distance_m": 345.7,
+      "speed_kmh": 118.9,
+      "gear": 4,
+      "rpm": 4412,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.2034,
+      "distance_m": 347.26,
+      "speed_kmh": 117.5,
+      "gear": 4,
+      "rpm": 4338,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.2043,
+      "distance_m": 348.79,
+      "speed_kmh": 115.9,
+      "gear": 4,
+      "rpm": 4249,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.2052,
+      "distance_m": 350.31,
+      "speed_kmh": 114.5,
+      "gear": 3,
+      "rpm": 6065,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.2061,
+      "distance_m": 351.9,
+      "speed_kmh": 112.5,
+      "gear": 3,
+      "rpm": 5937,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.207,
+      "distance_m": 353.46,
+      "speed_kmh": 110.8,
+      "gear": 3,
+      "rpm": 5825,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.2079,
+      "distance_m": 355.0,
+      "speed_kmh": 108.6,
+      "gear": 3,
+      "rpm": 5683,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.2088,
+      "distance_m": 356.51,
+      "speed_kmh": 106.5,
+      "gear": 3,
+      "rpm": 5549,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.2097,
+      "distance_m": 358.08,
+      "speed_kmh": 104.2,
+      "gear": 3,
+      "rpm": 5398,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.2106,
+      "distance_m": 359.61,
+      "speed_kmh": 101.6,
+      "gear": 3,
+      "rpm": 5230,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.2115,
+      "distance_m": 361.19,
+      "speed_kmh": 99.1,
+      "gear": 3,
+      "rpm": 5065,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.2124,
+      "distance_m": 362.74,
+      "speed_kmh": 97.6,
+      "gear": 3,
+      "rpm": 4971,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.2133,
+      "distance_m": 364.26,
+      "speed_kmh": 95.1,
+      "gear": 3,
+      "rpm": 4804,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.2143,
+      "distance_m": 365.82,
+      "speed_kmh": 92.6,
+      "gear": 3,
+      "rpm": 4641,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.2151,
+      "distance_m": 367.34,
+      "speed_kmh": 89.4,
+      "gear": 3,
+      "rpm": 4438,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.216,
+      "distance_m": 368.88,
+      "speed_kmh": 86.6,
+      "gear": 3,
+      "rpm": 4255,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.217,
+      "distance_m": 370.45,
+      "speed_kmh": 84.4,
+      "gear": 3,
+      "rpm": 4113,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.2179,
+      "distance_m": 371.99,
+      "speed_kmh": 82.5,
+      "gear": 3,
+      "rpm": 3987,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.2187,
+      "distance_m": 373.49,
+      "speed_kmh": 81.1,
+      "gear": 3,
+      "rpm": 3894,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.2197,
+      "distance_m": 375.05,
+      "speed_kmh": 80.1,
+      "gear": 3,
+      "rpm": 3832,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.2206,
+      "distance_m": 376.59,
+      "speed_kmh": 79.4,
+      "gear": 3,
+      "rpm": 3788,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.2215,
+      "distance_m": 378.11,
+      "speed_kmh": 78.8,
+      "gear": 3,
+      "rpm": 3748,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.2223,
+      "distance_m": 379.63,
+      "speed_kmh": 78.2,
+      "gear": 3,
+      "rpm": 3706,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.2232,
+      "distance_m": 381.13,
+      "speed_kmh": 77.5,
+      "gear": 3,
+      "rpm": 3663,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.2241,
+      "distance_m": 382.69,
+      "speed_kmh": 76.8,
+      "gear": 3,
+      "rpm": 3615,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.225,
+      "distance_m": 384.23,
+      "speed_kmh": 76.1,
+      "gear": 3,
+      "rpm": 3572,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.2259,
+      "distance_m": 385.76,
+      "speed_kmh": 75.6,
+      "gear": 3,
+      "rpm": 3540,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.2268,
+      "distance_m": 387.28,
+      "speed_kmh": 75.1,
+      "gear": 3,
+      "rpm": 3508,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.2277,
+      "distance_m": 388.79,
+      "speed_kmh": 74.7,
+      "gear": 2,
+      "rpm": 5945,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.2286,
+      "distance_m": 390.36,
+      "speed_kmh": 74.0,
+      "gear": 2,
+      "rpm": 5893,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.2295,
+      "distance_m": 391.91,
+      "speed_kmh": 73.4,
+      "gear": 2,
+      "rpm": 5843,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.2304,
+      "distance_m": 393.45,
+      "speed_kmh": 72.9,
+      "gear": 2,
+      "rpm": 5797,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.2313,
+      "distance_m": 394.98,
+      "speed_kmh": 72.4,
+      "gear": 2,
+      "rpm": 5750,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.2322,
+      "distance_m": 396.5,
+      "speed_kmh": 71.8,
+      "gear": 2,
+      "rpm": 5707,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.2331,
+      "distance_m": 398.01,
+      "speed_kmh": 71.4,
+      "gear": 2,
+      "rpm": 5669,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.234,
+      "distance_m": 399.57,
+      "speed_kmh": 71.0,
+      "gear": 2,
+      "rpm": 5635,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.2349,
+      "distance_m": 401.12,
+      "speed_kmh": 70.7,
+      "gear": 2,
+      "rpm": 5609,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.2358,
+      "distance_m": 402.67,
+      "speed_kmh": 70.3,
+      "gear": 2,
+      "rpm": 5579,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.2367,
+      "distance_m": 404.21,
+      "speed_kmh": 70.0,
+      "gear": 2,
+      "rpm": 5549,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.2376,
+      "distance_m": 405.74,
+      "speed_kmh": 69.7,
+      "gear": 2,
+      "rpm": 5522,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.2385,
+      "distance_m": 407.27,
+      "speed_kmh": 69.4,
+      "gear": 2,
+      "rpm": 5498,
+      "steer_norm": -0.045
+    },
+    {
+      "progress": 0.2394,
+      "distance_m": 408.79,
+      "speed_kmh": 69.1,
+      "gear": 2,
+      "rpm": 5473,
+      "steer_norm": -0.044
+    },
+    {
+      "progress": 0.2403,
+      "distance_m": 410.3,
+      "speed_kmh": 68.8,
+      "gear": 2,
+      "rpm": 5449,
+      "steer_norm": -0.044
+    },
+    {
+      "progress": 0.2412,
+      "distance_m": 411.8,
+      "speed_kmh": 68.5,
+      "gear": 2,
+      "rpm": 5422,
+      "steer_norm": -0.043
+    },
+    {
+      "progress": 0.2421,
+      "distance_m": 413.36,
+      "speed_kmh": 68.2,
+      "gear": 2,
+      "rpm": 5397,
+      "steer_norm": -0.042
+    },
+    {
+      "progress": 0.243,
+      "distance_m": 414.92,
+      "speed_kmh": 68.0,
+      "gear": 2,
+      "rpm": 5375,
+      "steer_norm": -0.042
+    },
+    {
+      "progress": 0.2439,
+      "distance_m": 416.46,
+      "speed_kmh": 67.7,
+      "gear": 2,
+      "rpm": 5350,
+      "steer_norm": -0.041
+    },
+    {
+      "progress": 0.2448,
+      "distance_m": 418.0,
+      "speed_kmh": 67.4,
+      "gear": 2,
+      "rpm": 5326,
+      "steer_norm": -0.04
+    },
+    {
+      "progress": 0.2457,
+      "distance_m": 419.54,
+      "speed_kmh": 67.0,
+      "gear": 2,
+      "rpm": 5298,
+      "steer_norm": -0.039
+    },
+    {
+      "progress": 0.2466,
+      "distance_m": 421.06,
+      "speed_kmh": 66.7,
+      "gear": 2,
+      "rpm": 5270,
+      "steer_norm": -0.038
+    },
+    {
+      "progress": 0.2475,
+      "distance_m": 422.58,
+      "speed_kmh": 66.4,
+      "gear": 2,
+      "rpm": 5245,
+      "steer_norm": -0.037
+    },
+    {
+      "progress": 0.2484,
+      "distance_m": 424.09,
+      "speed_kmh": 66.1,
+      "gear": 2,
+      "rpm": 5217,
+      "steer_norm": -0.036
+    },
+    {
+      "progress": 0.2493,
+      "distance_m": 425.59,
+      "speed_kmh": 65.8,
+      "gear": 2,
+      "rpm": 5192,
+      "steer_norm": -0.035
+    },
+    {
+      "progress": 0.2502,
+      "distance_m": 427.15,
+      "speed_kmh": 65.5,
+      "gear": 2,
+      "rpm": 5163,
+      "steer_norm": -0.033
+    },
+    {
+      "progress": 0.2511,
+      "distance_m": 428.69,
+      "speed_kmh": 65.1,
+      "gear": 2,
+      "rpm": 5134,
+      "steer_norm": -0.032
+    },
+    {
+      "progress": 0.252,
+      "distance_m": 430.23,
+      "speed_kmh": 64.9,
+      "gear": 2,
+      "rpm": 5114,
+      "steer_norm": -0.03
+    },
+    {
+      "progress": 0.2529,
+      "distance_m": 431.78,
+      "speed_kmh": 65.6,
+      "gear": 2,
+      "rpm": 5174,
+      "steer_norm": -0.028
+    },
+    {
+      "progress": 0.2538,
+      "distance_m": 433.29,
+      "speed_kmh": 66.8,
+      "gear": 2,
+      "rpm": 5274,
+      "steer_norm": -0.027
+    },
+    {
+      "progress": 0.2547,
+      "distance_m": 434.83,
+      "speed_kmh": 68.2,
+      "gear": 2,
+      "rpm": 5395,
+      "steer_norm": -0.026
+    },
+    {
+      "progress": 0.2556,
+      "distance_m": 436.34,
+      "speed_kmh": 69.6,
+      "gear": 2,
+      "rpm": 5517,
+      "steer_norm": -0.025
+    },
+    {
+      "progress": 0.2565,
+      "distance_m": 437.89,
+      "speed_kmh": 71.1,
+      "gear": 2,
+      "rpm": 5640,
+      "steer_norm": -0.024
+    },
+    {
+      "progress": 0.2573,
+      "distance_m": 439.4,
+      "speed_kmh": 72.5,
+      "gear": 2,
+      "rpm": 5759,
+      "steer_norm": -0.023
+    },
+    {
+      "progress": 0.2582,
+      "distance_m": 440.94,
+      "speed_kmh": 73.9,
+      "gear": 2,
+      "rpm": 5884,
+      "steer_norm": -0.022
+    },
+    {
+      "progress": 0.2591,
+      "distance_m": 442.45,
+      "speed_kmh": 75.4,
+      "gear": 3,
+      "rpm": 3524,
+      "steer_norm": -0.022
+    },
+    {
+      "progress": 0.26,
+      "distance_m": 443.99,
+      "speed_kmh": 76.8,
+      "gear": 3,
+      "rpm": 3616,
+      "steer_norm": -0.021
+    },
+    {
+      "progress": 0.2609,
+      "distance_m": 445.56,
+      "speed_kmh": 78.5,
+      "gear": 3,
+      "rpm": 3724,
+      "steer_norm": -0.02
+    },
+    {
+      "progress": 0.2618,
+      "distance_m": 447.09,
+      "speed_kmh": 80.1,
+      "gear": 3,
+      "rpm": 3828,
+      "steer_norm": -0.02
+    },
+    {
+      "progress": 0.2628,
+      "distance_m": 448.65,
+      "speed_kmh": 81.4,
+      "gear": 3,
+      "rpm": 3914,
+      "steer_norm": -0.019
+    },
+    {
+      "progress": 0.2636,
+      "distance_m": 450.16,
+      "speed_kmh": 82.9,
+      "gear": 3,
+      "rpm": 4014,
+      "steer_norm": -0.019
+    },
+    {
+      "progress": 0.2646,
+      "distance_m": 451.71,
+      "speed_kmh": 84.4,
+      "gear": 3,
+      "rpm": 4114,
+      "steer_norm": -0.018
+    },
+    {
+      "progress": 0.2655,
+      "distance_m": 453.28,
+      "speed_kmh": 85.9,
+      "gear": 3,
+      "rpm": 4210,
+      "steer_norm": -0.017
+    },
+    {
+      "progress": 0.2664,
+      "distance_m": 454.8,
+      "speed_kmh": 87.3,
+      "gear": 3,
+      "rpm": 4297,
+      "steer_norm": -0.016
+    },
+    {
+      "progress": 0.2673,
+      "distance_m": 456.34,
+      "speed_kmh": 88.4,
+      "gear": 3,
+      "rpm": 4369,
+      "steer_norm": -0.015
+    },
+    {
+      "progress": 0.2682,
+      "distance_m": 457.9,
+      "speed_kmh": 89.0,
+      "gear": 3,
+      "rpm": 4409,
+      "steer_norm": -0.014
+    },
+    {
+      "progress": 0.2691,
+      "distance_m": 459.46,
+      "speed_kmh": 88.7,
+      "gear": 3,
+      "rpm": 4392,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.27,
+      "distance_m": 461.01,
+      "speed_kmh": 88.4,
+      "gear": 3,
+      "rpm": 4368,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.2709,
+      "distance_m": 462.56,
+      "speed_kmh": 88.0,
+      "gear": 3,
+      "rpm": 4342,
+      "steer_norm": -0.011
+    },
+    {
+      "progress": 0.2718,
+      "distance_m": 464.1,
+      "speed_kmh": 87.6,
+      "gear": 3,
+      "rpm": 4318,
+      "steer_norm": -0.009
+    },
+    {
+      "progress": 0.2727,
+      "distance_m": 465.63,
+      "speed_kmh": 87.2,
+      "gear": 3,
+      "rpm": 4293,
+      "steer_norm": -0.008
+    },
+    {
+      "progress": 0.2736,
+      "distance_m": 467.16,
+      "speed_kmh": 86.8,
+      "gear": 3,
+      "rpm": 4267,
+      "steer_norm": -0.007
+    },
+    {
+      "progress": 0.2745,
+      "distance_m": 468.68,
+      "speed_kmh": 86.5,
+      "gear": 3,
+      "rpm": 4245,
+      "steer_norm": -0.006
+    },
+    {
+      "progress": 0.2754,
+      "distance_m": 470.19,
+      "speed_kmh": 86.1,
+      "gear": 3,
+      "rpm": 4218,
+      "steer_norm": -0.005
+    },
+    {
+      "progress": 0.2763,
+      "distance_m": 471.7,
+      "speed_kmh": 85.6,
+      "gear": 3,
+      "rpm": 4190,
+      "steer_norm": -0.003
+    },
+    {
+      "progress": 0.2772,
+      "distance_m": 473.27,
+      "speed_kmh": 85.2,
+      "gear": 3,
+      "rpm": 4162,
+      "steer_norm": -0.002
+    },
+    {
+      "progress": 0.2781,
+      "distance_m": 474.84,
+      "speed_kmh": 84.7,
+      "gear": 3,
+      "rpm": 4133,
+      "steer_norm": -0.0
+    },
+    {
+      "progress": 0.279,
+      "distance_m": 476.39,
+      "speed_kmh": 84.3,
+      "gear": 3,
+      "rpm": 4104,
+      "steer_norm": 0.001
+    },
+    {
+      "progress": 0.2799,
+      "distance_m": 477.94,
+      "speed_kmh": 83.8,
+      "gear": 3,
+      "rpm": 4074,
+      "steer_norm": 0.003
+    },
+    {
+      "progress": 0.2808,
+      "distance_m": 479.48,
+      "speed_kmh": 83.4,
+      "gear": 3,
+      "rpm": 4045,
+      "steer_norm": 0.005
+    },
+    {
+      "progress": 0.2817,
+      "distance_m": 481.01,
+      "speed_kmh": 82.9,
+      "gear": 3,
+      "rpm": 4016,
+      "steer_norm": 0.006
+    },
+    {
+      "progress": 0.2826,
+      "distance_m": 482.54,
+      "speed_kmh": 82.5,
+      "gear": 3,
+      "rpm": 3987,
+      "steer_norm": 0.008
+    },
+    {
+      "progress": 0.2835,
+      "distance_m": 484.05,
+      "speed_kmh": 82.1,
+      "gear": 3,
+      "rpm": 3959,
+      "steer_norm": 0.009
+    },
+    {
+      "progress": 0.2844,
+      "distance_m": 485.56,
+      "speed_kmh": 81.7,
+      "gear": 3,
+      "rpm": 3932,
+      "steer_norm": 0.011
+    },
+    {
+      "progress": 0.2853,
+      "distance_m": 487.13,
+      "speed_kmh": 81.3,
+      "gear": 3,
+      "rpm": 3906,
+      "steer_norm": 0.012
+    },
+    {
+      "progress": 0.2862,
+      "distance_m": 488.7,
+      "speed_kmh": 80.9,
+      "gear": 3,
+      "rpm": 3882,
+      "steer_norm": 0.014
+    },
+    {
+      "progress": 0.2871,
+      "distance_m": 490.25,
+      "speed_kmh": 80.6,
+      "gear": 3,
+      "rpm": 3862,
+      "steer_norm": 0.015
+    },
+    {
+      "progress": 0.288,
+      "distance_m": 491.81,
+      "speed_kmh": 80.2,
+      "gear": 3,
+      "rpm": 3840,
+      "steer_norm": 0.016
+    },
+    {
+      "progress": 0.2889,
+      "distance_m": 493.35,
+      "speed_kmh": 80.0,
+      "gear": 3,
+      "rpm": 3822,
+      "steer_norm": 0.017
+    },
+    {
+      "progress": 0.2898,
+      "distance_m": 494.89,
+      "speed_kmh": 79.5,
+      "gear": 3,
+      "rpm": 3794,
+      "steer_norm": 0.018
+    },
+    {
+      "progress": 0.2907,
+      "distance_m": 496.42,
+      "speed_kmh": 79.2,
+      "gear": 3,
+      "rpm": 3774,
+      "steer_norm": 0.019
+    },
+    {
+      "progress": 0.2916,
+      "distance_m": 497.95,
+      "speed_kmh": 78.9,
+      "gear": 3,
+      "rpm": 3755,
+      "steer_norm": 0.021
+    },
+    {
+      "progress": 0.2925,
+      "distance_m": 499.47,
+      "speed_kmh": 78.6,
+      "gear": 3,
+      "rpm": 3735,
+      "steer_norm": 0.022
+    },
+    {
+      "progress": 0.2934,
+      "distance_m": 500.98,
+      "speed_kmh": 78.3,
+      "gear": 3,
+      "rpm": 3714,
+      "steer_norm": 0.023
+    },
+    {
+      "progress": 0.2943,
+      "distance_m": 502.49,
+      "speed_kmh": 78.0,
+      "gear": 3,
+      "rpm": 3692,
+      "steer_norm": 0.024
+    },
+    {
+      "progress": 0.2952,
+      "distance_m": 503.99,
+      "speed_kmh": 77.6,
+      "gear": 3,
+      "rpm": 3670,
+      "steer_norm": 0.025
+    },
+    {
+      "progress": 0.2961,
+      "distance_m": 505.56,
+      "speed_kmh": 77.3,
+      "gear": 3,
+      "rpm": 3647,
+      "steer_norm": 0.026
+    },
+    {
+      "progress": 0.297,
+      "distance_m": 507.11,
+      "speed_kmh": 76.9,
+      "gear": 3,
+      "rpm": 3625,
+      "steer_norm": 0.028
+    },
+    {
+      "progress": 0.2979,
+      "distance_m": 508.66,
+      "speed_kmh": 76.6,
+      "gear": 3,
+      "rpm": 3601,
+      "steer_norm": 0.029
+    },
+    {
+      "progress": 0.2988,
+      "distance_m": 510.2,
+      "speed_kmh": 76.2,
+      "gear": 3,
+      "rpm": 3578,
+      "steer_norm": 0.03
+    },
+    {
+      "progress": 0.2997,
+      "distance_m": 511.73,
+      "speed_kmh": 75.8,
+      "gear": 3,
+      "rpm": 3554,
+      "steer_norm": 0.031
+    },
+    {
+      "progress": 0.3006,
+      "distance_m": 513.26,
+      "speed_kmh": 75.5,
+      "gear": 3,
+      "rpm": 3531,
+      "steer_norm": 0.033
+    },
+    {
+      "progress": 0.3015,
+      "distance_m": 514.78,
+      "speed_kmh": 75.1,
+      "gear": 3,
+      "rpm": 3509,
+      "steer_norm": 0.034
+    },
+    {
+      "progress": 0.3024,
+      "distance_m": 516.3,
+      "speed_kmh": 75.1,
+      "gear": 3,
+      "rpm": 3509,
+      "steer_norm": 0.035
+    },
+    {
+      "progress": 0.3033,
+      "distance_m": 517.82,
+      "speed_kmh": 75.8,
+      "gear": 3,
+      "rpm": 3553,
+      "steer_norm": 0.036
+    },
+    {
+      "progress": 0.3042,
+      "distance_m": 519.36,
+      "speed_kmh": 77.0,
+      "gear": 3,
+      "rpm": 3631,
+      "steer_norm": 0.037
+    },
+    {
+      "progress": 0.3051,
+      "distance_m": 520.87,
+      "speed_kmh": 78.5,
+      "gear": 3,
+      "rpm": 3727,
+      "steer_norm": 0.038
+    },
+    {
+      "progress": 0.306,
+      "distance_m": 522.4,
+      "speed_kmh": 80.0,
+      "gear": 3,
+      "rpm": 3822,
+      "steer_norm": 0.038
+    },
+    {
+      "progress": 0.3069,
+      "distance_m": 523.96,
+      "speed_kmh": 81.4,
+      "gear": 3,
+      "rpm": 3917,
+      "steer_norm": 0.039
+    },
+    {
+      "progress": 0.3078,
+      "distance_m": 525.47,
+      "speed_kmh": 82.7,
+      "gear": 3,
+      "rpm": 4002,
+      "steer_norm": 0.04
+    },
+    {
+      "progress": 0.3087,
+      "distance_m": 527.01,
+      "speed_kmh": 84.0,
+      "gear": 3,
+      "rpm": 4088,
+      "steer_norm": 0.04
+    },
+    {
+      "progress": 0.3096,
+      "distance_m": 528.57,
+      "speed_kmh": 85.3,
+      "gear": 3,
+      "rpm": 4167,
+      "steer_norm": 0.041
+    },
+    {
+      "progress": 0.3105,
+      "distance_m": 530.08,
+      "speed_kmh": 86.4,
+      "gear": 3,
+      "rpm": 4240,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.3113,
+      "distance_m": 531.61,
+      "speed_kmh": 87.5,
+      "gear": 3,
+      "rpm": 4311,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.3123,
+      "distance_m": 533.15,
+      "speed_kmh": 88.6,
+      "gear": 3,
+      "rpm": 4381,
+      "steer_norm": 0.043
+    },
+    {
+      "progress": 0.3132,
+      "distance_m": 534.72,
+      "speed_kmh": 89.6,
+      "gear": 3,
+      "rpm": 4452,
+      "steer_norm": 0.043
+    },
+    {
+      "progress": 0.3141,
+      "distance_m": 536.22,
+      "speed_kmh": 90.7,
+      "gear": 3,
+      "rpm": 4520,
+      "steer_norm": 0.044
+    },
+    {
+      "progress": 0.3149,
+      "distance_m": 537.75,
+      "speed_kmh": 91.8,
+      "gear": 3,
+      "rpm": 4591,
+      "steer_norm": 0.044
+    },
+    {
+      "progress": 0.3158,
+      "distance_m": 539.29,
+      "speed_kmh": 92.9,
+      "gear": 3,
+      "rpm": 4661,
+      "steer_norm": 0.045
+    },
+    {
+      "progress": 0.3168,
+      "distance_m": 540.85,
+      "speed_kmh": 94.0,
+      "gear": 3,
+      "rpm": 4734,
+      "steer_norm": 0.045
+    },
+    {
+      "progress": 0.3177,
+      "distance_m": 542.42,
+      "speed_kmh": 95.0,
+      "gear": 3,
+      "rpm": 4802,
+      "steer_norm": 0.045
+    },
+    {
+      "progress": 0.3186,
+      "distance_m": 543.93,
+      "speed_kmh": 96.0,
+      "gear": 3,
+      "rpm": 4867,
+      "steer_norm": 0.046
+    },
+    {
+      "progress": 0.3195,
+      "distance_m": 545.46,
+      "speed_kmh": 97.0,
+      "gear": 3,
+      "rpm": 4931,
+      "steer_norm": 0.046
+    },
+    {
+      "progress": 0.3204,
+      "distance_m": 547.0,
+      "speed_kmh": 98.0,
+      "gear": 3,
+      "rpm": 4992,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.3213,
+      "distance_m": 548.56,
+      "speed_kmh": 98.9,
+      "gear": 3,
+      "rpm": 5056,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.3222,
+      "distance_m": 550.13,
+      "speed_kmh": 99.9,
+      "gear": 3,
+      "rpm": 5117,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.3231,
+      "distance_m": 551.72,
+      "speed_kmh": 100.9,
+      "gear": 3,
+      "rpm": 5182,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.324,
+      "distance_m": 553.23,
+      "speed_kmh": 101.8,
+      "gear": 3,
+      "rpm": 5244,
+      "steer_norm": 0.048
+    },
+    {
+      "progress": 0.3249,
+      "distance_m": 554.76,
+      "speed_kmh": 102.8,
+      "gear": 3,
+      "rpm": 5310,
+      "steer_norm": 0.048
+    },
+    {
+      "progress": 0.3258,
+      "distance_m": 556.3,
+      "speed_kmh": 103.9,
+      "gear": 3,
+      "rpm": 5377,
+      "steer_norm": 0.048
+    },
+    {
+      "progress": 0.3267,
+      "distance_m": 557.86,
+      "speed_kmh": 105.0,
+      "gear": 3,
+      "rpm": 5446,
+      "steer_norm": 0.048
+    },
+    {
+      "progress": 0.3276,
+      "distance_m": 559.44,
+      "speed_kmh": 106.0,
+      "gear": 3,
+      "rpm": 5517,
+      "steer_norm": 0.048
+    },
+    {
+      "progress": 0.3286,
+      "distance_m": 561.03,
+      "speed_kmh": 107.1,
+      "gear": 3,
+      "rpm": 5587,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.3295,
+      "distance_m": 562.54,
+      "speed_kmh": 108.2,
+      "gear": 3,
+      "rpm": 5656,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.3304,
+      "distance_m": 564.07,
+      "speed_kmh": 109.2,
+      "gear": 3,
+      "rpm": 5724,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.3313,
+      "distance_m": 565.61,
+      "speed_kmh": 110.3,
+      "gear": 3,
+      "rpm": 5796,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.3322,
+      "distance_m": 567.17,
+      "speed_kmh": 111.4,
+      "gear": 3,
+      "rpm": 5863,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.3331,
+      "distance_m": 568.74,
+      "speed_kmh": 112.5,
+      "gear": 3,
+      "rpm": 5934,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.334,
+      "distance_m": 570.33,
+      "speed_kmh": 113.6,
+      "gear": 3,
+      "rpm": 6008,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.3349,
+      "distance_m": 571.83,
+      "speed_kmh": 114.7,
+      "gear": 3,
+      "rpm": 6079,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.3358,
+      "distance_m": 573.35,
+      "speed_kmh": 115.8,
+      "gear": 4,
+      "rpm": 4242,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.3367,
+      "distance_m": 574.88,
+      "speed_kmh": 116.9,
+      "gear": 4,
+      "rpm": 4302,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.3376,
+      "distance_m": 576.43,
+      "speed_kmh": 117.9,
+      "gear": 4,
+      "rpm": 4362,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.3385,
+      "distance_m": 577.99,
+      "speed_kmh": 119.0,
+      "gear": 4,
+      "rpm": 4422,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.3394,
+      "distance_m": 579.56,
+      "speed_kmh": 120.1,
+      "gear": 4,
+      "rpm": 4481,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.3404,
+      "distance_m": 581.15,
+      "speed_kmh": 121.2,
+      "gear": 4,
+      "rpm": 4540,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.3413,
+      "distance_m": 582.76,
+      "speed_kmh": 122.2,
+      "gear": 4,
+      "rpm": 4598,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.3422,
+      "distance_m": 584.27,
+      "speed_kmh": 123.2,
+      "gear": 4,
+      "rpm": 4652,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.3431,
+      "distance_m": 585.79,
+      "speed_kmh": 124.2,
+      "gear": 4,
+      "rpm": 4705,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.344,
+      "distance_m": 587.32,
+      "speed_kmh": 125.2,
+      "gear": 4,
+      "rpm": 4758,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.3449,
+      "distance_m": 588.86,
+      "speed_kmh": 126.1,
+      "gear": 4,
+      "rpm": 4810,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.3458,
+      "distance_m": 590.42,
+      "speed_kmh": 127.0,
+      "gear": 4,
+      "rpm": 4861,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.3467,
+      "distance_m": 591.99,
+      "speed_kmh": 128.0,
+      "gear": 4,
+      "rpm": 4912,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.3476,
+      "distance_m": 593.57,
+      "speed_kmh": 128.8,
+      "gear": 4,
+      "rpm": 4956,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.3486,
+      "distance_m": 595.15,
+      "speed_kmh": 129.6,
+      "gear": 4,
+      "rpm": 5002,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.3495,
+      "distance_m": 596.75,
+      "speed_kmh": 130.3,
+      "gear": 4,
+      "rpm": 5044,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.3504,
+      "distance_m": 598.36,
+      "speed_kmh": 131.1,
+      "gear": 4,
+      "rpm": 5084,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.3514,
+      "distance_m": 599.97,
+      "speed_kmh": 131.8,
+      "gear": 4,
+      "rpm": 5124,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.3523,
+      "distance_m": 601.48,
+      "speed_kmh": 132.5,
+      "gear": 4,
+      "rpm": 5160,
+      "steer_norm": 0.048
+    },
+    {
+      "progress": 0.3532,
+      "distance_m": 603.0,
+      "speed_kmh": 133.0,
+      "gear": 4,
+      "rpm": 5191,
+      "steer_norm": 0.048
+    },
+    {
+      "progress": 0.354,
+      "distance_m": 604.52,
+      "speed_kmh": 133.5,
+      "gear": 4,
+      "rpm": 5214,
+      "steer_norm": 0.048
+    },
+    {
+      "progress": 0.3549,
+      "distance_m": 606.04,
+      "speed_kmh": 133.6,
+      "gear": 4,
+      "rpm": 5221,
+      "steer_norm": 0.048
+    },
+    {
+      "progress": 0.3558,
+      "distance_m": 607.56,
+      "speed_kmh": 133.3,
+      "gear": 4,
+      "rpm": 5209,
+      "steer_norm": 0.048
+    },
+    {
+      "progress": 0.3567,
+      "distance_m": 609.08,
+      "speed_kmh": 133.1,
+      "gear": 4,
+      "rpm": 5195,
+      "steer_norm": 0.048
+    },
+    {
+      "progress": 0.3576,
+      "distance_m": 610.6,
+      "speed_kmh": 132.8,
+      "gear": 4,
+      "rpm": 5181,
+      "steer_norm": 0.048
+    },
+    {
+      "progress": 0.3585,
+      "distance_m": 612.11,
+      "speed_kmh": 132.6,
+      "gear": 4,
+      "rpm": 5168,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.3594,
+      "distance_m": 613.63,
+      "speed_kmh": 132.4,
+      "gear": 4,
+      "rpm": 5155,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.3603,
+      "distance_m": 615.13,
+      "speed_kmh": 132.3,
+      "gear": 4,
+      "rpm": 5149,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.3612,
+      "distance_m": 616.64,
+      "speed_kmh": 132.2,
+      "gear": 4,
+      "rpm": 5144,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.362,
+      "distance_m": 618.15,
+      "speed_kmh": 131.9,
+      "gear": 4,
+      "rpm": 5128,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.3629,
+      "distance_m": 619.65,
+      "speed_kmh": 131.5,
+      "gear": 4,
+      "rpm": 5109,
+      "steer_norm": 0.046
+    },
+    {
+      "progress": 0.3639,
+      "distance_m": 621.26,
+      "speed_kmh": 131.2,
+      "gear": 4,
+      "rpm": 5089,
+      "steer_norm": 0.046
+    },
+    {
+      "progress": 0.3648,
+      "distance_m": 622.87,
+      "speed_kmh": 130.8,
+      "gear": 4,
+      "rpm": 5069,
+      "steer_norm": 0.046
+    },
+    {
+      "progress": 0.3657,
+      "distance_m": 624.48,
+      "speed_kmh": 130.5,
+      "gear": 4,
+      "rpm": 5049,
+      "steer_norm": 0.046
+    },
+    {
+      "progress": 0.3667,
+      "distance_m": 626.08,
+      "speed_kmh": 130.1,
+      "gear": 4,
+      "rpm": 5030,
+      "steer_norm": 0.046
+    },
+    {
+      "progress": 0.3676,
+      "distance_m": 627.67,
+      "speed_kmh": 129.7,
+      "gear": 4,
+      "rpm": 5010,
+      "steer_norm": 0.046
+    },
+    {
+      "progress": 0.3685,
+      "distance_m": 629.26,
+      "speed_kmh": 129.4,
+      "gear": 4,
+      "rpm": 4990,
+      "steer_norm": 0.045
+    },
+    {
+      "progress": 0.3695,
+      "distance_m": 630.85,
+      "speed_kmh": 129.0,
+      "gear": 4,
+      "rpm": 4969,
+      "steer_norm": 0.045
+    },
+    {
+      "progress": 0.3704,
+      "distance_m": 632.43,
+      "speed_kmh": 128.6,
+      "gear": 4,
+      "rpm": 4948,
+      "steer_norm": 0.045
+    },
+    {
+      "progress": 0.3713,
+      "distance_m": 634.01,
+      "speed_kmh": 128.2,
+      "gear": 4,
+      "rpm": 4928,
+      "steer_norm": 0.045
+    },
+    {
+      "progress": 0.3722,
+      "distance_m": 635.58,
+      "speed_kmh": 127.8,
+      "gear": 4,
+      "rpm": 4906,
+      "steer_norm": 0.044
+    },
+    {
+      "progress": 0.3732,
+      "distance_m": 637.15,
+      "speed_kmh": 127.5,
+      "gear": 4,
+      "rpm": 4884,
+      "steer_norm": 0.044
+    },
+    {
+      "progress": 0.3741,
+      "distance_m": 638.71,
+      "speed_kmh": 127.1,
+      "gear": 4,
+      "rpm": 4862,
+      "steer_norm": 0.044
+    },
+    {
+      "progress": 0.375,
+      "distance_m": 640.27,
+      "speed_kmh": 126.6,
+      "gear": 4,
+      "rpm": 4840,
+      "steer_norm": 0.043
+    },
+    {
+      "progress": 0.3759,
+      "distance_m": 641.82,
+      "speed_kmh": 126.3,
+      "gear": 4,
+      "rpm": 4819,
+      "steer_norm": 0.043
+    },
+    {
+      "progress": 0.3768,
+      "distance_m": 643.37,
+      "speed_kmh": 125.9,
+      "gear": 4,
+      "rpm": 4802,
+      "steer_norm": 0.043
+    },
+    {
+      "progress": 0.3777,
+      "distance_m": 644.92,
+      "speed_kmh": 125.7,
+      "gear": 4,
+      "rpm": 4786,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.3786,
+      "distance_m": 646.46,
+      "speed_kmh": 125.4,
+      "gear": 4,
+      "rpm": 4773,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.3795,
+      "distance_m": 648.0,
+      "speed_kmh": 125.2,
+      "gear": 4,
+      "rpm": 4761,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.3804,
+      "distance_m": 649.54,
+      "speed_kmh": 125.0,
+      "gear": 4,
+      "rpm": 4750,
+      "steer_norm": 0.041
+    },
+    {
+      "progress": 0.3813,
+      "distance_m": 651.07,
+      "speed_kmh": 124.8,
+      "gear": 4,
+      "rpm": 4739,
+      "steer_norm": 0.041
+    },
+    {
+      "progress": 0.3822,
+      "distance_m": 652.6,
+      "speed_kmh": 124.6,
+      "gear": 4,
+      "rpm": 4729,
+      "steer_norm": 0.041
+    },
+    {
+      "progress": 0.3831,
+      "distance_m": 654.13,
+      "speed_kmh": 124.5,
+      "gear": 4,
+      "rpm": 4723,
+      "steer_norm": 0.04
+    },
+    {
+      "progress": 0.384,
+      "distance_m": 655.66,
+      "speed_kmh": 124.4,
+      "gear": 4,
+      "rpm": 4717,
+      "steer_norm": 0.04
+    },
+    {
+      "progress": 0.3849,
+      "distance_m": 657.19,
+      "speed_kmh": 124.3,
+      "gear": 4,
+      "rpm": 4713,
+      "steer_norm": 0.04
+    },
+    {
+      "progress": 0.3858,
+      "distance_m": 658.72,
+      "speed_kmh": 124.3,
+      "gear": 4,
+      "rpm": 4710,
+      "steer_norm": 0.04
+    },
+    {
+      "progress": 0.3867,
+      "distance_m": 660.24,
+      "speed_kmh": 124.2,
+      "gear": 4,
+      "rpm": 4707,
+      "steer_norm": 0.039
+    },
+    {
+      "progress": 0.3876,
+      "distance_m": 661.77,
+      "speed_kmh": 124.2,
+      "gear": 4,
+      "rpm": 4706,
+      "steer_norm": 0.039
+    },
+    {
+      "progress": 0.3885,
+      "distance_m": 663.3,
+      "speed_kmh": 124.2,
+      "gear": 4,
+      "rpm": 4708,
+      "steer_norm": 0.039
+    },
+    {
+      "progress": 0.3894,
+      "distance_m": 664.82,
+      "speed_kmh": 124.3,
+      "gear": 4,
+      "rpm": 4710,
+      "steer_norm": 0.039
+    },
+    {
+      "progress": 0.3903,
+      "distance_m": 666.35,
+      "speed_kmh": 124.4,
+      "gear": 4,
+      "rpm": 4715,
+      "steer_norm": 0.039
+    },
+    {
+      "progress": 0.3912,
+      "distance_m": 667.88,
+      "speed_kmh": 124.5,
+      "gear": 4,
+      "rpm": 4722,
+      "steer_norm": 0.039
+    },
+    {
+      "progress": 0.3921,
+      "distance_m": 669.41,
+      "speed_kmh": 124.7,
+      "gear": 4,
+      "rpm": 4731,
+      "steer_norm": 0.04
+    },
+    {
+      "progress": 0.393,
+      "distance_m": 670.95,
+      "speed_kmh": 124.8,
+      "gear": 4,
+      "rpm": 4739,
+      "steer_norm": 0.04
+    },
+    {
+      "progress": 0.3939,
+      "distance_m": 672.48,
+      "speed_kmh": 125.0,
+      "gear": 4,
+      "rpm": 4747,
+      "steer_norm": 0.04
+    },
+    {
+      "progress": 0.3948,
+      "distance_m": 674.02,
+      "speed_kmh": 125.1,
+      "gear": 4,
+      "rpm": 4755,
+      "steer_norm": 0.04
+    },
+    {
+      "progress": 0.3957,
+      "distance_m": 675.55,
+      "speed_kmh": 125.2,
+      "gear": 4,
+      "rpm": 4762,
+      "steer_norm": 0.04
+    },
+    {
+      "progress": 0.3966,
+      "distance_m": 677.09,
+      "speed_kmh": 125.4,
+      "gear": 4,
+      "rpm": 4769,
+      "steer_norm": 0.04
+    },
+    {
+      "progress": 0.3975,
+      "distance_m": 678.63,
+      "speed_kmh": 125.5,
+      "gear": 4,
+      "rpm": 4775,
+      "steer_norm": 0.04
+    },
+    {
+      "progress": 0.3984,
+      "distance_m": 680.18,
+      "speed_kmh": 125.6,
+      "gear": 4,
+      "rpm": 4781,
+      "steer_norm": 0.041
+    },
+    {
+      "progress": 0.3993,
+      "distance_m": 681.72,
+      "speed_kmh": 125.7,
+      "gear": 4,
+      "rpm": 4786,
+      "steer_norm": 0.041
+    },
+    {
+      "progress": 0.4002,
+      "distance_m": 683.27,
+      "speed_kmh": 125.8,
+      "gear": 4,
+      "rpm": 4791,
+      "steer_norm": 0.041
+    },
+    {
+      "progress": 0.4011,
+      "distance_m": 684.81,
+      "speed_kmh": 125.8,
+      "gear": 4,
+      "rpm": 4796,
+      "steer_norm": 0.041
+    },
+    {
+      "progress": 0.402,
+      "distance_m": 686.36,
+      "speed_kmh": 126.0,
+      "gear": 4,
+      "rpm": 4802,
+      "steer_norm": 0.041
+    },
+    {
+      "progress": 0.4029,
+      "distance_m": 687.91,
+      "speed_kmh": 126.1,
+      "gear": 4,
+      "rpm": 4811,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.4038,
+      "distance_m": 689.46,
+      "speed_kmh": 126.3,
+      "gear": 4,
+      "rpm": 4823,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.4047,
+      "distance_m": 691.01,
+      "speed_kmh": 126.7,
+      "gear": 4,
+      "rpm": 4840,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.4056,
+      "distance_m": 692.57,
+      "speed_kmh": 127.1,
+      "gear": 4,
+      "rpm": 4864,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.4065,
+      "distance_m": 694.14,
+      "speed_kmh": 127.7,
+      "gear": 4,
+      "rpm": 4899,
+      "steer_norm": 0.043
+    },
+    {
+      "progress": 0.4075,
+      "distance_m": 695.71,
+      "speed_kmh": 128.4,
+      "gear": 4,
+      "rpm": 4937,
+      "steer_norm": 0.043
+    },
+    {
+      "progress": 0.4084,
+      "distance_m": 697.3,
+      "speed_kmh": 129.1,
+      "gear": 4,
+      "rpm": 4976,
+      "steer_norm": 0.043
+    },
+    {
+      "progress": 0.4093,
+      "distance_m": 698.89,
+      "speed_kmh": 129.8,
+      "gear": 4,
+      "rpm": 5016,
+      "steer_norm": 0.043
+    },
+    {
+      "progress": 0.4103,
+      "distance_m": 700.49,
+      "speed_kmh": 130.5,
+      "gear": 4,
+      "rpm": 5055,
+      "steer_norm": 0.043
+    },
+    {
+      "progress": 0.4112,
+      "distance_m": 702.1,
+      "speed_kmh": 131.3,
+      "gear": 4,
+      "rpm": 5093,
+      "steer_norm": 0.044
+    },
+    {
+      "progress": 0.4121,
+      "distance_m": 703.6,
+      "speed_kmh": 131.9,
+      "gear": 4,
+      "rpm": 5129,
+      "steer_norm": 0.044
+    },
+    {
+      "progress": 0.413,
+      "distance_m": 705.11,
+      "speed_kmh": 132.6,
+      "gear": 4,
+      "rpm": 5165,
+      "steer_norm": 0.044
+    },
+    {
+      "progress": 0.4139,
+      "distance_m": 706.62,
+      "speed_kmh": 133.2,
+      "gear": 4,
+      "rpm": 5201,
+      "steer_norm": 0.044
+    },
+    {
+      "progress": 0.4147,
+      "distance_m": 708.15,
+      "speed_kmh": 133.9,
+      "gear": 4,
+      "rpm": 5237,
+      "steer_norm": 0.044
+    },
+    {
+      "progress": 0.4156,
+      "distance_m": 709.68,
+      "speed_kmh": 134.5,
+      "gear": 4,
+      "rpm": 5273,
+      "steer_norm": 0.045
+    },
+    {
+      "progress": 0.4165,
+      "distance_m": 711.22,
+      "speed_kmh": 135.2,
+      "gear": 4,
+      "rpm": 5308,
+      "steer_norm": 0.045
+    },
+    {
+      "progress": 0.4174,
+      "distance_m": 712.77,
+      "speed_kmh": 135.8,
+      "gear": 4,
+      "rpm": 5345,
+      "steer_norm": 0.045
+    },
+    {
+      "progress": 0.4184,
+      "distance_m": 714.32,
+      "speed_kmh": 136.5,
+      "gear": 4,
+      "rpm": 5381,
+      "steer_norm": 0.045
+    },
+    {
+      "progress": 0.4193,
+      "distance_m": 715.88,
+      "speed_kmh": 137.1,
+      "gear": 4,
+      "rpm": 5417,
+      "steer_norm": 0.045
+    },
+    {
+      "progress": 0.4202,
+      "distance_m": 717.45,
+      "speed_kmh": 137.8,
+      "gear": 4,
+      "rpm": 5454,
+      "steer_norm": 0.045
+    },
+    {
+      "progress": 0.4211,
+      "distance_m": 719.03,
+      "speed_kmh": 138.5,
+      "gear": 4,
+      "rpm": 5491,
+      "steer_norm": 0.046
+    },
+    {
+      "progress": 0.422,
+      "distance_m": 720.61,
+      "speed_kmh": 139.2,
+      "gear": 4,
+      "rpm": 5528,
+      "steer_norm": 0.046
+    },
+    {
+      "progress": 0.423,
+      "distance_m": 722.21,
+      "speed_kmh": 139.9,
+      "gear": 4,
+      "rpm": 5566,
+      "steer_norm": 0.046
+    },
+    {
+      "progress": 0.4239,
+      "distance_m": 723.81,
+      "speed_kmh": 140.6,
+      "gear": 4,
+      "rpm": 5605,
+      "steer_norm": 0.046
+    },
+    {
+      "progress": 0.4249,
+      "distance_m": 725.41,
+      "speed_kmh": 141.3,
+      "gear": 4,
+      "rpm": 5643,
+      "steer_norm": 0.046
+    },
+    {
+      "progress": 0.4258,
+      "distance_m": 727.03,
+      "speed_kmh": 142.0,
+      "gear": 4,
+      "rpm": 5683,
+      "steer_norm": 0.046
+    },
+    {
+      "progress": 0.4268,
+      "distance_m": 728.66,
+      "speed_kmh": 142.7,
+      "gear": 4,
+      "rpm": 5722,
+      "steer_norm": 0.046
+    },
+    {
+      "progress": 0.4276,
+      "distance_m": 730.16,
+      "speed_kmh": 143.3,
+      "gear": 4,
+      "rpm": 5758,
+      "steer_norm": 0.046
+    },
+    {
+      "progress": 0.4285,
+      "distance_m": 731.68,
+      "speed_kmh": 144.0,
+      "gear": 4,
+      "rpm": 5793,
+      "steer_norm": 0.046
+    },
+    {
+      "progress": 0.4294,
+      "distance_m": 733.2,
+      "speed_kmh": 144.6,
+      "gear": 4,
+      "rpm": 5829,
+      "steer_norm": 0.046
+    },
+    {
+      "progress": 0.4303,
+      "distance_m": 734.72,
+      "speed_kmh": 145.3,
+      "gear": 4,
+      "rpm": 5864,
+      "steer_norm": 0.046
+    },
+    {
+      "progress": 0.4312,
+      "distance_m": 736.26,
+      "speed_kmh": 145.9,
+      "gear": 4,
+      "rpm": 5899,
+      "steer_norm": 0.046
+    },
+    {
+      "progress": 0.4321,
+      "distance_m": 737.8,
+      "speed_kmh": 146.5,
+      "gear": 4,
+      "rpm": 5934,
+      "steer_norm": 0.046
+    },
+    {
+      "progress": 0.433,
+      "distance_m": 739.34,
+      "speed_kmh": 147.2,
+      "gear": 4,
+      "rpm": 5968,
+      "steer_norm": 0.046
+    },
+    {
+      "progress": 0.4339,
+      "distance_m": 740.9,
+      "speed_kmh": 147.8,
+      "gear": 4,
+      "rpm": 6003,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4348,
+      "distance_m": 742.46,
+      "speed_kmh": 148.4,
+      "gear": 4,
+      "rpm": 6034,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4358,
+      "distance_m": 744.02,
+      "speed_kmh": 148.1,
+      "gear": 4,
+      "rpm": 6018,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4367,
+      "distance_m": 745.57,
+      "speed_kmh": 146.8,
+      "gear": 4,
+      "rpm": 5947,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4376,
+      "distance_m": 747.11,
+      "speed_kmh": 145.3,
+      "gear": 4,
+      "rpm": 5863,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4384,
+      "distance_m": 748.63,
+      "speed_kmh": 143.6,
+      "gear": 4,
+      "rpm": 5773,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4393,
+      "distance_m": 750.13,
+      "speed_kmh": 141.9,
+      "gear": 4,
+      "rpm": 5678,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4403,
+      "distance_m": 751.73,
+      "speed_kmh": 140.0,
+      "gear": 4,
+      "rpm": 5573,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4412,
+      "distance_m": 753.31,
+      "speed_kmh": 138.0,
+      "gear": 4,
+      "rpm": 5466,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4421,
+      "distance_m": 754.88,
+      "speed_kmh": 136.2,
+      "gear": 4,
+      "rpm": 5363,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.443,
+      "distance_m": 756.42,
+      "speed_kmh": 134.3,
+      "gear": 4,
+      "rpm": 5262,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4439,
+      "distance_m": 757.94,
+      "speed_kmh": 132.5,
+      "gear": 4,
+      "rpm": 5162,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4448,
+      "distance_m": 759.55,
+      "speed_kmh": 130.5,
+      "gear": 4,
+      "rpm": 5053,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4458,
+      "distance_m": 761.14,
+      "speed_kmh": 128.5,
+      "gear": 4,
+      "rpm": 4945,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4467,
+      "distance_m": 762.7,
+      "speed_kmh": 126.6,
+      "gear": 4,
+      "rpm": 4836,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4476,
+      "distance_m": 764.24,
+      "speed_kmh": 124.6,
+      "gear": 4,
+      "rpm": 4729,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4485,
+      "distance_m": 765.76,
+      "speed_kmh": 122.7,
+      "gear": 4,
+      "rpm": 4621,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4494,
+      "distance_m": 767.36,
+      "speed_kmh": 120.6,
+      "gear": 4,
+      "rpm": 4507,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4503,
+      "distance_m": 768.93,
+      "speed_kmh": 118.5,
+      "gear": 4,
+      "rpm": 4393,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4512,
+      "distance_m": 770.47,
+      "speed_kmh": 116.5,
+      "gear": 4,
+      "rpm": 4280,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4521,
+      "distance_m": 771.99,
+      "speed_kmh": 114.4,
+      "gear": 3,
+      "rpm": 6060,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4531,
+      "distance_m": 773.58,
+      "speed_kmh": 112.3,
+      "gear": 3,
+      "rpm": 5922,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.454,
+      "distance_m": 775.14,
+      "speed_kmh": 110.2,
+      "gear": 3,
+      "rpm": 5785,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4549,
+      "distance_m": 776.67,
+      "speed_kmh": 108.0,
+      "gear": 3,
+      "rpm": 5648,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4558,
+      "distance_m": 778.26,
+      "speed_kmh": 105.8,
+      "gear": 3,
+      "rpm": 5503,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4567,
+      "distance_m": 779.82,
+      "speed_kmh": 103.8,
+      "gear": 3,
+      "rpm": 5370,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4576,
+      "distance_m": 781.35,
+      "speed_kmh": 101.8,
+      "gear": 3,
+      "rpm": 5242,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4585,
+      "distance_m": 782.93,
+      "speed_kmh": 99.2,
+      "gear": 3,
+      "rpm": 5072,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4594,
+      "distance_m": 784.48,
+      "speed_kmh": 96.8,
+      "gear": 3,
+      "rpm": 4919,
+      "steer_norm": 0.048
+    },
+    {
+      "progress": 0.4603,
+      "distance_m": 785.99,
+      "speed_kmh": 94.8,
+      "gear": 3,
+      "rpm": 4789,
+      "steer_norm": 0.048
+    },
+    {
+      "progress": 0.4612,
+      "distance_m": 787.55,
+      "speed_kmh": 93.5,
+      "gear": 3,
+      "rpm": 4701,
+      "steer_norm": 0.048
+    },
+    {
+      "progress": 0.4622,
+      "distance_m": 789.1,
+      "speed_kmh": 92.6,
+      "gear": 3,
+      "rpm": 4644,
+      "steer_norm": 0.048
+    },
+    {
+      "progress": 0.4631,
+      "distance_m": 790.64,
+      "speed_kmh": 91.9,
+      "gear": 3,
+      "rpm": 4597,
+      "steer_norm": 0.048
+    },
+    {
+      "progress": 0.464,
+      "distance_m": 792.17,
+      "speed_kmh": 91.2,
+      "gear": 3,
+      "rpm": 4555,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.4648,
+      "distance_m": 793.68,
+      "speed_kmh": 90.7,
+      "gear": 3,
+      "rpm": 4523,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.4657,
+      "distance_m": 795.19,
+      "speed_kmh": 90.3,
+      "gear": 3,
+      "rpm": 4495,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.4666,
+      "distance_m": 796.69,
+      "speed_kmh": 89.9,
+      "gear": 3,
+      "rpm": 4468,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.4675,
+      "distance_m": 798.27,
+      "speed_kmh": 89.5,
+      "gear": 3,
+      "rpm": 4440,
+      "steer_norm": 0.05
+    },
+    {
+      "progress": 0.4684,
+      "distance_m": 799.83,
+      "speed_kmh": 89.1,
+      "gear": 3,
+      "rpm": 4413,
+      "steer_norm": 0.05
+    },
+    {
+      "progress": 0.4694,
+      "distance_m": 801.39,
+      "speed_kmh": 88.6,
+      "gear": 3,
+      "rpm": 4386,
+      "steer_norm": 0.05
+    },
+    {
+      "progress": 0.4703,
+      "distance_m": 802.94,
+      "speed_kmh": 88.2,
+      "gear": 3,
+      "rpm": 4359,
+      "steer_norm": 0.05
+    },
+    {
+      "progress": 0.4712,
+      "distance_m": 804.49,
+      "speed_kmh": 87.8,
+      "gear": 3,
+      "rpm": 4333,
+      "steer_norm": 0.05
+    },
+    {
+      "progress": 0.4721,
+      "distance_m": 806.02,
+      "speed_kmh": 87.4,
+      "gear": 3,
+      "rpm": 4308,
+      "steer_norm": 0.05
+    },
+    {
+      "progress": 0.473,
+      "distance_m": 807.55,
+      "speed_kmh": 87.0,
+      "gear": 3,
+      "rpm": 4282,
+      "steer_norm": 0.05
+    },
+    {
+      "progress": 0.4739,
+      "distance_m": 809.08,
+      "speed_kmh": 86.7,
+      "gear": 3,
+      "rpm": 4257,
+      "steer_norm": 0.05
+    },
+    {
+      "progress": 0.4747,
+      "distance_m": 810.59,
+      "speed_kmh": 86.3,
+      "gear": 3,
+      "rpm": 4231,
+      "steer_norm": 0.05
+    },
+    {
+      "progress": 0.4756,
+      "distance_m": 812.1,
+      "speed_kmh": 85.9,
+      "gear": 3,
+      "rpm": 4206,
+      "steer_norm": 0.05
+    },
+    {
+      "progress": 0.4765,
+      "distance_m": 813.61,
+      "speed_kmh": 85.5,
+      "gear": 3,
+      "rpm": 4180,
+      "steer_norm": 0.05
+    },
+    {
+      "progress": 0.4774,
+      "distance_m": 815.18,
+      "speed_kmh": 85.1,
+      "gear": 3,
+      "rpm": 4153,
+      "steer_norm": 0.05
+    },
+    {
+      "progress": 0.4783,
+      "distance_m": 816.74,
+      "speed_kmh": 84.6,
+      "gear": 3,
+      "rpm": 4126,
+      "steer_norm": 0.05
+    },
+    {
+      "progress": 0.4793,
+      "distance_m": 818.29,
+      "speed_kmh": 84.2,
+      "gear": 3,
+      "rpm": 4099,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.4802,
+      "distance_m": 819.84,
+      "speed_kmh": 83.8,
+      "gear": 3,
+      "rpm": 4071,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.4811,
+      "distance_m": 821.38,
+      "speed_kmh": 83.4,
+      "gear": 3,
+      "rpm": 4044,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.482,
+      "distance_m": 822.91,
+      "speed_kmh": 83.0,
+      "gear": 3,
+      "rpm": 4017,
+      "steer_norm": 0.049
+    },
+    {
+      "progress": 0.4828,
+      "distance_m": 824.44,
+      "speed_kmh": 82.5,
+      "gear": 3,
+      "rpm": 3990,
+      "steer_norm": 0.048
+    },
+    {
+      "progress": 0.4837,
+      "distance_m": 825.95,
+      "speed_kmh": 82.1,
+      "gear": 3,
+      "rpm": 3963,
+      "steer_norm": 0.048
+    },
+    {
+      "progress": 0.4846,
+      "distance_m": 827.46,
+      "speed_kmh": 81.7,
+      "gear": 3,
+      "rpm": 3937,
+      "steer_norm": 0.048
+    },
+    {
+      "progress": 0.4855,
+      "distance_m": 828.96,
+      "speed_kmh": 81.3,
+      "gear": 3,
+      "rpm": 3910,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4864,
+      "distance_m": 830.53,
+      "speed_kmh": 80.9,
+      "gear": 3,
+      "rpm": 3883,
+      "steer_norm": 0.047
+    },
+    {
+      "progress": 0.4873,
+      "distance_m": 832.09,
+      "speed_kmh": 80.5,
+      "gear": 3,
+      "rpm": 3855,
+      "steer_norm": 0.046
+    },
+    {
+      "progress": 0.4882,
+      "distance_m": 833.63,
+      "speed_kmh": 80.0,
+      "gear": 3,
+      "rpm": 3827,
+      "steer_norm": 0.045
+    },
+    {
+      "progress": 0.4891,
+      "distance_m": 835.17,
+      "speed_kmh": 79.6,
+      "gear": 3,
+      "rpm": 3799,
+      "steer_norm": 0.045
+    },
+    {
+      "progress": 0.49,
+      "distance_m": 836.71,
+      "speed_kmh": 79.2,
+      "gear": 3,
+      "rpm": 3770,
+      "steer_norm": 0.044
+    },
+    {
+      "progress": 0.4909,
+      "distance_m": 838.23,
+      "speed_kmh": 78.7,
+      "gear": 3,
+      "rpm": 3741,
+      "steer_norm": 0.043
+    },
+    {
+      "progress": 0.4918,
+      "distance_m": 839.74,
+      "speed_kmh": 78.3,
+      "gear": 3,
+      "rpm": 3712,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.4927,
+      "distance_m": 841.25,
+      "speed_kmh": 77.8,
+      "gear": 3,
+      "rpm": 3682,
+      "steer_norm": 0.041
+    },
+    {
+      "progress": 0.4936,
+      "distance_m": 842.81,
+      "speed_kmh": 77.3,
+      "gear": 3,
+      "rpm": 3650,
+      "steer_norm": 0.04
+    },
+    {
+      "progress": 0.4945,
+      "distance_m": 844.37,
+      "speed_kmh": 76.8,
+      "gear": 3,
+      "rpm": 3619,
+      "steer_norm": 0.039
+    },
+    {
+      "progress": 0.4954,
+      "distance_m": 845.91,
+      "speed_kmh": 76.4,
+      "gear": 3,
+      "rpm": 3589,
+      "steer_norm": 0.038
+    },
+    {
+      "progress": 0.4963,
+      "distance_m": 847.45,
+      "speed_kmh": 76.0,
+      "gear": 3,
+      "rpm": 3565,
+      "steer_norm": 0.037
+    },
+    {
+      "progress": 0.4972,
+      "distance_m": 848.98,
+      "speed_kmh": 75.9,
+      "gear": 3,
+      "rpm": 3561,
+      "steer_norm": 0.036
+    },
+    {
+      "progress": 0.4981,
+      "distance_m": 850.52,
+      "speed_kmh": 76.6,
+      "gear": 3,
+      "rpm": 3604,
+      "steer_norm": 0.034
+    },
+    {
+      "progress": 0.499,
+      "distance_m": 852.08,
+      "speed_kmh": 77.8,
+      "gear": 3,
+      "rpm": 3683,
+      "steer_norm": 0.033
+    },
+    {
+      "progress": 0.4999,
+      "distance_m": 853.6,
+      "speed_kmh": 79.1,
+      "gear": 3,
+      "rpm": 3768,
+      "steer_norm": 0.032
+    },
+    {
+      "progress": 0.5008,
+      "distance_m": 855.14,
+      "speed_kmh": 80.5,
+      "gear": 3,
+      "rpm": 3855,
+      "steer_norm": 0.031
+    },
+    {
+      "progress": 0.5018,
+      "distance_m": 856.71,
+      "speed_kmh": 81.8,
+      "gear": 3,
+      "rpm": 3943,
+      "steer_norm": 0.03
+    },
+    {
+      "progress": 0.5026,
+      "distance_m": 858.23,
+      "speed_kmh": 83.1,
+      "gear": 3,
+      "rpm": 4029,
+      "steer_norm": 0.03
+    },
+    {
+      "progress": 0.5035,
+      "distance_m": 859.78,
+      "speed_kmh": 84.4,
+      "gear": 3,
+      "rpm": 4114,
+      "steer_norm": 0.029
+    },
+    {
+      "progress": 0.5045,
+      "distance_m": 861.35,
+      "speed_kmh": 85.8,
+      "gear": 3,
+      "rpm": 4201,
+      "steer_norm": 0.028
+    },
+    {
+      "progress": 0.5054,
+      "distance_m": 862.87,
+      "speed_kmh": 87.0,
+      "gear": 3,
+      "rpm": 4282,
+      "steer_norm": 0.028
+    },
+    {
+      "progress": 0.5063,
+      "distance_m": 864.41,
+      "speed_kmh": 88.3,
+      "gear": 3,
+      "rpm": 4366,
+      "steer_norm": 0.027
+    },
+    {
+      "progress": 0.5072,
+      "distance_m": 865.97,
+      "speed_kmh": 89.6,
+      "gear": 3,
+      "rpm": 4447,
+      "steer_norm": 0.026
+    },
+    {
+      "progress": 0.5081,
+      "distance_m": 867.47,
+      "speed_kmh": 90.8,
+      "gear": 3,
+      "rpm": 4527,
+      "steer_norm": 0.025
+    },
+    {
+      "progress": 0.5089,
+      "distance_m": 869.0,
+      "speed_kmh": 92.0,
+      "gear": 3,
+      "rpm": 4607,
+      "steer_norm": 0.025
+    },
+    {
+      "progress": 0.5099,
+      "distance_m": 870.55,
+      "speed_kmh": 93.3,
+      "gear": 3,
+      "rpm": 4689,
+      "steer_norm": 0.024
+    },
+    {
+      "progress": 0.5108,
+      "distance_m": 872.11,
+      "speed_kmh": 94.6,
+      "gear": 3,
+      "rpm": 4771,
+      "steer_norm": 0.024
+    },
+    {
+      "progress": 0.5117,
+      "distance_m": 873.62,
+      "speed_kmh": 95.8,
+      "gear": 3,
+      "rpm": 4849,
+      "steer_norm": 0.023
+    },
+    {
+      "progress": 0.5125,
+      "distance_m": 875.14,
+      "speed_kmh": 97.0,
+      "gear": 3,
+      "rpm": 4927,
+      "steer_norm": 0.023
+    },
+    {
+      "progress": 0.5135,
+      "distance_m": 876.69,
+      "speed_kmh": 98.2,
+      "gear": 3,
+      "rpm": 5006,
+      "steer_norm": 0.022
+    },
+    {
+      "progress": 0.5144,
+      "distance_m": 878.25,
+      "speed_kmh": 99.4,
+      "gear": 3,
+      "rpm": 5086,
+      "steer_norm": 0.022
+    },
+    {
+      "progress": 0.5153,
+      "distance_m": 879.83,
+      "speed_kmh": 100.6,
+      "gear": 3,
+      "rpm": 5165,
+      "steer_norm": 0.021
+    },
+    {
+      "progress": 0.5162,
+      "distance_m": 881.34,
+      "speed_kmh": 101.7,
+      "gear": 3,
+      "rpm": 5238,
+      "steer_norm": 0.021
+    },
+    {
+      "progress": 0.5171,
+      "distance_m": 882.87,
+      "speed_kmh": 102.9,
+      "gear": 3,
+      "rpm": 5311,
+      "steer_norm": 0.02
+    },
+    {
+      "progress": 0.518,
+      "distance_m": 884.42,
+      "speed_kmh": 104.0,
+      "gear": 3,
+      "rpm": 5385,
+      "steer_norm": 0.02
+    },
+    {
+      "progress": 0.5189,
+      "distance_m": 885.98,
+      "speed_kmh": 105.2,
+      "gear": 3,
+      "rpm": 5460,
+      "steer_norm": 0.019
+    },
+    {
+      "progress": 0.5198,
+      "distance_m": 887.56,
+      "speed_kmh": 106.3,
+      "gear": 3,
+      "rpm": 5533,
+      "steer_norm": 0.019
+    },
+    {
+      "progress": 0.5207,
+      "distance_m": 889.06,
+      "speed_kmh": 107.4,
+      "gear": 3,
+      "rpm": 5603,
+      "steer_norm": 0.018
+    },
+    {
+      "progress": 0.5216,
+      "distance_m": 890.58,
+      "speed_kmh": 108.5,
+      "gear": 3,
+      "rpm": 5675,
+      "steer_norm": 0.018
+    },
+    {
+      "progress": 0.5225,
+      "distance_m": 892.11,
+      "speed_kmh": 109.6,
+      "gear": 3,
+      "rpm": 5746,
+      "steer_norm": 0.017
+    },
+    {
+      "progress": 0.5234,
+      "distance_m": 893.66,
+      "speed_kmh": 110.7,
+      "gear": 3,
+      "rpm": 5818,
+      "steer_norm": 0.017
+    },
+    {
+      "progress": 0.5243,
+      "distance_m": 895.22,
+      "speed_kmh": 111.8,
+      "gear": 3,
+      "rpm": 5894,
+      "steer_norm": 0.017
+    },
+    {
+      "progress": 0.5252,
+      "distance_m": 896.8,
+      "speed_kmh": 113.0,
+      "gear": 3,
+      "rpm": 5971,
+      "steer_norm": 0.016
+    },
+    {
+      "progress": 0.5262,
+      "distance_m": 898.4,
+      "speed_kmh": 114.2,
+      "gear": 3,
+      "rpm": 6049,
+      "steer_norm": 0.016
+    },
+    {
+      "progress": 0.5271,
+      "distance_m": 899.91,
+      "speed_kmh": 115.4,
+      "gear": 4,
+      "rpm": 4219,
+      "steer_norm": 0.016
+    },
+    {
+      "progress": 0.5279,
+      "distance_m": 901.44,
+      "speed_kmh": 116.5,
+      "gear": 4,
+      "rpm": 4281,
+      "steer_norm": 0.015
+    },
+    {
+      "progress": 0.5289,
+      "distance_m": 902.98,
+      "speed_kmh": 117.6,
+      "gear": 4,
+      "rpm": 4342,
+      "steer_norm": 0.015
+    },
+    {
+      "progress": 0.5298,
+      "distance_m": 904.54,
+      "speed_kmh": 118.7,
+      "gear": 4,
+      "rpm": 4403,
+      "steer_norm": 0.015
+    },
+    {
+      "progress": 0.5307,
+      "distance_m": 906.11,
+      "speed_kmh": 119.8,
+      "gear": 4,
+      "rpm": 4464,
+      "steer_norm": 0.015
+    },
+    {
+      "progress": 0.5316,
+      "distance_m": 907.69,
+      "speed_kmh": 120.9,
+      "gear": 4,
+      "rpm": 4525,
+      "steer_norm": 0.014
+    },
+    {
+      "progress": 0.5325,
+      "distance_m": 909.3,
+      "speed_kmh": 122.0,
+      "gear": 4,
+      "rpm": 4586,
+      "steer_norm": 0.014
+    },
+    {
+      "progress": 0.5334,
+      "distance_m": 910.8,
+      "speed_kmh": 123.0,
+      "gear": 4,
+      "rpm": 4642,
+      "steer_norm": 0.014
+    },
+    {
+      "progress": 0.5343,
+      "distance_m": 912.32,
+      "speed_kmh": 124.1,
+      "gear": 4,
+      "rpm": 4699,
+      "steer_norm": 0.014
+    },
+    {
+      "progress": 0.5352,
+      "distance_m": 913.86,
+      "speed_kmh": 125.1,
+      "gear": 4,
+      "rpm": 4755,
+      "steer_norm": 0.014
+    },
+    {
+      "progress": 0.5361,
+      "distance_m": 915.4,
+      "speed_kmh": 126.1,
+      "gear": 4,
+      "rpm": 4811,
+      "steer_norm": 0.014
+    },
+    {
+      "progress": 0.537,
+      "distance_m": 916.96,
+      "speed_kmh": 127.1,
+      "gear": 4,
+      "rpm": 4867,
+      "steer_norm": 0.014
+    },
+    {
+      "progress": 0.538,
+      "distance_m": 918.53,
+      "speed_kmh": 128.1,
+      "gear": 4,
+      "rpm": 4922,
+      "steer_norm": 0.014
+    },
+    {
+      "progress": 0.5389,
+      "distance_m": 920.11,
+      "speed_kmh": 129.2,
+      "gear": 4,
+      "rpm": 4978,
+      "steer_norm": 0.014
+    },
+    {
+      "progress": 0.5398,
+      "distance_m": 921.7,
+      "speed_kmh": 130.2,
+      "gear": 4,
+      "rpm": 5034,
+      "steer_norm": 0.014
+    },
+    {
+      "progress": 0.5408,
+      "distance_m": 923.31,
+      "speed_kmh": 131.2,
+      "gear": 4,
+      "rpm": 5089,
+      "steer_norm": 0.014
+    },
+    {
+      "progress": 0.5416,
+      "distance_m": 924.81,
+      "speed_kmh": 132.1,
+      "gear": 4,
+      "rpm": 5140,
+      "steer_norm": 0.014
+    },
+    {
+      "progress": 0.5425,
+      "distance_m": 926.33,
+      "speed_kmh": 133.0,
+      "gear": 4,
+      "rpm": 5192,
+      "steer_norm": 0.014
+    },
+    {
+      "progress": 0.5434,
+      "distance_m": 927.85,
+      "speed_kmh": 134.0,
+      "gear": 4,
+      "rpm": 5243,
+      "steer_norm": 0.014
+    },
+    {
+      "progress": 0.5443,
+      "distance_m": 929.39,
+      "speed_kmh": 134.9,
+      "gear": 4,
+      "rpm": 5294,
+      "steer_norm": 0.014
+    },
+    {
+      "progress": 0.5452,
+      "distance_m": 930.93,
+      "speed_kmh": 135.8,
+      "gear": 4,
+      "rpm": 5344,
+      "steer_norm": 0.014
+    },
+    {
+      "progress": 0.5461,
+      "distance_m": 932.49,
+      "speed_kmh": 136.7,
+      "gear": 4,
+      "rpm": 5394,
+      "steer_norm": 0.014
+    },
+    {
+      "progress": 0.5471,
+      "distance_m": 934.06,
+      "speed_kmh": 137.6,
+      "gear": 4,
+      "rpm": 5444,
+      "steer_norm": 0.014
+    },
+    {
+      "progress": 0.548,
+      "distance_m": 935.63,
+      "speed_kmh": 138.5,
+      "gear": 4,
+      "rpm": 5494,
+      "steer_norm": 0.014
+    },
+    {
+      "progress": 0.5489,
+      "distance_m": 937.22,
+      "speed_kmh": 139.4,
+      "gear": 4,
+      "rpm": 5543,
+      "steer_norm": 0.014
+    },
+    {
+      "progress": 0.5498,
+      "distance_m": 938.82,
+      "speed_kmh": 140.3,
+      "gear": 4,
+      "rpm": 5592,
+      "steer_norm": 0.014
+    },
+    {
+      "progress": 0.5508,
+      "distance_m": 940.42,
+      "speed_kmh": 140.7,
+      "gear": 4,
+      "rpm": 5614,
+      "steer_norm": 0.015
+    },
+    {
+      "progress": 0.5517,
+      "distance_m": 942.03,
+      "speed_kmh": 140.6,
+      "gear": 4,
+      "rpm": 5608,
+      "steer_norm": 0.015
+    },
+    {
+      "progress": 0.5527,
+      "distance_m": 943.63,
+      "speed_kmh": 140.5,
+      "gear": 4,
+      "rpm": 5601,
+      "steer_norm": 0.015
+    },
+    {
+      "progress": 0.5536,
+      "distance_m": 945.23,
+      "speed_kmh": 140.4,
+      "gear": 4,
+      "rpm": 5594,
+      "steer_norm": 0.015
+    },
+    {
+      "progress": 0.5545,
+      "distance_m": 946.83,
+      "speed_kmh": 140.2,
+      "gear": 4,
+      "rpm": 5587,
+      "steer_norm": 0.015
+    },
+    {
+      "progress": 0.5555,
+      "distance_m": 948.43,
+      "speed_kmh": 140.1,
+      "gear": 4,
+      "rpm": 5580,
+      "steer_norm": 0.015
+    },
+    {
+      "progress": 0.5564,
+      "distance_m": 950.03,
+      "speed_kmh": 140.6,
+      "gear": 4,
+      "rpm": 5608,
+      "steer_norm": 0.015
+    },
+    {
+      "progress": 0.5574,
+      "distance_m": 951.64,
+      "speed_kmh": 141.4,
+      "gear": 4,
+      "rpm": 5653,
+      "steer_norm": 0.016
+    },
+    {
+      "progress": 0.5583,
+      "distance_m": 953.26,
+      "speed_kmh": 142.2,
+      "gear": 4,
+      "rpm": 5696,
+      "steer_norm": 0.016
+    },
+    {
+      "progress": 0.5592,
+      "distance_m": 954.77,
+      "speed_kmh": 142.9,
+      "gear": 4,
+      "rpm": 5733,
+      "steer_norm": 0.016
+    },
+    {
+      "progress": 0.5601,
+      "distance_m": 956.28,
+      "speed_kmh": 143.5,
+      "gear": 4,
+      "rpm": 5769,
+      "steer_norm": 0.016
+    },
+    {
+      "progress": 0.561,
+      "distance_m": 957.79,
+      "speed_kmh": 144.2,
+      "gear": 4,
+      "rpm": 5805,
+      "steer_norm": 0.016
+    },
+    {
+      "progress": 0.5618,
+      "distance_m": 959.31,
+      "speed_kmh": 144.8,
+      "gear": 4,
+      "rpm": 5839,
+      "steer_norm": 0.016
+    },
+    {
+      "progress": 0.5627,
+      "distance_m": 960.84,
+      "speed_kmh": 145.4,
+      "gear": 4,
+      "rpm": 5874,
+      "steer_norm": 0.016
+    },
+    {
+      "progress": 0.5636,
+      "distance_m": 962.38,
+      "speed_kmh": 146.1,
+      "gear": 4,
+      "rpm": 5909,
+      "steer_norm": 0.016
+    },
+    {
+      "progress": 0.5645,
+      "distance_m": 963.92,
+      "speed_kmh": 146.7,
+      "gear": 4,
+      "rpm": 5943,
+      "steer_norm": 0.017
+    },
+    {
+      "progress": 0.5654,
+      "distance_m": 965.47,
+      "speed_kmh": 147.3,
+      "gear": 4,
+      "rpm": 5978,
+      "steer_norm": 0.017
+    },
+    {
+      "progress": 0.5664,
+      "distance_m": 967.03,
+      "speed_kmh": 148.0,
+      "gear": 4,
+      "rpm": 6012,
+      "steer_norm": 0.017
+    },
+    {
+      "progress": 0.5673,
+      "distance_m": 968.59,
+      "speed_kmh": 148.6,
+      "gear": 4,
+      "rpm": 6047,
+      "steer_norm": 0.017
+    },
+    {
+      "progress": 0.5682,
+      "distance_m": 970.16,
+      "speed_kmh": 149.2,
+      "gear": 4,
+      "rpm": 6081,
+      "steer_norm": 0.017
+    },
+    {
+      "progress": 0.5691,
+      "distance_m": 971.73,
+      "speed_kmh": 149.8,
+      "gear": 4,
+      "rpm": 6114,
+      "steer_norm": 0.018
+    },
+    {
+      "progress": 0.57,
+      "distance_m": 973.32,
+      "speed_kmh": 150.4,
+      "gear": 4,
+      "rpm": 6148,
+      "steer_norm": 0.018
+    },
+    {
+      "progress": 0.571,
+      "distance_m": 974.91,
+      "speed_kmh": 151.1,
+      "gear": 4,
+      "rpm": 6182,
+      "steer_norm": 0.018
+    },
+    {
+      "progress": 0.5719,
+      "distance_m": 976.5,
+      "speed_kmh": 151.7,
+      "gear": 4,
+      "rpm": 6216,
+      "steer_norm": 0.018
+    },
+    {
+      "progress": 0.5728,
+      "distance_m": 978.1,
+      "speed_kmh": 152.3,
+      "gear": 4,
+      "rpm": 6250,
+      "steer_norm": 0.018
+    },
+    {
+      "progress": 0.5738,
+      "distance_m": 979.71,
+      "speed_kmh": 152.9,
+      "gear": 4,
+      "rpm": 6284,
+      "steer_norm": 0.018
+    },
+    {
+      "progress": 0.5747,
+      "distance_m": 981.32,
+      "speed_kmh": 153.5,
+      "gear": 4,
+      "rpm": 6318,
+      "steer_norm": 0.019
+    },
+    {
+      "progress": 0.5757,
+      "distance_m": 982.94,
+      "speed_kmh": 154.1,
+      "gear": 4,
+      "rpm": 6352,
+      "steer_norm": 0.019
+    },
+    {
+      "progress": 0.5766,
+      "distance_m": 984.57,
+      "speed_kmh": 154.8,
+      "gear": 4,
+      "rpm": 6387,
+      "steer_norm": 0.019
+    },
+    {
+      "progress": 0.5776,
+      "distance_m": 986.21,
+      "speed_kmh": 155.4,
+      "gear": 4,
+      "rpm": 6421,
+      "steer_norm": 0.019
+    },
+    {
+      "progress": 0.5785,
+      "distance_m": 987.71,
+      "speed_kmh": 156.0,
+      "gear": 4,
+      "rpm": 6453,
+      "steer_norm": 0.019
+    },
+    {
+      "progress": 0.5794,
+      "distance_m": 989.22,
+      "speed_kmh": 156.6,
+      "gear": 4,
+      "rpm": 6485,
+      "steer_norm": 0.019
+    },
+    {
+      "progress": 0.5802,
+      "distance_m": 990.74,
+      "speed_kmh": 157.1,
+      "gear": 4,
+      "rpm": 6516,
+      "steer_norm": 0.019
+    },
+    {
+      "progress": 0.5811,
+      "distance_m": 992.26,
+      "speed_kmh": 157.7,
+      "gear": 4,
+      "rpm": 6547,
+      "steer_norm": 0.019
+    },
+    {
+      "progress": 0.582,
+      "distance_m": 993.78,
+      "speed_kmh": 158.3,
+      "gear": 4,
+      "rpm": 6579,
+      "steer_norm": 0.019
+    },
+    {
+      "progress": 0.5829,
+      "distance_m": 995.31,
+      "speed_kmh": 158.8,
+      "gear": 4,
+      "rpm": 6610,
+      "steer_norm": 0.019
+    },
+    {
+      "progress": 0.5838,
+      "distance_m": 996.85,
+      "speed_kmh": 159.4,
+      "gear": 4,
+      "rpm": 6641,
+      "steer_norm": 0.019
+    },
+    {
+      "progress": 0.5847,
+      "distance_m": 998.39,
+      "speed_kmh": 160.0,
+      "gear": 4,
+      "rpm": 6672,
+      "steer_norm": 0.019
+    },
+    {
+      "progress": 0.5856,
+      "distance_m": 999.94,
+      "speed_kmh": 160.5,
+      "gear": 5,
+      "rpm": 4822,
+      "steer_norm": 0.019
+    },
+    {
+      "progress": 0.5865,
+      "distance_m": 1001.49,
+      "speed_kmh": 161.1,
+      "gear": 5,
+      "rpm": 4847,
+      "steer_norm": 0.019
+    },
+    {
+      "progress": 0.5875,
+      "distance_m": 1003.05,
+      "speed_kmh": 161.6,
+      "gear": 5,
+      "rpm": 4872,
+      "steer_norm": 0.019
+    },
+    {
+      "progress": 0.5884,
+      "distance_m": 1004.62,
+      "speed_kmh": 162.2,
+      "gear": 5,
+      "rpm": 4897,
+      "steer_norm": 0.019
+    },
+    {
+      "progress": 0.5893,
+      "distance_m": 1006.18,
+      "speed_kmh": 162.7,
+      "gear": 5,
+      "rpm": 4921,
+      "steer_norm": 0.02
+    },
+    {
+      "progress": 0.5902,
+      "distance_m": 1007.76,
+      "speed_kmh": 163.2,
+      "gear": 5,
+      "rpm": 4946,
+      "steer_norm": 0.02
+    },
+    {
+      "progress": 0.5911,
+      "distance_m": 1009.34,
+      "speed_kmh": 163.8,
+      "gear": 5,
+      "rpm": 4969,
+      "steer_norm": 0.02
+    },
+    {
+      "progress": 0.5921,
+      "distance_m": 1010.92,
+      "speed_kmh": 164.3,
+      "gear": 5,
+      "rpm": 4993,
+      "steer_norm": 0.02
+    },
+    {
+      "progress": 0.593,
+      "distance_m": 1012.51,
+      "speed_kmh": 164.8,
+      "gear": 5,
+      "rpm": 5017,
+      "steer_norm": 0.02
+    },
+    {
+      "progress": 0.5939,
+      "distance_m": 1014.11,
+      "speed_kmh": 165.3,
+      "gear": 5,
+      "rpm": 5040,
+      "steer_norm": 0.02
+    },
+    {
+      "progress": 0.5949,
+      "distance_m": 1015.71,
+      "speed_kmh": 165.9,
+      "gear": 5,
+      "rpm": 5063,
+      "steer_norm": 0.02
+    },
+    {
+      "progress": 0.5958,
+      "distance_m": 1017.31,
+      "speed_kmh": 166.4,
+      "gear": 5,
+      "rpm": 5086,
+      "steer_norm": 0.021
+    },
+    {
+      "progress": 0.5968,
+      "distance_m": 1018.92,
+      "speed_kmh": 166.9,
+      "gear": 5,
+      "rpm": 5108,
+      "steer_norm": 0.021
+    },
+    {
+      "progress": 0.5977,
+      "distance_m": 1020.53,
+      "speed_kmh": 167.4,
+      "gear": 5,
+      "rpm": 5130,
+      "steer_norm": 0.021
+    },
+    {
+      "progress": 0.5986,
+      "distance_m": 1022.15,
+      "speed_kmh": 167.8,
+      "gear": 5,
+      "rpm": 5152,
+      "steer_norm": 0.021
+    },
+    {
+      "progress": 0.5996,
+      "distance_m": 1023.78,
+      "speed_kmh": 168.3,
+      "gear": 5,
+      "rpm": 5174,
+      "steer_norm": 0.022
+    },
+    {
+      "progress": 0.6006,
+      "distance_m": 1025.4,
+      "speed_kmh": 168.8,
+      "gear": 5,
+      "rpm": 5196,
+      "steer_norm": 0.022
+    },
+    {
+      "progress": 0.6015,
+      "distance_m": 1027.04,
+      "speed_kmh": 169.3,
+      "gear": 5,
+      "rpm": 5218,
+      "steer_norm": 0.022
+    },
+    {
+      "progress": 0.6025,
+      "distance_m": 1028.67,
+      "speed_kmh": 169.8,
+      "gear": 5,
+      "rpm": 5239,
+      "steer_norm": 0.022
+    },
+    {
+      "progress": 0.6034,
+      "distance_m": 1030.32,
+      "speed_kmh": 170.2,
+      "gear": 5,
+      "rpm": 5261,
+      "steer_norm": 0.023
+    },
+    {
+      "progress": 0.6044,
+      "distance_m": 1031.96,
+      "speed_kmh": 170.7,
+      "gear": 5,
+      "rpm": 5281,
+      "steer_norm": 0.023
+    },
+    {
+      "progress": 0.6054,
+      "distance_m": 1033.61,
+      "speed_kmh": 171.2,
+      "gear": 5,
+      "rpm": 5302,
+      "steer_norm": 0.023
+    },
+    {
+      "progress": 0.6062,
+      "distance_m": 1035.12,
+      "speed_kmh": 171.6,
+      "gear": 5,
+      "rpm": 5321,
+      "steer_norm": 0.023
+    },
+    {
+      "progress": 0.6071,
+      "distance_m": 1036.63,
+      "speed_kmh": 172.0,
+      "gear": 5,
+      "rpm": 5339,
+      "steer_norm": 0.024
+    },
+    {
+      "progress": 0.608,
+      "distance_m": 1038.14,
+      "speed_kmh": 172.4,
+      "gear": 5,
+      "rpm": 5357,
+      "steer_norm": 0.024
+    },
+    {
+      "progress": 0.6089,
+      "distance_m": 1039.65,
+      "speed_kmh": 172.8,
+      "gear": 5,
+      "rpm": 5376,
+      "steer_norm": 0.024
+    },
+    {
+      "progress": 0.6098,
+      "distance_m": 1041.17,
+      "speed_kmh": 173.2,
+      "gear": 5,
+      "rpm": 5394,
+      "steer_norm": 0.024
+    },
+    {
+      "progress": 0.6107,
+      "distance_m": 1042.69,
+      "speed_kmh": 173.6,
+      "gear": 5,
+      "rpm": 5411,
+      "steer_norm": 0.025
+    },
+    {
+      "progress": 0.6116,
+      "distance_m": 1044.22,
+      "speed_kmh": 174.0,
+      "gear": 5,
+      "rpm": 5430,
+      "steer_norm": 0.025
+    },
+    {
+      "progress": 0.6125,
+      "distance_m": 1045.75,
+      "speed_kmh": 174.4,
+      "gear": 5,
+      "rpm": 5447,
+      "steer_norm": 0.025
+    },
+    {
+      "progress": 0.6134,
+      "distance_m": 1047.28,
+      "speed_kmh": 174.8,
+      "gear": 5,
+      "rpm": 5465,
+      "steer_norm": 0.026
+    },
+    {
+      "progress": 0.6143,
+      "distance_m": 1048.82,
+      "speed_kmh": 175.2,
+      "gear": 5,
+      "rpm": 5483,
+      "steer_norm": 0.026
+    },
+    {
+      "progress": 0.6152,
+      "distance_m": 1050.36,
+      "speed_kmh": 175.6,
+      "gear": 5,
+      "rpm": 5500,
+      "steer_norm": 0.026
+    },
+    {
+      "progress": 0.6161,
+      "distance_m": 1051.9,
+      "speed_kmh": 175.9,
+      "gear": 5,
+      "rpm": 5517,
+      "steer_norm": 0.026
+    },
+    {
+      "progress": 0.617,
+      "distance_m": 1053.45,
+      "speed_kmh": 176.3,
+      "gear": 5,
+      "rpm": 5534,
+      "steer_norm": 0.027
+    },
+    {
+      "progress": 0.6179,
+      "distance_m": 1055.0,
+      "speed_kmh": 176.7,
+      "gear": 5,
+      "rpm": 5551,
+      "steer_norm": 0.027
+    },
+    {
+      "progress": 0.6188,
+      "distance_m": 1056.55,
+      "speed_kmh": 177.1,
+      "gear": 5,
+      "rpm": 5567,
+      "steer_norm": 0.027
+    },
+    {
+      "progress": 0.6197,
+      "distance_m": 1058.11,
+      "speed_kmh": 177.4,
+      "gear": 5,
+      "rpm": 5584,
+      "steer_norm": 0.028
+    },
+    {
+      "progress": 0.6206,
+      "distance_m": 1059.67,
+      "speed_kmh": 177.8,
+      "gear": 5,
+      "rpm": 5600,
+      "steer_norm": 0.028
+    },
+    {
+      "progress": 0.6215,
+      "distance_m": 1061.23,
+      "speed_kmh": 178.1,
+      "gear": 5,
+      "rpm": 5616,
+      "steer_norm": 0.028
+    },
+    {
+      "progress": 0.6224,
+      "distance_m": 1062.79,
+      "speed_kmh": 178.5,
+      "gear": 5,
+      "rpm": 5631,
+      "steer_norm": 0.029
+    },
+    {
+      "progress": 0.6234,
+      "distance_m": 1064.36,
+      "speed_kmh": 178.8,
+      "gear": 5,
+      "rpm": 5646,
+      "steer_norm": 0.029
+    },
+    {
+      "progress": 0.6243,
+      "distance_m": 1065.93,
+      "speed_kmh": 179.1,
+      "gear": 5,
+      "rpm": 5659,
+      "steer_norm": 0.029
+    },
+    {
+      "progress": 0.6252,
+      "distance_m": 1067.51,
+      "speed_kmh": 179.4,
+      "gear": 5,
+      "rpm": 5671,
+      "steer_norm": 0.029
+    },
+    {
+      "progress": 0.6261,
+      "distance_m": 1069.08,
+      "speed_kmh": 179.7,
+      "gear": 5,
+      "rpm": 5684,
+      "steer_norm": 0.03
+    },
+    {
+      "progress": 0.6271,
+      "distance_m": 1070.66,
+      "speed_kmh": 179.9,
+      "gear": 5,
+      "rpm": 5696,
+      "steer_norm": 0.03
+    },
+    {
+      "progress": 0.628,
+      "distance_m": 1072.24,
+      "speed_kmh": 180.2,
+      "gear": 5,
+      "rpm": 5707,
+      "steer_norm": 0.03
+    },
+    {
+      "progress": 0.6289,
+      "distance_m": 1073.82,
+      "speed_kmh": 180.5,
+      "gear": 5,
+      "rpm": 5721,
+      "steer_norm": 0.031
+    },
+    {
+      "progress": 0.6298,
+      "distance_m": 1075.41,
+      "speed_kmh": 180.7,
+      "gear": 5,
+      "rpm": 5731,
+      "steer_norm": 0.031
+    },
+    {
+      "progress": 0.6308,
+      "distance_m": 1077.0,
+      "speed_kmh": 181.0,
+      "gear": 5,
+      "rpm": 5744,
+      "steer_norm": 0.031
+    },
+    {
+      "progress": 0.6317,
+      "distance_m": 1078.59,
+      "speed_kmh": 181.2,
+      "gear": 5,
+      "rpm": 5754,
+      "steer_norm": 0.032
+    },
+    {
+      "progress": 0.6326,
+      "distance_m": 1080.18,
+      "speed_kmh": 181.4,
+      "gear": 5,
+      "rpm": 5764,
+      "steer_norm": 0.032
+    },
+    {
+      "progress": 0.6336,
+      "distance_m": 1081.77,
+      "speed_kmh": 181.7,
+      "gear": 5,
+      "rpm": 5775,
+      "steer_norm": 0.032
+    },
+    {
+      "progress": 0.6345,
+      "distance_m": 1083.37,
+      "speed_kmh": 181.9,
+      "gear": 5,
+      "rpm": 5784,
+      "steer_norm": 0.033
+    },
+    {
+      "progress": 0.6354,
+      "distance_m": 1084.96,
+      "speed_kmh": 182.1,
+      "gear": 5,
+      "rpm": 5795,
+      "steer_norm": 0.033
+    },
+    {
+      "progress": 0.6364,
+      "distance_m": 1086.56,
+      "speed_kmh": 182.3,
+      "gear": 5,
+      "rpm": 5803,
+      "steer_norm": 0.033
+    },
+    {
+      "progress": 0.6373,
+      "distance_m": 1088.16,
+      "speed_kmh": 182.5,
+      "gear": 5,
+      "rpm": 5814,
+      "steer_norm": 0.034
+    },
+    {
+      "progress": 0.6382,
+      "distance_m": 1089.77,
+      "speed_kmh": 182.7,
+      "gear": 5,
+      "rpm": 5821,
+      "steer_norm": 0.034
+    },
+    {
+      "progress": 0.6392,
+      "distance_m": 1091.37,
+      "speed_kmh": 182.9,
+      "gear": 5,
+      "rpm": 5829,
+      "steer_norm": 0.034
+    },
+    {
+      "progress": 0.6401,
+      "distance_m": 1092.98,
+      "speed_kmh": 183.1,
+      "gear": 5,
+      "rpm": 5838,
+      "steer_norm": 0.034
+    },
+    {
+      "progress": 0.6411,
+      "distance_m": 1094.59,
+      "speed_kmh": 183.3,
+      "gear": 5,
+      "rpm": 5846,
+      "steer_norm": 0.035
+    },
+    {
+      "progress": 0.642,
+      "distance_m": 1096.19,
+      "speed_kmh": 183.4,
+      "gear": 5,
+      "rpm": 5854,
+      "steer_norm": 0.035
+    },
+    {
+      "progress": 0.643,
+      "distance_m": 1097.81,
+      "speed_kmh": 183.6,
+      "gear": 5,
+      "rpm": 5862,
+      "steer_norm": 0.035
+    },
+    {
+      "progress": 0.6439,
+      "distance_m": 1099.42,
+      "speed_kmh": 183.8,
+      "gear": 5,
+      "rpm": 5870,
+      "steer_norm": 0.036
+    },
+    {
+      "progress": 0.6448,
+      "distance_m": 1101.03,
+      "speed_kmh": 183.9,
+      "gear": 5,
+      "rpm": 5877,
+      "steer_norm": 0.036
+    },
+    {
+      "progress": 0.6458,
+      "distance_m": 1102.65,
+      "speed_kmh": 184.1,
+      "gear": 5,
+      "rpm": 5885,
+      "steer_norm": 0.036
+    },
+    {
+      "progress": 0.6467,
+      "distance_m": 1104.26,
+      "speed_kmh": 184.3,
+      "gear": 5,
+      "rpm": 5892,
+      "steer_norm": 0.036
+    },
+    {
+      "progress": 0.6477,
+      "distance_m": 1105.88,
+      "speed_kmh": 184.4,
+      "gear": 5,
+      "rpm": 5899,
+      "steer_norm": 0.037
+    },
+    {
+      "progress": 0.6486,
+      "distance_m": 1107.5,
+      "speed_kmh": 184.6,
+      "gear": 5,
+      "rpm": 5906,
+      "steer_norm": 0.037
+    },
+    {
+      "progress": 0.6496,
+      "distance_m": 1109.12,
+      "speed_kmh": 184.7,
+      "gear": 5,
+      "rpm": 5913,
+      "steer_norm": 0.037
+    },
+    {
+      "progress": 0.6505,
+      "distance_m": 1110.74,
+      "speed_kmh": 184.9,
+      "gear": 5,
+      "rpm": 5920,
+      "steer_norm": 0.038
+    },
+    {
+      "progress": 0.6515,
+      "distance_m": 1112.37,
+      "speed_kmh": 185.0,
+      "gear": 5,
+      "rpm": 5926,
+      "steer_norm": 0.038
+    },
+    {
+      "progress": 0.6524,
+      "distance_m": 1113.99,
+      "speed_kmh": 185.2,
+      "gear": 5,
+      "rpm": 5933,
+      "steer_norm": 0.038
+    },
+    {
+      "progress": 0.6534,
+      "distance_m": 1115.62,
+      "speed_kmh": 185.3,
+      "gear": 5,
+      "rpm": 5939,
+      "steer_norm": 0.038
+    },
+    {
+      "progress": 0.6543,
+      "distance_m": 1117.24,
+      "speed_kmh": 185.4,
+      "gear": 5,
+      "rpm": 5943,
+      "steer_norm": 0.039
+    },
+    {
+      "progress": 0.6553,
+      "distance_m": 1118.87,
+      "speed_kmh": 185.5,
+      "gear": 5,
+      "rpm": 5946,
+      "steer_norm": 0.039
+    },
+    {
+      "progress": 0.6562,
+      "distance_m": 1120.5,
+      "speed_kmh": 185.4,
+      "gear": 5,
+      "rpm": 5944,
+      "steer_norm": 0.039
+    },
+    {
+      "progress": 0.6572,
+      "distance_m": 1122.13,
+      "speed_kmh": 185.3,
+      "gear": 5,
+      "rpm": 5939,
+      "steer_norm": 0.039
+    },
+    {
+      "progress": 0.6581,
+      "distance_m": 1123.75,
+      "speed_kmh": 185.1,
+      "gear": 5,
+      "rpm": 5930,
+      "steer_norm": 0.039
+    },
+    {
+      "progress": 0.6591,
+      "distance_m": 1125.37,
+      "speed_kmh": 184.8,
+      "gear": 5,
+      "rpm": 5916,
+      "steer_norm": 0.04
+    },
+    {
+      "progress": 0.66,
+      "distance_m": 1126.99,
+      "speed_kmh": 184.4,
+      "gear": 5,
+      "rpm": 5899,
+      "steer_norm": 0.04
+    },
+    {
+      "progress": 0.661,
+      "distance_m": 1128.61,
+      "speed_kmh": 183.8,
+      "gear": 5,
+      "rpm": 5869,
+      "steer_norm": 0.04
+    },
+    {
+      "progress": 0.6619,
+      "distance_m": 1130.21,
+      "speed_kmh": 182.6,
+      "gear": 5,
+      "rpm": 5817,
+      "steer_norm": 0.04
+    },
+    {
+      "progress": 0.6629,
+      "distance_m": 1131.81,
+      "speed_kmh": 181.3,
+      "gear": 5,
+      "rpm": 5760,
+      "steer_norm": 0.04
+    },
+    {
+      "progress": 0.6638,
+      "distance_m": 1133.39,
+      "speed_kmh": 180.0,
+      "gear": 5,
+      "rpm": 5701,
+      "steer_norm": 0.041
+    },
+    {
+      "progress": 0.6647,
+      "distance_m": 1134.97,
+      "speed_kmh": 178.7,
+      "gear": 5,
+      "rpm": 5639,
+      "steer_norm": 0.041
+    },
+    {
+      "progress": 0.6656,
+      "distance_m": 1136.53,
+      "speed_kmh": 177.3,
+      "gear": 5,
+      "rpm": 5576,
+      "steer_norm": 0.041
+    },
+    {
+      "progress": 0.6665,
+      "distance_m": 1138.07,
+      "speed_kmh": 175.9,
+      "gear": 5,
+      "rpm": 5513,
+      "steer_norm": 0.041
+    },
+    {
+      "progress": 0.6674,
+      "distance_m": 1139.61,
+      "speed_kmh": 174.4,
+      "gear": 5,
+      "rpm": 5449,
+      "steer_norm": 0.041
+    },
+    {
+      "progress": 0.6683,
+      "distance_m": 1141.13,
+      "speed_kmh": 173.0,
+      "gear": 5,
+      "rpm": 5385,
+      "steer_norm": 0.041
+    },
+    {
+      "progress": 0.6692,
+      "distance_m": 1142.64,
+      "speed_kmh": 171.6,
+      "gear": 5,
+      "rpm": 5321,
+      "steer_norm": 0.041
+    },
+    {
+      "progress": 0.6702,
+      "distance_m": 1144.29,
+      "speed_kmh": 170.0,
+      "gear": 5,
+      "rpm": 5250,
+      "steer_norm": 0.041
+    },
+    {
+      "progress": 0.6711,
+      "distance_m": 1145.92,
+      "speed_kmh": 168.4,
+      "gear": 5,
+      "rpm": 5179,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.6721,
+      "distance_m": 1147.54,
+      "speed_kmh": 166.9,
+      "gear": 5,
+      "rpm": 5108,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.673,
+      "distance_m": 1149.14,
+      "speed_kmh": 165.2,
+      "gear": 5,
+      "rpm": 5035,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.6739,
+      "distance_m": 1150.72,
+      "speed_kmh": 163.6,
+      "gear": 5,
+      "rpm": 4963,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.6749,
+      "distance_m": 1152.29,
+      "speed_kmh": 162.0,
+      "gear": 5,
+      "rpm": 4891,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.6758,
+      "distance_m": 1153.85,
+      "speed_kmh": 160.4,
+      "gear": 5,
+      "rpm": 4818,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.6767,
+      "distance_m": 1155.38,
+      "speed_kmh": 158.8,
+      "gear": 4,
+      "rpm": 6608,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.6776,
+      "distance_m": 1156.91,
+      "speed_kmh": 157.2,
+      "gear": 4,
+      "rpm": 6519,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.6785,
+      "distance_m": 1158.41,
+      "speed_kmh": 155.5,
+      "gear": 4,
+      "rpm": 6429,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.6794,
+      "distance_m": 1160.04,
+      "speed_kmh": 153.8,
+      "gear": 4,
+      "rpm": 6332,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.6803,
+      "distance_m": 1161.65,
+      "speed_kmh": 152.0,
+      "gear": 4,
+      "rpm": 6234,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.6813,
+      "distance_m": 1163.24,
+      "speed_kmh": 150.2,
+      "gear": 4,
+      "rpm": 6137,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.6822,
+      "distance_m": 1164.81,
+      "speed_kmh": 148.5,
+      "gear": 4,
+      "rpm": 6040,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.6831,
+      "distance_m": 1166.36,
+      "speed_kmh": 146.7,
+      "gear": 4,
+      "rpm": 5943,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.684,
+      "distance_m": 1167.89,
+      "speed_kmh": 144.9,
+      "gear": 4,
+      "rpm": 5847,
+      "steer_norm": 0.043
+    },
+    {
+      "progress": 0.6849,
+      "distance_m": 1169.41,
+      "speed_kmh": 143.2,
+      "gear": 4,
+      "rpm": 5750,
+      "steer_norm": 0.043
+    },
+    {
+      "progress": 0.6858,
+      "distance_m": 1171.03,
+      "speed_kmh": 141.3,
+      "gear": 4,
+      "rpm": 5646,
+      "steer_norm": 0.043
+    },
+    {
+      "progress": 0.6868,
+      "distance_m": 1172.63,
+      "speed_kmh": 139.4,
+      "gear": 4,
+      "rpm": 5542,
+      "steer_norm": 0.043
+    },
+    {
+      "progress": 0.6877,
+      "distance_m": 1174.2,
+      "speed_kmh": 137.6,
+      "gear": 4,
+      "rpm": 5440,
+      "steer_norm": 0.043
+    },
+    {
+      "progress": 0.6886,
+      "distance_m": 1175.76,
+      "speed_kmh": 135.7,
+      "gear": 4,
+      "rpm": 5338,
+      "steer_norm": 0.043
+    },
+    {
+      "progress": 0.6895,
+      "distance_m": 1177.3,
+      "speed_kmh": 133.9,
+      "gear": 4,
+      "rpm": 5237,
+      "steer_norm": 0.043
+    },
+    {
+      "progress": 0.6904,
+      "distance_m": 1178.81,
+      "speed_kmh": 132.1,
+      "gear": 4,
+      "rpm": 5138,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.6913,
+      "distance_m": 1180.42,
+      "speed_kmh": 130.3,
+      "gear": 4,
+      "rpm": 5043,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.6923,
+      "distance_m": 1182.01,
+      "speed_kmh": 129.3,
+      "gear": 4,
+      "rpm": 4989,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.6932,
+      "distance_m": 1183.6,
+      "speed_kmh": 128.8,
+      "gear": 4,
+      "rpm": 4958,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.6941,
+      "distance_m": 1185.18,
+      "speed_kmh": 128.4,
+      "gear": 4,
+      "rpm": 4934,
+      "steer_norm": 0.042
+    },
+    {
+      "progress": 0.695,
+      "distance_m": 1186.75,
+      "speed_kmh": 128.0,
+      "gear": 4,
+      "rpm": 4913,
+      "steer_norm": 0.041
+    },
+    {
+      "progress": 0.696,
+      "distance_m": 1188.32,
+      "speed_kmh": 127.6,
+      "gear": 4,
+      "rpm": 4893,
+      "steer_norm": 0.041
+    },
+    {
+      "progress": 0.6969,
+      "distance_m": 1189.88,
+      "speed_kmh": 127.2,
+      "gear": 4,
+      "rpm": 4871,
+      "steer_norm": 0.041
+    },
+    {
+      "progress": 0.6978,
+      "distance_m": 1191.44,
+      "speed_kmh": 126.8,
+      "gear": 4,
+      "rpm": 4849,
+      "steer_norm": 0.04
+    },
+    {
+      "progress": 0.6987,
+      "distance_m": 1193.0,
+      "speed_kmh": 126.4,
+      "gear": 4,
+      "rpm": 4826,
+      "steer_norm": 0.04
+    },
+    {
+      "progress": 0.6996,
+      "distance_m": 1194.55,
+      "speed_kmh": 126.0,
+      "gear": 4,
+      "rpm": 4804,
+      "steer_norm": 0.039
+    },
+    {
+      "progress": 0.7005,
+      "distance_m": 1196.09,
+      "speed_kmh": 125.6,
+      "gear": 4,
+      "rpm": 4782,
+      "steer_norm": 0.039
+    },
+    {
+      "progress": 0.7014,
+      "distance_m": 1197.63,
+      "speed_kmh": 125.2,
+      "gear": 4,
+      "rpm": 4760,
+      "steer_norm": 0.038
+    },
+    {
+      "progress": 0.7023,
+      "distance_m": 1199.17,
+      "speed_kmh": 124.8,
+      "gear": 4,
+      "rpm": 4738,
+      "steer_norm": 0.038
+    },
+    {
+      "progress": 0.7032,
+      "distance_m": 1200.7,
+      "speed_kmh": 124.4,
+      "gear": 4,
+      "rpm": 4719,
+      "steer_norm": 0.038
+    },
+    {
+      "progress": 0.7041,
+      "distance_m": 1202.23,
+      "speed_kmh": 124.1,
+      "gear": 4,
+      "rpm": 4700,
+      "steer_norm": 0.037
+    },
+    {
+      "progress": 0.705,
+      "distance_m": 1203.75,
+      "speed_kmh": 123.8,
+      "gear": 4,
+      "rpm": 4682,
+      "steer_norm": 0.037
+    },
+    {
+      "progress": 0.7059,
+      "distance_m": 1205.27,
+      "speed_kmh": 123.5,
+      "gear": 4,
+      "rpm": 4665,
+      "steer_norm": 0.037
+    },
+    {
+      "progress": 0.7068,
+      "distance_m": 1206.78,
+      "speed_kmh": 123.2,
+      "gear": 4,
+      "rpm": 4648,
+      "steer_norm": 0.036
+    },
+    {
+      "progress": 0.7077,
+      "distance_m": 1208.29,
+      "speed_kmh": 122.9,
+      "gear": 4,
+      "rpm": 4632,
+      "steer_norm": 0.036
+    },
+    {
+      "progress": 0.7085,
+      "distance_m": 1209.8,
+      "speed_kmh": 122.6,
+      "gear": 4,
+      "rpm": 4615,
+      "steer_norm": 0.035
+    },
+    {
+      "progress": 0.7094,
+      "distance_m": 1211.3,
+      "speed_kmh": 122.2,
+      "gear": 4,
+      "rpm": 4598,
+      "steer_norm": 0.035
+    },
+    {
+      "progress": 0.7104,
+      "distance_m": 1212.91,
+      "speed_kmh": 121.9,
+      "gear": 4,
+      "rpm": 4580,
+      "steer_norm": 0.035
+    },
+    {
+      "progress": 0.7113,
+      "distance_m": 1214.51,
+      "speed_kmh": 121.6,
+      "gear": 4,
+      "rpm": 4560,
+      "steer_norm": 0.034
+    },
+    {
+      "progress": 0.7122,
+      "distance_m": 1216.11,
+      "speed_kmh": 121.2,
+      "gear": 4,
+      "rpm": 4540,
+      "steer_norm": 0.034
+    },
+    {
+      "progress": 0.7132,
+      "distance_m": 1217.7,
+      "speed_kmh": 120.8,
+      "gear": 4,
+      "rpm": 4519,
+      "steer_norm": 0.033
+    },
+    {
+      "progress": 0.7141,
+      "distance_m": 1219.29,
+      "speed_kmh": 120.4,
+      "gear": 4,
+      "rpm": 4497,
+      "steer_norm": 0.033
+    },
+    {
+      "progress": 0.715,
+      "distance_m": 1220.87,
+      "speed_kmh": 120.0,
+      "gear": 4,
+      "rpm": 4474,
+      "steer_norm": 0.032
+    },
+    {
+      "progress": 0.716,
+      "distance_m": 1222.45,
+      "speed_kmh": 119.5,
+      "gear": 4,
+      "rpm": 4449,
+      "steer_norm": 0.031
+    },
+    {
+      "progress": 0.7169,
+      "distance_m": 1224.02,
+      "speed_kmh": 119.1,
+      "gear": 4,
+      "rpm": 4424,
+      "steer_norm": 0.031
+    },
+    {
+      "progress": 0.7178,
+      "distance_m": 1225.58,
+      "speed_kmh": 118.6,
+      "gear": 4,
+      "rpm": 4398,
+      "steer_norm": 0.03
+    },
+    {
+      "progress": 0.7187,
+      "distance_m": 1227.14,
+      "speed_kmh": 118.1,
+      "gear": 4,
+      "rpm": 4371,
+      "steer_norm": 0.029
+    },
+    {
+      "progress": 0.7196,
+      "distance_m": 1228.69,
+      "speed_kmh": 117.6,
+      "gear": 4,
+      "rpm": 4342,
+      "steer_norm": 0.028
+    },
+    {
+      "progress": 0.7205,
+      "distance_m": 1230.24,
+      "speed_kmh": 117.1,
+      "gear": 4,
+      "rpm": 4314,
+      "steer_norm": 0.028
+    },
+    {
+      "progress": 0.7214,
+      "distance_m": 1231.77,
+      "speed_kmh": 116.5,
+      "gear": 4,
+      "rpm": 4283,
+      "steer_norm": 0.027
+    },
+    {
+      "progress": 0.7223,
+      "distance_m": 1233.3,
+      "speed_kmh": 116.0,
+      "gear": 4,
+      "rpm": 4254,
+      "steer_norm": 0.026
+    },
+    {
+      "progress": 0.7232,
+      "distance_m": 1234.83,
+      "speed_kmh": 115.4,
+      "gear": 4,
+      "rpm": 4223,
+      "steer_norm": 0.025
+    },
+    {
+      "progress": 0.7241,
+      "distance_m": 1236.34,
+      "speed_kmh": 114.9,
+      "gear": 3,
+      "rpm": 6094,
+      "steer_norm": 0.024
+    },
+    {
+      "progress": 0.725,
+      "distance_m": 1237.85,
+      "speed_kmh": 114.6,
+      "gear": 3,
+      "rpm": 6074,
+      "steer_norm": 0.023
+    },
+    {
+      "progress": 0.7259,
+      "distance_m": 1239.36,
+      "speed_kmh": 114.7,
+      "gear": 3,
+      "rpm": 6077,
+      "steer_norm": 0.023
+    },
+    {
+      "progress": 0.7267,
+      "distance_m": 1240.87,
+      "speed_kmh": 114.9,
+      "gear": 3,
+      "rpm": 6090,
+      "steer_norm": 0.022
+    },
+    {
+      "progress": 0.7276,
+      "distance_m": 1242.39,
+      "speed_kmh": 115.1,
+      "gear": 4,
+      "rpm": 4205,
+      "steer_norm": 0.021
+    },
+    {
+      "progress": 0.7285,
+      "distance_m": 1243.9,
+      "speed_kmh": 115.3,
+      "gear": 4,
+      "rpm": 4219,
+      "steer_norm": 0.02
+    },
+    {
+      "progress": 0.7294,
+      "distance_m": 1245.42,
+      "speed_kmh": 115.6,
+      "gear": 4,
+      "rpm": 4234,
+      "steer_norm": 0.019
+    },
+    {
+      "progress": 0.7303,
+      "distance_m": 1246.95,
+      "speed_kmh": 116.0,
+      "gear": 4,
+      "rpm": 4253,
+      "steer_norm": 0.019
+    },
+    {
+      "progress": 0.7312,
+      "distance_m": 1248.48,
+      "speed_kmh": 116.4,
+      "gear": 4,
+      "rpm": 4274,
+      "steer_norm": 0.018
+    },
+    {
+      "progress": 0.7321,
+      "distance_m": 1250.02,
+      "speed_kmh": 116.8,
+      "gear": 4,
+      "rpm": 4300,
+      "steer_norm": 0.017
+    },
+    {
+      "progress": 0.733,
+      "distance_m": 1251.56,
+      "speed_kmh": 117.3,
+      "gear": 4,
+      "rpm": 4328,
+      "steer_norm": 0.016
+    },
+    {
+      "progress": 0.7339,
+      "distance_m": 1253.11,
+      "speed_kmh": 117.9,
+      "gear": 4,
+      "rpm": 4362,
+      "steer_norm": 0.015
+    },
+    {
+      "progress": 0.7348,
+      "distance_m": 1254.67,
+      "speed_kmh": 118.6,
+      "gear": 4,
+      "rpm": 4397,
+      "steer_norm": 0.015
+    },
+    {
+      "progress": 0.7357,
+      "distance_m": 1256.23,
+      "speed_kmh": 119.3,
+      "gear": 4,
+      "rpm": 4437,
+      "steer_norm": 0.014
+    },
+    {
+      "progress": 0.7367,
+      "distance_m": 1257.81,
+      "speed_kmh": 120.1,
+      "gear": 4,
+      "rpm": 4479,
+      "steer_norm": 0.013
+    },
+    {
+      "progress": 0.7376,
+      "distance_m": 1259.4,
+      "speed_kmh": 120.9,
+      "gear": 4,
+      "rpm": 4522,
+      "steer_norm": 0.013
+    },
+    {
+      "progress": 0.7385,
+      "distance_m": 1261.0,
+      "speed_kmh": 121.6,
+      "gear": 4,
+      "rpm": 4565,
+      "steer_norm": 0.012
+    },
+    {
+      "progress": 0.7395,
+      "distance_m": 1262.61,
+      "speed_kmh": 122.4,
+      "gear": 4,
+      "rpm": 4608,
+      "steer_norm": 0.011
+    },
+    {
+      "progress": 0.7404,
+      "distance_m": 1264.12,
+      "speed_kmh": 123.1,
+      "gear": 4,
+      "rpm": 4646,
+      "steer_norm": 0.011
+    },
+    {
+      "progress": 0.7412,
+      "distance_m": 1265.63,
+      "speed_kmh": 123.8,
+      "gear": 4,
+      "rpm": 4685,
+      "steer_norm": 0.01
+    },
+    {
+      "progress": 0.7421,
+      "distance_m": 1267.16,
+      "speed_kmh": 124.5,
+      "gear": 4,
+      "rpm": 4720,
+      "steer_norm": 0.01
+    },
+    {
+      "progress": 0.743,
+      "distance_m": 1268.7,
+      "speed_kmh": 125.1,
+      "gear": 4,
+      "rpm": 4758,
+      "steer_norm": 0.009
+    },
+    {
+      "progress": 0.7439,
+      "distance_m": 1270.24,
+      "speed_kmh": 125.9,
+      "gear": 4,
+      "rpm": 4798,
+      "steer_norm": 0.009
+    },
+    {
+      "progress": 0.7449,
+      "distance_m": 1271.79,
+      "speed_kmh": 126.6,
+      "gear": 4,
+      "rpm": 4837,
+      "steer_norm": 0.008
+    },
+    {
+      "progress": 0.7458,
+      "distance_m": 1273.35,
+      "speed_kmh": 127.3,
+      "gear": 4,
+      "rpm": 4874,
+      "steer_norm": 0.007
+    },
+    {
+      "progress": 0.7467,
+      "distance_m": 1274.92,
+      "speed_kmh": 127.9,
+      "gear": 4,
+      "rpm": 4908,
+      "steer_norm": 0.007
+    },
+    {
+      "progress": 0.7476,
+      "distance_m": 1276.5,
+      "speed_kmh": 128.4,
+      "gear": 4,
+      "rpm": 4937,
+      "steer_norm": 0.006
+    },
+    {
+      "progress": 0.7485,
+      "distance_m": 1278.08,
+      "speed_kmh": 129.0,
+      "gear": 4,
+      "rpm": 4971,
+      "steer_norm": 0.006
+    },
+    {
+      "progress": 0.7495,
+      "distance_m": 1279.67,
+      "speed_kmh": 129.5,
+      "gear": 4,
+      "rpm": 4998,
+      "steer_norm": 0.005
+    },
+    {
+      "progress": 0.7504,
+      "distance_m": 1281.27,
+      "speed_kmh": 129.9,
+      "gear": 4,
+      "rpm": 5020,
+      "steer_norm": 0.004
+    },
+    {
+      "progress": 0.7513,
+      "distance_m": 1282.87,
+      "speed_kmh": 130.4,
+      "gear": 4,
+      "rpm": 5046,
+      "steer_norm": 0.004
+    },
+    {
+      "progress": 0.7523,
+      "distance_m": 1284.47,
+      "speed_kmh": 130.7,
+      "gear": 4,
+      "rpm": 5064,
+      "steer_norm": 0.003
+    },
+    {
+      "progress": 0.7532,
+      "distance_m": 1286.08,
+      "speed_kmh": 131.2,
+      "gear": 4,
+      "rpm": 5089,
+      "steer_norm": 0.002
+    },
+    {
+      "progress": 0.7542,
+      "distance_m": 1287.7,
+      "speed_kmh": 131.7,
+      "gear": 4,
+      "rpm": 5119,
+      "steer_norm": 0.002
+    },
+    {
+      "progress": 0.7551,
+      "distance_m": 1289.21,
+      "speed_kmh": 132.3,
+      "gear": 4,
+      "rpm": 5150,
+      "steer_norm": 0.001
+    },
+    {
+      "progress": 0.7559,
+      "distance_m": 1290.72,
+      "speed_kmh": 132.7,
+      "gear": 4,
+      "rpm": 5174,
+      "steer_norm": 0.0
+    },
+    {
+      "progress": 0.7568,
+      "distance_m": 1292.24,
+      "speed_kmh": 133.2,
+      "gear": 4,
+      "rpm": 5200,
+      "steer_norm": -0.0
+    },
+    {
+      "progress": 0.7577,
+      "distance_m": 1293.76,
+      "speed_kmh": 133.7,
+      "gear": 4,
+      "rpm": 5226,
+      "steer_norm": -0.001
+    },
+    {
+      "progress": 0.7586,
+      "distance_m": 1295.29,
+      "speed_kmh": 134.1,
+      "gear": 4,
+      "rpm": 5252,
+      "steer_norm": -0.002
+    },
+    {
+      "progress": 0.7595,
+      "distance_m": 1296.83,
+      "speed_kmh": 134.7,
+      "gear": 4,
+      "rpm": 5283,
+      "steer_norm": -0.002
+    },
+    {
+      "progress": 0.7604,
+      "distance_m": 1298.37,
+      "speed_kmh": 135.2,
+      "gear": 4,
+      "rpm": 5313,
+      "steer_norm": -0.003
+    },
+    {
+      "progress": 0.7613,
+      "distance_m": 1299.92,
+      "speed_kmh": 135.7,
+      "gear": 4,
+      "rpm": 5339,
+      "steer_norm": -0.003
+    },
+    {
+      "progress": 0.7622,
+      "distance_m": 1301.47,
+      "speed_kmh": 136.3,
+      "gear": 4,
+      "rpm": 5373,
+      "steer_norm": -0.004
+    },
+    {
+      "progress": 0.7631,
+      "distance_m": 1303.03,
+      "speed_kmh": 136.9,
+      "gear": 4,
+      "rpm": 5406,
+      "steer_norm": -0.004
+    },
+    {
+      "progress": 0.7641,
+      "distance_m": 1304.6,
+      "speed_kmh": 137.5,
+      "gear": 4,
+      "rpm": 5439,
+      "steer_norm": -0.005
+    },
+    {
+      "progress": 0.765,
+      "distance_m": 1306.18,
+      "speed_kmh": 138.2,
+      "gear": 4,
+      "rpm": 5476,
+      "steer_norm": -0.005
+    },
+    {
+      "progress": 0.7659,
+      "distance_m": 1307.76,
+      "speed_kmh": 138.6,
+      "gear": 4,
+      "rpm": 5495,
+      "steer_norm": -0.006
+    },
+    {
+      "progress": 0.7668,
+      "distance_m": 1309.34,
+      "speed_kmh": 139.1,
+      "gear": 4,
+      "rpm": 5524,
+      "steer_norm": -0.006
+    },
+    {
+      "progress": 0.7678,
+      "distance_m": 1310.93,
+      "speed_kmh": 139.8,
+      "gear": 4,
+      "rpm": 5561,
+      "steer_norm": -0.007
+    },
+    {
+      "progress": 0.7687,
+      "distance_m": 1312.53,
+      "speed_kmh": 140.4,
+      "gear": 4,
+      "rpm": 5596,
+      "steer_norm": -0.007
+    },
+    {
+      "progress": 0.7697,
+      "distance_m": 1314.14,
+      "speed_kmh": 141.0,
+      "gear": 4,
+      "rpm": 5632,
+      "steer_norm": -0.008
+    },
+    {
+      "progress": 0.7706,
+      "distance_m": 1315.76,
+      "speed_kmh": 141.6,
+      "gear": 4,
+      "rpm": 5663,
+      "steer_norm": -0.008
+    },
+    {
+      "progress": 0.7716,
+      "distance_m": 1317.38,
+      "speed_kmh": 142.2,
+      "gear": 4,
+      "rpm": 5696,
+      "steer_norm": -0.008
+    },
+    {
+      "progress": 0.7724,
+      "distance_m": 1318.88,
+      "speed_kmh": 142.8,
+      "gear": 4,
+      "rpm": 5729,
+      "steer_norm": -0.009
+    },
+    {
+      "progress": 0.7733,
+      "distance_m": 1320.39,
+      "speed_kmh": 143.3,
+      "gear": 4,
+      "rpm": 5754,
+      "steer_norm": -0.009
+    },
+    {
+      "progress": 0.7742,
+      "distance_m": 1321.9,
+      "speed_kmh": 143.9,
+      "gear": 4,
+      "rpm": 5787,
+      "steer_norm": -0.009
+    },
+    {
+      "progress": 0.7751,
+      "distance_m": 1323.42,
+      "speed_kmh": 144.5,
+      "gear": 4,
+      "rpm": 5821,
+      "steer_norm": -0.01
+    },
+    {
+      "progress": 0.776,
+      "distance_m": 1324.95,
+      "speed_kmh": 145.1,
+      "gear": 4,
+      "rpm": 5853,
+      "steer_norm": -0.01
+    },
+    {
+      "progress": 0.7769,
+      "distance_m": 1326.48,
+      "speed_kmh": 145.0,
+      "gear": 4,
+      "rpm": 5847,
+      "steer_norm": -0.01
+    },
+    {
+      "progress": 0.7778,
+      "distance_m": 1328.0,
+      "speed_kmh": 143.8,
+      "gear": 4,
+      "rpm": 5783,
+      "steer_norm": -0.011
+    },
+    {
+      "progress": 0.7787,
+      "distance_m": 1329.51,
+      "speed_kmh": 142.4,
+      "gear": 4,
+      "rpm": 5706,
+      "steer_norm": -0.011
+    },
+    {
+      "progress": 0.7796,
+      "distance_m": 1331.12,
+      "speed_kmh": 140.6,
+      "gear": 4,
+      "rpm": 5608,
+      "steer_norm": -0.011
+    },
+    {
+      "progress": 0.7805,
+      "distance_m": 1332.71,
+      "speed_kmh": 138.8,
+      "gear": 4,
+      "rpm": 5509,
+      "steer_norm": -0.011
+    },
+    {
+      "progress": 0.7815,
+      "distance_m": 1334.28,
+      "speed_kmh": 136.9,
+      "gear": 4,
+      "rpm": 5405,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.7824,
+      "distance_m": 1335.83,
+      "speed_kmh": 135.0,
+      "gear": 4,
+      "rpm": 5298,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.7833,
+      "distance_m": 1337.36,
+      "speed_kmh": 133.0,
+      "gear": 4,
+      "rpm": 5189,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.7841,
+      "distance_m": 1338.87,
+      "speed_kmh": 131.2,
+      "gear": 4,
+      "rpm": 5090,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.7851,
+      "distance_m": 1340.47,
+      "speed_kmh": 129.1,
+      "gear": 4,
+      "rpm": 4977,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.786,
+      "distance_m": 1342.04,
+      "speed_kmh": 127.1,
+      "gear": 4,
+      "rpm": 4865,
+      "steer_norm": -0.011
+    },
+    {
+      "progress": 0.7869,
+      "distance_m": 1343.59,
+      "speed_kmh": 125.0,
+      "gear": 4,
+      "rpm": 4750,
+      "steer_norm": -0.011
+    },
+    {
+      "progress": 0.7878,
+      "distance_m": 1345.11,
+      "speed_kmh": 122.9,
+      "gear": 4,
+      "rpm": 4635,
+      "steer_norm": -0.011
+    },
+    {
+      "progress": 0.7887,
+      "distance_m": 1346.71,
+      "speed_kmh": 120.8,
+      "gear": 4,
+      "rpm": 4520,
+      "steer_norm": -0.011
+    },
+    {
+      "progress": 0.7897,
+      "distance_m": 1348.29,
+      "speed_kmh": 118.8,
+      "gear": 4,
+      "rpm": 4410,
+      "steer_norm": -0.011
+    },
+    {
+      "progress": 0.7906,
+      "distance_m": 1349.84,
+      "speed_kmh": 116.9,
+      "gear": 4,
+      "rpm": 4305,
+      "steer_norm": -0.011
+    },
+    {
+      "progress": 0.7915,
+      "distance_m": 1351.36,
+      "speed_kmh": 115.3,
+      "gear": 4,
+      "rpm": 4219,
+      "steer_norm": -0.011
+    },
+    {
+      "progress": 0.7923,
+      "distance_m": 1352.87,
+      "speed_kmh": 113.9,
+      "gear": 3,
+      "rpm": 6029,
+      "steer_norm": -0.011
+    },
+    {
+      "progress": 0.7933,
+      "distance_m": 1354.46,
+      "speed_kmh": 112.5,
+      "gear": 3,
+      "rpm": 5935,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.7942,
+      "distance_m": 1356.03,
+      "speed_kmh": 111.2,
+      "gear": 3,
+      "rpm": 5850,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.7951,
+      "distance_m": 1357.58,
+      "speed_kmh": 109.9,
+      "gear": 3,
+      "rpm": 5770,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.796,
+      "distance_m": 1359.12,
+      "speed_kmh": 108.6,
+      "gear": 3,
+      "rpm": 5686,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.7969,
+      "distance_m": 1360.63,
+      "speed_kmh": 106.5,
+      "gear": 3,
+      "rpm": 5548,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.7978,
+      "distance_m": 1362.2,
+      "speed_kmh": 104.5,
+      "gear": 3,
+      "rpm": 5415,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.7987,
+      "distance_m": 1363.74,
+      "speed_kmh": 103.1,
+      "gear": 3,
+      "rpm": 5324,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.7996,
+      "distance_m": 1365.27,
+      "speed_kmh": 102.1,
+      "gear": 3,
+      "rpm": 5259,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.8005,
+      "distance_m": 1366.79,
+      "speed_kmh": 101.1,
+      "gear": 3,
+      "rpm": 5199,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.8014,
+      "distance_m": 1368.29,
+      "speed_kmh": 100.3,
+      "gear": 3,
+      "rpm": 5144,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.8023,
+      "distance_m": 1369.87,
+      "speed_kmh": 99.4,
+      "gear": 3,
+      "rpm": 5088,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.8032,
+      "distance_m": 1371.43,
+      "speed_kmh": 98.5,
+      "gear": 3,
+      "rpm": 5028,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.8041,
+      "distance_m": 1372.98,
+      "speed_kmh": 97.6,
+      "gear": 3,
+      "rpm": 4966,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.805,
+      "distance_m": 1374.52,
+      "speed_kmh": 96.6,
+      "gear": 3,
+      "rpm": 4902,
+      "steer_norm": -0.014
+    },
+    {
+      "progress": 0.8059,
+      "distance_m": 1376.03,
+      "speed_kmh": 95.4,
+      "gear": 3,
+      "rpm": 4828,
+      "steer_norm": -0.014
+    },
+    {
+      "progress": 0.8068,
+      "distance_m": 1377.61,
+      "speed_kmh": 94.1,
+      "gear": 3,
+      "rpm": 4740,
+      "steer_norm": -0.014
+    },
+    {
+      "progress": 0.8077,
+      "distance_m": 1379.17,
+      "speed_kmh": 92.7,
+      "gear": 3,
+      "rpm": 4650,
+      "steer_norm": -0.015
+    },
+    {
+      "progress": 0.8086,
+      "distance_m": 1380.7,
+      "speed_kmh": 91.2,
+      "gear": 3,
+      "rpm": 4554,
+      "steer_norm": -0.015
+    },
+    {
+      "progress": 0.8095,
+      "distance_m": 1382.21,
+      "speed_kmh": 90.0,
+      "gear": 3,
+      "rpm": 4474,
+      "steer_norm": -0.016
+    },
+    {
+      "progress": 0.8104,
+      "distance_m": 1383.78,
+      "speed_kmh": 89.0,
+      "gear": 3,
+      "rpm": 4411,
+      "steer_norm": -0.017
+    },
+    {
+      "progress": 0.8114,
+      "distance_m": 1385.34,
+      "speed_kmh": 88.2,
+      "gear": 3,
+      "rpm": 4355,
+      "steer_norm": -0.018
+    },
+    {
+      "progress": 0.8123,
+      "distance_m": 1386.88,
+      "speed_kmh": 87.3,
+      "gear": 3,
+      "rpm": 4301,
+      "steer_norm": -0.019
+    },
+    {
+      "progress": 0.8132,
+      "distance_m": 1388.41,
+      "speed_kmh": 86.6,
+      "gear": 3,
+      "rpm": 4254,
+      "steer_norm": -0.02
+    },
+    {
+      "progress": 0.814,
+      "distance_m": 1389.92,
+      "speed_kmh": 85.9,
+      "gear": 3,
+      "rpm": 4207,
+      "steer_norm": -0.021
+    },
+    {
+      "progress": 0.815,
+      "distance_m": 1391.5,
+      "speed_kmh": 85.2,
+      "gear": 3,
+      "rpm": 4159,
+      "steer_norm": -0.022
+    },
+    {
+      "progress": 0.8159,
+      "distance_m": 1393.06,
+      "speed_kmh": 84.4,
+      "gear": 3,
+      "rpm": 4113,
+      "steer_norm": -0.023
+    },
+    {
+      "progress": 0.8168,
+      "distance_m": 1394.61,
+      "speed_kmh": 83.8,
+      "gear": 3,
+      "rpm": 4069,
+      "steer_norm": -0.024
+    },
+    {
+      "progress": 0.8177,
+      "distance_m": 1396.15,
+      "speed_kmh": 83.1,
+      "gear": 3,
+      "rpm": 4028,
+      "steer_norm": -0.026
+    },
+    {
+      "progress": 0.8186,
+      "distance_m": 1397.68,
+      "speed_kmh": 82.5,
+      "gear": 3,
+      "rpm": 3987,
+      "steer_norm": -0.027
+    },
+    {
+      "progress": 0.8195,
+      "distance_m": 1399.19,
+      "speed_kmh": 81.8,
+      "gear": 3,
+      "rpm": 3943,
+      "steer_norm": -0.028
+    },
+    {
+      "progress": 0.8204,
+      "distance_m": 1400.76,
+      "speed_kmh": 81.1,
+      "gear": 3,
+      "rpm": 3896,
+      "steer_norm": -0.029
+    },
+    {
+      "progress": 0.8213,
+      "distance_m": 1402.32,
+      "speed_kmh": 80.3,
+      "gear": 3,
+      "rpm": 3845,
+      "steer_norm": -0.03
+    },
+    {
+      "progress": 0.8222,
+      "distance_m": 1403.87,
+      "speed_kmh": 79.6,
+      "gear": 3,
+      "rpm": 3797,
+      "steer_norm": -0.031
+    },
+    {
+      "progress": 0.8231,
+      "distance_m": 1405.4,
+      "speed_kmh": 78.9,
+      "gear": 3,
+      "rpm": 3756,
+      "steer_norm": -0.033
+    },
+    {
+      "progress": 0.824,
+      "distance_m": 1406.92,
+      "speed_kmh": 78.4,
+      "gear": 3,
+      "rpm": 3723,
+      "steer_norm": -0.034
+    },
+    {
+      "progress": 0.8249,
+      "distance_m": 1408.43,
+      "speed_kmh": 77.9,
+      "gear": 3,
+      "rpm": 3690,
+      "steer_norm": -0.035
+    },
+    {
+      "progress": 0.8258,
+      "distance_m": 1410.0,
+      "speed_kmh": 77.4,
+      "gear": 3,
+      "rpm": 3657,
+      "steer_norm": -0.036
+    },
+    {
+      "progress": 0.8267,
+      "distance_m": 1411.55,
+      "speed_kmh": 76.9,
+      "gear": 3,
+      "rpm": 3625,
+      "steer_norm": -0.038
+    },
+    {
+      "progress": 0.8276,
+      "distance_m": 1413.1,
+      "speed_kmh": 76.5,
+      "gear": 3,
+      "rpm": 3597,
+      "steer_norm": -0.039
+    },
+    {
+      "progress": 0.8285,
+      "distance_m": 1414.65,
+      "speed_kmh": 76.2,
+      "gear": 3,
+      "rpm": 3578,
+      "steer_norm": -0.04
+    },
+    {
+      "progress": 0.8294,
+      "distance_m": 1416.18,
+      "speed_kmh": 76.0,
+      "gear": 3,
+      "rpm": 3563,
+      "steer_norm": -0.041
+    },
+    {
+      "progress": 0.8303,
+      "distance_m": 1417.71,
+      "speed_kmh": 75.8,
+      "gear": 3,
+      "rpm": 3548,
+      "steer_norm": -0.042
+    },
+    {
+      "progress": 0.8312,
+      "distance_m": 1419.24,
+      "speed_kmh": 75.6,
+      "gear": 3,
+      "rpm": 3535,
+      "steer_norm": -0.043
+    },
+    {
+      "progress": 0.8321,
+      "distance_m": 1420.77,
+      "speed_kmh": 75.5,
+      "gear": 3,
+      "rpm": 3529,
+      "steer_norm": -0.044
+    },
+    {
+      "progress": 0.833,
+      "distance_m": 1422.29,
+      "speed_kmh": 75.6,
+      "gear": 3,
+      "rpm": 3536,
+      "steer_norm": -0.044
+    },
+    {
+      "progress": 0.8339,
+      "distance_m": 1423.82,
+      "speed_kmh": 75.8,
+      "gear": 3,
+      "rpm": 3549,
+      "steer_norm": -0.045
+    },
+    {
+      "progress": 0.8348,
+      "distance_m": 1425.35,
+      "speed_kmh": 76.1,
+      "gear": 3,
+      "rpm": 3570,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8357,
+      "distance_m": 1426.9,
+      "speed_kmh": 76.7,
+      "gear": 3,
+      "rpm": 3610,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.8366,
+      "distance_m": 1428.46,
+      "speed_kmh": 77.5,
+      "gear": 3,
+      "rpm": 3659,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.8375,
+      "distance_m": 1429.96,
+      "speed_kmh": 78.3,
+      "gear": 3,
+      "rpm": 3714,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.8384,
+      "distance_m": 1431.48,
+      "speed_kmh": 79.1,
+      "gear": 3,
+      "rpm": 3768,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.8393,
+      "distance_m": 1433.02,
+      "speed_kmh": 79.8,
+      "gear": 3,
+      "rpm": 3814,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.8402,
+      "distance_m": 1434.57,
+      "speed_kmh": 80.7,
+      "gear": 3,
+      "rpm": 3869,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.8411,
+      "distance_m": 1436.14,
+      "speed_kmh": 81.6,
+      "gear": 3,
+      "rpm": 3929,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.842,
+      "distance_m": 1437.66,
+      "speed_kmh": 82.6,
+      "gear": 3,
+      "rpm": 3996,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.8429,
+      "distance_m": 1439.19,
+      "speed_kmh": 83.7,
+      "gear": 3,
+      "rpm": 4065,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.8438,
+      "distance_m": 1440.75,
+      "speed_kmh": 84.9,
+      "gear": 3,
+      "rpm": 4146,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.8447,
+      "distance_m": 1442.25,
+      "speed_kmh": 86.2,
+      "gear": 3,
+      "rpm": 4228,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.8456,
+      "distance_m": 1443.78,
+      "speed_kmh": 87.5,
+      "gear": 3,
+      "rpm": 4313,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.8465,
+      "distance_m": 1445.33,
+      "speed_kmh": 88.8,
+      "gear": 3,
+      "rpm": 4394,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.8474,
+      "distance_m": 1446.9,
+      "speed_kmh": 89.9,
+      "gear": 3,
+      "rpm": 4465,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.8483,
+      "distance_m": 1448.41,
+      "speed_kmh": 90.7,
+      "gear": 3,
+      "rpm": 4520,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.8492,
+      "distance_m": 1449.93,
+      "speed_kmh": 91.5,
+      "gear": 3,
+      "rpm": 4573,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.8501,
+      "distance_m": 1451.46,
+      "speed_kmh": 92.4,
+      "gear": 3,
+      "rpm": 4629,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.851,
+      "distance_m": 1453.01,
+      "speed_kmh": 93.1,
+      "gear": 3,
+      "rpm": 4674,
+      "steer_norm": -0.05
+    },
+    {
+      "progress": 0.8519,
+      "distance_m": 1454.57,
+      "speed_kmh": 93.7,
+      "gear": 3,
+      "rpm": 4716,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.8528,
+      "distance_m": 1456.14,
+      "speed_kmh": 94.4,
+      "gear": 3,
+      "rpm": 4759,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.8537,
+      "distance_m": 1457.72,
+      "speed_kmh": 95.1,
+      "gear": 3,
+      "rpm": 4807,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.8546,
+      "distance_m": 1459.23,
+      "speed_kmh": 95.5,
+      "gear": 3,
+      "rpm": 4831,
+      "steer_norm": -0.049
+    },
+    {
+      "progress": 0.8555,
+      "distance_m": 1460.74,
+      "speed_kmh": 95.9,
+      "gear": 3,
+      "rpm": 4857,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.8564,
+      "distance_m": 1462.26,
+      "speed_kmh": 96.5,
+      "gear": 3,
+      "rpm": 4896,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.8573,
+      "distance_m": 1463.79,
+      "speed_kmh": 97.2,
+      "gear": 3,
+      "rpm": 4943,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.8582,
+      "distance_m": 1465.33,
+      "speed_kmh": 98.0,
+      "gear": 3,
+      "rpm": 4993,
+      "steer_norm": -0.048
+    },
+    {
+      "progress": 0.8591,
+      "distance_m": 1466.89,
+      "speed_kmh": 98.8,
+      "gear": 3,
+      "rpm": 5047,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.86,
+      "distance_m": 1468.46,
+      "speed_kmh": 99.4,
+      "gear": 3,
+      "rpm": 5085,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.861,
+      "distance_m": 1470.03,
+      "speed_kmh": 100.4,
+      "gear": 3,
+      "rpm": 5150,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.8618,
+      "distance_m": 1471.54,
+      "speed_kmh": 101.6,
+      "gear": 3,
+      "rpm": 5227,
+      "steer_norm": -0.047
+    },
+    {
+      "progress": 0.8627,
+      "distance_m": 1473.07,
+      "speed_kmh": 102.7,
+      "gear": 3,
+      "rpm": 5303,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8636,
+      "distance_m": 1474.61,
+      "speed_kmh": 103.8,
+      "gear": 3,
+      "rpm": 5372,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8646,
+      "distance_m": 1476.17,
+      "speed_kmh": 104.8,
+      "gear": 3,
+      "rpm": 5434,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8655,
+      "distance_m": 1477.74,
+      "speed_kmh": 106.1,
+      "gear": 3,
+      "rpm": 5518,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8664,
+      "distance_m": 1479.33,
+      "speed_kmh": 106.9,
+      "gear": 3,
+      "rpm": 5571,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8673,
+      "distance_m": 1480.84,
+      "speed_kmh": 107.8,
+      "gear": 3,
+      "rpm": 5630,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8682,
+      "distance_m": 1482.36,
+      "speed_kmh": 108.7,
+      "gear": 3,
+      "rpm": 5692,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8691,
+      "distance_m": 1483.9,
+      "speed_kmh": 109.8,
+      "gear": 3,
+      "rpm": 5760,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.87,
+      "distance_m": 1485.45,
+      "speed_kmh": 110.9,
+      "gear": 3,
+      "rpm": 5835,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8709,
+      "distance_m": 1487.02,
+      "speed_kmh": 111.9,
+      "gear": 3,
+      "rpm": 5897,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8718,
+      "distance_m": 1488.6,
+      "speed_kmh": 112.8,
+      "gear": 3,
+      "rpm": 5958,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8728,
+      "distance_m": 1490.19,
+      "speed_kmh": 114.0,
+      "gear": 3,
+      "rpm": 6033,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8736,
+      "distance_m": 1491.7,
+      "speed_kmh": 115.1,
+      "gear": 4,
+      "rpm": 4206,
+      "steer_norm": -0.045
+    },
+    {
+      "progress": 0.8745,
+      "distance_m": 1493.22,
+      "speed_kmh": 116.1,
+      "gear": 4,
+      "rpm": 4260,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8754,
+      "distance_m": 1494.76,
+      "speed_kmh": 117.0,
+      "gear": 4,
+      "rpm": 4311,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8763,
+      "distance_m": 1496.31,
+      "speed_kmh": 117.8,
+      "gear": 4,
+      "rpm": 4352,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8773,
+      "distance_m": 1497.86,
+      "speed_kmh": 118.7,
+      "gear": 4,
+      "rpm": 4405,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8782,
+      "distance_m": 1499.44,
+      "speed_kmh": 119.8,
+      "gear": 4,
+      "rpm": 4465,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8791,
+      "distance_m": 1501.02,
+      "speed_kmh": 120.9,
+      "gear": 4,
+      "rpm": 4524,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.88,
+      "distance_m": 1502.62,
+      "speed_kmh": 120.9,
+      "gear": 4,
+      "rpm": 4525,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.881,
+      "distance_m": 1504.2,
+      "speed_kmh": 119.5,
+      "gear": 4,
+      "rpm": 4449,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8819,
+      "distance_m": 1505.75,
+      "speed_kmh": 117.4,
+      "gear": 4,
+      "rpm": 4333,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8828,
+      "distance_m": 1507.29,
+      "speed_kmh": 115.5,
+      "gear": 4,
+      "rpm": 4229,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8837,
+      "distance_m": 1508.79,
+      "speed_kmh": 113.5,
+      "gear": 3,
+      "rpm": 6004,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8846,
+      "distance_m": 1510.37,
+      "speed_kmh": 111.4,
+      "gear": 3,
+      "rpm": 5867,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8855,
+      "distance_m": 1511.91,
+      "speed_kmh": 109.0,
+      "gear": 3,
+      "rpm": 5712,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8864,
+      "distance_m": 1513.43,
+      "speed_kmh": 107.5,
+      "gear": 3,
+      "rpm": 5613,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8873,
+      "distance_m": 1515.01,
+      "speed_kmh": 104.7,
+      "gear": 3,
+      "rpm": 5433,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8882,
+      "distance_m": 1516.55,
+      "speed_kmh": 102.1,
+      "gear": 3,
+      "rpm": 5263,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8891,
+      "distance_m": 1518.05,
+      "speed_kmh": 100.1,
+      "gear": 3,
+      "rpm": 5129,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.89,
+      "distance_m": 1519.61,
+      "speed_kmh": 97.8,
+      "gear": 3,
+      "rpm": 4979,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8909,
+      "distance_m": 1521.14,
+      "speed_kmh": 95.4,
+      "gear": 3,
+      "rpm": 4828,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8918,
+      "distance_m": 1522.7,
+      "speed_kmh": 92.4,
+      "gear": 3,
+      "rpm": 4628,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8927,
+      "distance_m": 1524.22,
+      "speed_kmh": 89.9,
+      "gear": 3,
+      "rpm": 4467,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8936,
+      "distance_m": 1525.77,
+      "speed_kmh": 88.1,
+      "gear": 3,
+      "rpm": 4351,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8945,
+      "distance_m": 1527.31,
+      "speed_kmh": 87.3,
+      "gear": 3,
+      "rpm": 4301,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8954,
+      "distance_m": 1528.84,
+      "speed_kmh": 86.6,
+      "gear": 3,
+      "rpm": 4255,
+      "steer_norm": -0.046
+    },
+    {
+      "progress": 0.8963,
+      "distance_m": 1530.35,
+      "speed_kmh": 86.0,
+      "gear": 3,
+      "rpm": 4217,
+      "steer_norm": -0.045
+    },
+    {
+      "progress": 0.8972,
+      "distance_m": 1531.86,
+      "speed_kmh": 85.5,
+      "gear": 3,
+      "rpm": 4183,
+      "steer_norm": -0.045
+    },
+    {
+      "progress": 0.8981,
+      "distance_m": 1533.43,
+      "speed_kmh": 85.2,
+      "gear": 3,
+      "rpm": 4159,
+      "steer_norm": -0.045
+    },
+    {
+      "progress": 0.899,
+      "distance_m": 1534.99,
+      "speed_kmh": 84.8,
+      "gear": 3,
+      "rpm": 4139,
+      "steer_norm": -0.045
+    },
+    {
+      "progress": 0.8999,
+      "distance_m": 1536.55,
+      "speed_kmh": 84.5,
+      "gear": 3,
+      "rpm": 4116,
+      "steer_norm": -0.045
+    },
+    {
+      "progress": 0.9008,
+      "distance_m": 1538.11,
+      "speed_kmh": 84.1,
+      "gear": 3,
+      "rpm": 4093,
+      "steer_norm": -0.045
+    },
+    {
+      "progress": 0.9017,
+      "distance_m": 1539.65,
+      "speed_kmh": 83.8,
+      "gear": 3,
+      "rpm": 4073,
+      "steer_norm": -0.044
+    },
+    {
+      "progress": 0.9026,
+      "distance_m": 1541.2,
+      "speed_kmh": 83.5,
+      "gear": 3,
+      "rpm": 4049,
+      "steer_norm": -0.044
+    },
+    {
+      "progress": 0.9035,
+      "distance_m": 1542.73,
+      "speed_kmh": 83.2,
+      "gear": 3,
+      "rpm": 4030,
+      "steer_norm": -0.044
+    },
+    {
+      "progress": 0.9044,
+      "distance_m": 1544.26,
+      "speed_kmh": 82.9,
+      "gear": 3,
+      "rpm": 4010,
+      "steer_norm": -0.043
+    },
+    {
+      "progress": 0.9053,
+      "distance_m": 1545.78,
+      "speed_kmh": 82.6,
+      "gear": 3,
+      "rpm": 3991,
+      "steer_norm": -0.043
+    },
+    {
+      "progress": 0.9062,
+      "distance_m": 1547.3,
+      "speed_kmh": 82.2,
+      "gear": 3,
+      "rpm": 3967,
+      "steer_norm": -0.042
+    },
+    {
+      "progress": 0.9071,
+      "distance_m": 1548.81,
+      "speed_kmh": 82.0,
+      "gear": 3,
+      "rpm": 3952,
+      "steer_norm": -0.042
+    },
+    {
+      "progress": 0.908,
+      "distance_m": 1550.32,
+      "speed_kmh": 81.8,
+      "gear": 3,
+      "rpm": 3944,
+      "steer_norm": -0.041
+    },
+    {
+      "progress": 0.9089,
+      "distance_m": 1551.83,
+      "speed_kmh": 81.7,
+      "gear": 3,
+      "rpm": 3936,
+      "steer_norm": -0.041
+    },
+    {
+      "progress": 0.9097,
+      "distance_m": 1553.34,
+      "speed_kmh": 81.8,
+      "gear": 3,
+      "rpm": 3939,
+      "steer_norm": -0.04
+    },
+    {
+      "progress": 0.9106,
+      "distance_m": 1554.84,
+      "speed_kmh": 81.8,
+      "gear": 3,
+      "rpm": 3944,
+      "steer_norm": -0.039
+    },
+    {
+      "progress": 0.9115,
+      "distance_m": 1556.35,
+      "speed_kmh": 81.9,
+      "gear": 3,
+      "rpm": 3951,
+      "steer_norm": -0.039
+    },
+    {
+      "progress": 0.9124,
+      "distance_m": 1557.86,
+      "speed_kmh": 82.1,
+      "gear": 3,
+      "rpm": 3960,
+      "steer_norm": -0.038
+    },
+    {
+      "progress": 0.9133,
+      "distance_m": 1559.38,
+      "speed_kmh": 82.4,
+      "gear": 3,
+      "rpm": 3981,
+      "steer_norm": -0.037
+    },
+    {
+      "progress": 0.9142,
+      "distance_m": 1560.91,
+      "speed_kmh": 82.9,
+      "gear": 3,
+      "rpm": 4015,
+      "steer_norm": -0.036
+    },
+    {
+      "progress": 0.9151,
+      "distance_m": 1562.44,
+      "speed_kmh": 83.8,
+      "gear": 3,
+      "rpm": 4070,
+      "steer_norm": -0.036
+    },
+    {
+      "progress": 0.916,
+      "distance_m": 1564.0,
+      "speed_kmh": 84.8,
+      "gear": 3,
+      "rpm": 4139,
+      "steer_norm": -0.035
+    },
+    {
+      "progress": 0.9169,
+      "distance_m": 1565.57,
+      "speed_kmh": 85.9,
+      "gear": 3,
+      "rpm": 4210,
+      "steer_norm": -0.034
+    },
+    {
+      "progress": 0.9178,
+      "distance_m": 1567.09,
+      "speed_kmh": 87.2,
+      "gear": 3,
+      "rpm": 4290,
+      "steer_norm": -0.034
+    },
+    {
+      "progress": 0.9187,
+      "distance_m": 1568.63,
+      "speed_kmh": 88.3,
+      "gear": 3,
+      "rpm": 4364,
+      "steer_norm": -0.033
+    },
+    {
+      "progress": 0.9196,
+      "distance_m": 1570.2,
+      "speed_kmh": 89.6,
+      "gear": 3,
+      "rpm": 4447,
+      "steer_norm": -0.033
+    },
+    {
+      "progress": 0.9205,
+      "distance_m": 1571.7,
+      "speed_kmh": 90.6,
+      "gear": 3,
+      "rpm": 4517,
+      "steer_norm": -0.032
+    },
+    {
+      "progress": 0.9214,
+      "distance_m": 1573.22,
+      "speed_kmh": 91.8,
+      "gear": 3,
+      "rpm": 4594,
+      "steer_norm": -0.031
+    },
+    {
+      "progress": 0.9223,
+      "distance_m": 1574.76,
+      "speed_kmh": 92.5,
+      "gear": 3,
+      "rpm": 4636,
+      "steer_norm": -0.031
+    },
+    {
+      "progress": 0.9232,
+      "distance_m": 1576.31,
+      "speed_kmh": 93.4,
+      "gear": 3,
+      "rpm": 4697,
+      "steer_norm": -0.03
+    },
+    {
+      "progress": 0.9241,
+      "distance_m": 1577.88,
+      "speed_kmh": 94.7,
+      "gear": 3,
+      "rpm": 4778,
+      "steer_norm": -0.03
+    },
+    {
+      "progress": 0.925,
+      "distance_m": 1579.39,
+      "speed_kmh": 95.8,
+      "gear": 3,
+      "rpm": 4854,
+      "steer_norm": -0.029
+    },
+    {
+      "progress": 0.9259,
+      "distance_m": 1580.91,
+      "speed_kmh": 96.9,
+      "gear": 3,
+      "rpm": 4921,
+      "steer_norm": -0.028
+    },
+    {
+      "progress": 0.9268,
+      "distance_m": 1582.45,
+      "speed_kmh": 98.0,
+      "gear": 3,
+      "rpm": 4997,
+      "steer_norm": -0.028
+    },
+    {
+      "progress": 0.9277,
+      "distance_m": 1584.01,
+      "speed_kmh": 98.8,
+      "gear": 3,
+      "rpm": 5046,
+      "steer_norm": -0.027
+    },
+    {
+      "progress": 0.9286,
+      "distance_m": 1585.58,
+      "speed_kmh": 99.6,
+      "gear": 3,
+      "rpm": 5096,
+      "steer_norm": -0.027
+    },
+    {
+      "progress": 0.9296,
+      "distance_m": 1587.16,
+      "speed_kmh": 100.5,
+      "gear": 3,
+      "rpm": 5157,
+      "steer_norm": -0.027
+    },
+    {
+      "progress": 0.9304,
+      "distance_m": 1588.67,
+      "speed_kmh": 101.7,
+      "gear": 3,
+      "rpm": 5233,
+      "steer_norm": -0.026
+    },
+    {
+      "progress": 0.9313,
+      "distance_m": 1590.19,
+      "speed_kmh": 102.7,
+      "gear": 3,
+      "rpm": 5302,
+      "steer_norm": -0.025
+    },
+    {
+      "progress": 0.9322,
+      "distance_m": 1591.73,
+      "speed_kmh": 103.5,
+      "gear": 3,
+      "rpm": 5353,
+      "steer_norm": -0.025
+    },
+    {
+      "progress": 0.9331,
+      "distance_m": 1593.28,
+      "speed_kmh": 104.4,
+      "gear": 3,
+      "rpm": 5411,
+      "steer_norm": -0.024
+    },
+    {
+      "progress": 0.9341,
+      "distance_m": 1594.85,
+      "speed_kmh": 105.1,
+      "gear": 3,
+      "rpm": 5455,
+      "steer_norm": -0.024
+    },
+    {
+      "progress": 0.935,
+      "distance_m": 1596.42,
+      "speed_kmh": 105.9,
+      "gear": 3,
+      "rpm": 5511,
+      "steer_norm": -0.023
+    },
+    {
+      "progress": 0.9359,
+      "distance_m": 1598.01,
+      "speed_kmh": 106.8,
+      "gear": 3,
+      "rpm": 5566,
+      "steer_norm": -0.023
+    },
+    {
+      "progress": 0.9368,
+      "distance_m": 1599.52,
+      "speed_kmh": 107.8,
+      "gear": 3,
+      "rpm": 5633,
+      "steer_norm": -0.022
+    },
+    {
+      "progress": 0.9377,
+      "distance_m": 1601.04,
+      "speed_kmh": 108.6,
+      "gear": 3,
+      "rpm": 5682,
+      "steer_norm": -0.022
+    },
+    {
+      "progress": 0.9386,
+      "distance_m": 1602.57,
+      "speed_kmh": 109.4,
+      "gear": 3,
+      "rpm": 5733,
+      "steer_norm": -0.021
+    },
+    {
+      "progress": 0.9395,
+      "distance_m": 1604.11,
+      "speed_kmh": 110.2,
+      "gear": 3,
+      "rpm": 5787,
+      "steer_norm": -0.021
+    },
+    {
+      "progress": 0.9404,
+      "distance_m": 1605.67,
+      "speed_kmh": 110.9,
+      "gear": 3,
+      "rpm": 5834,
+      "steer_norm": -0.02
+    },
+    {
+      "progress": 0.9413,
+      "distance_m": 1607.23,
+      "speed_kmh": 111.9,
+      "gear": 3,
+      "rpm": 5895,
+      "steer_norm": -0.02
+    },
+    {
+      "progress": 0.9422,
+      "distance_m": 1608.81,
+      "speed_kmh": 112.8,
+      "gear": 3,
+      "rpm": 5956,
+      "steer_norm": -0.019
+    },
+    {
+      "progress": 0.9432,
+      "distance_m": 1610.4,
+      "speed_kmh": 113.5,
+      "gear": 3,
+      "rpm": 6001,
+      "steer_norm": -0.019
+    },
+    {
+      "progress": 0.944,
+      "distance_m": 1611.9,
+      "speed_kmh": 114.5,
+      "gear": 3,
+      "rpm": 6066,
+      "steer_norm": -0.019
+    },
+    {
+      "progress": 0.9449,
+      "distance_m": 1613.42,
+      "speed_kmh": 115.5,
+      "gear": 4,
+      "rpm": 4228,
+      "steer_norm": -0.018
+    },
+    {
+      "progress": 0.9458,
+      "distance_m": 1614.95,
+      "speed_kmh": 116.5,
+      "gear": 4,
+      "rpm": 4280,
+      "steer_norm": -0.018
+    },
+    {
+      "progress": 0.9467,
+      "distance_m": 1616.49,
+      "speed_kmh": 117.1,
+      "gear": 4,
+      "rpm": 4318,
+      "steer_norm": -0.018
+    },
+    {
+      "progress": 0.9476,
+      "distance_m": 1618.03,
+      "speed_kmh": 117.9,
+      "gear": 4,
+      "rpm": 4361,
+      "steer_norm": -0.017
+    },
+    {
+      "progress": 0.9486,
+      "distance_m": 1619.59,
+      "speed_kmh": 118.9,
+      "gear": 4,
+      "rpm": 4413,
+      "steer_norm": -0.017
+    },
+    {
+      "progress": 0.9495,
+      "distance_m": 1621.17,
+      "speed_kmh": 120.1,
+      "gear": 4,
+      "rpm": 4478,
+      "steer_norm": -0.017
+    },
+    {
+      "progress": 0.9504,
+      "distance_m": 1622.76,
+      "speed_kmh": 120.7,
+      "gear": 4,
+      "rpm": 4515,
+      "steer_norm": -0.017
+    },
+    {
+      "progress": 0.9513,
+      "distance_m": 1624.35,
+      "speed_kmh": 121.8,
+      "gear": 4,
+      "rpm": 4571,
+      "steer_norm": -0.016
+    },
+    {
+      "progress": 0.9523,
+      "distance_m": 1625.96,
+      "speed_kmh": 122.5,
+      "gear": 4,
+      "rpm": 4611,
+      "steer_norm": -0.016
+    },
+    {
+      "progress": 0.9532,
+      "distance_m": 1627.47,
+      "speed_kmh": 123.4,
+      "gear": 4,
+      "rpm": 4660,
+      "steer_norm": -0.016
+    },
+    {
+      "progress": 0.9541,
+      "distance_m": 1629.0,
+      "speed_kmh": 124.3,
+      "gear": 4,
+      "rpm": 4711,
+      "steer_norm": -0.016
+    },
+    {
+      "progress": 0.955,
+      "distance_m": 1630.53,
+      "speed_kmh": 124.9,
+      "gear": 4,
+      "rpm": 4747,
+      "steer_norm": -0.015
+    },
+    {
+      "progress": 0.9559,
+      "distance_m": 1632.07,
+      "speed_kmh": 125.8,
+      "gear": 4,
+      "rpm": 4794,
+      "steer_norm": -0.015
+    },
+    {
+      "progress": 0.9568,
+      "distance_m": 1633.62,
+      "speed_kmh": 126.7,
+      "gear": 4,
+      "rpm": 4842,
+      "steer_norm": -0.015
+    },
+    {
+      "progress": 0.9577,
+      "distance_m": 1635.19,
+      "speed_kmh": 127.4,
+      "gear": 4,
+      "rpm": 4883,
+      "steer_norm": -0.015
+    },
+    {
+      "progress": 0.9586,
+      "distance_m": 1636.76,
+      "speed_kmh": 128.4,
+      "gear": 4,
+      "rpm": 4939,
+      "steer_norm": -0.014
+    },
+    {
+      "progress": 0.9595,
+      "distance_m": 1638.34,
+      "speed_kmh": 129.0,
+      "gear": 4,
+      "rpm": 4970,
+      "steer_norm": -0.014
+    },
+    {
+      "progress": 0.9605,
+      "distance_m": 1639.93,
+      "speed_kmh": 130.0,
+      "gear": 4,
+      "rpm": 5023,
+      "steer_norm": -0.014
+    },
+    {
+      "progress": 0.9614,
+      "distance_m": 1641.54,
+      "speed_kmh": 131.0,
+      "gear": 4,
+      "rpm": 5079,
+      "steer_norm": -0.014
+    },
+    {
+      "progress": 0.9623,
+      "distance_m": 1643.04,
+      "speed_kmh": 131.9,
+      "gear": 4,
+      "rpm": 5127,
+      "steer_norm": -0.014
+    },
+    {
+      "progress": 0.9632,
+      "distance_m": 1644.55,
+      "speed_kmh": 132.6,
+      "gear": 4,
+      "rpm": 5166,
+      "steer_norm": -0.014
+    },
+    {
+      "progress": 0.9641,
+      "distance_m": 1646.07,
+      "speed_kmh": 133.4,
+      "gear": 4,
+      "rpm": 5210,
+      "steer_norm": -0.014
+    },
+    {
+      "progress": 0.965,
+      "distance_m": 1647.59,
+      "speed_kmh": 134.2,
+      "gear": 4,
+      "rpm": 5255,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9659,
+      "distance_m": 1649.13,
+      "speed_kmh": 135.0,
+      "gear": 4,
+      "rpm": 5300,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9668,
+      "distance_m": 1650.68,
+      "speed_kmh": 135.6,
+      "gear": 4,
+      "rpm": 5335,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9677,
+      "distance_m": 1652.23,
+      "speed_kmh": 136.3,
+      "gear": 4,
+      "rpm": 5371,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9686,
+      "distance_m": 1653.79,
+      "speed_kmh": 137.2,
+      "gear": 4,
+      "rpm": 5423,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9695,
+      "distance_m": 1655.36,
+      "speed_kmh": 137.3,
+      "gear": 4,
+      "rpm": 5427,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9704,
+      "distance_m": 1656.92,
+      "speed_kmh": 137.2,
+      "gear": 4,
+      "rpm": 5420,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9713,
+      "distance_m": 1658.49,
+      "speed_kmh": 137.1,
+      "gear": 4,
+      "rpm": 5414,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9722,
+      "distance_m": 1660.05,
+      "speed_kmh": 137.0,
+      "gear": 4,
+      "rpm": 5407,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9732,
+      "distance_m": 1661.61,
+      "speed_kmh": 136.8,
+      "gear": 4,
+      "rpm": 5399,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9741,
+      "distance_m": 1663.17,
+      "speed_kmh": 136.7,
+      "gear": 4,
+      "rpm": 5393,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.975,
+      "distance_m": 1664.74,
+      "speed_kmh": 137.6,
+      "gear": 4,
+      "rpm": 5444,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9759,
+      "distance_m": 1666.32,
+      "speed_kmh": 138.2,
+      "gear": 4,
+      "rpm": 5474,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9768,
+      "distance_m": 1667.9,
+      "speed_kmh": 139.0,
+      "gear": 4,
+      "rpm": 5517,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9778,
+      "distance_m": 1669.49,
+      "speed_kmh": 139.8,
+      "gear": 4,
+      "rpm": 5564,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9787,
+      "distance_m": 1671.09,
+      "speed_kmh": 140.4,
+      "gear": 4,
+      "rpm": 5598,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9796,
+      "distance_m": 1672.65,
+      "speed_kmh": 141.1,
+      "gear": 4,
+      "rpm": 5636,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9805,
+      "distance_m": 1674.18,
+      "speed_kmh": 141.7,
+      "gear": 4,
+      "rpm": 5670,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9814,
+      "distance_m": 1675.69,
+      "speed_kmh": 142.2,
+      "gear": 4,
+      "rpm": 5696,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9823,
+      "distance_m": 1677.18,
+      "speed_kmh": 142.9,
+      "gear": 4,
+      "rpm": 5735,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9831,
+      "distance_m": 1678.66,
+      "speed_kmh": 143.6,
+      "gear": 4,
+      "rpm": 5771,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.984,
+      "distance_m": 1680.14,
+      "speed_kmh": 144.2,
+      "gear": 4,
+      "rpm": 5808,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9849,
+      "distance_m": 1681.61,
+      "speed_kmh": 145.1,
+      "gear": 4,
+      "rpm": 5854,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9857,
+      "distance_m": 1683.09,
+      "speed_kmh": 145.6,
+      "gear": 4,
+      "rpm": 5880,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9866,
+      "distance_m": 1684.57,
+      "speed_kmh": 146.2,
+      "gear": 4,
+      "rpm": 5918,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9875,
+      "distance_m": 1686.06,
+      "speed_kmh": 146.7,
+      "gear": 4,
+      "rpm": 5941,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9883,
+      "distance_m": 1687.55,
+      "speed_kmh": 147.4,
+      "gear": 4,
+      "rpm": 5979,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9892,
+      "distance_m": 1689.04,
+      "speed_kmh": 147.9,
+      "gear": 4,
+      "rpm": 6007,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9901,
+      "distance_m": 1690.54,
+      "speed_kmh": 148.7,
+      "gear": 4,
+      "rpm": 6050,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.991,
+      "distance_m": 1692.04,
+      "speed_kmh": 149.1,
+      "gear": 4,
+      "rpm": 6076,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9919,
+      "distance_m": 1693.55,
+      "speed_kmh": 149.5,
+      "gear": 4,
+      "rpm": 6099,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9927,
+      "distance_m": 1695.06,
+      "speed_kmh": 150.2,
+      "gear": 4,
+      "rpm": 6134,
+      "steer_norm": -0.013
+    },
+    {
+      "progress": 0.9936,
+      "distance_m": 1696.57,
+      "speed_kmh": 150.8,
+      "gear": 4,
+      "rpm": 6168,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.9945,
+      "distance_m": 1698.09,
+      "speed_kmh": 151.4,
+      "gear": 4,
+      "rpm": 6203,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.9954,
+      "distance_m": 1699.61,
+      "speed_kmh": 152.0,
+      "gear": 4,
+      "rpm": 6237,
+      "steer_norm": -0.012
+    },
+    {
+      "progress": 0.9963,
+      "distance_m": 1701.15,
+      "speed_kmh": 152.7,
+      "gear": 4,
+      "rpm": 6271,
+      "steer_norm": -0.011
+    },
+    {
+      "progress": 0.9972,
+      "distance_m": 1702.7,
+      "speed_kmh": 153.3,
+      "gear": 4,
+      "rpm": 6306,
+      "steer_norm": -0.011
+    },
+    {
+      "progress": 0.9981,
+      "distance_m": 1704.27,
+      "speed_kmh": 153.9,
+      "gear": 4,
+      "rpm": 6340,
+      "steer_norm": -0.011
+    },
+    {
+      "progress": 0.9991,
+      "distance_m": 1705.85,
+      "speed_kmh": 154.5,
+      "gear": 4,
+      "rpm": 6375,
+      "steer_norm": -0.01
+    },
+    {
+      "progress": 1.0,
+      "distance_m": 1707.44,
+      "speed_kmh": 155.2,
+      "gear": 4,
+      "rpm": 6409,
+      "steer_norm": -0.01
+    }
+  ]
+}
