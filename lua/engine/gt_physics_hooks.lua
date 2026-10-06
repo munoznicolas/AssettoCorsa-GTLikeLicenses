@@ -179,7 +179,10 @@ function GTPhysicsHooks.lockControls(durationSeconds, isStandingStart)
 end
 
 ---Immediately unlocks all user inputs and releases forced brakes.
-function GTPhysicsHooks.unlockControls()
+---@param carIndex integer? @0-based car index (default: 0)
+---@param targetGear integer? @Optional gear to engage upon control release (e.g. 2 for rolling start)
+function GTPhysicsHooks.unlockControls(carIndex, targetGear)
+  carIndex = carIndex or 0
   if physics and physics.lockUserControlsFor then
     physics.lockUserControlsFor(0)
   end
@@ -189,8 +192,20 @@ function GTPhysicsHooks.unlockControls()
   if physics and physics.forceUserHandbrakeFor then
     physics.forceUserHandbrakeFor(0, 0)
   end
-  if physics and physics.lockUserGearboxFor then
-    physics.lockUserGearboxFor(0, false)
+  if physics and physics.overrideSteering then
+    physics.overrideSteering(carIndex, 0 / 0)
+  end
+  if targetGear and targetGear > 0 then
+    if physics and physics.engageGear then
+      physics.engageGear(carIndex, targetGear)
+    end
+    if physics and physics.setEngineRPM then
+      physics.setEngineRPM(carIndex, 3500)
+    end
+  else
+    if physics and physics.lockUserGearboxFor then
+      physics.lockUserGearboxFor(0, false)
+    end
   end
 end
 
@@ -304,7 +319,7 @@ function GTPhysicsHooks.maintainRollingSpline(carIndex, currentProgress, speedKm
   local fwd = safeNormalize(diff)
   local vel = vec3(fwd.x * speedMs, fwd.y * speedMs, fwd.z * speedMs)
 
-  -- Update car position & orientation on the spline
+  -- Position chassis and orient headlights along the spline tangent
   -- Orientation Inversion Rule: pass -fwd so car.look aligns with +fwd
   if physics and physics.setCarPosition then
     physics.setCarPosition(carIndex, vec3(targetPos.x, targetPos.y + 0.05, targetPos.z), vec3(-fwd.x, -fwd.y, -fwd.z))
@@ -322,13 +337,6 @@ function GTPhysicsHooks.maintainRollingSpline(carIndex, currentProgress, speedKm
 
   -- Engage gear and RPM
   local gear = GTPhysicsHooks.estimateStartingGear(speedKmh)
-  if ac and ac.accessCarPhysics then
-    local phys = ac.accessCarPhysics(carIndex)
-    if phys then
-      pcall(function() phys:setGear(gear) end)
-      pcall(function() phys:setEngineRPM(3500) end)
-    end
-  end
   if physics and physics.engageGear then
     physics.engageGear(carIndex, gear)
   end

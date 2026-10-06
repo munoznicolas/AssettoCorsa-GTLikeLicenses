@@ -591,7 +591,10 @@ function GTLicenseEngine:update(dt)
 
     if self.countdownTimer <= 0 then
       -- Release control locks and launch test
-      GTPhysicsHooks.unlockControls()
+      local initSpeed = tonumber(self.testConfig.spawn and self.testConfig.spawn.initial_speed_kmh) or 0
+      local targetGear = (initSpeed > 0) and GTPhysicsHooks.estimateStartingGear(initSpeed) or 0
+      GTPhysicsHooks.unlockControls(0, targetGear)
+
       if self.aiCoordinator then
         self.aiCoordinator:triggerGreenFlag()
       end
@@ -648,6 +651,20 @@ function GTLicenseEngine:update(dt)
 
   elseif self.state == GTLicenseEngine.STATE.RUNNING then
     self.sessionTime = self.sessionTime + dt
+
+    -- Ensure gear remains firmly engaged right after handover on rolling starts
+    if self.sessionTime < 0.5 and self.testConfig and self.testConfig.spawn then
+      local initSpeed = tonumber(self.testConfig.spawn.initial_speed_kmh) or 0
+      if initSpeed > 0 then
+        local targetGear = GTPhysicsHooks.estimateStartingGear(initSpeed)
+        if car and car.gear == 0 and physics and physics.engageGear then
+          physics.engageGear(0, targetGear)
+        end
+        if car and car.rpm < 2000 and physics and physics.setEngineRPM then
+          physics.setEngineRPM(0, 3500)
+        end
+      end
+    end
 
     -- Adjudicate failure conditions and finish gate/stop box completion
     local adjResult = self.adjudicator:adjudicate(dt, self.sessionTime, car)
