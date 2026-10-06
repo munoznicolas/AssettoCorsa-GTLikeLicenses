@@ -526,7 +526,9 @@ function GTLicenseEngine:update(dt)
     if self.countdownTimer <= 0 then
       -- Release AI autopilot and hand control to player on GO!
       local initSpeed = tonumber(self.testConfig.spawn and self.testConfig.spawn.initial_speed_kmh) or 0
-      local targetGear = (initSpeed > 0) and GTPhysicsHooks.estimateStartingGear(initSpeed) or 0
+      local targetGear = (self.testConfig.spawn and self.testConfig.spawn.gear and tonumber(self.testConfig.spawn.gear) > 0)
+        and tonumber(self.testConfig.spawn.gear)
+        or ((initSpeed > 0) and GTPhysicsHooks.estimateStartingGear(initSpeed) or 0)
       if self.isAIRollingActive or initSpeed > 0 then
         GTPhysicsHooks.stopAIRolling(0, targetGear)
         self.isAIRollingActive = false
@@ -610,12 +612,17 @@ function GTLicenseEngine:update(dt)
     if self.sessionTime < 0.5 and self.testConfig and self.testConfig.spawn then
       local initSpeed = tonumber(self.testConfig.spawn.initial_speed_kmh) or 0
       if initSpeed > 0 then
-        local targetGear = GTPhysicsHooks.estimateStartingGear(initSpeed)
+        local targetGear = (self.testConfig.spawn.gear and tonumber(self.testConfig.spawn.gear) > 0)
+          and tonumber(self.testConfig.spawn.gear)
+          or GTPhysicsHooks.estimateStartingGear(initSpeed)
+        local targetRPM = (self.testConfig.spawn.rpm and tonumber(self.testConfig.spawn.rpm) > 1000)
+          and tonumber(self.testConfig.spawn.rpm)
+          or 3500
         if car and car.gear == 0 and physics and physics.engageGear then
           physics.engageGear(0, targetGear)
         end
         if car and car.rpm < 2000 and physics and physics.setEngineRPM then
-          physics.setEngineRPM(0, 3500)
+          physics.setEngineRPM(0, targetRPM)
         end
       end
     end

@@ -371,6 +371,8 @@ def generate_test_parameters(
     gate_width: Optional[float] = None,
     with_stop_box: bool = False,
     stop_box_offset_m: float = 0.0,
+    gear: Optional[int] = None,
+    rpm: Optional[int] = None,
 ) -> Dict[str, Any]:
     """Generates schema-compliant spawn and timing dictionaries."""
     total_len = parser.total_length
@@ -401,11 +403,15 @@ def generate_test_parameters(
         stop_box = parser.compute_stop_box(box_dist)
         timing_dict["stop_box"] = asdict(stop_box)
 
-    spawn_dict = {
+    spawn_dict: Dict[str, Any] = {
         "position": spawn_pos,
         "forward_vector": list(spawn_fwd),
         "initial_speed_kmh": round(initial_speed_kmh, 1),
     }
+    if gear is not None:
+        spawn_dict["gear"] = int(gear)
+    if rpm is not None:
+        spawn_dict["rpm"] = int(rpm)
 
     metadata = {
         "track_total_length_m": round(total_len, 2),

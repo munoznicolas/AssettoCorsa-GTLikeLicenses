@@ -30,6 +30,7 @@ from record_ai_telemetry import (
     TelemetryProfile,
     TelemetrySample,
     calibrate_from_spline,
+    estimate_gear_and_rpm,
     load_telemetry_profile,
 )
 
@@ -242,8 +243,9 @@ class TrackStraightAnalyzer:
         for next_start, next_end in raw_runs[1:]:
             gap_dist = self.waypoints[next_start].distance - self.waypoints[curr_end].distance
             h_diff = angle_diff_deg(headings[curr_end], headings[next_start])
+            gap_max_steer = max(steer_angles[curr_end + 1 : next_start]) if next_start > curr_end + 1 else 0.0
 
-            if 0 < gap_dist <= bridge_gap_m and h_diff <= max_heading_dev_deg:
+            if 0 < gap_dist <= bridge_gap_m and h_diff <= max_heading_dev_deg and gap_max_steer <= 5.0:
                 # Merge across small gap
                 curr_end = next_end
             else:
@@ -401,7 +403,7 @@ class TrackStraightAnalyzer:
                 spawn_dist = (gate_dist - countdown_dist + self.total_length) % self.total_length
                 handover_spd = target_speed_kmh
                 spawn_spd = target_speed_kmh
-                _, engaged_gear, engine_rpm = self.telemetry.query_sample(gate_dist)
+                engaged_gear, engine_rpm = estimate_gear_and_rpm(target_speed_kmh)
             else:
                 # 1. Start gate is placed post_go_sec before the corner entry
                 if post_go_margin_m is not None:

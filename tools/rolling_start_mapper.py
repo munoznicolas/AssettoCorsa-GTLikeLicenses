@@ -1060,7 +1060,12 @@ function runKinematicAnalysis(trackData, params) {{
     const gapDist = wps[nextStart][2] - wps[currEnd][2];
     const hDiff = Math.abs((headings[currEnd] - headings[nextStart] + 180.0) % 360.0 - 180.0);
 
-    if (gapDist > 0 && gapDist <= 12.0 && hDiff <= 3.5) {{
+    let gapMaxSteer = 0;
+    for (let gi = currEnd + 1; gi < nextStart; gi++) {{
+      if (steerAngles[gi] > gapMaxSteer) gapMaxSteer = steerAngles[gi];
+    }}
+
+    if (gapDist > 0 && gapDist <= 12.0 && hDiff <= 3.5 && gapMaxSteer <= 5.0) {{
       currEnd = nextEnd;
     }} else {{
       bridgedRuns.push([currStart, currEnd]);

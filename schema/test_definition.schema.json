@@ -75,6 +75,18 @@
           "type": "number",
           "minimum": 0,
           "description": "Initial speed in km/h (0 for standing start)"
+        },
+        "gear": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 8,
+          "description": "Engaged transmission gear at handover (0 = neutral/standing)"
+        },
+        "rpm": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 22000,
+          "description": "Engine RPM at handover"
         }
       }
     },
