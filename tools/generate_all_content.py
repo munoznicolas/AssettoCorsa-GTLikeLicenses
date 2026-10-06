@@ -77,7 +77,7 @@ TEST_CATALOG = [
         "start_mode": "ROLLING",
         "start_s": 0.28,
         "finish_s": 0.42,
-        "spawn_offset": 35.0,
+        "spawn_offset": 58.3,
         "speed": 70.0,
         "with_stop_box": False,
         "targets": {"gold_seconds": 13.800, "silver_seconds": 14.500, "bronze_seconds": 15.800},

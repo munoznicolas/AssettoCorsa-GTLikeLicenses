@@ -259,6 +259,86 @@ function GTPhysicsHooks.maintainRollingVelocity(carIndex, forwardVector, speedKm
   return true
 end
 
+---Maintains rolling motion along the track AI ideal spline during COUNTDOWN state.
+---Smoothly guides vehicle position, tangent heading orientation, velocity, gear, and RPM.
+---@param carIndex integer @0-based car index
+---@param currentProgress number @Current normalized position along the track spline [0.0, 1.0]
+---@param speedKmh number @Target rolling speed in km/h
+---@param dt number @Delta time in seconds
+---@param fallbackFwd table|vec3|number[]? @Optional fallback forward vector
+---@return number nextProgress, vec3 currentFwd
+function GTPhysicsHooks.maintainRollingSpline(carIndex, currentProgress, speedKmh, dt, fallbackFwd)
+  carIndex = carIndex or 0
+  speedKmh = tonumber(speedKmh) or 0
+  dt = tonumber(dt) or 0.016
+  currentProgress = tonumber(currentProgress) or 0.0
+
+  if speedKmh <= 0 then
+    return currentProgress, safeNormalize(GTPhysicsHooks.toVec3(fallbackFwd))
+  end
+
+  local hasSpline = ac and ac.hasTrackSpline and ac.hasTrackSpline()
+  if not hasSpline or not ac.trackProgressToWorldCoordinate then
+    -- Fallback to linear velocity along forward vector
+    GTPhysicsHooks.maintainRollingVelocity(carIndex, fallbackFwd, speedKmh)
+    return currentProgress, safeNormalize(GTPhysicsHooks.toVec3(fallbackFwd))
+  end
+
+  local sim = ac.getSim and ac.getSim()
+  local trackLength = (sim and sim.trackLengthM and sim.trackLengthM > 10) and sim.trackLengthM or 1000.0
+  local speedMs = speedKmh / 3.6
+
+  -- Advance progress along the spline
+  local progressDelta = (speedMs * dt) / trackLength
+  local nextProgress = (currentProgress + progressDelta) % 1.0
+
+  -- Query 3D world position on spline at nextProgress
+  local targetPos = ac.trackProgressToWorldCoordinate(nextProgress)
+
+  -- Query lookahead point along the spline to compute tangent heading
+  local lookaheadDist = math.max(2.0, speedMs * 0.15)
+  local lookaheadDelta = lookaheadDist / trackLength
+  local aheadPos = ac.trackProgressToWorldCoordinate((nextProgress + lookaheadDelta) % 1.0)
+
+  local diff = vec3(aheadPos.x - targetPos.x, aheadPos.y - targetPos.y, aheadPos.z - targetPos.z)
+  local fwd = safeNormalize(diff)
+  local vel = vec3(fwd.x * speedMs, fwd.y * speedMs, fwd.z * speedMs)
+
+  -- Update car position & orientation on the spline
+  -- Orientation Inversion Rule: pass -fwd so car.look aligns with +fwd
+  if physics and physics.setCarPosition then
+    physics.setCarPosition(carIndex, vec3(targetPos.x, targetPos.y + 0.05, targetPos.z), vec3(-fwd.x, -fwd.y, -fwd.z))
+  end
+
+  -- Apply matching linear velocity vector along the spline tangent
+  if physics and physics.setCarVelocity then
+    physics.setCarVelocity(carIndex, vel)
+  end
+
+  -- Stabilize angular velocity
+  if ac and ac.setCarPhysicAngularVelocity then
+    ac.setCarPhysicAngularVelocity(carIndex, vec3(0, 0, 0))
+  end
+
+  -- Engage gear and RPM
+  local gear = GTPhysicsHooks.estimateStartingGear(speedKmh)
+  if ac and ac.accessCarPhysics then
+    local phys = ac.accessCarPhysics(carIndex)
+    if phys then
+      pcall(function() phys:setGear(gear) end)
+      pcall(function() phys:setEngineRPM(3500) end)
+    end
+  end
+  if physics and physics.engageGear then
+    physics.engageGear(carIndex, gear)
+  end
+  if physics and physics.setEngineRPM then
+    physics.setEngineRPM(carIndex, 3500)
+  end
+
+  return nextProgress, fwd
+end
+
 ---Sets an absolute top speed ceiling (in km/h) on an AI controlled vehicle.
 ---@param carIndex integer @0-based car index
 ---@param speedKmh number @Speed limit in km/h (use 1e9 or 999999 for unlimited)

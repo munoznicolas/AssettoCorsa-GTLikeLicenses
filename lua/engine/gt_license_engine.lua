@@ -425,6 +425,27 @@ function GTLicenseEngine:startCountdown()
   -- Lock controls during countdown
   GTPhysicsHooks.lockControls(3.0, isStanding)
 
+  -- Initialize spline progress tracking for rolling starts
+  self.rollingSplineProgress = nil
+  if not isStanding and ac and ac.hasTrackSpline and ac.hasTrackSpline() then
+    local spawnPos = self.testConfig.spawn and self.testConfig.spawn.position
+    if spawnPos and ac.worldCoordinateToTrackProgress then
+      local p = ac.worldCoordinateToTrackProgress(GTPhysicsHooks.toVec3(spawnPos))
+      if p and p >= 0 and p <= 1 then
+        self.rollingSplineProgress = p
+      end
+    end
+    if not self.rollingSplineProgress then
+      local car = ac.getCar and ac.getCar(0)
+      if car and car.splinePosition and car.splinePosition > 0 then
+        self.rollingSplineProgress = car.splinePosition
+      end
+    end
+    if ac and ac.log and self.rollingSplineProgress then
+      ac.log(string.format("[GTLicense] Initialized rollingSplineProgress=%.4f", self.rollingSplineProgress))
+    end
+  end
+
   if ac and ac.log then
     ac.log(string.format("[GTLicense] Countdown started | start_mode=%s | isStanding=%s | initial_speed=%.1f km/h",
       tostring(self.testConfig.start_mode), tostring(isStanding),
@@ -508,10 +529,25 @@ function GTLicenseEngine:update(dt)
     GTPhysicsHooks.setupSpawn(self.testConfig, 0)
     local isStanding = (self.testConfig.start_mode == "STANDING")
     GTPhysicsHooks.lockControls(3.0, isStanding)
+
+    if not isStanding and ac and ac.hasTrackSpline and ac.hasTrackSpline() then
+      if not self.rollingSplineProgress then
+        if car.splinePosition and car.splinePosition > 0 then
+          self.rollingSplineProgress = car.splinePosition
+        elseif ac.worldCoordinateToTrackProgress and self.testConfig.spawn and self.testConfig.spawn.position then
+          local p = ac.worldCoordinateToTrackProgress(GTPhysicsHooks.toVec3(self.testConfig.spawn.position))
+          if p and p >= 0 and p <= 1 then
+            self.rollingSplineProgress = p
+          end
+        end
+      end
+    end
+
     if ac and ac.log then
-      ac.log(string.format("[GTLicense] First live frame spawn applied: pos=(%.2f, %.2f, %.2f), look=(%.2f, %.2f, %.2f), speed=%.2f km/h",
+      ac.log(string.format("[GTLicense] First live frame spawn applied: pos=(%.2f, %.2f, %.2f), look=(%.2f, %.2f, %.2f), speed=%.2f km/h, splineProg=%s",
         car.position.x, car.position.y, car.position.z,
-        car.look.x, car.look.y, car.look.z, car.speedKmh))
+        car.look.x, car.look.y, car.look.z, car.speedKmh,
+        tostring(self.rollingSplineProgress)))
     end
   end
 
@@ -528,16 +564,28 @@ function GTLicenseEngine:update(dt)
         local gear = car and car.gear or 0
         local lx = car and car.look and car.look.x or 0
         local lz = car and car.look and car.look.z or 0
-        ac.log(string.format("[GTLicense] Countdown Tick %d | Mode=%s | Speed=%.2f km/h | Gear=%d | Look=(%.2f, %.2f)",
-          currentStep, tostring(self.testConfig.start_mode), spd, gear, lx, lz))
+        ac.log(string.format("[GTLicense] Countdown Tick %d | Mode=%s | Speed=%.2f km/h | Gear=%d | Look=(%.2f, %.2f) | SplineProg=%s",
+          currentStep, tostring(self.testConfig.start_mode), spd, gear, lx, lz,
+          tostring(self.rollingSplineProgress and string.format("%.4f", self.rollingSplineProgress) or "nil")))
       end
     end
 
-    -- Maintain spawn position and rolling velocity vector during countdown
+    -- Maintain spawn position and rolling velocity vector along ideal spline during countdown
     if self.testConfig and self.testConfig.spawn then
       local initialSpeed = tonumber(self.testConfig.spawn.initial_speed_kmh) or 0
       if initialSpeed > 0 then
-        GTPhysicsHooks.maintainRollingVelocity(0, self.testConfig.spawn.forward_vector, initialSpeed)
+        if self.rollingSplineProgress and ac and ac.hasTrackSpline and ac.hasTrackSpline() then
+          local nextProg, curFwd = GTPhysicsHooks.maintainRollingSpline(
+            0,
+            self.rollingSplineProgress,
+            initialSpeed,
+            dt,
+            self.testConfig.spawn.forward_vector
+          )
+          self.rollingSplineProgress = nextProg
+        else
+          GTPhysicsHooks.maintainRollingVelocity(0, self.testConfig.spawn.forward_vector, initialSpeed)
+        end
       end
     end
 
@@ -546,6 +594,9 @@ function GTLicenseEngine:update(dt)
       GTPhysicsHooks.unlockControls()
       if self.aiCoordinator then
         self.aiCoordinator:triggerGreenFlag()
+      end
+      if self.adjudicator and (self.testConfig.start_mode == "ROLLING") then
+        self.adjudicator.hasPassedStartGate = true
       end
       dispatchEvent(self, "go")
       self:setState(GTLicenseEngine.STATE.RUNNING)
