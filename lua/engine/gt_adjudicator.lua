@@ -127,16 +127,52 @@ function GTAdjudicator.isInsideStopBox(pos, stopBox)
 end
 
 ---Adjudicates off-track limit violations (> max_wheels_off).
+---Evaluates wheel surface validity (ac.StateWheel.surfaceValidTrack) across all 4 wheels,
+---with fallback to car.wheelsOutside. Requires persistent violation over consecutive frames
+---to debounce instantaneous geometry seam glitches.
 ---@param car table|ac.CarState
 ---@return boolean failed, string? reason
 function GTAdjudicator:checkOffTrack(car)
   if not car then return false end
 
-  -- In CSP Lua, car.wheelsOutsideTrack or car.wheelsOutside indicates wheel count
-  local wheelsOut = car.wheelsOutsideTrack or car.wheelsOutside or 0
+  local wheelsOut = 0
 
+  -- 1. Primary check: Query surfaceValidTrack for each wheel from physics contact
+  if car.wheels then
+    -- CSP C++ exposes car.wheels as a 0-indexed array: 0, 1, 2, 3
+    for i = 0, 3 do
+      local w = car.wheels[i]
+      if w and w.surfaceValidTrack == false then
+        wheelsOut = wheelsOut + 1
+      end
+    end
+
+    -- Safety check for 1-based mock tables (e.g. testing environments)
+    if wheelsOut == 0 and not car.wheels[0] and car.wheels[1] then
+      for i = 1, 4 do
+        local w = car.wheels[i]
+        if w and w.surfaceValidTrack == false then
+          wheelsOut = wheelsOut + 1
+        end
+      end
+    end
+  end
+
+  -- 2. Fallback check: CSP/AC car.wheelsOutside telemetry counter
+  local nativeWheelsOut = car.wheelsOutside or 0
+  if nativeWheelsOut > wheelsOut then
+    wheelsOut = nativeWheelsOut
+  end
+
+  -- 3. Adjudicate against threshold with debounce filter (2 consecutive frames)
   if wheelsOut > self.maxWheelsOff then
-    return true, string.format("Off Track: Exceeded Track Limits (%d wheels off)", wheelsOut)
+    self.consecutiveOffTrackFrames = (self.consecutiveOffTrackFrames or 0) + 1
+    -- 2 consecutive frames (~33ms at 60fps) to debounce instantaneous geometry seam glitches
+    if self.consecutiveOffTrackFrames >= 2 then
+      return true, string.format("Off Track: Exceeded Track Limits (%d wheels off)", wheelsOut)
+    end
+  else
+    self.consecutiveOffTrackFrames = 0
   end
 
   return false
@@ -284,6 +320,9 @@ function GTAdjudicator:adjudicate(dt, sessionTime, car)
   if sessionTime > self.bronzeSeconds then
     self.isDisqualified = true
     self.failReason = "Time Limit Exceeded"
+    if ac and ac.log then
+      ac.log(string.format("[GTLicense] Adjudicator DISQUALIFIED: %s (t=%.2fs)", self.failReason, sessionTime))
+    end
     return { status = "FAILED", reason = self.failReason }
   end
 
@@ -292,6 +331,9 @@ function GTAdjudicator:adjudicate(dt, sessionTime, car)
   if offTrack then
     self.isDisqualified = true
     self.failReason = offTrackReason
+    if ac and ac.log then
+      ac.log(string.format("[GTLicense] Adjudicator DISQUALIFIED: %s (t=%.2fs)", self.failReason, sessionTime))
+    end
     return { status = "FAILED", reason = self.failReason }
   end
 
@@ -300,6 +342,9 @@ function GTAdjudicator:adjudicate(dt, sessionTime, car)
   if hitWall then
     self.isDisqualified = true
     self.failReason = wallReason
+    if ac and ac.log then
+      ac.log(string.format("[GTLicense] Adjudicator DISQUALIFIED: %s (t=%.2fs)", self.failReason, sessionTime))
+    end
     return { status = "FAILED", reason = self.failReason }
   end
 

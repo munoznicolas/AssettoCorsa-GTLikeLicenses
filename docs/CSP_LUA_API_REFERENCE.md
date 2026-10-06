@@ -54,8 +54,18 @@ Retrieves the telemetry and physics state table for a vehicle by zero-based inde
 | `car.gas` | `number` | Throttle pedal input normalized `[0.0, 1.0]`. |
 | `car.brake` | `number` | Brake pedal input normalized `[0.0, 1.0]`. |
 | `car.gear` | `integer` | Active gear (-1 = Reverse, 0 = Neutral, 1+ = Forward). |
-| `car.wheelsOutside` | `integer` | Total count of wheels detected off the track surface (0 to 4). |
+| `car.wheels` | `ac.StateWheel[]` | 4-element array (`0..3`). Each wheel provides `surfaceValidTrack: boolean` from `surfaces.ini`. |
+| `car.wheelsOutside` | `integer` | Native AC penalty counter (0 to 4). Unreliable in New Modes without cut penalty triggers. |
 | `car.collidedWith` | `integer` | Index of car collided with, or -1 if none. |
+
+#### Authoritative Track Limits & Off-Track Detection:
+In Custom Shaders Patch New Modes, `car.wheelsOutside` (derived from Kunos' `numberOfTyresOut` shared memory) is tied to Kunos' native penalty and cut-detection subroutines. In custom event modes or across non-standard sectors, `car.wheelsOutside` frequently remains `0` even when all four tyres are on grass, sand, or gravel.
+
+The **authoritative ground-truth** for wheel surface contact is `car.wheels[i].surfaceValidTrack` (`i = 0..3`):
+- Each wheel raycasts onto track geometry every physics tick and queries `surfaces.ini`.
+- If on valid tarmac or curbs (`IS_VALID_TRACK=1`), `surfaceValidTrack` is `true`.
+- If on grass, gravel, dirt, or runoff out-of-bounds (`IS_VALID_TRACK=0`), `surfaceValidTrack` is `false`.
+- To avoid false positives from instantaneous 1-frame mesh seam raycast drops or high curb hops, debounce the off-track condition over **2 consecutive frames** (~33ms at 60Hz) before issuing disqualification.
 
 ---
 

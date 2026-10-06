@@ -57,6 +57,10 @@ The mod runs inside CSP's **New Modes** extension subsystem (`extension/lua/new-
     - `physics.setEngineRPM(carIndex, 3500)`
   - **Live Update Frame Spawn**: Because `ac.getCar(0)` is not fully initialized during initial script bytecode compilation, re-assert `setupSpawn` on the first frame of `script.update(dt)`.
   - During `COUNTDOWN`, continuously maintain linear velocity, gear, and engine RPM via `maintainRollingVelocity` on every frame so AC does not bleed off momentum or drop into neutral/idle.
+* **Authoritative Track Limits Adjudication**:
+  - Never rely solely on `car.wheelsOutside` or non-existent `car.wheelsOutsideTrack`. In CSP New Modes, `car.wheelsOutside` (Kunos penalty counter) remains `0` unless Kunos cut detection is triggered.
+  - The authoritative ground-truth is `car.wheels[i].surfaceValidTrack` (`i = 0..3`) from `ac.StateWheel`. This directly evaluates `IS_VALID_TRACK` from `surfaces.ini` for each tyre contact point.
+  - Debounce the condition for **2 consecutive frames** (~33ms at 60Hz) before disqualification to avoid false positives on high kerb hops or geometry seam transitions.
 
 ---
 

@@ -71,6 +71,33 @@ def evaluate_medal(session_time, targets):
         return "NONE"
 
 
+def check_off_track(car, max_wheels_off=2, consecutive_frames=0):
+    if not car:
+        return False, consecutive_frames, None
+
+    wheels_out = 0
+    wheels = car.get("wheels")
+    if wheels is not None:
+        for i in range(4):
+            if i in wheels and wheels[i].get("surfaceValidTrack") is False:
+                wheels_out += 1
+            elif (i + 1) in wheels and 0 not in wheels and wheels[i + 1].get("surfaceValidTrack") is False:
+                wheels_out += 1
+
+    native_out = car.get("wheelsOutside", 0)
+    if native_out > wheels_out:
+        wheels_out = native_out
+
+    if wheels_out > max_wheels_off:
+        consecutive_frames += 1
+        if consecutive_frames >= 2:
+            return True, consecutive_frames, f"Off Track: Exceeded Track Limits ({wheels_out} wheels off)"
+    else:
+        consecutive_frames = 0
+
+    return False, consecutive_frames, None
+
+
 class TestEngineMath(unittest.TestCase):
     def test_gate_crossing(self):
         gate_p1 = [-10.0, 0.0, 100.0]
@@ -177,6 +204,111 @@ class TestEngineMath(unittest.TestCase):
         self.assertEqual(get_linear_multiplier(1.0), 0.0)
         self.assertEqual(get_linear_multiplier(8.0), 1.0)
         self.assertAlmostEqual(get_linear_multiplier(20.0), 1.5)
+
+    def test_off_track_valid_track_zero_wheels_off(self):
+        car = {
+            "wheels": {
+                0: {"surfaceValidTrack": True},
+                1: {"surfaceValidTrack": True},
+                2: {"surfaceValidTrack": True},
+                3: {"surfaceValidTrack": True}
+            }
+        }
+        failed, frames, reason = check_off_track(car, max_wheels_off=2, consecutive_frames=0)
+        self.assertFalse(failed)
+        self.assertEqual(frames, 0)
+        self.assertIsNone(reason)
+
+    def test_off_track_one_or_two_wheels_off_within_limit(self):
+        car = {
+            "wheels": {
+                0: {"surfaceValidTrack": False},
+                1: {"surfaceValidTrack": False},
+                2: {"surfaceValidTrack": True},
+                3: {"surfaceValidTrack": True}
+            }
+        }
+        failed, frames, reason = check_off_track(car, max_wheels_off=2, consecutive_frames=0)
+        self.assertFalse(failed)
+        self.assertEqual(frames, 0)
+        self.assertIsNone(reason)
+
+    def test_off_track_three_wheels_off_debounce(self):
+        car = {
+            "wheels": {
+                0: {"surfaceValidTrack": False},
+                1: {"surfaceValidTrack": False},
+                2: {"surfaceValidTrack": False},
+                3: {"surfaceValidTrack": True}
+            }
+        }
+        # Frame 1: Debouncing (consecutive = 1)
+        failed, frames, reason = check_off_track(car, max_wheels_off=2, consecutive_frames=0)
+        self.assertFalse(failed)
+        self.assertEqual(frames, 1)
+
+        # Frame 2: Confirmed violation (consecutive = 2)
+        failed, frames, reason = check_off_track(car, max_wheels_off=2, consecutive_frames=frames)
+        self.assertTrue(failed)
+        self.assertEqual(frames, 2)
+        self.assertIn("3 wheels off", reason)
+
+    def test_off_track_four_wheels_off_fails(self):
+        car = {
+            "wheels": {
+                0: {"surfaceValidTrack": False},
+                1: {"surfaceValidTrack": False},
+                2: {"surfaceValidTrack": False},
+                3: {"surfaceValidTrack": False}
+            }
+        }
+        # Frame 1
+        failed, frames, reason = check_off_track(car, max_wheels_off=2, consecutive_frames=0)
+        self.assertFalse(failed)
+        self.assertEqual(frames, 1)
+
+        # Frame 2: Disqualified
+        failed, frames, reason = check_off_track(car, max_wheels_off=2, consecutive_frames=frames)
+        self.assertTrue(failed)
+        self.assertEqual(frames, 2)
+        self.assertIn("4 wheels off", reason)
+
+    def test_off_track_transient_glitch_reset(self):
+        car_glitch = {
+            "wheels": {
+                0: {"surfaceValidTrack": False},
+                1: {"surfaceValidTrack": False},
+                2: {"surfaceValidTrack": False},
+                3: {"surfaceValidTrack": False}
+            }
+        }
+        car_valid = {
+            "wheels": {
+                0: {"surfaceValidTrack": True},
+                1: {"surfaceValidTrack": True},
+                2: {"surfaceValidTrack": True},
+                3: {"surfaceValidTrack": True}
+            }
+        }
+        # Frame 1: 4 wheels off
+        failed, frames, reason = check_off_track(car_glitch, max_wheels_off=2, consecutive_frames=0)
+        self.assertEqual(frames, 1)
+
+        # Frame 2: Returned to track (glitch resolved)
+        failed, frames, reason = check_off_track(car_valid, max_wheels_off=2, consecutive_frames=frames)
+        self.assertFalse(failed)
+        self.assertEqual(frames, 0)
+
+    def test_off_track_native_fallback(self):
+        car_fallback = {
+            "wheelsOutside": 4
+        }
+        failed, frames, reason = check_off_track(car_fallback, max_wheels_off=2, consecutive_frames=0)
+        self.assertEqual(frames, 1)
+        failed, frames, reason = check_off_track(car_fallback, max_wheels_off=2, consecutive_frames=frames)
+        self.assertTrue(failed)
+        self.assertEqual(frames, 2)
+        self.assertIn("4 wheels off", reason)
 
 
 if __name__ == "__main__":
