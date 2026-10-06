@@ -155,22 +155,34 @@ countdownBeep:play()
 
 ## 6. Track Splines & Geometry APIs
 
-### `ac.getTrackSplineLength() -> number`
-Returns the total length of the active track AI spline in meters.
+### `ac.hasTrackSpline() -> boolean`
+Returns `true` if the track has an AI spline (`ideal_line.ai` or `fast_lane.ai`).
 
-### `ac.getTrackSplinePosition(progress: number) -> vec3`
-Returns the 3D world coordinate `(x, y, z)` at spline progress `progress` $\in [0.0, 1.0]$.
+### `ac.worldCoordinateToTrackProgress(worldPos: vec3) -> number`
+Finds the nearest point on the track AI spline and returns its normalized position $s \in [0.0, 1.0]$. Returns `-1` if no spline exists.
 
-### `ac.getTrackSplineForward(progress: number) -> vec3`
-Returns the normalized 3D forward direction vector tangent to the spline path at `progress`.
+### `ac.trackProgressToWorldCoordinate(progress: number, linear: boolean?) -> vec3`
+Returns the 3D world coordinate `(x, y, z)` on the ideal AI spline at normalized progress `progress`.
+
+### Spline Forward Tangent Vector
+In CSP Lua, calculate the forward tangent vector at progress $s$ using a lookahead point:
+```lua
+local trackLength = ac.getSim().trackLengthM
+local lookahead = 2.0 / trackLength
+local pTarget = ac.trackProgressToWorldCoordinate(s)
+local pAhead  = ac.trackProgressToWorldCoordinate((s + lookahead) % 1.0)
+local fwd = (pAhead - pTarget):normalize()
+```
 
 ---
 
 ## 7. Lessons Learned & Best Practices
 
-1. **Continuous Rolling Start Enforcement**:
-   Always execute `ac.setCarPhysicLinearVelocity()` on every frame inside `update(dt)` while state is `COUNTDOWN`. Do not rely on single-shot initialization.
-2. **Control Lock Synchronization**:
-   When locking user inputs (`ac.accessCarPhysics(0)`), ensure gear selection ($2^\text{nd}$ gear for rolling start) matches initial target launch speed to prevent clutch kick or engine stall upon control release (`GO!`).
-3. **Pcall Wrapping for Event Callbacks**:
+1. **Continuous Rolling Start Spline Guidance**:
+   On curved pre-corner approaches, do not enforce a static linear velocity vector along the spawn heading—the car will travel in a straight line off into the grass. Use `maintainRollingSpline` to advance spline progress $\Delta s = (v_{\text{mps}} \cdot dt) / L_{\text{track}}$ and continuously re-apply position `targetPos`, orientation `-fwd` (Orientation Inversion Rule), and velocity `fwd * v` every frame during `COUNTDOWN`.
+2. **Spawn Offset Calibration**:
+   Calibrate spawn distance upstream of the start gate to match the countdown time: $\text{spawn\_offset} = v_{\text{mps}} \times t_{\text{countdown}}$. This ensures the vehicle rolls smoothly along the curve and crosses the start gate right at "GO!".
+3. **Control Lock Synchronization**:
+   When locking user inputs (`physics.lockUserControlsFor(3.0)`), ensure gear selection ($2^\text{nd}$ gear for rolling start) and engine RPM ($3500\text{ RPM}$) match initial target launch speed via `ac.accessCarPhysics(0)` and `physics.engageGear` to prevent clutch kick or engine stall upon control release (`GO!`).
+4. **Pcall Wrapping for Event Callbacks**:
    Always wrap user-defined listeners and UI events in `pcall` to prevent uncaught LUA syntax or state errors from halting the main simulation thread.

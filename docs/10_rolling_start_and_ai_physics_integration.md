@@ -159,9 +159,21 @@ end
   - Fail test if player falls $> 30\text{m}$ behind or overtakes pace car before green zone.
   - Award Gold/Silver/Bronze based on precision of maintaining target gap ($\pm 3\text{m}$).
 
-### 2. High-Speed Sector Rolling Starts (e.g. Eau Rouge / Parabolica Tests)
-- **Spawn & Orientation**: Spawn player car upstream of the target sector with `physics.setCarPosition(0, targetPos, vec3(-fwd.x, -fwd.y, -fwd.z))`. The negative forward vector is required to align Assetto Corsa's internal coordinate orientation with the forward track tangent.
-- **Velocity Enforcement**: During `COUNTDOWN` state, continuously call `physics.setCarVelocity(0, fwd * targetSpeedMps)`, `physics.engageGear(0, gear)`, and `physics.setEngineRPM(0, 3500)` while locking controls with `physics.lockUserControlsFor(3.0)` until `GO!`.
+### 2. High-Speed Sector Rolling Starts & Curved Approaches
+- **The Curvature Pitfall**: In tests where the pre-sector approach curves (such as B-3 Out-In-Out Hairpin Trajectory at Vallelunga Club Circuit), enforcing a static linear velocity vector along a fixed spawn heading causes the car to travel in a Euclidean straight line, drifting off-track into the grass and accumulating off-track penalties before control is handed to the player.
+- **Dynamic Spline Guidance (`maintainRollingSpline`)**:
+  - Resolve the initial spline progress $s_0$ using `ac.worldCoordinateToTrackProgress(spawnPos)`.
+  - On every frame update during `COUNTDOWN`, advance the progress by $\Delta s = \frac{v_{\text{mps}} \cdot dt}{L_{\text{track}}}$.
+  - Compute the world position $P(s)$ and a lookahead tangent vector $\vec{fwd} = \text{normalize}(P(s + \delta s) - P(s))$ via `ac.trackProgressToWorldCoordinate`.
+  - Apply chassis orientation `vec3(-fwd.x, -fwd.y, -fwd.z)` (Orientation Inversion Rule) and elevation $P(s) + 0.05\text{m}$ using `physics.setCarPosition(0, targetPos, -fwd)`.
+  - Apply the matching velocity vector $\vec{fwd} \times v_{\text{mps}}$ using `physics.setCarVelocity(0, vel)`.
+  - Continuously enforce gear (2nd) and RPM (3500) via `ac.accessCarPhysics(0)` and `physics.engageGear`.
+  - If a track lacks an AI spline (`ac.hasTrackSpline() == false`), automatically fall back to static forward vector maintenance (`maintainRollingVelocity`).
+- **Spawn Distance Calibration Rule**:
+  - To ensure the countdown sequence naturally leads up to the start line and crosses the start gate right at "GO!", the spawn offset upstream of the start gate must equal:
+    $$\text{spawn\_offset} = \left(\frac{v_{\text{km/h}}}{3.6}\right) \times t_{\text{countdown}}$$
+  - Example: for $70.0\text{ km/h}$ over a $3.0\text{s}$ countdown, $\text{spawn\_offset} = 19.444 \times 3.0 \approx 58.3\text{ meters}$.
+  - At the green flag ("GO!"), mark `self.adjudicator.hasPassedStartGate = true` to ensure the sector timing completion registers cleanly.
 
 ### 3. Overtaking & Traffic License Tests (IA / Super License)
 - **Mechanism**: Populate track with multiple AI cars.

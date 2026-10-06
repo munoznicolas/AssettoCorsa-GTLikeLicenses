@@ -56,7 +56,11 @@ The mod runs inside CSP's **New Modes** extension subsystem (`extension/lua/new-
     - `physics.engageGear(carIndex, gear)`
     - `physics.setEngineRPM(carIndex, 3500)`
   - **Live Update Frame Spawn**: Because `ac.getCar(0)` is not fully initialized during initial script bytecode compilation, re-assert `setupSpawn` on the first frame of `script.update(dt)`.
-  - During `COUNTDOWN`, continuously maintain linear velocity, gear, and engine RPM via `maintainRollingVelocity` on every frame so AC does not bleed off momentum or drop into neutral/idle.
+  - **Dynamic Spline-Guided Rolling Starts (`maintainRollingSpline`)**:
+    - During `COUNTDOWN`, for tracks with an AI spline, guide the car along the ideal racing line each frame via `maintainRollingSpline`. Advance spline progress $\Delta s = (v_{\text{mps}} \cdot dt) / L_{\text{track}}$, orienting the chassis along the curve tangent ($-\vec{fwd}$) and setting linear velocity ($\vec{fwd} \times v_{\text{mps}}$). Never force a static Euclidean velocity vector on curved pre-corner approaches.
+    - Fall back to `maintainRollingVelocity` if no AI spline exists (`ac.hasTrackSpline() == false`).
+    - **Spawn Distance Calibration**: Set $\text{spawn\_offset} = v_{\text{mps}} \times t_{\text{countdown}}$ (e.g. $58.3\text{m}$ for $70\text{ km/h}$ over $3.0\text{s}$) so the car rolls up to the start gate right as the countdown reaches "GO!".
+    - On "GO!", mark `self.adjudicator.hasPassedStartGate = true` for rolling start tests to ensure finish gate crossing registers cleanly.
 * **Authoritative Track Limits Adjudication**:
   - Never rely solely on `car.wheelsOutside` or non-existent `car.wheelsOutsideTrack`. In CSP New Modes, `car.wheelsOutside` (Kunos penalty counter) remains `0` unless Kunos cut detection is triggered.
   - The authoritative ground-truth is `car.wheels[i].surfaceValidTrack` (`i = 0..3`) from `ac.StateWheel`. This directly evaluates `IS_VALID_TRACK` from `surfaces.ini` for each tyre contact point.
