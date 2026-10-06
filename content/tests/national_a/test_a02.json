@@ -2,48 +2,48 @@
   "test_id": "A-2",
   "tier": "National A",
   "title": "The Corkscrew: Severe Elevation Drop",
-  "description": "Brake blind uphill over the crest of Turn 8 at Laguna Seca, plunging five stories downward through Turn 8A into the compression while keeping the Porsche 718 Cayman S balanced.",
-  "lesson_objective": "Braking uphill into a completely blind crest. Sighting the oak tree marker, braking in a straight line, clipping the left curb as the track falls 5 stories, and immediately transitioning right into the bottom compression.",
+  "description": "Braking uphill into a blind crest, dropping 5 stories through Turns 8 and 8A.",
+  "lesson_objective": "Navigating blind downhill elevation drops and bottom compression.",
   "car_id": "ks_porsche_718_cayman_s",
   "track_id": "ks_laguna_seca",
   "track_layout": "",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      366.428,
-      27.845,
-      177.265
+      353.096,
+      8.323,
+      356.651
     ],
     "forward_vector": [
-      -0.0167,
-      0.0779,
-      -0.9968
+      0.3184,
+      0.0607,
+      -0.946
     ],
     "initial_speed_kmh": 130.0
   },
   "timing": {
     "start_gate": {
       "p1": [
-        367.186,
-        31.469,
-        127.359
+        369.27,
+        12.283,
+        313.827
       ],
       "p2": [
-        357.371,
-        31.469,
-        127.669
+        359.377,
+        12.283,
+        312.515
       ]
     },
     "finish_gate": {
       "p1": [
-        289.486,
-        6.892,
-        -281.432
+        326.685,
+        21.617,
+        -155.641
       ],
       "p2": [
-        282.722,
-        6.892,
-        -270.695
+        314.498,
+        21.617,
+        -156.887
       ]
     }
   },

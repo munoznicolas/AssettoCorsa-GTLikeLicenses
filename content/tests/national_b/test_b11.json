@@ -2,48 +2,48 @@
   "test_id": "B-11",
   "tier": "National B",
   "title": "S-Bend Line Straightening",
-  "description": "Classic lightweight live-axle rear-wheel drive. Sacrificing entry speed in Turn 2 to straighten the line and maximize rolling exit speed up the banked Hugenholtz corner.",
-  "lesson_objective": "Sacrifice entry velocity to straighten the geometry and maximize exit momentum.",
+  "description": "Sacrificing entry speed in Turn 2 to straighten the line and maximize exit speed up Hugenholtz.",
+  "lesson_objective": "Line straightening across linked corners in a classic rear-wheel drive coupe.",
   "car_id": "ks_ford_escort_mk1",
   "track_id": "ks_zandvoort",
   "track_layout": "",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      152.928,
-      3.458,
-      318.351
+      243.637,
+      2.705,
+      270.228
     ],
     "forward_vector": [
-      0.0122,
-      -0.0225,
-      -0.9997
+      0.0044,
+      0.011,
+      0.9999
     ],
     "initial_speed_kmh": 100.0
   },
   "timing": {
     "start_gate": {
       "p1": [
-        156.588,
-        2.461,
-        268.406
+        241.89,
+        3.243,
+        305.198
       ],
       "p2": [
-        148.018,
-        2.461,
-        268.427
+        252.539,
+        3.243,
+        305.356
       ]
     },
     "finish_gate": {
       "p1": [
-        163.067,
-        3.273,
-        -39.45
+        202.052,
+        1.324,
+        -34.554
       ],
       "p2": [
-        165.771,
-        3.273,
-        -30.593
+        196.139,
+        1.324,
+        -26.451
       ]
     }
   },

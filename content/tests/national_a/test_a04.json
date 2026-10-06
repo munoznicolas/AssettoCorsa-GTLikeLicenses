@@ -2,48 +2,48 @@
   "test_id": "A-4",
   "tier": "National A",
   "title": "Mid-Engine Snap Oversteer Control",
-  "description": "Tackle the fast downhill left at Graham Hill Bend in the carbon-monocoque Alfa Romeo 4C, balancing maintenance throttle through turn-in and mid-corner.",
-  "lesson_objective": "Off-camber downhill left turn. Avoiding abrupt throttle lift mid-corner which triggers instantaneous snap oversteer in a light, carbon-tub mid-engine car.",
+  "description": "Avoiding abrupt throttle lift through off-camber Graham Hill Bend.",
+  "lesson_objective": "Controlling mid-engine lift-off snap oversteer in a carbon-tub sports car.",
   "car_id": "ks_alfa_romeo_4c",
   "track_id": "ks_brands_hatch",
   "track_layout": "indy",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      80.296,
-      -5.269,
-      -151.944
+      158.025,
+      -9.328,
+      -208.592
     ],
     "forward_vector": [
-      -0.2587,
-      -0.0893,
-      -0.9618
+      -0.0945,
+      0.1119,
+      0.9892
     ],
     "initial_speed_kmh": 110.0
   },
   "timing": {
     "start_gate": {
       "p1": [
-        82.88,
-        -11.25,
-        -211.281
+        152.84,
+        -5.426,
+        -174.192
       ],
       "p2": [
-        72.485,
-        -11.25,
-        -211.594
+        163.245,
+        -5.426,
+        -172.941
       ]
     },
     "finish_gate": {
       "p1": [
-        -188.494,
-        -12.403,
-        -292.578
+        78.21,
+        -17.992,
+        -295.81
       ],
       "p2": [
-        -184.171,
-        -12.403,
-        -283.828
+        68.2,
+        -17.992,
+        -293.75
       ]
     }
   },

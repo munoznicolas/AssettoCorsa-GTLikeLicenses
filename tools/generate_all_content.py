@@ -1235,7 +1235,7 @@ def generate_career() -> None:
                 "NAME": "License Test",
                 "TYPE": "4",
                 "DURATION": "0",
-                "SPAWN_SET": "START",
+                "SPAWN_SET": "PIT",
             }
             # Target times in milliseconds
             targets = tdef["targets"]

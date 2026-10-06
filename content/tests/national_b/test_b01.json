@@ -1,63 +1,63 @@
 {
   "test_id": "B-1",
   "tier": "National B",
-  "title": "200m Acceleration & Braking",
-  "description": "Launch cleanly with minimal front wheelspin. Reach peak speed in 3rd gear, anchor eyes on the 150m braking marker, and execute threshold braking to bring the car to a full stop inside the marked grid box without locking the tires or overshooting.",
-  "lesson_objective": "Master standing launch traction and threshold braking down to complete standstill within target stop box.",
+  "title": "200m Acceleration & Braking (Short Threshold)",
+  "description": "Launch cleanly with minimal front wheelspin and execute threshold braking into the stop box.",
+  "lesson_objective": "Straight-line threshold braking without locking wheels or overshooting.",
   "car_id": "abarth500",
   "track_id": "ks_drag",
   "track_layout": "drag200",
   "start_mode": "STANDING",
   "spawn": {
     "position": [
-      31.146,
+      26.615,
       -0.72,
-      -5.264
+      -5.274
     ],
     "forward_vector": [
       1.0,
-      0.0001,
-      0.0028
+      0.0023,
+      0.0014
     ],
     "initial_speed_kmh": 0.0
   },
   "timing": {
     "start_gate": {
       "p1": [
-        34.073,
+        26.593,
         -0.72,
-        10.398
+        10.376
       ],
       "p2": [
-        34.168,
+        26.621,
         -0.72,
-        -9.652
+        -9.674
       ]
     },
     "finish_gate": {
       "p1": [
-        234.193,
-        -0.731,
-        10.099
+        468.551,
+        -0.738,
+        10.475
       ],
       "p2": [
-        234.135,
-        -0.731,
-        -9.951
+        468.529,
+        -0.738,
+        -9.575
       ]
     },
     "stop_box": {
       "center": [
-        239.148,
-        1.269,
-        -5.414
+        468.534,
+        1.262,
+        -5.225
       ],
       "size": [
         12.0,
         4.0,
         20.0
       ],
-      "rotation_deg": 90.13
+      "rotation_deg": 90.06
     }
   },
   "fail_rules": {

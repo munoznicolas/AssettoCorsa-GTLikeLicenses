@@ -2,48 +2,48 @@
   "test_id": "B-3",
   "tier": "National B",
   "title": "Out-In-Out Hairpin Trajectory",
-  "description": "Approach from the far track edge. Brake in a straight line, clip the rumble strip late at the apex, and open the steering wheel progressively onto the exit straight to preserve rolling momentum in a low-horsepower roadster.",
-  "lesson_objective": "Learn the classic out-in-out racing line through a tight 180-degree hairpin.",
+  "description": "Brake in a straight line, clip the rumble strip late, and open the wheel on exit.",
+  "lesson_objective": "Late apex out-in-out line to preserve rolling momentum in a lightweight roadster.",
   "car_id": "ks_mazda_miata",
   "track_id": "ks_vallelunga",
   "track_layout": "club_circuit",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      133.395,
-      187.857,
-      166.026
+      113.989,
+      190.67,
+      86.987
     ],
     "forward_vector": [
-      -0.9795,
-      -0.0078,
-      -0.2011
+      0.9984,
+      0.0032,
+      -0.0564
     ],
     "initial_speed_kmh": 70.0
   },
   "timing": {
     "start_gate": {
       "p1": [
-        102.049,
-        187.637,
-        150.206
+        148.845,
+        190.741,
+        89.823
       ],
       "p2": [
-        97.759,
-        187.637,
-        161.627
+        149.329,
+        190.741,
+        77.983
       ]
     },
     "finish_gate": {
       "p1": [
-        81.801,
-        187.699,
-        196.831
+        72.92,
+        187.579,
+        136.133
       ],
       "p2": [
-        83.123,
-        187.699,
-        183.939
+        69.356,
+        187.579,
+        147.371
       ]
     }
   },

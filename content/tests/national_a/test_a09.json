@@ -2,48 +2,48 @@
   "test_id": "A-9",
   "tier": "National A",
   "title": "High-Speed Esses Precision",
-  "description": "Thread the BMW M3 E30 S1 through the high-speed Maggotts-Becketts-Chapel esses at Silverstone GP with precision rhythm, minimal brake taps, and flowing momentum.",
-  "lesson_objective": "One of the fastest corner combinations in motorsport. Precision rhythm: lift slightly for Maggotts, dab brakes into Becketts, and set up a wide line into Chapel for the Hangar Straight.",
+  "description": "Precision rhythm: lift for Maggotts, dab brakes into Becketts, wide exit into Chapel.",
+  "lesson_objective": "Linking high-speed S-curves at 180+ km/h.",
   "car_id": "bmw_m3_e30_s1",
   "track_id": "ks_silverstone",
   "track_layout": "gp",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      418.5,
-      4.384,
-      -504.633
+      -71.959,
+      1.956,
+      -587.948
     ],
     "forward_vector": [
-      0.0685,
-      -0.0033,
-      0.9976
+      -0.7601,
+      -0.0112,
+      -0.6497
     ],
     "initial_speed_kmh": 160.0
   },
   "timing": {
     "start_gate": {
       "p1": [
-        424.929,
-        3.861,
-        -404.151
+        -110.322,
+        1.287,
+        -629.45
       ],
       "p2": [
-        439.0,
-        3.861,
-        -407.351
+        -118.37,
+        1.287,
+        -617.054
       ]
     },
     "finish_gate": {
       "p1": [
-        267.419,
-        -1.173,
-        342.484
+        -53.636,
+        -0.242,
+        -834.156
       ],
       "p2": [
-        280.547,
-        -1.173,
-        348.473
+        -55.52,
+        -0.242,
+        -848.835
       ]
     }
   },

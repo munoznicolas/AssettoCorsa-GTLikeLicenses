@@ -2,48 +2,48 @@
   "test_id": "A-11",
   "tier": "National A",
   "title": "Classic Rally 4WD Slide & Exit",
-  "description": "Utilize the full traction of the Celica GT-Four ST185 through the linked Surtees-to-Clearways sweep at Brands Hatch Indy, stabilizing turn exit onto Brabham Straight.",
-  "lesson_objective": "Connecting off-camber linked corners. Using the 4WD system to stabilize the car across the long looping Clearways sweep and accelerating onto Brabham Straight.",
+  "description": "Using 4WD traction to stabilize across looping Clearways and launch onto Brabham Straight.",
+  "lesson_objective": "Managing off-camber corner exit traction with all-wheel drive.",
   "car_id": "ks_toyota_celica_st185",
   "track_id": "ks_brands_hatch",
   "track_layout": "indy",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      -166.912,
-      -12.968,
-      -294.018
+      -109.395,
+      -14.792,
+      -317.533
     ],
     "forward_vector": [
-      -0.9082,
-      0.0295,
-      0.4175
+      -0.9389,
+      0.0306,
+      0.3429
     ],
     "initial_speed_kmh": 110.0
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -232.071,
-        -11.096,
-        -265.87
+        -144.549,
+        -13.741,
+        -311.113
       ],
       "p2": [
-        -226.352,
-        -11.096,
-        -258.122
+        -140.89,
+        -13.741,
+        -302.151
       ]
     },
     "finish_gate": {
       "p1": [
-        -284.06,
-        -4.539,
-        -313.792
+        -364.983,
+        0.962,
+        -71.79
       ],
       "p2": [
-        -289.281,
-        -4.539,
-        -323.531
+        -367.681,
+        0.962,
+        -59.585
       ]
     }
   },

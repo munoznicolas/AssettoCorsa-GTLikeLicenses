@@ -2,48 +2,48 @@
   "test_id": "B-8",
   "tier": "National B",
   "title": "Blind Compression Corner Entry",
-  "description": "Downhill compression dynamics. Committing to turn-in at the blind crest, soaking the vertical compression at the bottom, and staying off the outside gravel trap.",
-  "lesson_objective": "Maintain steering commitment over a crest through vertical suspension compression.",
+  "description": "Downhill compression turn-in over a blind crest and soaking vertical compression at the bottom.",
+  "lesson_objective": "Committing to blind crest turn-in and elevation drop at Paddock Hill Bend.",
   "car_id": "ks_mazda_mx5_nd",
   "track_id": "ks_brands_hatch",
   "track_layout": "indy",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      -71.112,
-      -5.916,
-      -413.401
+      -282.571,
+      -4.682,
+      -320.217
     ],
     "forward_vector": [
-      0.9452,
-      0.0323,
-      -0.325
+      0.8841,
+      -0.032,
+      -0.4662
     ],
     "initial_speed_kmh": 120.0
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -21.318,
-        -5.154,
-        -422.176
+        -239.819,
+        -5.912,
+        -335.01
       ],
       "p2": [
-        -24.8,
-        -5.154,
-        -432.484
+        -244.81,
+        -5.912,
+        -345.515
       ]
     },
     "finish_gate": {
       "p1": [
-        161.756,
-        -20.423,
-        -308.691
+        9.555,
+        -5.006,
+        -433.897
       ],
       "p2": [
-        175.803,
-        -20.423,
-        -308.992
+        6.223,
+        -5.006,
+        -444.453
       ]
     }
   },
