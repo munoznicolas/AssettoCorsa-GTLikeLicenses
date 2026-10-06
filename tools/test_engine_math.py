@@ -136,5 +136,37 @@ class TestEngineMath(unittest.TestCase):
         self.assertEqual(evaluate_medal(31.000, targets), "BRONZE")
         self.assertEqual(evaluate_medal(31.001, targets), "NONE")
 
+    def test_spline_distance_math(self):
+        track_length = 2000.0
+        
+        # Standard trailing car: lead at 0.50, follow at 0.48 -> 0.02 * 2000 = 40m
+        delta = 0.50 - 0.48
+        dist = delta * track_length
+        self.assertAlmostEqual(dist, 40.0)
+
+        # Wrap-around boundary: lead at 0.01 (crossed S/F), follow at 0.98 -> delta = -0.97 + 1.0 = 0.03 -> 60m
+        delta_wrap = 0.01 - 0.98
+        if delta_wrap < -0.5:
+            delta_wrap += 1.0
+        dist_wrap = delta_wrap * track_length
+        self.assertAlmostEqual(dist_wrap, 60.0)
+
+    def test_linear_speed_multiplier(self):
+        def get_linear_multiplier(dist_meters, target_gap=8.0, min_gap=1.5, max_mult=1.5):
+            if dist_meters <= min_gap:
+                return 0.0
+            if dist_meters <= target_gap:
+                ratio = (dist_meters - min_gap) / (target_gap - min_gap)
+                return max(0.50, ratio)
+            max_gap = target_gap + 12.0
+            if dist_meters >= max_gap:
+                return max_mult
+            return 1.0 + ((dist_meters - target_gap) / (max_gap - target_gap)) * (max_mult - 1.0)
+
+        self.assertEqual(get_linear_multiplier(1.0), 0.0)
+        self.assertEqual(get_linear_multiplier(8.0), 1.0)
+        self.assertAlmostEqual(get_linear_multiplier(20.0), 1.5)
+
 if __name__ == '__main__':
     unittest.main()
+

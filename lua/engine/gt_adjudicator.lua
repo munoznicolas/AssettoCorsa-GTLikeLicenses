@@ -319,6 +319,34 @@ function GTAdjudicator:adjudicate(dt, sessionTime, car)
     return { status = "FAILED", reason = self.failReason }
   end
 
+  -- 5b. Adjudicate Pace Car & Rolling Start rules
+  if self.testConfig and self.testConfig.start_mode == "PACE_CAR" then
+    local pc = self.testConfig.pace_car or {}
+    local paceCarIndex = pc.car_index or 1
+    local maxAllowedGap = pc.max_allowed_gap_m or 30.0
+
+    if ac and ac.getCar then
+      local paceCar = ac.getCar(paceCarIndex)
+      if paceCar then
+        -- Check if player overtakes pace car before green flag
+        if not self.hasPassedStartGate and car.splinePosition > paceCar.splinePosition then
+          self.isDisqualified = true
+          self.failReason = "Passed Pace Car Before Green Zone"
+          return { status = "FAILED", reason = self.failReason }
+        end
+
+        -- Check if player falls too far behind pace car
+        local trackLength = (ac.getSim() and ac.getSim().trackLengthM) or 1000.0
+        local gap = (paceCar.splinePosition - car.splinePosition) * trackLength
+        if gap > maxAllowedGap then
+          self.isDisqualified = true
+          self.failReason = string.format("Fell Too Far Behind Pace Car (%.0fm > %.0fm)", gap, maxAllowedGap)
+          return { status = "FAILED", reason = self.failReason }
+        end
+      end
+    end
+  end
+
   -- 6. Adjudicate finish line / Stop box logic
   if self.hasPassedStartGate and self.finishGate and not self.hasCrossedFinishGate and self.previousCarPos then
     if GTAdjudicator.segmentsIntersect2D(self.previousCarPos, currPos, self.finishGate.p1, self.finishGate.p2) then

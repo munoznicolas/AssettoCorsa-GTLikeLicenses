@@ -201,4 +201,110 @@ function GTPhysicsHooks.setupSpawn(testConfig, carIndex)
   return true
 end
 
+---Continuously re-applies linear velocity on frame updates during COUNTDOWN state.
+---Prevents native AC engine from clearing velocity vectors before GO!
+---@param carIndex integer @0-based car index
+---@param forwardVector table|vec3|number[] @Forward facing direction
+---@param speedKmh number @Target rolling speed in km/h
+---@return boolean success
+function GTPhysicsHooks.maintainRollingVelocity(carIndex, forwardVector, speedKmh)
+  carIndex = carIndex or 0
+  speedKmh = tonumber(speedKmh) or 0
+  if speedKmh <= 0 then return false end
+
+  local fwd = safeNormalize(GTPhysicsHooks.toVec3(forwardVector))
+  local speedMs = speedKmh / 3.6
+  local vel = vec3(fwd.x * speedMs, fwd.y * speedMs, fwd.z * speedMs)
+
+  if ac and ac.setCarPhysicLinearVelocity then
+    ac.setCarPhysicLinearVelocity(carIndex, vel)
+  elseif physics and physics.setCarVelocity then
+    physics.setCarVelocity(carIndex, vel)
+  end
+
+  return true
+end
+
+---Sets an absolute top speed ceiling (in km/h) on an AI controlled vehicle.
+---@param carIndex integer @0-based car index
+---@param speedKmh number @Speed limit in km/h (use 1e9 or 999999 for unlimited)
+function GTPhysicsHooks.setAITopSpeed(carIndex, speedKmh)
+  carIndex = carIndex or 0
+  speedKmh = tonumber(speedKmh) or 999999.0
+  if physics and physics.setAITopSpeed then
+    physics.setAITopSpeed(carIndex, speedKmh)
+  end
+end
+
+---Limits the maximum throttle output of an AI car.
+---@param carIndex integer @0-based car index
+---@param throttleLimit number @Throttle cap between 0.0 and 1.0
+function GTPhysicsHooks.setAIThrottleLimit(carIndex, throttleLimit)
+  carIndex = carIndex or 0
+  throttleLimit = math.max(0.0, math.min(1.0, tonumber(throttleLimit) or 1.0))
+  if physics and physics.setAIThrottleLimit then
+    physics.setAIThrottleLimit(carIndex, throttleLimit)
+  end
+end
+
+---Adjusts the caution level of an AI driver.
+---@param carIndex integer @0-based car index
+---@param level number @Caution level (0.0 = aggressive, 1.0 = normal, 3.0+ = extra cautious)
+function GTPhysicsHooks.setAICaution(carIndex, level)
+  carIndex = carIndex or 0
+  level = tonumber(level) or 1.0
+  if physics and physics.setAICaution then
+    physics.setAICaution(carIndex, level)
+  end
+end
+
+---Sets the lateral offset of an AI car relative to the track ideal spline.
+---@param carIndex integer @0-based car index
+---@param offsetMeters number @Offset distance in meters (negative = left, positive = right)
+---@param isRelative boolean? @Whether offset is relative to car position (default: false)
+function GTPhysicsHooks.setAISplineAbsoluteOffset(carIndex, offsetMeters, isRelative)
+  carIndex = carIndex or 0
+  offsetMeters = tonumber(offsetMeters) or 0.0
+  isRelative = isRelative or false
+  if physics and physics.setAISplineAbsoluteOffset then
+    physics.setAISplineAbsoluteOffset(carIndex, offsetMeters, isRelative)
+  elseif physics and physics.setAISplineOffset then
+    physics.setAISplineOffset(carIndex, offsetMeters, isRelative)
+  end
+end
+
+---Commands an AI car to remain stationary for a set duration.
+---@param carIndex integer @0-based car index
+---@param seconds number @Hold duration in seconds
+function GTPhysicsHooks.setAIStopCounter(carIndex, seconds)
+  carIndex = carIndex or 0
+  seconds = math.max(0.0, tonumber(seconds) or 0.0)
+  if physics and physics.setAIStopCounter then
+    physics.setAIStopCounter(carIndex, seconds)
+  end
+end
+
+---Linearly decays a lateral spline offset toward a target value at a safe rate.
+---@param currentOffset number @Current lateral offset in meters
+---@param targetOffset number @Target lateral offset in meters (e.g. 0.0 for racing line)
+---@param dt number @Frame delta time in seconds
+---@param maxRate number? @Max rate of offset decay in m/s (default: 0.5 m/s)
+---@return number newOffset
+function GTPhysicsHooks.smoothSplineOffsetDecay(currentOffset, targetOffset, dt, maxRate)
+  currentOffset = tonumber(currentOffset) or 0.0
+  targetOffset = tonumber(targetOffset) or 0.0
+  dt = tonumber(dt) or 0.016
+  maxRate = maxRate or 0.5
+
+  local diff = targetOffset - currentOffset
+  local maxMove = maxRate * dt
+
+  if math.abs(diff) <= maxMove then
+    return targetOffset
+  else
+    return currentOffset + (diff > 0 and maxMove or -maxMove)
+  end
+end
+
 return GTPhysicsHooks
+

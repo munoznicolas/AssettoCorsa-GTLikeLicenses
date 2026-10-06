@@ -22,6 +22,18 @@ local GTAdjudicator  = safeRequire("gt_adjudicator")
 local GTSessionReset = safeRequire("gt_session_reset")
 local GTGhostManager = safeRequire("gt_ghost_manager")
 
+local function tryRequireEngine(name)
+  local ok, mod = pcall(require, name)
+  if ok then return mod end
+  ok, mod = pcall(require, "engine/" .. name)
+  if ok then return mod end
+  ok, mod = pcall(require, "lua/engine/" .. name)
+  if ok then return mod end
+  return nil
+end
+
+local GTAICoordinator = tryRequireEngine("gt_ai_coordinator")
+
 local function tryRequireUI(name)
   local ok, mod = pcall(require, name)
   if ok then return mod end
@@ -201,6 +213,11 @@ function GTLicenseEngine.new(testDefinition)
   end
   self.ghostManager = GTGhostManager.new(self.testConfig, ghostTrajectory)
 
+  -- Initialize AI & Rolling Start Coordinator
+  if GTAICoordinator then
+    self.aiCoordinator = GTAICoordinator.new(self.testConfig)
+  end
+
   -- Begin countdown immediately upon creation
   self:startCountdown()
 
@@ -377,13 +394,16 @@ function GTLicenseEngine:update(dt)
     if self.testConfig and self.testConfig.spawn then
       local initialSpeed = tonumber(self.testConfig.spawn.initial_speed_kmh) or 0
       if initialSpeed > 0 then
-        GTPhysicsHooks.applyRollingVelocity(0, self.testConfig.spawn.forward_vector, initialSpeed)
+        GTPhysicsHooks.maintainRollingVelocity(0, self.testConfig.spawn.forward_vector, initialSpeed)
       end
     end
 
     if self.countdownTimer <= 0 then
       -- Release control locks and launch test
       GTPhysicsHooks.unlockControls()
+      if self.aiCoordinator then
+        self.aiCoordinator:triggerGreenFlag()
+      end
       dispatchEvent(self, "go")
       self:setState(GTLicenseEngine.STATE.RUNNING)
     end
@@ -425,7 +445,12 @@ function GTLicenseEngine:update(dt)
     -- Handled via UI input
   end
 
-  -- 3. Update Ghost & Pace Car Manager
+  -- 3. Update AI Traffic & Pace Car Coordinator
+  if self.aiCoordinator then
+    self.aiCoordinator:update(dt, self.sessionTime)
+  end
+
+  -- 4. Update Ghost & Pace Car Manager
   if self.ghostManager then
     local carPos = nil
     if car and car.position then
