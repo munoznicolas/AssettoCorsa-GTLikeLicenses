@@ -4,3 +4,4 @@ Pillow>=9.0.0
 
 # Optional development and test runners
 pytest>=7.0.0
+
