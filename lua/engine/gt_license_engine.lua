@@ -605,7 +605,8 @@ function GTLicenseEngine:update(dt)
       self.failReason = adjResult.reason or "Disqualified"
       self:setState(GTLicenseEngine.STATE.FAILED)
       dispatchEvent(self, "testFailed", self.failReason)
-      self.sessionReset:scheduleAutoReset(2.0)
+      -- Do NOT auto restart on timer; wait for user input (hotkey, gamepad, or UI retry)
+      self.sessionReset:cancelAutoReset()
 
     elseif adjResult.status == "PASSED" then
       self.achievedMedal = self:evaluateMedal(self.sessionTime)

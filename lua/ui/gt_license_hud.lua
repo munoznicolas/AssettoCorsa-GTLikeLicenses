@@ -414,8 +414,8 @@ end
 --------------------------------------------------------------------------------
 -- 6. PROMINENT RED 'DISQUALIFIED' BANNER
 --------------------------------------------------------------------------------
-local function drawDisqualifiedBanner(screenW, screenH, failReason)
-    local bannerH = 160
+local function drawDisqualifiedBanner(screenW, screenH, failReason, callbacks)
+    local bannerH = 180
     local p1 = vec2(0, (screenH - bannerH) * 0.45)
     local p2 = vec2(screenW, p1.y + bannerH)
 
@@ -430,18 +430,48 @@ local function drawDisqualifiedBanner(screenW, screenH, failReason)
 
     -- Primary Warning Title
     ui.pushFont(ui.Font.Huge)
-    ui.drawTextClipped("DISQUALIFIED", p1 + vec2(0, 16), vec2(screenW, p1.y + 70), COLORS.WHITE, vec2(0.5, 0.5))
+    ui.drawTextClipped("DISQUALIFIED", p1 + vec2(0, 14), vec2(screenW, p1.y + 64), COLORS.WHITE, vec2(0.5, 0.5))
     ui.popFont()
 
     -- Failure Reason Subtitle
     local reasonText = string.upper(failReason or "FAILED CRITERIA")
     ui.pushFont(ui.Font.Title)
-    ui.drawTextClipped(reasonText, p1 + vec2(0, 72), vec2(screenW, p1.y + 112), rgbm(1, 0.85, 0.85, 0.95), vec2(0.5, 0.5))
+    ui.drawTextClipped(reasonText, p1 + vec2(0, 66), vec2(screenW, p1.y + 104), rgbm(1, 0.85, 0.85, 0.95), vec2(0.5, 0.5))
     ui.popFont()
 
-    -- Prompt to Retry
+    -- Interactive Retry Button
+    local btnW = 200
+    local btnH = 36
+    local btnX = (screenW - btnW) * 0.5
+    local btnY = p1.y + 110
+    local btnP1 = vec2(btnX, btnY)
+    local btnP2 = btnP1 + vec2(btnW, btnH)
+
+    -- Click Detection for interactive mouse control
+    local uiState = ac.getUI and ac.getUI()
+    local isHovered = false
+    if uiState and uiState.mousePos then
+        local mPos = uiState.mousePos
+        if mPos.x >= btnP1.x and mPos.x <= btnP2.x and mPos.y >= btnP1.y and mPos.y <= btnP2.y then
+            isHovered = true
+            if uiState.isMouseLeftKeyClicked and callbacks and callbacks.onRestart then
+                callbacks.onRestart()
+            end
+        end
+    end
+
+    local btnBg = isHovered and rgbm(0.35, 0.10, 0.10, 0.95) or rgbm(0.20, 0.06, 0.06, 0.85)
+    local btnBorder = isHovered and rgbm(1.0, 0.4, 0.4, 1.0) or COLORS.BORDER_GREY
+    ui.drawRectFilled(btnP1, btnP2, btnBg, 4)
+    ui.drawRect(btnP1, btnP2, btnBorder, 4, ui.CornerFlags.All, 1.2)
+
     ui.pushFont(ui.Font.Main)
-    ui.drawTextClipped("PRESS  [ R ]  OR  [ RESET ]  TO RETRY", p1 + vec2(0, 116), vec2(screenW, p1.y + 146), COLORS.OFF_WHITE, vec2(0.5, 0.5))
+    ui.drawTextClipped("RETRY  (R)", btnP1, btnP2, COLORS.WHITE, vec2(0.5, 0.5))
+    ui.popFont()
+
+    -- Prompt to Retry via Hotkey / Gamepad
+    ui.pushFont(ui.Font.Small)
+    ui.drawTextClipped("PRESS  [ R ],  [ ENTER ],  [ SPACE ]  OR  CLICK  TO  RETRY", p1 + vec2(0, 152), vec2(screenW, p1.y + 174), rgbm(0.85, 0.85, 0.85, 0.8), vec2(0.5, 0.5))
     ui.popFont()
 end
 
@@ -646,7 +676,7 @@ function GTLicenseHUD.draw(sessionTime, targetsOrConfig, currentState, failReaso
 
     -- 5. Disqualification Banner
     if currentState == GTLicenseHUD.STATE.FAILED then
-        drawDisqualifiedBanner(screenW, screenH, failReason)
+        drawDisqualifiedBanner(screenW, screenH, failReason, callbacks)
     end
 
     -- 6. Results Screen

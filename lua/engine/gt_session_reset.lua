@@ -83,13 +83,45 @@ function GTSessionReset:executeReset(reason)
   return true
 end
 
+---Checks if user has requested a session restart via keyboard or controller.
+---@return boolean
+function GTSessionReset:isRestartRequested()
+  -- 1. Check primary configured restart key
+  if self.restartKey then
+    if ac and ac.isKeyPressed and ac.isKeyPressed(self.restartKey) then return true end
+    if ui and ui.keyboardButtonPressed and ui.keyboardButtonPressed(self.restartKey) then return true end
+  end
+
+  -- 2. Check standard retry keys: R, Space, Return (Enter)
+  if ac and ac.isKeyPressed and ui and ui.KeyIndex then
+    if ui.KeyIndex.R and ac.isKeyPressed(ui.KeyIndex.R) then return true end
+    if ui.KeyIndex.Space and ac.isKeyPressed(ui.KeyIndex.Space) then return true end
+    if ui.KeyIndex.Return and ac.isKeyPressed(ui.KeyIndex.Return) then return true end
+  end
+
+  if ui and ui.keyboardButtonPressed and ui.KeyIndex then
+    if ui.KeyIndex.R and ui.keyboardButtonPressed(ui.KeyIndex.R) then return true end
+    if ui.KeyIndex.Space and ui.keyboardButtonPressed(ui.KeyIndex.Space) then return true end
+    if ui.KeyIndex.Return and ui.keyboardButtonPressed(ui.KeyIndex.Return) then return true end
+  end
+
+  -- 3. Check Gamepad buttons: A, Start, X
+  if ac and ac.isGamepadButtonPressed and ac.GamepadButton then
+    if ac.GamepadButton.A and ac.isGamepadButtonPressed(0, ac.GamepadButton.A) then return true end
+    if ac.GamepadButton.Start and ac.isGamepadButtonPressed(0, ac.GamepadButton.Start) then return true end
+    if ac.GamepadButton.X and ac.isGamepadButtonPressed(0, ac.GamepadButton.X) then return true end
+  end
+
+  return false
+end
+
 ---Per-frame update loop checking restart input keys and ticking auto-reset timer.
 ---@param dt number @Frame delta time in seconds
 ---@return boolean didReset @True if a reset was triggered this frame
 function GTSessionReset:update(dt)
-  -- 1. Check manual restart hotkey (e.g. 'R' key)
-  if ac and ac.isKeyPressed and ac.isKeyPressed(self.restartKey) then
-    self:executeReset("KEYPRESS")
+  -- 1. Check user input (R key, Space, Return, Gamepad buttons)
+  if self:isRestartRequested() then
+    self:executeReset("USER_INPUT")
     return true
   end
 
