@@ -75,3 +75,4 @@ When troubleshooting crashes or anomalies:
      `race.ini` is missing `__CM_CUSTOM_MODE=gt-license` in `[RACE]`.
    * `Car stationary at grid slot #1 with 0 km/h`:
      Engine coordinator was not instantiated at top level or `testConfig` was not loaded dynamically.
+

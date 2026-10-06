@@ -17,6 +17,7 @@ local function safeRequire(name)
   error(string.format("gt_license_engine: Failed to require '%s': %s", name, tostring(mod)))
 end
 
+local GTUtils        = safeRequire("gt_utils")
 local GTPhysicsHooks = safeRequire("gt_physics_hooks")
 local GTAdjudicator  = safeRequire("gt_adjudicator")
 local GTSessionReset = safeRequire("gt_session_reset")
@@ -107,14 +108,19 @@ local DEFAULT_TEST_CONFIG = {
 
 ---Simple JSON parser fallback for standalone test harnesses without CSP JSON global.
 local function parseJSONSafe(str)
+  if GTUtils and GTUtils.parseJSONSafe then
+    return GTUtils.parseJSONSafe(str)
+  end
   if JSON and JSON.parse then
     return JSON.parse(str)
   end
-  -- If JSON is not present, return default
   return nil
 end
 
 local function getTestFilePath(testId)
+  if GTUtils and GTUtils.getTestFilePath then
+    return GTUtils.getTestFilePath(testId)
+  end
   if not testId or #testId == 0 then return nil end
   local prefix, numStr = testId:match("^([%a]+)%-(%d+)$")
   if not prefix or not numStr then return nil end

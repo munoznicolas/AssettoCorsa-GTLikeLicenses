@@ -98,7 +98,7 @@ class HeadlessAdjudicator:
     def reset(self):
         self.status = "RUNNING"
         self.fail_reason = None
-        self.has_passed_start = False
+        self.has_passed_start = (self.config.get("start_mode") == "STANDING") or (self.start_gate is None)
         self.has_crossed_finish = False
         self.stop_box_entry_time = None
         self.stop_box_completed = False
@@ -305,9 +305,10 @@ def simulate_single_test(test_json_path: str, verbose: bool = False) -> Dict[str
     adjudicator.update(dt, 5.0, (spawn_pos[0] + 50, spawn_pos[1], spawn_pos[2] + 50), 100.0)
     # Trigger reset
     adjudicator.reset()
+    expected_has_passed_start = (test_data.get("start_mode") == "STANDING") or (adjudicator.start_gate is None)
     results["profile_e_reset"] = (
         adjudicator.status == "RUNNING"
-        and not adjudicator.has_passed_start
+        and adjudicator.has_passed_start == expected_has_passed_start
         and not adjudicator.has_crossed_finish
     )
 

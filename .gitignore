@@ -1,5 +1,27 @@
+# Byte-compiled / optimized files
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 .tmp*
+
+# Python test caches, coverage & virtual environments
+.pytest_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+ENV/
+
+# Game logs, crash reports and dumps
+logs/
+*.report
+*.dmp
+*.log
+
+# Distribution & release artifacts
+release/
+*.zip
+dist/
+build/
+*.egg-info/

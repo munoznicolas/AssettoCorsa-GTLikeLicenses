@@ -1,0 +1,6 @@
+# Core dependencies for Assetto Corsa GT-Like Licenses tooling and validation
+jsonschema>=4.0.0
+Pillow>=9.0.0
+
+# Optional development and test runners
+pytest>=7.0.0

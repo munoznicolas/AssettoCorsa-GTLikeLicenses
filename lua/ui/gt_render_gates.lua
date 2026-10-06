@@ -90,8 +90,21 @@ local cachedFinishPoints = nil
 local cachedStopBoxCorners = nil
 local cachedGuideLine = nil
 
+local function safeRequire(name)
+    local ok, mod = pcall(require, name)
+    if ok then return mod end
+    ok, mod = pcall(require, "engine/" .. name)
+    if ok then return mod end
+    ok, mod = pcall(require, "lua/engine/" .. name)
+    if ok then return mod end
+    return nil
+end
+
+local GTUtils = safeRequire("gt_utils")
+
 --- Helper to safely convert array {x, y, z} or vec3 into a vec3 object
 local function toVec3(p)
+    if GTUtils and GTUtils.toVec3 then return GTUtils.toVec3(p) end
     if not p then return vec3(0, 0, 0) end
     if type(p.x) == "number" and type(p.y) == "number" and type(p.z) == "number" then
         return vec3(p.x, p.y, p.z)

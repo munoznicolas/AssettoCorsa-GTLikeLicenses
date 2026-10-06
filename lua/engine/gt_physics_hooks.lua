@@ -5,21 +5,22 @@
 --              velocity vectors, and control locking during countdown sequences.
 -- ==============================================================================
 
+local function safeRequire(name)
+  local ok, mod = pcall(require, name)
+  if ok then return mod end
+  ok, mod = pcall(require, "engine/" .. name)
+  if ok then return mod end
+  ok, mod = pcall(require, "lua/engine/" .. name)
+  if ok then return mod end
+  return nil
+end
+
+local GTUtils = safeRequire("gt_utils")
 local GTPhysicsHooks = {}
 
----Converts an array {x, y, z}, table {x=..., y=..., z=...}, or vec3 to a valid vec3.
----@param v table|vec3|number[]
----@return vec3
-function GTPhysicsHooks.toVec3(v)
-  if v == nil then
-    return vec3(0, 0, 0)
-  end
-
-  -- Already a vec3 or cdata object with x, y, z
-  if type(v) == 'cdata' or (type(v) == 'userdata') then
-    return v
-  end
-
+GTPhysicsHooks.toVec3 = GTUtils and GTUtils.toVec3 or function(v)
+  if v == nil then return vec3(0, 0, 0) end
+  if type(v) == 'cdata' or (type(v) == 'userdata') then return v end
   if type(v) == 'table' then
     if v.x ~= nil and v.y ~= nil and v.z ~= nil then
       return vec3(tonumber(v.x) or 0, tonumber(v.y) or 0, tonumber(v.z) or 0)
@@ -27,19 +28,14 @@ function GTPhysicsHooks.toVec3(v)
       return vec3(tonumber(v[1]) or 0, tonumber(v[2]) or 0, tonumber(v[3]) or 0)
     end
   end
-
   return vec3(0, 0, 0)
 end
 
----Normalizes a direction vector safely.
----@param dir vec3
----@return vec3
-local function safeNormalize(dir)
-  local len = math.sqrt(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z)
-  if len > 0.0001 then
-    return vec3(dir.x / len, dir.y / len, dir.z / len)
-  end
-  return vec3(0, 0, 1) -- default forward facing vector
+local safeNormalize = GTUtils and GTUtils.safeNormalize or function(dir)
+  local v = GTPhysicsHooks.toVec3(dir)
+  local len = math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z)
+  if len > 0.0001 then return vec3(v.x / len, v.y / len, v.z / len) end
+  return vec3(0, 0, 1)
 end
 
 ---Estimates a realistic starting gear for rolling start velocity.

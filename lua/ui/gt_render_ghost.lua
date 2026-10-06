@@ -21,8 +21,23 @@ local trailHistory = {}
 local MAX_TRAIL_POINTS = 25
 local trailTimer = 0.0
 
+local function safeRequire(name)
+  local ok, mod = pcall(require, name)
+  if ok then return mod end
+  ok, mod = pcall(require, "engine/" .. name)
+  if ok then return mod end
+  ok, mod = pcall(require, "lua/engine/" .. name)
+  if ok then return mod end
+  return nil
+end
+
+local GTUtils = safeRequire("gt_utils")
+
 ---Helper to construct vec3 safely across CSP environments.
 local function toVec3(p)
+  if GTUtils and GTUtils.toVec3 then
+    return GTUtils.toVec3(p)
+  end
   if vec3 and vec3.new then
     return vec3(p[1], p[2], p[3])
   end
@@ -31,6 +46,10 @@ end
 
 ---Draws a 3D line segment using render.drawLine or polyline fallback.
 local function draw3DLine(p1, p2, color, thickness)
+  if GTUtils and GTUtils.draw3DLine then
+    GTUtils.draw3DLine(p1, p2, color, thickness)
+    return
+  end
   thickness = thickness or 2.0
   if render and render.drawLine then
     render.drawLine(p1, p2, color, thickness)

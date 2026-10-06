@@ -103,3 +103,4 @@ When diagnosing launch issues or crashes:
     `race.ini` is missing `__CM_CUSTOM_MODE=gt-license` in `[RACE]`.
   - `Car stopped at grid slot #1 / pit box with 0 km/h`:
     Engine was not instantiated at top level or `testConfig` was not loaded dynamically.
+

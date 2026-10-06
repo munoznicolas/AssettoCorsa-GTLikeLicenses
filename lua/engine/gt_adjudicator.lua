@@ -43,7 +43,7 @@ function GTAdjudicator:init(testConfig)
   self.stopBox = timing.stop_box
 
   -- Runtime state
-  self.hasPassedStartGate = false
+  self.hasPassedStartGate = (self.testConfig.start_mode == "STANDING") or (timing.start_gate == nil)
   self.hasCrossedFinishGate = false
   self.stoppedInBox = false
   self.isDisqualified = false
