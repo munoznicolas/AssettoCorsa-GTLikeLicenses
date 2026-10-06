@@ -161,14 +161,25 @@ end
 
 ### 2. High-Speed Sector Rolling Starts & Curved Approaches
 - **The Curvature Pitfall**: In tests where the pre-sector approach curves (such as B-3 Out-In-Out Hairpin Trajectory at Vallelunga Club Circuit), enforcing a static linear velocity vector along a fixed spawn heading causes the car to travel in a Euclidean straight line, drifting off-track into the grass and accumulating off-track penalties before control is handed to the player.
+- **Steering Rack Lock vs. Kinematic Spline Guidance Pitfall**:
+  - Attempting to steer the front wheels along the curve via `physics.overrideSteering` while player controls are locked (`physics.lockUserControlsFor(duration)`) is **ineffective**: Assetto Corsa's C++ physics core locks the mechanical steering rack itself during control locks.
+  - Omitting chassis positioning during countdown and relying solely on velocity + steering override causes the vehicle to plow straight ahead along its initial spawn heading, drifting into outer barriers.
+  - Spline-guided countdowns must reposition and orient the chassis directly via `physics.setCarPosition(carIndex, targetPos, vec3(-fwd.x, -fwd.y, -fwd.z))`.
 - **Dynamic Spline Guidance (`maintainRollingSpline`)**:
   - Resolve the initial spline progress $s_0$ using `ac.worldCoordinateToTrackProgress(spawnPos)`.
   - On every frame update during `COUNTDOWN`, advance the progress by $\Delta s = \frac{v_{\text{mps}} \cdot dt}{L_{\text{track}}}$.
   - Compute the world position $P(s)$ and a lookahead tangent vector $\vec{fwd} = \text{normalize}(P(s + \delta s) - P(s))$ via `ac.trackProgressToWorldCoordinate`.
+  - **Lookahead Distance Calibration Rule**: Scale lookahead with vehicle speed:
+    $$\text{lookaheadDist} = \max(3.5\text{m}, v_{\text{mps}} \times 0.25)$$
+    Using an infinitesimal lookahead ($< 3.0\text{m}$, less than one car length) causes the chassis to track the immediate local curb tangent, aiming the vehicle's nose into the outside white line on corner approach. A dynamic lookahead ($\approx 4.9\text{m}$ at $70\text{ km/h}$) smoothly anticipates the corner entry and apex.
   - Apply chassis orientation `vec3(-fwd.x, -fwd.y, -fwd.z)` (Orientation Inversion Rule) and elevation $P(s) + 0.05\text{m}$ using `physics.setCarPosition(0, targetPos, -fwd)`.
   - Apply the matching velocity vector $\vec{fwd} \times v_{\text{mps}}$ using `physics.setCarVelocity(0, vel)`.
   - Continuously enforce gear (2nd) and RPM (3500) via `ac.accessCarPhysics(0)` and `physics.engageGear`.
   - If a track lacks an AI spline (`ac.hasTrackSpline() == false`), automatically fall back to static forward vector maintenance (`maintainRollingVelocity`).
+- **Drivetrain & Gear Engagement Retention Across Handover**:
+  - **The Starting-Line Neutral Reset Trap**: Calling `physics.lockUserGearboxFor(0, false)` on rolling starts triggers Assetto Corsa's native starting-line subroutine, which disengages any selected gear and drops the transmission back to neutral.
+  - **Handover Gear Assertion**: Inside `GTPhysicsHooks.unlockControls(carIndex, targetGear)`, on rolling starts where `targetGear > 0`, **bypass** `lockUserGearboxFor(0, false)` completely. Instead, explicitly call `physics.engageGear(carIndex, targetGear)` and `physics.setEngineRPM(carIndex, 3500)`.
+  - **Post-Handover Guard Window**: When transitioning into `RUNNING` state, hardware controller initialization or clutch release can attempt to drop the gearbox back to neutral. Maintain a $0.5\text{s}$ guard window in `GTLicenseEngine:update(dt)` that re-asserts `physics.engageGear(0, targetGear)` if `car.gear == 0`, ensuring instantaneous drive power when the player accelerates.
 - **Spawn Distance Calibration Rule**:
   - To ensure the countdown sequence naturally leads up to the start line and crosses the start gate right at "GO!", the spawn offset upstream of the start gate must equal:
     $$\text{spawn\_offset} = \left(\frac{v_{\text{km/h}}}{3.6}\right) \times t_{\text{countdown}}$$

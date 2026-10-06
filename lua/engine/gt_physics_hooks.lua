@@ -311,7 +311,7 @@ function GTPhysicsHooks.maintainRollingSpline(carIndex, currentProgress, speedKm
   local targetPos = ac.trackProgressToWorldCoordinate(nextProgress)
 
   -- Query lookahead point along the spline to compute tangent heading
-  local lookaheadDist = math.max(2.0, speedMs * 0.15)
+  local lookaheadDist = math.max(3.5, speedMs * 0.25)
   local lookaheadDelta = lookaheadDist / trackLength
   local aheadPos = ac.trackProgressToWorldCoordinate((nextProgress + lookaheadDelta) % 1.0)
 

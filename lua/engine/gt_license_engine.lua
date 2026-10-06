@@ -605,9 +605,10 @@ function GTLicenseEngine:update(dt)
       self:setState(GTLicenseEngine.STATE.RUNNING)
       if ac and ac.log then
         local spd = car and car.speedKmh or 0
-        local gear = car and car.gear or 0
-        ac.log(string.format("[GTLicense] Countdown GO! | Mode=%s | Telemetry: Speed=%.2f km/h, Gear=%d",
-          tostring(self.testConfig.start_mode), spd, gear))
+        local lx = car and car.look and car.look.x or 0
+        local lz = car and car.look and car.look.z or 0
+        ac.log(string.format("[GTLicense] Countdown GO! | Mode=%s | Telemetry: Speed=%.2f km/h, TargetGear=%d, Look=(%.2f, %.2f)",
+          tostring(self.testConfig.start_mode), spd, targetGear, lx, lz))
       end
     end
 

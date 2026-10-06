@@ -113,8 +113,17 @@ physics.setEngineRPM(0, 3500)
 ### `physics.lockUserControlsFor(seconds: number)`
 Locks user steering, throttle, and brake inputs for a specified duration (0 to unlock immediately).
 
+> [!WARNING]
+> While `physics.lockUserControlsFor` is active, Assetto Corsa locks the steering rack. Calls to `physics.overrideSteering(carIndex, steerVal)` will **NOT** turn the vehicle's wheels. Rolling starts along curves must reposition and orient the chassis directly via `physics.setCarPosition`.
+
 ### `physics.forceUserBrakesFor(seconds: number, val: number)`
 Forces human player brake pedal input (`0.0` to `1.0`) during standing start countdowns.
+
+### `physics.lockUserGearboxFor(seconds: number, lock: boolean)`
+Commands Kunos' native gearbox lock subroutine.
+
+> [!CAUTION]
+> On rolling starts, **never call `physics.lockUserGearboxFor(0, false)`** upon releasing controls. In CSP New Modes, calling this function triggers AC's native starting-line subroutine which forcibly resets the engaged transmission back to neutral. For rolling starts, simply assert `physics.engageGear(carIndex, targetGear)` and omit `lockUserGearboxFor`.
 
 ---
 
@@ -165,12 +174,14 @@ Finds the nearest point on the track AI spline and returns its normalized positi
 Returns the 3D world coordinate `(x, y, z)` on the ideal AI spline at normalized progress `progress`.
 
 ### Spline Forward Tangent Vector
-In CSP Lua, calculate the forward tangent vector at progress $s$ using a lookahead point:
+In CSP Lua, calculate the forward tangent vector at progress $s$ using a dynamic velocity-scaled lookahead point:
 ```lua
 local trackLength = ac.getSim().trackLengthM
-local lookahead = 2.0 / trackLength
+local speedMs = speedKmh / 3.6
+local lookaheadDist = math.max(3.5, speedMs * 0.25) -- Anticipate corner entry
+local lookaheadDelta = lookaheadDist / trackLength
 local pTarget = ac.trackProgressToWorldCoordinate(s)
-local pAhead  = ac.trackProgressToWorldCoordinate((s + lookahead) % 1.0)
+local pAhead  = ac.trackProgressToWorldCoordinate((s + lookaheadDelta) % 1.0)
 local fwd = (pAhead - pTarget):normalize()
 ```
 
@@ -180,9 +191,13 @@ local fwd = (pAhead - pTarget):normalize()
 
 1. **Continuous Rolling Start Spline Guidance**:
    On curved pre-corner approaches, do not enforce a static linear velocity vector along the spawn heading—the car will travel in a straight line off into the grass. Use `maintainRollingSpline` to advance spline progress $\Delta s = (v_{\text{mps}} \cdot dt) / L_{\text{track}}$ and continuously re-apply position `targetPos`, orientation `-fwd` (Orientation Inversion Rule), and velocity `fwd * v` every frame during `COUNTDOWN`.
-2. **Spawn Offset Calibration**:
+2. **Steering Override vs. Locked Controls**:
+   `physics.overrideSteering` is ineffective while `physics.lockUserControlsFor` is active because the steering rack is held locked. Spline guidance along curves during countdown must update chassis position and orientation directly.
+3. **Transmission Retention Across Rolling Handover**:
+   Do not call `physics.lockUserGearboxFor(0, false)` on rolling starts—it triggers AC's native starting-line neutral reset. Explicitly call `physics.engageGear(0, targetGear)` upon release and guard the transmission for $0.5\text{s}$ in `RUNNING` state.
+4. **Spawn Offset Calibration**:
    Calibrate spawn distance upstream of the start gate to match the countdown time: $\text{spawn\_offset} = v_{\text{mps}} \times t_{\text{countdown}}$. This ensures the vehicle rolls smoothly along the curve and crosses the start gate right at "GO!".
-3. **Control Lock Synchronization**:
+5. **Control Lock Synchronization**:
    When locking user inputs (`physics.lockUserControlsFor(3.0)`), ensure gear selection ($2^\text{nd}$ gear for rolling start) and engine RPM ($3500\text{ RPM}$) match initial target launch speed via `ac.accessCarPhysics(0)` and `physics.engageGear` to prevent clutch kick or engine stall upon control release (`GO!`).
-4. **Pcall Wrapping for Event Callbacks**:
+6. **Pcall Wrapping for Event Callbacks**:
    Always wrap user-defined listeners and UI events in `pcall` to prevent uncaught LUA syntax or state errors from halting the main simulation thread.
