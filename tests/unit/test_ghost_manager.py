@@ -62,30 +62,24 @@ class TestGhostTrajectoryGenerator(unittest.TestCase):
             self.assertEqual(len(s["pos"]), 3)
             self.assertEqual(len(s["heading"]), 3)
 
-    def test_all_58_ghost_files_exist(self):
-        """Ensure all 58 license tests have a corresponding ghost trajectory file."""
+    def test_all_58_ghost_profiles_generate(self):
+        """Ensure all 58 license tests can generate valid calibrated ghost trajectories on demand."""
         tests_dir = os.path.join(REPO_ROOT, "content", "tests")
         tiers = ["national_b", "national_a", "international_b", "international_a", "super_license"]
 
         total_tests = 0
-        total_ghosts = 0
-
         for tier in tiers:
             tdir = os.path.join(tests_dir, tier)
             self.assertTrue(os.path.isdir(tdir), f"Tier dir not found: {tdir}")
             test_files = [f for f in os.listdir(tdir) if f.startswith("test_") and f.endswith(".json")]
             for tf in test_files:
                 total_tests += 1
-                ghost_name = f"ghost_{tf}"
-                ghost_path = os.path.join(tdir, ghost_name)
-                self.assertTrue(
-                    os.path.isfile(ghost_path),
-                    f"Missing ghost file: {ghost_path} for test {tf}"
-                )
-                total_ghosts += 1
+                profile = generate_ghost_profile(os.path.join(tdir, tf))
+                self.assertIsNotNone(profile)
+                self.assertIn("trajectory", profile)
+                self.assertGreater(len(profile["trajectory"]), 5)
 
         self.assertEqual(total_tests, 58)
-        self.assertEqual(total_ghosts, 58)
 
 
 if __name__ == "__main__":

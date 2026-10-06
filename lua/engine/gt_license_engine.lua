@@ -106,49 +106,8 @@ local DEFAULT_TEST_CONFIG = {
   }
 }
 
----Simple JSON parser fallback for standalone test harnesses without CSP JSON global.
-local function parseJSONSafe(str)
-  if GTUtils and GTUtils.parseJSONSafe then
-    return GTUtils.parseJSONSafe(str)
-  end
-  if JSON and JSON.parse then
-    return JSON.parse(str)
-  end
-  return nil
-end
-
-local function getTestFilePath(testId)
-  if GTUtils and GTUtils.getTestFilePath then
-    return GTUtils.getTestFilePath(testId)
-  end
-  if not testId or #testId == 0 then return nil end
-  local prefix, numStr = testId:match("^([%a]+)%-(%d+)$")
-  if not prefix or not numStr then return nil end
-  local num = tonumber(numStr)
-  if not num then return nil end
-  prefix = string.upper(prefix)
-  local numPadded = string.format("%02d", num)
-  local tierFolder, filePrefix
-  if prefix == "B" then
-    tierFolder = "national_b"
-    filePrefix = "b"
-  elseif prefix == "A" then
-    tierFolder = "national_a"
-    filePrefix = "a"
-  elseif prefix == "IB" then
-    tierFolder = "international_b"
-    filePrefix = "ib"
-  elseif prefix == "IA" then
-    tierFolder = "international_a"
-    filePrefix = "ia"
-  elseif prefix == "S" then
-    tierFolder = "super_license"
-    filePrefix = "s"
-  else
-    return nil
-  end
-  return string.format("%s/test_%s%s.json", tierFolder, filePrefix, numPadded)
-end
+local parseJSONSafe = GTUtils.parseJSONSafe
+local getTestFilePath = GTUtils.getTestFilePath
 
 ---Loads a JSON test definition file from disk.
 ---@param filepath string? @Path to test JSON file
@@ -420,31 +379,12 @@ function GTLicenseEngine:startCountdown()
 
   -- Teleport car to spawn coordinates and impart rolling launch velocity if configured
   local isStanding = (self.testConfig.start_mode == "STANDING")
+  local initialSpeed = tonumber(self.testConfig.spawn and self.testConfig.spawn.initial_speed_kmh or 0) or 0
+  self.isAIRollingActive = (not isStanding) and (initialSpeed > 0)
   GTPhysicsHooks.setupSpawn(self.testConfig, 0)
 
   -- Lock controls during countdown
   GTPhysicsHooks.lockControls(3.0, isStanding)
-
-  -- Initialize spline progress tracking for rolling starts
-  self.rollingSplineProgress = nil
-  if not isStanding and ac and ac.hasTrackSpline and ac.hasTrackSpline() then
-    local spawnPos = self.testConfig.spawn and self.testConfig.spawn.position
-    if spawnPos and ac.worldCoordinateToTrackProgress then
-      local p = ac.worldCoordinateToTrackProgress(GTPhysicsHooks.toVec3(spawnPos))
-      if p and p >= 0 and p <= 1 then
-        self.rollingSplineProgress = p
-      end
-    end
-    if not self.rollingSplineProgress then
-      local car = ac.getCar and ac.getCar(0)
-      if car and car.splinePosition and car.splinePosition > 0 then
-        self.rollingSplineProgress = car.splinePosition
-      end
-    end
-    if ac and ac.log and self.rollingSplineProgress then
-      ac.log(string.format("[GTLicense] Initialized rollingSplineProgress=%.4f", self.rollingSplineProgress))
-    end
-  end
 
   if ac and ac.log then
     ac.log(string.format("[GTLicense] Countdown started | start_mode=%s | isStanding=%s | initial_speed=%.1f km/h",
@@ -500,6 +440,10 @@ end
 ---Called when GTSessionReset fires a reset.
 ---@param reason string
 function GTLicenseEngine:onSessionResetTriggered(reason)
+  if self.isAIRollingActive then
+    GTPhysicsHooks.stopAIRolling(0, 0)
+    self.isAIRollingActive = false
+  end
   if self.ghostManager then
     self.ghostManager:reset()
   end
@@ -530,24 +474,10 @@ function GTLicenseEngine:update(dt)
     local isStanding = (self.testConfig.start_mode == "STANDING")
     GTPhysicsHooks.lockControls(3.0, isStanding)
 
-    if not isStanding and ac and ac.hasTrackSpline and ac.hasTrackSpline() then
-      if not self.rollingSplineProgress then
-        if car.splinePosition and car.splinePosition > 0 then
-          self.rollingSplineProgress = car.splinePosition
-        elseif ac.worldCoordinateToTrackProgress and self.testConfig.spawn and self.testConfig.spawn.position then
-          local p = ac.worldCoordinateToTrackProgress(GTPhysicsHooks.toVec3(self.testConfig.spawn.position))
-          if p and p >= 0 and p <= 1 then
-            self.rollingSplineProgress = p
-          end
-        end
-      end
-    end
-
     if ac and ac.log then
-      ac.log(string.format("[GTLicense] First live frame spawn applied: pos=(%.2f, %.2f, %.2f), look=(%.2f, %.2f, %.2f), speed=%.2f km/h, splineProg=%s",
+      ac.log(string.format("[GTLicense] First live frame spawn applied: pos=(%.2f, %.2f, %.2f), look=(%.2f, %.2f, %.2f), speed=%.2f km/h",
         car.position.x, car.position.y, car.position.z,
-        car.look.x, car.look.y, car.look.z, car.speedKmh,
-        tostring(self.rollingSplineProgress)))
+        car.look.x, car.look.y, car.look.z, car.speedKmh))
     end
   end
 
@@ -564,36 +494,45 @@ function GTLicenseEngine:update(dt)
         local gear = car and car.gear or 0
         local lx = car and car.look and car.look.x or 0
         local lz = car and car.look and car.look.z or 0
-        ac.log(string.format("[GTLicense] Countdown Tick %d | Mode=%s | Speed=%.2f km/h | Gear=%d | Look=(%.2f, %.2f) | SplineProg=%s",
-          currentStep, tostring(self.testConfig.start_mode), spd, gear, lx, lz,
-          tostring(self.rollingSplineProgress and string.format("%.4f", self.rollingSplineProgress) or "nil")))
+        local hb = car and car.handbrake or 0
+        local brk = car and car.brake or 0
+        local wFL = (car and car.wheels and car.wheels[0] and car.wheels[0].angularSpeed) or 0
+        local wFR = (car and car.wheels and car.wheels[1] and car.wheels[1].angularSpeed) or 0
+        local wRL = (car and car.wheels and car.wheels[2] and car.wheels[2].angularSpeed) or 0
+        local wRR = (car and car.wheels and car.wheels[3] and car.wheels[3].angularSpeed) or 0
+        local cphys = ac.getCarPhysics and ac.getCarPhysics(0)
+        local dtVel = cphys and cphys.drivetrainVelocity or 0
+        local clState = cphys and cphys.clutchState or 0
+        local rBrk = cphys and cphys.wheels and cphys.wheels[2] and cphys.wheels[2].brakeTorque or 0
+        local rHb = cphys and cphys.wheels and cphys.wheels[2] and cphys.wheels[2].handbrakeTorque or 0
+        local px = car and car.position and car.position.x or 0
+        local py = car and car.position and car.position.y or 0
+        local pz = car and car.position and car.position.z or 0
+        local st = car and car.steer or 0
+        ac.log(string.format("[GTLicense] Countdown Tick %d | Spd=%.1f | Gear=%d | pos=(%.1f, %.1f, %.1f) | look=(%.2f, %.2f) | Steer=%.1f deg | Omegas=(FL:%.1f, FR:%.1f, RL:%.1f, RR:%.1f) | DT=%.1f | Cl=%.2f",
+          currentStep, spd, gear, px, py, pz, lx, lz, st, wFL, wFR, wRL, wRR, dtVel, clState))
       end
     end
 
-    -- Maintain spawn position and rolling velocity vector along ideal spline during countdown
+    -- AI-controlled rolling start during countdown:
+    -- Assetto Corsa native AI drives the car along the ideal racing line up to target rolling speed.
     if self.testConfig and self.testConfig.spawn then
       local initialSpeed = tonumber(self.testConfig.spawn.initial_speed_kmh) or 0
       if initialSpeed > 0 then
-        if self.rollingSplineProgress and ac and ac.hasTrackSpline and ac.hasTrackSpline() then
-          local nextProg, curFwd = GTPhysicsHooks.maintainRollingSpline(
-            0,
-            self.rollingSplineProgress,
-            initialSpeed,
-            dt,
-            self.testConfig.spawn.forward_vector
-          )
-          self.rollingSplineProgress = nextProg
-        else
-          GTPhysicsHooks.maintainRollingVelocity(0, self.testConfig.spawn.forward_vector, initialSpeed)
-        end
+        GTPhysicsHooks.maintainAIRolling(0, initialSpeed, self.testConfig.spawn.forward_vector, dt)
       end
     end
 
     if self.countdownTimer <= 0 then
-      -- Release control locks and launch test
+      -- Release AI autopilot and hand control to player on GO!
       local initSpeed = tonumber(self.testConfig.spawn and self.testConfig.spawn.initial_speed_kmh) or 0
       local targetGear = (initSpeed > 0) and GTPhysicsHooks.estimateStartingGear(initSpeed) or 0
-      GTPhysicsHooks.unlockControls(0, targetGear)
+      if self.isAIRollingActive or initSpeed > 0 then
+        GTPhysicsHooks.stopAIRolling(0, targetGear)
+        self.isAIRollingActive = false
+      else
+        GTPhysicsHooks.unlockControls(0, targetGear)
+      end
 
       if self.aiCoordinator then
         self.aiCoordinator:triggerGreenFlag()
@@ -607,8 +546,22 @@ function GTLicenseEngine:update(dt)
         local spd = car and car.speedKmh or 0
         local lx = car and car.look and car.look.x or 0
         local lz = car and car.look and car.look.z or 0
-        ac.log(string.format("[GTLicense] Countdown GO! | Mode=%s | Telemetry: Speed=%.2f km/h, TargetGear=%d, Look=(%.2f, %.2f)",
-          tostring(self.testConfig.start_mode), spd, targetGear, lx, lz))
+        local px = car and car.position and car.position.x or 0
+        local py = car and car.position and car.position.y or 0
+        local pz = car and car.position and car.position.z or 0
+        local st = car and car.steer or 0
+        local wFL = (car and car.wheels and car.wheels[0] and car.wheels[0].angularSpeed) or 0
+        local wFR = (car and car.wheels and car.wheels[1] and car.wheels[1].angularSpeed) or 0
+        local wRL = (car and car.wheels and car.wheels[2] and car.wheels[2].angularSpeed) or 0
+        local wRR = (car and car.wheels and car.wheels[3] and car.wheels[3].angularSpeed) or 0
+        local cphys = ac.getCarPhysics and ac.getCarPhysics(0)
+        local dtVel = cphys and cphys.drivetrainVelocity or 0
+        local clState = cphys and cphys.clutchState or 0
+        local rBrk = cphys and cphys.wheels and cphys.wheels[2] and cphys.wheels[2].brakeTorque or 0
+        local rHb = cphys and cphys.wheels and cphys.wheels[2] and cphys.wheels[2].handbrakeTorque or 0
+        local rShaft = cphys and cphys.wheels and cphys.wheels[2] and cphys.wheels[2].shaftVelocity or 0
+        ac.log(string.format("[GTLicense] Countdown GO! | Spd=%.1f | Gear=%d | pos=(%.1f, %.1f, %.1f) | look=(%.2f, %.2f) | Steer=%.1f deg | Omegas=(FL:%.1f, FR:%.1f, RL:%.1f, RR:%.1f)",
+          spd, targetGear, px, py, pz, lx, lz, st, wFL, wFR, wRL, wRR))
       end
     end
 
@@ -664,6 +617,19 @@ function GTLicenseEngine:update(dt)
         if car and car.rpm < 2000 and physics and physics.setEngineRPM then
           physics.setEngineRPM(0, 3500)
         end
+      end
+    end
+
+    -- Telemetry logging of wheel speeds right after GO
+    if self.sessionTime <= 1.2 and ac and ac.log then
+      if not self.lastPostGoLog or (self.sessionTime - self.lastPostGoLog >= 0.2) then
+        self.lastPostGoLog = self.sessionTime
+        local wFL = (car and car.wheels and car.wheels[0] and car.wheels[0].angularSpeed) or 0
+        local wFR = (car and car.wheels and car.wheels[1] and car.wheels[1].angularSpeed) or 0
+        local wRL = (car and car.wheels and car.wheels[2] and car.wheels[2].angularSpeed) or 0
+        local wRR = (car and car.wheels and car.wheels[3] and car.wheels[3].angularSpeed) or 0
+        ac.log(string.format("[GTLicense] Post-GO t=%.2fs | Speed=%.1f km/h | Gear=%d | RPM=%d | Omegas=(FL:%.1f, FR:%.1f, RL:%.1f, RR:%.1f)",
+          self.sessionTime, car and car.speedKmh or 0, car and car.gear or 0, car and car.rpm or 0, wFL, wFR, wRL, wRR))
       end
     end
 

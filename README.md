@@ -63,6 +63,25 @@ We have conducted a comprehensive investigation divided into two core research d
    * File-by-file breakdown with naming conventions, audio formats, image resolutions, and subagent write boundaries.
    * Automated one-click drag-and-drop packaging protocol for Content Manager.
 
+8. **[Ghost Car & Pace Car Specification](docs/08_ghost_car_and_pace_car_spec.md)**
+   * Recording and rendering architecture for transparent Gold medal target ghosts (`gt_ghost_manager.lua`, `gt_render_ghost.lua`).
+   * Pace car trajectory tracking and distance-based adjudication for IB-5 pace challenge.
+
+9. **[Automated Testing Framework Specification](docs/09_automated_testing_framework_spec.md)**
+   * End-to-end testing pipeline combining static schema linting, dynamic headless math simulation, and in-engine launch loops.
+
+10. **[Rolling Start & AI Physics Integration Guide](docs/10_rolling_start_and_ai_physics_integration.md)**
+    * Comprehensive guide to CSP physics hooks, AI spline offset tracking, and pace car regulation.
+
+11. **[CSP Lifecycle & INI Pitfalls Reference](docs/11_csp_lifecycle_and_ini_pitfalls.md)**
+    * In-depth documentation of Assetto Corsa and CSP INI parser quirks, New Modes lifecycle hooks, and crash prevention runbooks.
+
+12. **[ADR 001: Native AI Autopilot for Rolling Starts](docs/12_architecture_decision_record_ai_rolling_starts.md)**
+    * Architecture Decision Record detailing the migration from synthetic velocity injection to native CSP AI autopilot tracking `fast_lane.ai`.
+
+13. **[CSP Lua SDK API Reference](docs/CSP_LUA_API_REFERENCE.md)**
+    * Authoritative symbol catalog extracted from CSP SDK `lib.lua`.
+
 ---
 
 ## 🏗️ Proposed System Architecture
@@ -103,15 +122,16 @@ The mod development is **100% complete across all 5 tiers (58 tests)**, fully in
 4. Navigate to **Career $\rightarrow$ Gran Turismo Licenses** in Content Manager to begin!
 
 ### 🧪 Automated Verification & Tooling
-To run the automated validation suite locally:
+To run the master validation suite locally:
 ```bash
-# Validate all 58 tests across all tiers against official Kunos data and JSON schemas
-python tools/validate_curriculum.py --all --strict
+# Run the complete test suite (Curriculum schemas, Engine math, UI contracts, Ghost profiles, Simulation)
+python tools/run_full_validation_suite.py
 
-# Run Lua engine and UI unit tests
+# Lint Lua codebase against CSP APIs
 python tools/lint_lua.py
-python tools/test_engine_math.py
-python tools/test_ui_modules.py
+
+# Audit CSP API symbol compliance against official SDK lib.lua
+python tools/audit_csp_api.py
 
 # Re-build Content Manager drag-and-drop distribution archive
 python tools/build_cm_package.py --validate

@@ -16,13 +16,17 @@ By analyzing community reference mods, we identified key technical mechanisms po
 
 | Function Signature | Description | License Test Application |
 | :--- | :--- | :--- |
-| `physics.setAITopSpeed(carIndex: int, speedKmh: float)` | Sets an absolute speed ceiling (in km/h) on an AI car. | Controls pace car speed or caps traffic speed during overtaking tests. |
-| `physics.setAIThrottleLimit(carIndex: int, limit: float)` | Restricts maximum throttle output (`0.0` to `1.0`). | Prevents AI wheelspin or aggressive overshooting on formation laps/corners. |
-| `physics.setAICaution(carIndex: int, level: float)` | Adjusts AI safety/aggression margin (`0.0` aggressive to `3.0+` cautious). | Controls AI overtaking eagerness and collision avoidance during tests. |
-| `physics.setAISplineAbsoluteOffset(carIndex: int, offset: float, isRel: bool)` | Sets lateral distance (in meters) from the track ideal spline. | Positions AI in specific lanes, sets up staggered grids, or holds pace lines. |
+| `physics.setCarAutopilot(active: bool, chooseTyres: bool)` | Activates or deactivates native Assetto Corsa AI driver takeover of user car (`0`). | Core driver takeover during rolling start countdown (`3-2-1`). Released on "GO!". |
+| `physics.setAITopSpeed(carIndex: int, speedKmh: float)` | Sets an absolute speed ceiling (in km/h) on an AI car. | Caps vehicle speed to target rolling launch velocity (e.g. 70 km/h) or pace car speed. |
+| `physics.setAILevel(carIndex: int, level: float)` | Sets AI driver skill rating (`0.0` to `2.0`, standard `1.0`). | Calibrates smooth racing line adherence and corner navigation without errors. |
+| `physics.setAIAggression(carIndex: int, aggression: float)` | Controls AI overtaking assertiveness (`0.0` to `1.0`). | Set to `0.0` during rolling countdown to prevent erratic steering or aggressive slides. |
+| `physics.setAICaution(carIndex: int, level: float)` | Adjusts AI safety/aggression margin (`0.0` aggressive to `3.0+` cautious). | Set to `0.1` during rolling countdown so AI maintains rolling speed through sweeps. |
+| `physics.setAISplineAbsoluteOffset(carIndex: int, offset: float, isRel: bool)` | Sets lateral distance (in meters) from the track ideal spline. | Set to `0.0` to lock rolling car strictly to the official racing line (`fast_lane.ai`). |
+| `physics.setAIThrottleLimit(carIndex: int, limit: float)` | Restricts maximum throttle output (`0.0` to `1.0`). | Prevents wheelspin or aggressive overshooting on formation laps/corners. |
 | `physics.setAIStopCounter(carIndex: int, seconds: float)` | Commands AI car to halt for `seconds` duration. | Holds AI cars on grid slots during countdown or delayed release. |
-| `physics.forceUserThrottleFor(seconds: float, val: float)` | Overrides human player throttle input (`0.0` to `1.0`). | Holds player car stationary during grid countdown without stalls. |
-| `physics.forceUserBrakesFor(seconds: float, val: float)` | Overrides human player brake input (`0.0` to `1.0`). | Engages player brakes during rolling start control lock phase. |
+| `physics.forceUserThrottleFor(seconds: float, val: float)` | Overrides human player throttle input (`0.0` to `1.0`). | Prevents accidental rev-limiter bouncing during countdown. |
+| `physics.forceUserBrakesFor(seconds: float, val: float)` | Overrides human player brake input (`0.0` to `1.0`). | Engages brakes on standing starts; explicitly set to `0` during rolling starts. |
+| `physics.engageGear(carIndex: int, gear: int)` | Asserts instantaneous gearbox gear selection. | Retains appropriate transmission gear (e.g. 2nd) across rolling start handover. |
 
 ---
 
@@ -159,32 +163,27 @@ end
   - Fail test if player falls $> 30\text{m}$ behind or overtakes pace car before green zone.
   - Award Gold/Silver/Bronze based on precision of maintaining target gap ($\pm 3\text{m}$).
 
-### 2. High-Speed Sector Rolling Starts & Curved Approaches
-- **The Curvature Pitfall**: In tests where the pre-sector approach curves (such as B-3 Out-In-Out Hairpin Trajectory at Vallelunga Club Circuit), enforcing a static linear velocity vector along a fixed spawn heading causes the car to travel in a Euclidean straight line, drifting off-track into the grass and accumulating off-track penalties before control is handed to the player.
-- **Steering Rack Lock vs. Kinematic Spline Guidance Pitfall**:
-  - Attempting to steer the front wheels along the curve via `physics.overrideSteering` while player controls are locked (`physics.lockUserControlsFor(duration)`) is **ineffective**: Assetto Corsa's C++ physics core locks the mechanical steering rack itself during control locks.
-  - Omitting chassis positioning during countdown and relying solely on velocity + steering override causes the vehicle to plow straight ahead along its initial spawn heading, drifting into outer barriers.
-  - Spline-guided countdowns must reposition and orient the chassis directly via `physics.setCarPosition(carIndex, targetPos, vec3(-fwd.x, -fwd.y, -fwd.z))`.
-- **Dynamic Spline Guidance (`maintainRollingSpline`)**:
-  - Resolve the initial spline progress $s_0$ using `ac.worldCoordinateToTrackProgress(spawnPos)`.
-  - On every frame update during `COUNTDOWN`, advance the progress by $\Delta s = \frac{v_{\text{mps}} \cdot dt}{L_{\text{track}}}$.
-  - Compute the world position $P(s)$ and a lookahead tangent vector $\vec{fwd} = \text{normalize}(P(s + \delta s) - P(s))$ via `ac.trackProgressToWorldCoordinate`.
-  - **Lookahead Distance Calibration Rule**: Scale lookahead with vehicle speed:
-    $$\text{lookaheadDist} = \max(3.5\text{m}, v_{\text{mps}} \times 0.25)$$
-    Using an infinitesimal lookahead ($< 3.0\text{m}$, less than one car length) causes the chassis to track the immediate local curb tangent, aiming the vehicle's nose into the outside white line on corner approach. A dynamic lookahead ($\approx 4.9\text{m}$ at $70\text{ km/h}$) smoothly anticipates the corner entry and apex.
-  - Apply chassis orientation `vec3(-fwd.x, -fwd.y, -fwd.z)` (Orientation Inversion Rule) and elevation $P(s) + 0.05\text{m}$ using `physics.setCarPosition(0, targetPos, -fwd)`.
-  - Apply the matching velocity vector $\vec{fwd} \times v_{\text{mps}}$ using `physics.setCarVelocity(0, vel)`.
-  - Continuously enforce gear (2nd) and RPM (3500) via `ac.accessCarPhysics(0)` and `physics.engageGear`.
-  - If a track lacks an AI spline (`ac.hasTrackSpline() == false`), automatically fall back to static forward vector maintenance (`maintainRollingVelocity`).
-- **Drivetrain & Gear Engagement Retention Across Handover**:
-  - **The Starting-Line Neutral Reset Trap**: Calling `physics.lockUserGearboxFor(0, false)` on rolling starts triggers Assetto Corsa's native starting-line subroutine, which disengages any selected gear and drops the transmission back to neutral.
-  - **Handover Gear Assertion**: Inside `GTPhysicsHooks.unlockControls(carIndex, targetGear)`, on rolling starts where `targetGear > 0`, **bypass** `lockUserGearboxFor(0, false)` completely. Instead, explicitly call `physics.engageGear(carIndex, targetGear)` and `physics.setEngineRPM(carIndex, 3500)`.
-  - **Post-Handover Guard Window**: When transitioning into `RUNNING` state, hardware controller initialization or clutch release can attempt to drop the gearbox back to neutral. Maintain a $0.5\text{s}$ guard window in `GTLicenseEngine:update(dt)` that re-asserts `physics.engageGear(0, targetGear)` if `car.gear == 0`, ensuring instantaneous drive power when the player accelerates.
+### 2. High-Speed Sector Rolling Starts & Native AI Autopilot
+- **The Architecture**: Rather than relying on synthetic velocity vectors or manual steering calculations, rolling starts are driven by Assetto Corsa's native AI autopilot following the official track racing line (`ideal_line.ai` / `fast_lane.ai`).
+- **Setup & Autopilot Engagement (`startAIRolling`)**:
+  - Teleport the car rigid body once at spawn facing $-\vec{fwd}$ and impart initial kinetic velocity and wheel omega matching target speed.
+  - Assert `physics.setCarAutopilot(true, false)` to transfer driving inputs directly to Assetto Corsa's native AI.
+  - Assert `physics.setAITopSpeed(carIndex, targetSpeedKmh)` to cap the AI velocity ceiling to the exact target rolling speed.
+  - Configure `physics.setAILevel(carIndex, 1.0)`, `physics.setAIAggression(carIndex, 0.0)`, and `physics.setAICaution(carIndex, 0.1)` for clean, non-erratic, professional racing line adherence.
+  - Assert `physics.setAISplineAbsoluteOffset(carIndex, 0.0, false)` to keep the vehicle locked directly to the ideal racing line.
+  - Release all user control locks and forced brakes (`lockUserControlsFor(0)`, `forceUserBrakesFor(0, 0)`) so the native AI operates without friction.
+- **Countdown Maintenance (`maintainAIRolling`)**:
+  - On frame updates during `COUNTDOWN`, continuously reinforce `physics.setAITopSpeed(carIndex, targetSpeedKmh)` and `physics.setAISplineAbsoluteOffset(carIndex, 0.0, false)`.
+  - The native AI naturally steers the front wheels, engages gears, works the clutch, and modulates throttle along track curves.
+  - If a track lacks an AI spline (`ac.hasTrackSpline() == false`), automatically fall back to linear velocity maintenance (`maintainRollingVelocity`).
+- **Seamless Handover on "GO!" (`stopAIRolling`)**:
+  - Call `physics.setCarAutopilot(false)` to deactivate autopilot and immediately return vehicle control to the human player.
+  - Call `physics.setAITopSpeed(carIndex, 999999.0)` to remove the AI top speed ceiling so the player can accelerate to maximum velocity.
+  - Inside `GTPhysicsHooks.unlockControls(carIndex, targetGear)`, directly assert `physics.engageGear(carIndex, targetGear)` and `physics.setEngineRPM(carIndex, 3500)` without triggering AC's starting-line neutral reset subroutine.
+  - Maintain a $0.5\text{s}$ guard window in `RUNNING` state inside `GTLicenseEngine:update(dt)` to re-assert `targetGear` if controller initialization or clutch slip drops it to neutral.
 - **Spawn Distance Calibration Rule**:
-  - To ensure the countdown sequence naturally leads up to the start line and crosses the start gate right at "GO!", the spawn offset upstream of the start gate must equal:
-    $$\text{spawn\_offset} = \left(\frac{v_{\text{km/h}}}{3.6}\right) \times t_{\text{countdown}}$$
-  - Example: for $70.0\text{ km/h}$ over a $3.0\text{s}$ countdown, $\text{spawn\_offset} = 19.444 \times 3.0 \approx 58.3\text{ meters}$.
-  - At the green flag ("GO!"), mark `self.adjudicator.hasPassedStartGate = true` to ensure the sector timing completion registers cleanly.
+  - Set $\text{spawn\_offset} = v_{\text{mps}} \times t_{\text{countdown}}$ (e.g. $58.3\text{m}$ for $70\text{ km/h}$ over $3.0\text{s}$) so the car rolls up to the start gate right as the countdown reaches "GO!".
+  - On "GO!", mark `self.adjudicator.hasPassedStartGate = true` for rolling start tests to ensure finish gate crossing registers cleanly.
 
 ### 3. Overtaking & Traffic License Tests (IA / Super License)
 - **Mechanism**: Populate track with multiple AI cars.

@@ -118,5 +118,5 @@ We apply a scaling scalar $\lambda = \frac{T_{\text{raw}}}{T_{\text{gold}}}$ to 
 | **2** | **Engine Ghost State** | Implement `lua/engine/gt_ghost_manager.lua` handling time evaluation, spline lookup, lead offsets, and instant reset | `lua/engine/gt_ghost_manager.lua` |
 | **3** | **3D Visualizer** | Implement `lua/ui/gt_render_ghost.lua` rendering 3D translucent chassis, brake light triggers, 3D chevron, and ribbon | `lua/ui/gt_render_ghost.lua` |
 | **4** | **HUD & Controls** | Integrate Ghost toggle hotkey (`'G'`), OSD pop-up, and real-time ghost delta in `lua/ui/gt_license_hud.lua` | `lua/ui/gt_license_hud.lua` |
-| **5** | **Batch Trajectory Pre-computation** | Pre-compute or dynamically solve ghost profiles for all 58 tests into `content/tests/<tier>/ghost_*.json` | 58 Ghost Profile datasets |
-| **6** | **Packaging & Verification** | Run unit tests (`test_engine_math.py`, `lint_lua.py`), rebuild CM package zip | `release/AssettoCorsa_GT_Licenses.zip` |
+| **5** | **Batch Trajectory Computation** | Dynamically solve ghost profiles on-demand in engine / test harness | On-demand Ghost Profile solver |
+| **6** | **Packaging & Verification** | Run validation suite (`run_full_validation_suite.py`, `lint_lua.py`), rebuild CM package zip | `release/AssettoCorsa_GT_Licenses.zip` |

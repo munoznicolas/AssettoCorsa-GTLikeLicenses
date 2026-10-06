@@ -208,7 +208,7 @@ def simulate_single_test(test_json_path: str, verbose: bool = False) -> Dict[str
     t_gold = float(targets.get("gold_seconds", 20.0))
     has_stop_box = test_data.get("timing", {}).get("stop_box") is not None
 
-    # Load companion ghost trajectory
+    # Load companion ghost trajectory or generate on-demand
     test_dir = os.path.dirname(test_json_path)
     ghost_path = os.path.join(test_dir, f"ghost_{os.path.basename(test_json_path)}")
     ghost_samples = []
@@ -216,6 +216,13 @@ def simulate_single_test(test_json_path: str, verbose: bool = False) -> Dict[str
         with open(ghost_path, "r", encoding="utf-8") as gf:
             g_data = json.load(gf)
             ghost_samples = g_data.get("trajectory", [])
+    else:
+        try:
+            from generate_ghost_trajectory import generate_ghost_profile
+            profile = generate_ghost_profile(test_json_path)
+            ghost_samples = profile.get("trajectory", [])
+        except Exception:
+            ghost_samples = []
 
     results = {
         "test_id": test_id,

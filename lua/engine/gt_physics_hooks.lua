@@ -140,10 +140,23 @@ function GTPhysicsHooks.applyRollingVelocity(carIndex, forwardVector, speedKmh)
     local phys = ac.accessCarPhysics(carIndex)
     if phys then
       pcall(function() phys:setGear(gear) end)
-      pcall(function() phys:setEngineRPM(3500) end)
     end
   elseif physics and physics.engageGear then
     physics.engageGear(carIndex, gear)
+  end
+  -- Initialize wheel angular velocity matching launch road speed and clear brakes
+  local car = ac.getCar and ac.getCar(carIndex)
+  local tyreRadius = (car and car.wheels and car.wheels[0] and car.wheels[0].tyreRadius and car.wheels[0].tyreRadius > 0.1) and car.wheels[0].tyreRadius or 0.30
+  local targetOmega = speedMs / tyreRadius
+  if physics and physics.setWheelAngularVelocity then
+    local allWheels = (ac and ac.Wheel and ac.Wheel.All) or 60
+    physics.setWheelAngularVelocity(carIndex, allWheels, targetOmega)
+  end
+  if physics and physics.forceUserBrakesFor then
+    physics.forceUserBrakesFor(0)
+  end
+  if physics and physics.forceUserHandbrakeFor then
+    physics.forceUserHandbrakeFor(0)
   end
 
   if ac and ac.log then
@@ -160,11 +173,10 @@ end
 function GTPhysicsHooks.lockControls(durationSeconds, isStandingStart)
   durationSeconds = durationSeconds or 3.0
 
-  if physics and physics.lockUserControlsFor then
-    physics.lockUserControlsFor(durationSeconds)
-  end
-
   if isStandingStart then
+    if physics and physics.lockUserControlsFor then
+      physics.lockUserControlsFor(durationSeconds)
+    end
     -- On standing starts, engage brakes and handbrake so the vehicle does not roll on slopes
     if physics and physics.forceUserBrakesFor then
       physics.forceUserBrakesFor(durationSeconds, 1.0)
@@ -174,6 +186,24 @@ function GTPhysicsHooks.lockControls(durationSeconds, isStandingStart)
     end
     if physics and physics.lockUserGearboxFor then
       physics.lockUserGearboxFor(durationSeconds, false)
+    end
+  else
+    -- Rolling start: Do NOT call lockUserControlsFor or setCarNoInput because they force brakes!
+    -- Explicitly pass time=0 to disable any brake or handbrake forcing so wheels spin freely
+    if physics and physics.lockUserControlsFor then
+      physics.lockUserControlsFor(0)
+    end
+    if physics and physics.setCarNoInput then
+      physics.setCarNoInput(false)
+    end
+    if physics and physics.forceUserThrottleFor then
+      physics.forceUserThrottleFor(0)
+    end
+    if physics and physics.forceUserBrakesFor then
+      physics.forceUserBrakesFor(0)
+    end
+    if physics and physics.forceUserHandbrakeFor then
+      physics.forceUserHandbrakeFor(0)
     end
   end
 end
@@ -186,11 +216,20 @@ function GTPhysicsHooks.unlockControls(carIndex, targetGear)
   if physics and physics.lockUserControlsFor then
     physics.lockUserControlsFor(0)
   end
+  if physics and physics.setCarNoInput then
+    physics.setCarNoInput(false)
+  end
+  if physics and physics.forceUserThrottleFor then
+    physics.forceUserThrottleFor(0, 0)
+  end
   if physics and physics.forceUserBrakesFor then
     physics.forceUserBrakesFor(0, 0)
   end
   if physics and physics.forceUserHandbrakeFor then
     physics.forceUserHandbrakeFor(0, 0)
+  end
+  if physics and physics.forceUserClutchFor then
+    physics.forceUserClutchFor(0, 0)
   end
   if physics and physics.overrideSteering then
     physics.overrideSteering(carIndex, 0 / 0)
@@ -202,10 +241,130 @@ function GTPhysicsHooks.unlockControls(carIndex, targetGear)
     if physics and physics.setEngineRPM then
       physics.setEngineRPM(carIndex, 3500)
     end
+    if ac and ac.overrideCarControls then
+      local ctrl = ac.overrideCarControls(carIndex)
+      if ctrl then
+        ctrl.requestedGearIndex = targetGear
+        ctrl.steer = math.huge
+      end
+    end
   else
     if physics and physics.lockUserGearboxFor then
       physics.lockUserGearboxFor(0, false)
     end
+  end
+  if physics and physics.setEngineStallEnabled then
+    physics.setEngineStallEnabled(carIndex, true)
+  end
+end
+
+---Engages native AI autopilot on user car for rolling start countdown.
+---The car is driven by Assetto Corsa's native AI along the ideal racing line.
+---@param carIndex integer? @0-based car index (default: 0)
+---@param targetSpeedKmh number @Target rolling speed in km/h
+function GTPhysicsHooks.startAIRolling(carIndex, targetSpeedKmh)
+  carIndex = carIndex or 0
+  targetSpeedKmh = tonumber(targetSpeedKmh) or 70.0
+
+  -- Ensure no forced brakes, clutch, or handbrake hold the car back
+  if physics and physics.lockUserControlsFor then
+    physics.lockUserControlsFor(0)
+  end
+  if physics and physics.setCarNoInput then
+    physics.setCarNoInput(false)
+  end
+  if physics and physics.forceUserThrottleFor then
+    physics.forceUserThrottleFor(0, 0)
+  end
+  if physics and physics.forceUserBrakesFor then
+    physics.forceUserBrakesFor(0, 0)
+  end
+  if physics and physics.forceUserHandbrakeFor then
+    physics.forceUserHandbrakeFor(0, 0)
+  end
+  if physics and physics.forceUserClutchFor then
+    physics.forceUserClutchFor(0, 0)
+  end
+  if physics and physics.overrideSteering then
+    physics.overrideSteering(carIndex, 0 / 0)
+  end
+
+  -- Engage native AI autopilot for car 0
+  if physics and physics.setCarAutopilot then
+    physics.setCarAutopilot(true, false)
+  end
+
+  -- Configure AI parameters to strictly follow the racing line at target speed
+  if physics and physics.setAITopSpeed then
+    physics.setAITopSpeed(carIndex, targetSpeedKmh)
+  end
+  if physics and physics.setAILevel then
+    physics.setAILevel(carIndex, 1.0)
+  end
+  if physics and physics.setAIAggression then
+    physics.setAIAggression(carIndex, 0.0)
+  end
+  if physics and physics.setAICaution then
+    physics.setAICaution(carIndex, 0.2)
+  end
+  if physics and physics.setAISplineAbsoluteOffset then
+    physics.setAISplineAbsoluteOffset(carIndex, 0.0, false)
+  elseif physics and physics.setAISplineOffset then
+    physics.setAISplineOffset(carIndex, 0.0, false)
+  end
+
+  if ac and ac.log then
+    ac.log(string.format("[GTPhysicsHooks] startAIRolling car=%d: autopilot=true, topSpeed=%.1f km/h", carIndex, targetSpeedKmh))
+  end
+end
+
+---Disengages AI autopilot and seamlessly returns full control to the player at GO!
+---@param carIndex integer? @0-based car index (default: 0)
+---@param targetGear integer? @Optional gear to engage upon control release
+function GTPhysicsHooks.stopAIRolling(carIndex, targetGear)
+  carIndex = carIndex or 0
+
+  -- Deactivate AI autopilot
+  if physics and physics.setCarAutopilot then
+    physics.setCarAutopilot(false)
+  end
+
+  -- Remove AI top speed ceiling so player can accelerate to full speed
+  if physics and physics.setAITopSpeed then
+    physics.setAITopSpeed(carIndex, 999999.0)
+  end
+
+  if ac and ac.log then
+    ac.log(string.format("[GTPhysicsHooks] stopAIRolling car=%d: autopilot=false, speed un-capped", carIndex))
+  end
+
+  -- Unlock controls and engage target gear
+  GTPhysicsHooks.unlockControls(carIndex, targetGear)
+end
+
+---Maintains rolling motion under AI control along the racing line during COUNTDOWN state.
+---Re-asserts AI target speed and zero spline offset so the car adheres to the ideal line.
+---Falls back to linear velocity maintenance if no track spline is present.
+---@param carIndex integer? @0-based car index (default: 0)
+---@param targetSpeedKmh number @Target rolling speed in km/h
+---@param fallbackFwd table|vec3|number[]? @Optional fallback forward vector
+---@param dt number? @Frame delta time
+function GTPhysicsHooks.maintainAIRolling(carIndex, targetSpeedKmh, fallbackFwd, dt)
+  carIndex = carIndex or 0
+  targetSpeedKmh = tonumber(targetSpeedKmh) or 70.0
+
+  local hasSpline = (ac and ac.hasTrackSpline) and ac.hasTrackSpline() or true
+  if hasSpline then
+    if physics and physics.setAITopSpeed then
+      physics.setAITopSpeed(carIndex, targetSpeedKmh)
+    end
+    if physics and physics.setAISplineAbsoluteOffset then
+      physics.setAISplineAbsoluteOffset(carIndex, 0.0, false)
+    elseif physics and physics.setAISplineOffset then
+      physics.setAISplineOffset(carIndex, 0.0, false)
+    end
+  else
+    GTPhysicsHooks.maintainRollingVelocity(carIndex, fallbackFwd, targetSpeedKmh)
   end
 end
 
@@ -231,8 +390,18 @@ function GTPhysicsHooks.setupSpawn(testConfig, carIndex)
 
   -- 2. Impart initial rolling launch velocity if defined
   if initialSpeed > 0 then
+    if physics and physics.forceUserHandbrakeFor then
+      physics.forceUserHandbrakeFor(0, 0)
+    end
+    if physics and physics.forceUserBrakesFor then
+      physics.forceUserBrakesFor(0, 0)
+    end
     GTPhysicsHooks.applyRollingVelocity(carIndex, spawn.forward_vector, initialSpeed)
+    GTPhysicsHooks.startAIRolling(carIndex, initialSpeed)
   else
+    if physics and physics.setCarAutopilot then
+      physics.setCarAutopilot(false)
+    end
     GTPhysicsHooks.applyRollingVelocity(carIndex, spawn.forward_vector, 0)
   end
 
@@ -267,84 +436,22 @@ function GTPhysicsHooks.maintainRollingVelocity(carIndex, forwardVector, speedKm
   if physics and physics.engageGear then
     physics.engageGear(carIndex, gear)
   end
-  if physics and physics.setEngineRPM then
-    physics.setEngineRPM(carIndex, 3500)
+  -- Clear brakes and spin wheels at road speed
+  if physics and physics.forceUserBrakesFor then
+    physics.forceUserBrakesFor(0, 0)
+  end
+  if physics and physics.forceUserHandbrakeFor then
+    physics.forceUserHandbrakeFor(0, 0)
+  end
+  local car = ac.getCar and ac.getCar(carIndex)
+  local tyreRadius = (car and car.wheels and car.wheels[0] and car.wheels[0].tyreRadius and car.wheels[0].tyreRadius > 0.1) and car.wheels[0].tyreRadius or 0.30
+  local targetOmega = speedMs / tyreRadius
+  if physics and physics.setWheelAngularVelocity then
+    local allWheels = (ac and ac.Wheel and ac.Wheel.All) or 60
+    physics.setWheelAngularVelocity(carIndex, allWheels, targetOmega)
   end
 
   return true
-end
-
----Maintains rolling motion along the track AI ideal spline during COUNTDOWN state.
----Smoothly guides vehicle position, tangent heading orientation, velocity, gear, and RPM.
----@param carIndex integer @0-based car index
----@param currentProgress number @Current normalized position along the track spline [0.0, 1.0]
----@param speedKmh number @Target rolling speed in km/h
----@param dt number @Delta time in seconds
----@param fallbackFwd table|vec3|number[]? @Optional fallback forward vector
----@return number nextProgress, vec3 currentFwd
-function GTPhysicsHooks.maintainRollingSpline(carIndex, currentProgress, speedKmh, dt, fallbackFwd)
-  carIndex = carIndex or 0
-  speedKmh = tonumber(speedKmh) or 0
-  dt = tonumber(dt) or 0.016
-  currentProgress = tonumber(currentProgress) or 0.0
-
-  if speedKmh <= 0 then
-    return currentProgress, safeNormalize(GTPhysicsHooks.toVec3(fallbackFwd))
-  end
-
-  local hasSpline = ac and ac.hasTrackSpline and ac.hasTrackSpline()
-  if not hasSpline or not ac.trackProgressToWorldCoordinate then
-    -- Fallback to linear velocity along forward vector
-    GTPhysicsHooks.maintainRollingVelocity(carIndex, fallbackFwd, speedKmh)
-    return currentProgress, safeNormalize(GTPhysicsHooks.toVec3(fallbackFwd))
-  end
-
-  local sim = ac.getSim and ac.getSim()
-  local trackLength = (sim and sim.trackLengthM and sim.trackLengthM > 10) and sim.trackLengthM or 1000.0
-  local speedMs = speedKmh / 3.6
-
-  -- Advance progress along the spline
-  local progressDelta = (speedMs * dt) / trackLength
-  local nextProgress = (currentProgress + progressDelta) % 1.0
-
-  -- Query 3D world position on spline at nextProgress
-  local targetPos = ac.trackProgressToWorldCoordinate(nextProgress)
-
-  -- Query lookahead point along the spline to compute tangent heading
-  local lookaheadDist = math.max(3.5, speedMs * 0.25)
-  local lookaheadDelta = lookaheadDist / trackLength
-  local aheadPos = ac.trackProgressToWorldCoordinate((nextProgress + lookaheadDelta) % 1.0)
-
-  local diff = vec3(aheadPos.x - targetPos.x, aheadPos.y - targetPos.y, aheadPos.z - targetPos.z)
-  local fwd = safeNormalize(diff)
-  local vel = vec3(fwd.x * speedMs, fwd.y * speedMs, fwd.z * speedMs)
-
-  -- Position chassis and orient headlights along the spline tangent
-  -- Orientation Inversion Rule: pass -fwd so car.look aligns with +fwd
-  if physics and physics.setCarPosition then
-    physics.setCarPosition(carIndex, vec3(targetPos.x, targetPos.y + 0.05, targetPos.z), vec3(-fwd.x, -fwd.y, -fwd.z))
-  end
-
-  -- Apply matching linear velocity vector along the spline tangent
-  if physics and physics.setCarVelocity then
-    physics.setCarVelocity(carIndex, vel)
-  end
-
-  -- Stabilize angular velocity
-  if ac and ac.setCarPhysicAngularVelocity then
-    ac.setCarPhysicAngularVelocity(carIndex, vec3(0, 0, 0))
-  end
-
-  -- Engage gear and RPM
-  local gear = GTPhysicsHooks.estimateStartingGear(speedKmh)
-  if physics and physics.engageGear then
-    physics.engageGear(carIndex, gear)
-  end
-  if physics and physics.setEngineRPM then
-    physics.setEngineRPM(carIndex, 3500)
-  end
-
-  return nextProgress, fwd
 end
 
 ---Sets an absolute top speed ceiling (in km/h) on an AI controlled vehicle.

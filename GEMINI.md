@@ -56,15 +56,21 @@ The mod runs inside CSP's **New Modes** extension subsystem (`extension/lua/new-
     - `physics.engageGear(carIndex, gear)`
     - `physics.setEngineRPM(carIndex, 3500)`
   - **Live Update Frame Spawn**: Because `ac.getCar(0)` is not fully initialized during initial script bytecode compilation, re-assert `setupSpawn` on the first frame of `script.update(dt)`.
-  - **Dynamic Spline-Guided Rolling Starts (`maintainRollingSpline`)**:
-    - During `COUNTDOWN`, for tracks with an AI spline, guide the car along the ideal racing line each frame via `maintainRollingSpline`. Advance spline progress $\Delta s = (v_{\text{mps}} \cdot dt) / L_{\text{track}}$, orienting the chassis along the curve tangent ($-\vec{fwd}$) and setting linear velocity ($\vec{fwd} \times v_{\text{mps}}$). Never force a static Euclidean velocity vector on curved pre-corner approaches.
-    - **Steering Rack Lock vs. Chassis Repositioning**: Do not attempt to guide rolling countdowns via `physics.overrideSteering`. Because `physics.lockUserControlsFor` locks the mechanical steering rack, `overrideSteering` is ineffective. The chassis must be repositioned directly via `physics.setCarPosition(carIndex, targetPos, -fwd)`.
-    - **Spline Lookahead Anticipation**: Calibrate lookahead tangent distance to $\max(3.5\text{m}, v_{\text{mps}} \times 0.25)$ ($\approx 4.9\text{m}$ at $70\text{ km/h}$). Infinitesimal lookahead ($< 3\text{m}$) tracks local curb edges and points the car into the outside boundary at corner approach.
-    - **Transmission Retention Across Rolling Handover**:
-      - Never call `physics.lockUserGearboxFor(0, false)` on rolling starts—this triggers AC's native starting-line neutral reset subroutine.
-      - In `GTPhysicsHooks.unlockControls(carIndex, targetGear)`, assert `physics.engageGear(carIndex, targetGear)` and `physics.setEngineRPM(carIndex, 3500)` directly, bypassing `lockUserGearboxFor`.
+  - **Native AI Autopilot Rolling Start Architecture**:
+    - Instead of synthetic velocity overrides, rolling starts are driven by Assetto Corsa's native AI autopilot following the official racing line (`fast_lane.ai` / ideal spline).
+    - **Spawn Placement & Kinetic Energy**: On initial spawn (`setupSpawn`), teleport vehicle rigid body once with $-\vec{fwd}$ orientation, then impart initial linear velocity and wheel rotation via `GTPhysicsHooks.applyRollingVelocity`.
+    - **AI Autopilot Engagement**:
+      - `physics.setCarAutopilot(true, false)` takes over driver inputs for car 0.
+      - `physics.setAITopSpeed(carIndex, speedKmh)` caps AI maximum velocity to the exact target rolling speed.
+      - `physics.setAILevel(carIndex, 1.0)`, `physics.setAIAggression(carIndex, 0.0)`, `physics.setAICaution(carIndex, 0.1)` ensure smooth, non-aggressive racing line tracking.
+      - `physics.setAISplineAbsoluteOffset(carIndex, 0.0, false)` locks the AI directly onto the ideal racing line.
+      - User control locks and forced pedals are completely released (`physics.lockUserControlsFor(0)`, `physics.forceUserBrakesFor(0, 0)`) so the native AI has unrestricted throttle, steering, and braking control.
+    - **Countdown Maintenance**: During `COUNTDOWN`, call `GTPhysicsHooks.maintainAIRolling(0, speedKmh, forwardVector, dt)` to continuously preserve AI top speed and zero spline offset. Fall back to linear velocity maintenance if `ac.hasTrackSpline() == false`.
+    - **Seamless Handover on "GO!"**:
+      - `physics.setCarAutopilot(false)` deactivates autopilot and instantly returns full control to the player.
+      - `physics.setAITopSpeed(carIndex, 999999.0)` removes the AI top speed ceiling so the player can accelerate without restriction.
+      - `GTPhysicsHooks.unlockControls(carIndex, targetGear)` asserts gear (`physics.engageGear`) and RPM (`physics.setEngineRPM`) directly, bypassing `physics.lockUserGearboxFor(0, false)`.
       - Maintain a $0.5\text{s}$ guard window in `RUNNING` state inside `GTLicenseEngine:update(dt)` to re-assert `targetGear` if controller initialization or clutch slip drops it to neutral.
-    - Fall back to `maintainRollingVelocity` if no AI spline exists (`ac.hasTrackSpline() == false`).
     - **Spawn Distance Calibration**: Set $\text{spawn\_offset} = v_{\text{mps}} \times t_{\text{countdown}}$ (e.g. $58.3\text{m}$ for $70\text{ km/h}$ over $3.0\text{s}$) so the car rolls up to the start gate right as the countdown reaches "GO!".
     - On "GO!", mark `self.adjudicator.hasPassedStartGate = true` for rolling start tests to ensure finish gate crossing registers cleanly.
 * **Authoritative Track Limits Adjudication**:
