@@ -12,56 +12,59 @@ import sys
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SDK_LIB_PATH = r"D:\SteamLibrary\steamapps\common\assettocorsa\extension\internal\lua-sdk\ac_new_modes\lib.lua"
+SDK_APP_PATH = r"D:\SteamLibrary\steamapps\common\assettocorsa\extension\internal\lua-sdk\ac_apps\lib.lua"
 
 # Regex patterns to capture function calls / property accesses on globals: ac.*, physics.*, ui.*, render.*
 API_PATTERN = re.compile(r'\b(ac|physics|ui|render|dwrite|JSON|io)\.([a-zA-Z0-9_]+)\b')
 
 
-def load_sdk_symbols(sdk_path: str) -> set:
+def load_sdk_symbols(sdk_paths: list) -> set:
     symbols = set()
-    if not os.path.isfile(sdk_path):
-        print(f"[ERROR] SDK lib.lua not found at {sdk_path}", file=sys.stderr)
-        return symbols
+    for sdk_path in sdk_paths:
+        if not os.path.isfile(sdk_path):
+            continue
+        with open(sdk_path, "r", encoding="utf-8", errors="ignore") as f:
+            content = f.read()
 
-    with open(sdk_path, "r", encoding="utf-8", errors="ignore") as f:
-        content = f.read()
+        # Find function declarations, table entries, and annotations
+        # e.g., ac.getCar, physics.setAITopSpeed, ui.drawRect, render.debugLine
+        for match in API_PATTERN.finditer(content):
+            namespace, name = match.group(1), match.group(2)
+            symbols.add(f"{namespace}.{name}")
 
-    # Find function declarations, table entries, and annotations
-    # e.g., ac.getCar, physics.setAITopSpeed, ui.drawRect, render.debugLine
-    for match in API_PATTERN.finditer(content):
-        namespace, name = match.group(1), match.group(2)
-        symbols.add(f"{namespace}.{name}")
-
-    # Also capture functions defined under `ac.` namespace in lib.lua
-    for match in re.finditer(r'function\s+(ac|physics|ui|render|dwrite)\.([a-zA-Z0-9_]+)', content):
-        symbols.add(f"{match.group(1)}.{match.group(2)}")
+        # Also capture functions defined under `ac.` namespace in lib.lua
+        for match in re.finditer(r'function\s+(ac|physics|ui|render|dwrite)\.([a-zA-Z0-9_]+)', content):
+            symbols.add(f"{match.group(1)}.{match.group(2)}")
 
     return symbols
 
 
 def scan_repo_lua_calls(repo_root: str) -> dict:
-    """Scans all lua files in lua/ and returns a map of symbol -> list of (file, line_num, line_str)."""
+    """Scans all lua files in lua/ and apps/lua/ and returns a map of symbol -> list of (file, line_num, line_str)."""
     calls = {}
-    lua_dir = os.path.join(repo_root, "lua")
+    scan_dirs = [os.path.join(repo_root, "lua"), os.path.join(repo_root, "apps", "lua")]
 
-    for root, _, files in os.walk(lua_dir):
-        for f in files:
-            if f.endswith(".lua"):
-                path = os.path.join(root, f)
-                rel_path = os.path.relpath(path, repo_root)
-                with open(path, "r", encoding="utf-8", errors="ignore") as fp:
-                    lines = fp.readlines()
-                    for idx, line in enumerate(lines, 1):
-                        # Ignore comments
-                        stripped = line.strip()
-                        if stripped.startswith("--"):
-                            continue
-                        for match in API_PATTERN.finditer(line):
-                            namespace, name = match.group(1), match.group(2)
-                            symbol = f"{namespace}.{name}"
-                            if symbol not in calls:
-                                calls[symbol] = []
-                            calls[symbol].append((rel_path, idx, line.strip()))
+    for s_dir in scan_dirs:
+        if not os.path.isdir(s_dir):
+            continue
+        for root, _, files in os.walk(s_dir):
+            for f in files:
+                if f.endswith(".lua"):
+                    path = os.path.join(root, f)
+                    rel_path = os.path.relpath(path, repo_root)
+                    with open(path, "r", encoding="utf-8", errors="ignore") as fp:
+                        lines = fp.readlines()
+                        for idx, line in enumerate(lines, 1):
+                            # Ignore comments
+                            stripped = line.strip()
+                            if stripped.startswith("--"):
+                                continue
+                            for match in API_PATTERN.finditer(line):
+                                namespace, name = match.group(1), match.group(2)
+                                symbol = f"{namespace}.{name}"
+                                if symbol not in calls:
+                                    calls[symbol] = []
+                                calls[symbol].append((rel_path, idx, line.strip()))
 
     return calls
 
@@ -69,10 +72,10 @@ def scan_repo_lua_calls(repo_root: str) -> dict:
 def main():
     print("=" * 80)
     print(" CSP LUA API AUTHORITATIVE AUDIT TOOL")
-    print(f" SDK Reference: {SDK_LIB_PATH}")
+    print(f" SDK References: {SDK_LIB_PATH}, {SDK_APP_PATH}")
     print("=" * 80)
 
-    sdk_symbols = load_sdk_symbols(SDK_LIB_PATH)
+    sdk_symbols = load_sdk_symbols([SDK_LIB_PATH, SDK_APP_PATH])
     print(f"Loaded {len(sdk_symbols):,} official CSP SDK symbols.")
 
     repo_calls = scan_repo_lua_calls(REPO_ROOT)

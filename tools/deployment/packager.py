@@ -68,6 +68,7 @@ START_TYPE = PIT
 IMMEDIATE_START = 1
 DISABLE_FLAGS = YELLOW, BLUE
 HIDE_PITCREW = 1
+ASSOCIATED_APPS = gt_license
 """
 
 DEFAULT_SCENARIO_LUA = """-- ==============================================================================
@@ -157,7 +158,12 @@ class CMPackageBuilder:
         if os.path.isdir(career_src):
             self._add_directory_tree(career_src, "content/career")
 
-        # 7. Optional Root Documentation
+        # 7. Assetto Corsa Lua UI Apps (Movable GT License HUD App)
+        app_src = os.path.join(self.repo_root, "apps", "lua", "gt_license")
+        if os.path.isdir(app_src):
+            self._add_directory_tree(app_src, "apps/lua/gt_license")
+
+        # 8. Optional Root Documentation
         readme_src = os.path.join(self.repo_root, "README.md")
         if os.path.isfile(readme_src):
             self.entries.append((readme_src, f"{gt_mode_base}/README.md"))

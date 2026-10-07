@@ -9,9 +9,8 @@ def lint_lua(filepath: Path):
     clean = re.sub(r'--[^\n]*', '', clean)
     # Remove multi-line strings
     clean = re.sub(r'\[\[.*?\]\]', '""', clean, flags=re.DOTALL)
-    # Remove single and double quoted strings
-    clean = re.sub(r'"(\\.|[^"\\])*"', '""', clean)
-    clean = re.sub(r"'(\\.|[^'\\])*'", "''", clean)
+    # Remove single and double quoted strings (Lua single-line strings cannot span newlines)
+    clean = re.sub(r'("(?:\\.|[^"\\\n])*"|\'(?:\\.|[^\'\\\n])*\')', '""', clean)
 
     # In Lua:
     # 'if' starts a conditional, ended by 'end' (regardless of how many 'elseif ... then' or 'else' are inside)
@@ -66,11 +65,11 @@ def lint_lua(filepath: Path):
                 p_stack.append((char, line_num))
             elif char in ')]}':
                 if not p_stack:
-                    errors.append(f"Unmatched closing '{char}' on line {line_num}")
+                    errors.append(f"Unmatched closing '{char}' on line {line_num}: {repr(line)}")
                 else:
                     last_open, last_line = p_stack.pop()
                     if brackets[last_open] != char:
-                        errors.append(f"Mismatched bracket '{last_open}' (line {last_line}) and '{char}' (line {line_num})")
+                        errors.append(f"Mismatched bracket '{last_open}' (line {last_line}) and '{char}' (line {line_num}): {repr(line)}")
     if p_stack:
         errors.append(f"Unclosed brackets: {p_stack}")
 
@@ -78,7 +77,11 @@ def lint_lua(filepath: Path):
 
 def main():
     repo_root = Path(__file__).resolve().parent.parent.parent
-    files = sorted(list(repo_root.glob("lua/engine/**/*.lua")) + list(repo_root.glob("lua/ui/**/*.lua")))
+    files = sorted(
+        list(repo_root.glob("lua/engine/**/*.lua"))
+        + list(repo_root.glob("lua/ui/**/*.lua"))
+        + list(repo_root.glob("apps/lua/**/*.lua"))
+    )
     all_ok = True
     for f in files:
         errs = lint_lua(f)

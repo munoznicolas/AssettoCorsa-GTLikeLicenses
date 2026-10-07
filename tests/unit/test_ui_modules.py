@@ -135,7 +135,71 @@ class TestUIModules(unittest.TestCase):
         ]:
             self.assertIn(req, ghost_code, f"gt_render_ghost.lua missing requirement: {req}")
 
+    def test_ui_screens_modular_contracts(self):
+        """Verifies modular widget contracts in lua/ui/screens and common."""
+        screens_dir = REPO_ROOT / "lua" / "ui" / "screens"
+        self.assertTrue((screens_dir / "gt_timer_widget.lua").is_file())
+        self.assertTrue((screens_dir / "gt_banner_widget.lua").is_file())
+        self.assertTrue((screens_dir / "gt_ghost_widget.lua").is_file())
+        self.assertTrue((screens_dir / "gt_modal_overlays.lua").is_file())
+
+        theme_file = REPO_ROOT / "lua" / "ui" / "common" / "gt_ui_theme.lua"
+        self.assertTrue(theme_file.is_file())
+        theme_code = theme_file.read_text(encoding="utf-8")
+        for req in ["GTTheme.COLORS", "GTTheme.formatTime", "GTTheme.formatDelta", "GTTheme.evaluateMedal"]:
+            self.assertIn(req, theme_code)
+
+    def test_ui_app_structure(self):
+        """Verifies integrity of AC Lua App directory apps/lua/gt_license/."""
+        app_dir = REPO_ROOT / "apps" / "lua" / "gt_license"
+        self.assertTrue(app_dir.is_dir(), "apps/lua/gt_license directory does not exist")
+
+        # Manifest
+        manifest_path = app_dir / "manifest.ini"
+        self.assertTrue(manifest_path.is_file(), "manifest.ini missing in gt_license app")
+        manifest_text = manifest_path.read_text(encoding="utf-8")
+        for req in [
+            "[ABOUT]",
+            "NAME = GT License HUD",
+            "[WINDOW_...]",
+            "ID = config",
+            "FUNCTION_MAIN = configHUD",
+            "ID = timer",
+            "FUNCTION_MAIN = timerHUD",
+            "ID = banner",
+            "FUNCTION_MAIN = bannerHUD",
+            "ID = ghost",
+            "FUNCTION_MAIN = ghostHUD",
+        ]:
+            self.assertIn(req, manifest_text)
+
+        # Screens
+        screens_dir = app_dir / "screens"
+        self.assertTrue(screens_dir.is_dir(), "screens directory missing in gt_license app")
+        required_screens = [
+            "timer_screen.lua",
+            "banner_screen.lua",
+            "ghost_screen.lua",
+            "config_screen.lua",
+            "settings.lua",
+            "shared_state.lua",
+            "theme.lua",
+        ]
+        for s in required_screens:
+            self.assertTrue((screens_dir / s).is_file(), f"Missing app screen: {s}")
+
+        # Icons
+        icons_dir = app_dir / "icons"
+        self.assertTrue(icons_dir.is_dir(), "icons directory missing in gt_license app")
+        for icon in ["timer.png", "banner.png", "ghost.png", "settings.png"]:
+            p = icons_dir / icon
+            self.assertTrue(p.is_file(), f"Missing icon: {icon}")
+            with Image.open(str(p)) as im:
+                self.assertEqual(im.format, "PNG")
+                self.assertEqual(im.size, (128, 128))
+
 
 if __name__ == "__main__":
     unittest.main()
+
 

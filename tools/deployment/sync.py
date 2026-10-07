@@ -34,6 +34,7 @@ START_TYPE = PIT
 IMMEDIATE_START = 1
 DISABLE_FLAGS = YELLOW, BLUE
 HIDE_PITCREW = 1
+ASSOCIATED_APPS = gt_license
 """
 
 DEFAULT_SCENARIO_LUA = """-- ==============================================================================
@@ -111,6 +112,16 @@ def build_sync_mappings(repo_root: str, ac_root: str) -> List[Tuple[str, str]]:
                 src = os.path.join(root, f)
                 rel = os.path.relpath(src, career_src)
                 dst = os.path.join(ac_root, "content", "career", rel)
+                mappings.append((src, dst))
+
+    # 6. Assetto Corsa Lua UI Apps (Movable GT License HUD App)
+    app_src = os.path.join(repo_root, "apps", "lua", "gt_license")
+    if os.path.isdir(app_src):
+        for root, _, files in os.walk(app_src):
+            for f in files:
+                src = os.path.join(root, f)
+                rel = os.path.relpath(src, app_src)
+                dst = os.path.join(ac_root, "apps", "lua", "gt_license", rel)
                 mappings.append((src, dst))
 
     return mappings

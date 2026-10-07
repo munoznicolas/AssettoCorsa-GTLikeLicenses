@@ -52,6 +52,12 @@ local GTRenderGates  = tryRequireUI("gt_render_gates")
 local GTRenderGhost  = tryRequireUI("gt_render_ghost")
 local GTAudioManager = tryRequireUI("gt_audio_manager")
 
+local GTLicenseShared = nil
+pcall(function() GTLicenseShared = require("engine/gt_shared_state") end)
+if not GTLicenseShared then
+  pcall(function() GTLicenseShared = require("gt_shared_state") end)
+end
+
 local GTLicenseEngine = {}
 
 -- Engine Lifecycle States
@@ -135,6 +141,11 @@ function GTLicenseEngine.new(testDefinition)
   -- Initialize AI & Rolling Start Coordinator
   if GTAICoordinator then
     self.aiCoordinator = GTAICoordinator.new(self.testConfig)
+  end
+
+  -- Initialize Inter-Process Shared State
+  if GTLicenseShared and GTLicenseShared.connect then
+    self.sharedState = GTLicenseShared.connect()
   end
 
   -- Begin countdown immediately upon creation
@@ -302,6 +313,13 @@ end
 ---Main per-frame simulation update step.
 ---@param dt number @Frame delta time in seconds
 function GTLicenseEngine:update(dt)
+  -- Check for UI App requested restart
+  if self.sharedState and self.sharedState.requestRestart then
+    self.sharedState.requestRestart = false
+    self:restart()
+    return
+  end
+
   -- 1. Check restart inputs and auto-reset countdown
   self.sessionReset:update(dt)
 
@@ -556,6 +574,41 @@ function GTLicenseEngine:update(dt)
   -- 4. Update audio cues if audio manager is loaded
   if GTAudioManager and GTAudioManager.update then
     GTAudioManager.update(dt, self:getNumericState(), self.countdownTimer, self.achievedMedal)
+  end
+
+  -- 5. Sync state to Inter-Process Shared State for AC Lua App
+  if self.sharedState then
+    self.sharedState.isActive = true
+    self.sharedState.sessionTime = self.sessionTime
+    self.sharedState.currentState = self:getNumericState()
+    self.sharedState.countdownTimer = self.countdownTimer
+    self.sharedState.isGo = (self.state == GTLicenseEngine.STATE.RUNNING and self.sessionTime < 0.85)
+    self.sharedState.failReason = self.failReason or ""
+    if self.testConfig then
+      self.sharedState.testId = self.testConfig.test_id or ""
+      self.sharedState.testTitle = self.testConfig.title or ""
+      self.sharedState.lessonObjective = self.testConfig.lesson_objective or ""
+      if self.testConfig.targets then
+        self.sharedState.goldTime = self.testConfig.targets.gold_seconds or 0
+        self.sharedState.silverTime = self.testConfig.targets.silver_seconds or 0
+        self.sharedState.bronzeTime = self.testConfig.targets.bronze_seconds or 0
+      end
+    end
+    if car then
+      self.sharedState.speedKmh = car.speedKmh or 0
+      self.sharedState.gear = car.gear or 0
+      self.sharedState.rpm = car.rpm or 0
+    end
+    self.sharedState.medalAchieved = self.achievedMedal or ""
+    if self.ghostManager then
+      local gState = self.ghostManager:getState()
+      if gState then
+        self.sharedState.ghostDelta = gState.delta or 0
+        self.sharedState.ghostActive = gState.active or false
+        self.sharedState.ghostMode = gState.mode or 1
+        self.sharedState.ghostOSD = gState.osd_message or ""
+      end
+    end
   end
 end
 
