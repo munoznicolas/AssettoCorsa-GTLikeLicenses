@@ -33,7 +33,7 @@ apps/lua/gt_license/
 | Window ID | Window Name       | Callback               | Default Dimensions | Flags                                                                |
 | :-------- | :---------------- | :--------------------- | :----------------- | :------------------------------------------------------------------- |
 | `config`  | GT License Config | `script.configHUD(dt)` | 380 x 280          | `SETTINGS`                                                           |
-| `timer`   | GT License Timer  | `script.timerHUD(dt)`  | 270 x 95           | `NO_BACKGROUND,NO_COLLAPSE,NO_SCROLLBAR,NO_SCROLL_WITH_MOUSE,FADING` |
+| `timer`   | GT License Timer  | `script.timerHUD(dt)`  | 270 x 70           | `NO_BACKGROUND,NO_COLLAPSE,NO_SCROLLBAR,NO_SCROLL_WITH_MOUSE,FADING` |
 | `ghost`   | GT License Ghost  | `script.ghostHUD(dt)`  | 260 x 50           | `NO_BACKGROUND,NO_COLLAPSE,NO_SCROLLBAR,NO_SCROLL_WITH_MOUSE,FADING` |
 
 ## Movable Windows & Individual Scaling

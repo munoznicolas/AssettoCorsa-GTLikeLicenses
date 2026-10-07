@@ -35,6 +35,18 @@ local cachedMedalAchieved = nil
 
 local sharedState = GTLicenseShared.connect()
 
+local function isUIAppActive()
+    if not sharedState or not sharedState.uiAppActive then return false end
+    if sharedState.lastAppHeartbeat and sharedState.lastAppHeartbeat > 0 then
+        local sim = ac and ac.getSim and ac.getSim()
+        local now = (sim and sim.currentSessionTime and (sim.currentSessionTime / 1000)) or (os and os.clock and os.clock()) or 0
+        if math.abs(now - sharedState.lastAppHeartbeat) > 0.5 then
+            return false
+        end
+    end
+    return true
+end
+
 -- Internal component functions retained for contract tests & legacy compatibility
 local function drawStopwatchCluster(screenW, sessionTime, targets, currentState)
     GTTimerWidget.drawFixed(screenW, sessionTime, targets, currentState)
@@ -138,7 +150,7 @@ function GTLicenseHUD.draw(sessionTime, targetsOrConfig, currentState, failReaso
     ui.beginTransparentWindow("gtLicenseHudWindow", vec2(0, 0), vec2(screenW, screenH), false)
 
     -- If movable UI App is not active, render in-race HUD widgets directly as fallback
-    if not (sharedState and sharedState.uiAppActive) then
+    if not isUIAppActive() then
         drawStopwatchCluster(screenW, sessionTime, targets, currentState)
         if currentState == GTLicenseHUD.STATE.RUNNING and ghostState then
             drawGhostDelta(screenW, ghostState)

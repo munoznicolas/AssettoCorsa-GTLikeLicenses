@@ -88,7 +88,7 @@ function Theme.drawGTText(text, fontSize, pos, textColor, weight)
 
     if hasDWrite then
         ui.pushDWriteFont(string.format("MyFont:fonts;Weight=%s", weight))
-        local outlineCol = rgbm(0, 0, 0, 0.85)
+        local outlineCol = rgbm(0, 0, 0, 0.92)
         ui.dwriteDrawText(text, fontSize, vec2(pos.x - 1, pos.y), outlineCol)
         ui.dwriteDrawText(text, fontSize, vec2(pos.x + 1, pos.y), outlineCol)
         ui.dwriteDrawText(text, fontSize, vec2(pos.x, pos.y - 1), outlineCol)
@@ -97,6 +97,13 @@ function Theme.drawGTText(text, fontSize, pos, textColor, weight)
         ui.popDWriteFont()
     else
         if ui.pushFont and ui.Font and ui.Font.Main then ui.pushFont(ui.Font.Main) end
+        local oCol = rgbm and rgbm(0, 0, 0, 0.92) or nil
+        if oCol then
+            ui.drawText(text, vec2(pos.x - 1, pos.y), oCol)
+            ui.drawText(text, vec2(pos.x + 1, pos.y), oCol)
+            ui.drawText(text, vec2(pos.x, pos.y - 1), oCol)
+            ui.drawText(text, vec2(pos.x, pos.y + 1), oCol)
+        end
         ui.drawText(text, pos, textColor)
         if ui.popFont and ui.Font and ui.Font.Main then ui.popFont() end
     end

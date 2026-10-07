@@ -6,54 +6,46 @@
 local Theme       = require("screens/theme")
 local SharedState = require("screens/shared_state")
 
-local BASE_WIDTH  = 270
-local BASE_HEIGHT = 95
+local BASE_WIDTH  = 280
+local BASE_HEIGHT = 75
 
-local function getDeltaText(sessionTime, targets, currentState)
-    if not targets or not targets.gold_seconds or currentState ~= 2 then
-        return nil
-    end
-
-    if sessionTime < targets.gold_seconds then
-        local delta = sessionTime - targets.gold_seconds
-        return string.format("GOLD %s", Theme.formatDelta(delta))
-    elseif targets.silver_seconds and sessionTime < targets.silver_seconds then
-        local delta = sessionTime - targets.silver_seconds
-        return string.format("SILVER %s", Theme.formatDelta(delta))
-    elseif targets.bronze_seconds and sessionTime < targets.bronze_seconds then
-        local delta = sessionTime - targets.bronze_seconds
-        return string.format("BRONZE %s", Theme.formatDelta(delta))
-    else
-        local delta = sessionTime - (targets.bronze_seconds or 0)
-        return string.format("LIMIT %s", Theme.formatDelta(delta))
-    end
-end
-
-local function renderTimerContent(origin, scale)
+local function renderTimerContent(curW, curH)
     local state = SharedState.get()
-    local s = scale or 1.0
-    local ox = origin.x
-    local oy = origin.y
+
+    -- Guaranteed edge padding to prevent window clipping boundaries from slicing font ascenders/outlines
+    local padX = math.max(8, math.floor(curW * 0.04))
+    local padY = math.max(10, math.floor(curH * 0.12))
+
+    local availW = math.max(60, curW - (padX * 2))
+    local availH = math.max(25, curH - (padY * 2))
+
+    -- Text 0'00.000 is ~7.46x fontSize wide in MyTimingFont. Margin 7.8x prevents right-edge clipping.
+    -- Total vertical stack is label (0.32x) + gap (0.10x) + clock (1.0x) = ~1.42x. Divisor 1.45 guarantees no vertical clipping.
+    local sizeByWidth  = availW / 7.8
+    local sizeByHeight = availH / 1.45
+
+    local timingFontSize = math.floor(math.min(sizeByWidth, sizeByHeight))
+    timingFontSize = math.max(16, math.min(timingFontSize, 60))
+
+    -- Header label "TIME": guaranteed minimum 10px with safe top clearance
+    local labelFontSize = math.max(10, math.floor(timingFontSize * 0.32))
+    labelFontSize = math.min(labelFontSize, 18)
+
+    local gap = math.max(3, math.floor(timingFontSize * 0.10))
 
     -- Header label: "TIME"
-    Theme.drawGTText("TIME", math.floor(13 * s), vec2(ox, oy), Theme.COLORS.WHITE, "Regular")
+    Theme.drawGTText("TIME", labelFontSize, vec2(padX, padY), Theme.COLORS.WHITE, "Regular")
 
-    -- Digital Clock Display
+    -- Digital Clock Display: positioned with guaranteed clearance below header
     local timeText = Theme.formatTime(state.sessionTime)
-    Theme.drawTimingText(timeText, math.floor(40 * s), vec2(ox, oy + 16 * s), Theme.COLORS.WHITE)
-
-    -- Live Medal Target Delta
-    local deltaText = getDeltaText(state.sessionTime, state.targets, state.currentState)
-    if deltaText then
-        Theme.drawGTText(deltaText, math.floor(17 * s), vec2(ox, oy + 66 * s), Theme.COLORS.WHITE, "Regular")
-    end
+    local clockY = padY + labelFontSize + gap
+    Theme.drawTimingText(timeText, timingFontSize, vec2(padX, clockY), Theme.COLORS.WHITE)
 end
 
 function script.timerHUD(dt)
     -- Individual widget scaling driven by native window dimensions
     local curW = (ui and ui.windowWidth and ui.windowWidth()) or BASE_WIDTH
     local curH = (ui and ui.windowHeight and ui.windowHeight()) or BASE_HEIGHT
-    local s = math.max(0.35, math.min(curW / BASE_WIDTH, curH / BASE_HEIGHT))
 
-    renderTimerContent(vec2(8 * s, 6 * s), s)
+    renderTimerContent(curW, curH)
 end

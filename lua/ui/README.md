@@ -20,7 +20,7 @@ lua/ui/
 ## UI Components & Rendering Hooks
 
 ### 1. `gt_license_hud.lua` (`script.drawUI()`)
-- **Stopwatch Cluster**: digital clock (`MM:SS.mmm`) with live delta vs target medal times ($+0.12\text{s}$ / $-0.35\text{s}$).
+- **Stopwatch Cluster**: digital clock (`MM:SS.mmm`) tracking active run time since GO!
 - **Ghost Delta & OSD**: real-time lead/lag distance widget and hotkey display (`[G] Toggle Ghost`, `[O] Cycle Mode`).
 - **3-2-1-GO Graphics**: large centered countdown with sound synchronization.
 - **Disqualification Banner**: red header with specific violation reason (e.g. `OFF-TRACK (3+ WHEELS OUTSIDE)`).
