@@ -7,7 +7,6 @@
 
 local Theme           = require("ui/common/gt_ui_theme")
 local GTTimerWidget   = require("ui/screens/gt_timer_widget")
-local GTBannerWidget  = require("ui/screens/gt_banner_widget")
 local GTGhostWidget   = require("ui/screens/gt_ghost_widget")
 local GTModalOverlays = require("ui/screens/gt_modal_overlays")
 local GTLicenseShared = require("engine/gt_shared_state")
@@ -37,10 +36,6 @@ local cachedMedalAchieved = nil
 local sharedState = GTLicenseShared.connect()
 
 -- Internal component functions retained for contract tests & legacy compatibility
-local function drawTopBanner(screenW, config, targets)
-    GTBannerWidget.drawFixed(screenW, config, targets)
-end
-
 local function drawStopwatchCluster(screenW, sessionTime, targets, currentState)
     GTTimerWidget.drawFixed(screenW, sessionTime, targets, currentState)
 end
@@ -144,7 +139,6 @@ function GTLicenseHUD.draw(sessionTime, targetsOrConfig, currentState, failReaso
 
     -- If movable UI App is not active, render in-race HUD widgets directly as fallback
     if not (sharedState and sharedState.uiAppActive) then
-        drawTopBanner(screenW, config, targets)
         drawStopwatchCluster(screenW, sessionTime, targets, currentState)
         if currentState == GTLicenseHUD.STATE.RUNNING and ghostState then
             drawGhostDelta(screenW, ghostState)

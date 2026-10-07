@@ -4,7 +4,6 @@ create_app_icons.py
 Generates clean 128x128 RGBA icons for the GT License AC Lua App windows:
 - icons/settings.png
 - icons/timer.png
-- icons/banner.png
 - icons/ghost.png
 - icons/speedo.png
 - icon.png (Main App Icon)
@@ -35,20 +34,6 @@ def create_timer_icon(path: Path):
     d.ellipse([60, 64, 68, 72], fill=(255, 215, 0, 255))
     im.save(path)
 
-
-def create_banner_icon(path: Path):
-    im = Image.new("RGBA", (128, 128), (0, 0, 0, 0))
-    d = ImageDraw.Draw(im)
-    # Flag pole
-    d.rectangle([20, 16, 26, 112], fill=(200, 200, 200, 240))
-    d.ellipse([17, 10, 29, 22], fill=(255, 215, 0, 255))
-    # Checkered / License banner flag
-    points = [(26, 20), (108, 20), (96, 54), (108, 88), (26, 88)]
-    d.polygon(points, fill=(30, 30, 30, 220), outline=(255, 255, 255, 240))
-    # Accent stripes
-    d.line([(26, 42), (102, 42)], fill=(255, 215, 0, 255), width=4) # Gold
-    d.line([(26, 66), (102, 66)], fill=(220, 50, 50, 255), width=4) # Red
-    im.save(path)
 
 
 def create_ghost_icon(path: Path):
@@ -113,7 +98,6 @@ def main():
     APP_ROOT_DIR.mkdir(parents=True, exist_ok=True)
 
     create_timer_icon(APP_ICONS_DIR / "timer.png")
-    create_banner_icon(APP_ICONS_DIR / "banner.png")
     create_ghost_icon(APP_ICONS_DIR / "ghost.png")
     create_settings_icon(APP_ICONS_DIR / "settings.png")
 

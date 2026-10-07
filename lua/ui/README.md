@@ -20,7 +20,6 @@ lua/ui/
 ## UI Components & Rendering Hooks
 
 ### 1. `gt_license_hud.lua` (`script.drawUI()`)
-- **Top Banner**: floating GT7 typography displaying tier badge, test code, title, and lesson objective.
 - **Stopwatch Cluster**: digital clock (`MM:SS.mmm`) with live delta vs target medal times ($+0.12\text{s}$ / $-0.35\text{s}$).
 - **Ghost Delta & OSD**: real-time lead/lag distance widget and hotkey display (`[G] Toggle Ghost`, `[O] Cycle Mode`).
 - **3-2-1-GO Graphics**: large centered countdown with sound synchronization.

@@ -13,7 +13,6 @@ apps/lua/gt_license/
 ├── icon.png                 # Main app icon (128x128 RGBA)
 ├── icons/                   # Per-window sidebar icons (128x128 RGBA)
 │   ├── timer.png            # Stopwatch window icon
-│   ├── banner.png           # Test information banner icon
 │   ├── ghost.png            # Ghost / Pace Car delta icon
 │   └── settings.png         # Configuration dialog icon
 ├── screens/                 # Modular screen window scripts
@@ -21,7 +20,6 @@ apps/lua/gt_license/
 │   ├── settings.lua         # Persistent configuration manager (settings.ini)
 │   ├── shared_state.lua     # Zero-copy inter-process shared state client
 │   ├── timer_screen.lua     # Callback: script.timerHUD(dt)
-│   ├── banner_screen.lua    # Callback: script.bannerHUD(dt)
 │   ├── ghost_screen.lua     # Callback: script.ghostHUD(dt)
 │   └── config_screen.lua    # Callback: script.configHUD(dt)
 ├── settings/                # Settings INI files
@@ -36,7 +34,6 @@ apps/lua/gt_license/
 | :-------- | :---------------- | :--------------------- | :----------------- | :------------------------------------------------------------------- |
 | `config`  | GT License Config | `script.configHUD(dt)` | 380 x 280          | `SETTINGS`                                                           |
 | `timer`   | GT License Timer  | `script.timerHUD(dt)`  | 270 x 95           | `NO_BACKGROUND,NO_COLLAPSE,NO_SCROLLBAR,NO_SCROLL_WITH_MOUSE,FADING` |
-| `banner`  | GT License Banner | `script.bannerHUD(dt)` | 860 x 75           | `NO_BACKGROUND,NO_COLLAPSE,NO_SCROLLBAR,NO_SCROLL_WITH_MOUSE,FADING` |
 | `ghost`   | GT License Ghost  | `script.ghostHUD(dt)`  | 260 x 50           | `NO_BACKGROUND,NO_COLLAPSE,NO_SCROLLBAR,NO_SCROLL_WITH_MOUSE,FADING` |
 
 ## Movable Windows & Individual Scaling
@@ -46,7 +43,7 @@ apps/lua/gt_license/
 - **Individual Widget Scaling**:
   Each widget features a resize handle in the bottom-right corner. Dragging the handle scales the widget's fonts, badges, and layout individually.
 - **Authentic Gran Turismo Defaults**:
-  Widgets initialize at default positions replicating Gran Turismo 7 (Top Banner centered, Stopwatch top-right, Ghost delta below stopwatch).
+  Widgets initialize at default positions replicating Gran Turismo 7 (Stopwatch top-right, Ghost delta below stopwatch).
 
 ## Inter-Process Communication
 
