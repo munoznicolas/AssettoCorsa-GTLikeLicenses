@@ -1,15 +1,14 @@
 --[[
     Gran Turismo-style Vector Canvas HUD for Assetto Corsa Licenses Mod
-    Renders responsive, resolution-independent vector UI using CSP's ui.* API.
+    Renders responsive, resolution-independent vector UI using CSP's DirectWrite (DWrite) & ui.* API.
     
     Components:
     1. Top Banner: Test title, lesson objective, target medal times (Gold, Silver, Bronze)
-    2. Real-Time Stopwatch: Classic GT typography and precision session timer
-    3. Speed Indicator: Digital speedometer readout and dynamic bar gauge
-    4. Live Medal Target Delta: Real-time delta comparison against target thresholds
-    5. Center Countdown: 3-2-1-GO animated countdown
-    6. Prominent Disqualification Banner: Deep crimson banner with failure reason
-    7. Celebratory Results Screen: Medal awarded card, target comparisons, and action controls
+    2. Real-Time Stopwatch: Classic GT7 typography (MyTimingFont & MyTimingFontOutline)
+    3. Live Medal Target Delta: Real-time delta comparison against target thresholds
+    4. Center Countdown: 3-2-1-GO animated countdown
+    5. Prominent Disqualification Banner: Deep crimson banner with failure reason
+    6. Celebratory Results Screen: Medal awarded card, target comparisons, and action controls
 ]]
 
 local GTLicenseHUD = {}
@@ -23,18 +22,17 @@ GTLicenseHUD.STATE = {
     FAILED    = 4,
 }
 
--- Color Palette (Gran Turismo aesthetic)
+-- Color Palette (Gran Turismo aesthetic: White typography with black edges, neutral backdrop)
 local COLORS = {
-    BG_DARK       = rgbm(0.04, 0.06, 0.09, 0.88),
-    BG_CARD       = rgbm(0.07, 0.09, 0.14, 0.94),
-    ACCENT_BLUE   = rgbm(0.08, 0.55, 0.95, 1.00),
-    ACCENT_CYAN   = rgbm(0.10, 0.85, 0.95, 1.00),
+    BG_DARK       = rgbm(0.04, 0.04, 0.04, 0.85),
+    BG_CARD       = rgbm(0.06, 0.06, 0.06, 0.94),
     WHITE         = rgbm(1.00, 1.00, 1.00, 1.00),
-    OFF_WHITE     = rgbm(0.90, 0.92, 0.95, 0.95),
-    GREY_TEXT     = rgbm(0.65, 0.68, 0.74, 0.85),
-    BORDER_GREY   = rgbm(0.25, 0.28, 0.35, 0.60),
+    BLACK         = rgbm(0.00, 0.00, 0.00, 1.00),
+    OFF_WHITE     = rgbm(0.92, 0.92, 0.92, 0.95),
+    GREY_TEXT     = rgbm(0.70, 0.70, 0.70, 0.85),
+    BORDER_GREY   = rgbm(0.25, 0.25, 0.25, 0.60),
 
-    -- Medal Colors
+    -- Medal Colors (Accents for icons / indicators)
     GOLD          = rgbm(1.00, 0.84, 0.00, 1.00),
     GOLD_BG       = rgbm(0.35, 0.28, 0.02, 0.85),
     SILVER        = rgbm(0.85, 0.88, 0.92, 1.00),
@@ -57,6 +55,9 @@ local animTimer = 0.0
 local lastState = GTLicenseHUD.STATE.PREPARE
 local cachedMedalAchieved = nil
 
+-- Check if CSP DirectWrite font subsystem is available
+local hasDWrite = (ui ~= nil and ui.pushDWriteFont ~= nil and ui.dwriteDrawText ~= nil)
+
 --- Helper to format seconds into classic GT laptime format: M'SS.mmm
 local function formatTime(seconds)
     if not seconds or seconds < 0 then seconds = 0 end
@@ -74,6 +75,144 @@ local function formatDelta(delta)
     local secs = math.floor(absVal)
     local millis = math.floor((absVal - secs) * 1000)
     return string.format("%s%d.%03d", sign, secs, millis)
+end
+
+--------------------------------------------------------------------------------
+-- TYPOGRAPHY SUBSYSTEM: GT7 DirectWrite Paired Outlines & Weight Layering
+--------------------------------------------------------------------------------
+
+--- Fallback: 8-directional ImGui outline
+local function drawTextOutlinedFallback(text, pos, textColor, outlineColor, thickness)
+    if not text or text == "" then return end
+    local col = textColor or COLORS.WHITE
+    local oCol = outlineColor or COLORS.BLACK
+    local t = thickness or 1.5
+
+    ui.drawText(text, vec2(pos.x - t, pos.y), oCol)
+    ui.drawText(text, vec2(pos.x + t, pos.y), oCol)
+    ui.drawText(text, vec2(pos.x, pos.y - t), oCol)
+    ui.drawText(text, vec2(pos.x, pos.y + t), oCol)
+    ui.drawText(text, vec2(pos.x - t, pos.y - t), oCol)
+    ui.drawText(text, vec2(pos.x + t, pos.y - t), oCol)
+    ui.drawText(text, vec2(pos.x - t, pos.y + t), oCol)
+    ui.drawText(text, vec2(pos.x + t, pos.y + t), oCol)
+    ui.drawText(text, pos, col)
+end
+
+--- Fallback: 8-directional ImGui clipped outline
+local function drawTextClippedOutlinedFallback(text, posMin, posMax, textColor, alignment, outlineColor, thickness)
+    if not text or text == "" then return end
+    local col = textColor or COLORS.WHITE
+    local oCol = outlineColor or COLORS.BLACK
+    local t = thickness or 1.5
+    local align = alignment or vec2(0, 0)
+
+    ui.drawTextClipped(text, posMin + vec2(-t, 0), posMax + vec2(-t, 0), oCol, align)
+    ui.drawTextClipped(text, posMin + vec2(t, 0), posMax + vec2(t, 0), oCol, align)
+    ui.drawTextClipped(text, posMin + vec2(0, -t), posMax + vec2(0, -t), oCol, align)
+    ui.drawTextClipped(text, posMin + vec2(0, t), posMax + vec2(0, t), oCol, align)
+    ui.drawTextClipped(text, posMin + vec2(-t, -t), posMax + vec2(-t, -t), oCol, align)
+    ui.drawTextClipped(text, posMin + vec2(t, -t), posMax + vec2(t, -t), oCol, align)
+    ui.drawTextClipped(text, posMin + vec2(-t, t), posMax + vec2(-t, t), oCol, align)
+    ui.drawTextClipped(text, posMin + vec2(t, t), posMax + vec2(t, t), oCol, align)
+    ui.drawTextClipped(text, posMin, posMax, col, align)
+end
+
+--- Draw GT7 digital timing text using paired MyTimingFontOutline + MyTimingFont
+local function drawTimingText(text, fontSize, pos, textColor, outlineAlpha)
+    if not text or text == "" then return end
+    textColor = textColor or COLORS.WHITE
+    outlineAlpha = outlineAlpha or 0.95
+
+    if hasDWrite then
+        -- 1. Black outline layer using MyTimingFontOutline
+        ui.pushDWriteFont("MyTimingFontOutline:fonts")
+        ui.dwriteDrawText(text, fontSize, pos, rgbm(0, 0, 0, outlineAlpha))
+        ui.popDWriteFont()
+
+        -- 2. Foreground timing layer using MyTimingFont
+        ui.pushDWriteFont("MyTimingFont:fonts")
+        ui.dwriteDrawText(text, fontSize, pos, textColor)
+        ui.popDWriteFont()
+    else
+        ui.pushFont(ui.Font.Huge)
+        drawTextOutlinedFallback(text, pos, textColor, COLORS.BLACK, 2.0)
+        ui.popFont()
+    end
+end
+
+--- Draw GT7 clipped digital timing text using paired MyTimingFontOutline + MyTimingFont
+local function drawTimingTextClipped(text, fontSize, posMin, posMax, hAlign, vAlign, textColor, outlineAlpha)
+    if not text or text == "" then return end
+    textColor = textColor or COLORS.WHITE
+    outlineAlpha = outlineAlpha or 0.95
+    hAlign = hAlign or (ui.Alignment and ui.Alignment.Center or 0)
+    vAlign = vAlign or (ui.Alignment and ui.Alignment.Center or 0)
+
+    if hasDWrite then
+        ui.pushDWriteFont("MyTimingFontOutline:fonts")
+        ui.dwriteDrawTextClipped(text, fontSize, posMin, posMax, hAlign, vAlign, false, rgbm(0, 0, 0, outlineAlpha))
+        ui.popDWriteFont()
+
+        ui.pushDWriteFont("MyTimingFont:fonts")
+        ui.dwriteDrawTextClipped(text, fontSize, posMin, posMax, hAlign, vAlign, false, textColor)
+        ui.popDWriteFont()
+    else
+        ui.pushFont(ui.Font.Huge)
+        local ax = (hAlign == 1) and 1.0 or ((hAlign == -1) and 0.0 or 0.5)
+        local ay = (vAlign == 1) and 1.0 or ((vAlign == -1) and 0.0 or 0.5)
+        drawTextClippedOutlinedFallback(text, posMin, posMax, textColor, vec2(ax, ay), COLORS.BLACK, 2.0)
+        ui.popFont()
+    end
+end
+
+--- Draw GT7 UI text (Titles, subtitles, labels) using clean white typography with crisp 1px black edges
+local function drawGTText(text, fontSize, pos, textColor, weight)
+    if not text or text == "" then return end
+    textColor = textColor or COLORS.WHITE
+    weight = weight or "Regular"
+
+    if hasDWrite then
+        -- Use matching weight for both outline and text to preserve exact glyph geometry and spacing
+        ui.pushDWriteFont(string.format("MyFont:fonts;Weight=%s", weight))
+        local outlineCol = rgbm(0, 0, 0, 0.85)
+        ui.dwriteDrawText(text, fontSize, vec2(pos.x - 1, pos.y), outlineCol)
+        ui.dwriteDrawText(text, fontSize, vec2(pos.x + 1, pos.y), outlineCol)
+        ui.dwriteDrawText(text, fontSize, vec2(pos.x, pos.y - 1), outlineCol)
+        ui.dwriteDrawText(text, fontSize, vec2(pos.x, pos.y + 1), outlineCol)
+        ui.dwriteDrawText(text, fontSize, pos, textColor)
+        ui.popDWriteFont()
+    else
+        ui.pushFont(ui.Font.Title)
+        drawTextOutlinedFallback(text, pos, textColor, COLORS.BLACK, 1.2)
+        ui.popFont()
+    end
+end
+
+--- Draw GT7 clipped UI text using clean white typography with crisp 1px black edges
+local function drawGTTextClipped(text, fontSize, posMin, posMax, hAlign, vAlign, textColor, weight)
+    if not text or text == "" then return end
+    textColor = textColor or COLORS.WHITE
+    weight = weight or "Regular"
+    hAlign = hAlign or (ui.Alignment and ui.Alignment.Center or 0)
+    vAlign = vAlign or (ui.Alignment and ui.Alignment.Center or 0)
+
+    if hasDWrite then
+        ui.pushDWriteFont(string.format("MyFont:fonts;Weight=%s", weight))
+        local outlineCol = rgbm(0, 0, 0, 0.85)
+        ui.dwriteDrawTextClipped(text, fontSize, posMin + vec2(-1, 0), posMax + vec2(-1, 0), hAlign, vAlign, false, outlineCol)
+        ui.dwriteDrawTextClipped(text, fontSize, posMin + vec2(1, 0), posMax + vec2(1, 0), hAlign, vAlign, false, outlineCol)
+        ui.dwriteDrawTextClipped(text, fontSize, posMin + vec2(0, -1), posMax + vec2(0, -1), hAlign, vAlign, false, outlineCol)
+        ui.dwriteDrawTextClipped(text, fontSize, posMin + vec2(0, 1), posMax + vec2(0, 1), hAlign, vAlign, false, outlineCol)
+        ui.dwriteDrawTextClipped(text, fontSize, posMin, posMax, hAlign, vAlign, false, textColor)
+        ui.popDWriteFont()
+    else
+        ui.pushFont(ui.Font.Main)
+        local ax = (hAlign == 1) and 1.0 or ((hAlign == -1) and 0.0 or 0.5)
+        local ay = (vAlign == 1) and 1.0 or ((vAlign == -1) and 0.0 or 0.5)
+        drawTextClippedOutlinedFallback(text, posMin, posMax, textColor, vec2(ax, ay), COLORS.BLACK, 1.2)
+        ui.popFont()
+    end
 end
 
 --- Initialize HUD with active test configuration
@@ -133,142 +272,90 @@ function GTLicenseHUD.update(dt, currentState, stateCountdownTimer)
 end
 
 --------------------------------------------------------------------------------
--- 1. TOP HEADER BANNER
+-- 1. TOP HEADER BANNER (Clean floating GT7 typography, zero blue rectangles)
 --------------------------------------------------------------------------------
 local function drawTopBanner(screenW, config, targets)
-    local bannerH = 68
-    local bannerW = math.min(screenW - 40, 1600)
+    local bannerW = math.min(screenW - 80, 1600)
     local bannerX = (screenW - bannerW) * 0.5
-    local p1 = vec2(bannerX, 16)
-    local p2 = vec2(bannerX + bannerW, 16 + bannerH)
 
-    -- Background Bar with Glassmorphic Gradient
-    ui.drawRectFilled(p1, p2, COLORS.BG_DARK, 6)
-    -- Bottom Accent Pinstripe
-    ui.drawRectFilled(vec2(bannerX, 16 + bannerH - 3), p2, COLORS.ACCENT_BLUE, 2)
-    -- Sleek Border Outline
-    ui.drawRect(p1, p2, COLORS.BORDER_GREY, 6, ui.CornerFlags.All, 1)
-
-    -- Left: Test ID Badge & Title
+    -- Left: Test ID and Lesson Title (Clean GT7 Typography)
     local testCode = config.test_id or "TEST"
-    local badgeW = 75
-    local badgeP1 = p1 + vec2(12, 10)
-    local badgeP2 = badgeP1 + vec2(badgeW, bannerH - 24)
+    local titleText = config.title or "License Examination"
+    local headerText = string.format("%s   %s", testCode, titleText)
 
-    ui.drawRectFilled(badgeP1, badgeP2, COLORS.ACCENT_BLUE, 4)
-    ui.pushFont(ui.Font.Title)
-    ui.drawTextClipped(testCode, badgeP1, badgeP2, COLORS.WHITE, vec2(0.5, 0.5))
-    ui.popFont()
-
-    -- Title & Lesson Objective
-    local titleX = badgeP2.x + 14
-    local titleY = p1.y + 10
-    ui.pushFont(ui.Font.Title)
-    ui.drawText(config.title or "License Examination", vec2(titleX, titleY), COLORS.WHITE)
-    ui.popFont()
+    drawGTText(headerText, 22, vec2(bannerX, 18), COLORS.WHITE, "Regular")
 
     if config.lesson_objective and config.lesson_objective ~= "" then
-        ui.pushFont(ui.Font.Small)
-        ui.drawText(config.lesson_objective, vec2(titleX, titleY + 24), COLORS.GREY_TEXT)
-        ui.popFont()
+        drawGTText(config.lesson_objective, 14, vec2(bannerX, 44), COLORS.OFF_WHITE, "Regular")
     end
 
-    -- Right: Target Medal Times (Gold, Silver, Bronze)
+    -- Right: Target Medal Times (Gold, Silver, Bronze - Vertically Aligned Stack)
     if targets then
-        local rightPad = p2.x - 14
-        local cardW = 125
-        local cardH = bannerH - 22
-        local cardY = p1.y + 11
+        local rightPad = bannerX + bannerW
+        local medalBlockW = 195
+        local medalBlockX = rightPad - medalBlockW
+        local startY = 16
+        local rowH = 22
 
         local medals = {
-            { label = "BRONZE", time = targets.bronze_seconds, col = COLORS.BRONZE, bg = COLORS.BRONZE_BG },
-            { label = "SILVER", time = targets.silver_seconds, col = COLORS.SILVER, bg = COLORS.SILVER_BG },
-            { label = "GOLD",   time = targets.gold_seconds,   col = COLORS.GOLD,   bg = COLORS.GOLD_BG },
+            { label = "GOLD",   time = targets.gold_seconds,   col = COLORS.GOLD },
+            { label = "SILVER", time = targets.silver_seconds, col = COLORS.SILVER },
+            { label = "BRONZE", time = targets.bronze_seconds, col = COLORS.BRONZE },
         }
 
+        local hEnd = ui.Alignment and ui.Alignment.End or 1
+        local vCenter = ui.Alignment and ui.Alignment.Center or 0
+
         for i, m in ipairs(medals) do
-            local cX = rightPad - (i * (cardW + 10))
-            local cP1 = vec2(cX, cardY)
-            local cP2 = cP1 + vec2(cardW, cardH)
+            local rowY = startY + (i - 1) * rowH
 
-            ui.drawRectFilled(cP1, cP2, m.bg, 4)
-            ui.drawRect(cP1, cP2, m.col, 4, ui.CornerFlags.All, 1)
+            -- Medal indicator dot
+            ui.drawCircleFilled(vec2(medalBlockX + 5, rowY + 9), 3.5, m.col)
 
-            -- Medal Label
-            ui.pushFont(ui.Font.Tiny)
-            ui.drawTextClipped(m.label, cP1 + vec2(6, 4), cP1 + vec2(cardW - 6, 16), m.col, vec2(0.0, 0.5))
-            ui.popFont()
+            -- Medal Label (GT7 Clean Typography: White with black edges)
+            drawGTText(m.label, 12, vec2(medalBlockX + 16, rowY + 2), COLORS.WHITE, "Regular")
 
-            -- Medal Time
-            ui.pushFont(ui.Font.Main)
+            -- Medal Time (GT7 Timing Font: Vertically aligned flush right)
             local timeStr = m.time and formatTime(m.time) or "--'--.---"
-            ui.drawTextClipped(timeStr, cP1 + vec2(6, 16), cP2 - vec2(6, 4), COLORS.WHITE, vec2(1.0, 0.5))
-            ui.popFont()
+            local pMin = vec2(medalBlockX + 65, rowY)
+            local pMax = vec2(rightPad, rowY + 18)
+            drawTimingTextClipped(timeStr, 17, pMin, pMax, hEnd, vCenter, COLORS.WHITE)
         end
     end
 end
 
 --------------------------------------------------------------------------------
--- 2. STOPWATCH & LIVE MEDAL DELTA CLUSTER
+-- 2. STOPWATCH & LIVE MEDAL DELTA (GT7 Digital Stopwatch Typography)
 --------------------------------------------------------------------------------
 local function drawStopwatchCluster(screenW, sessionTime, targets, currentState)
-    local boxW = 280
-    local boxH = 92
-    local boxX = screenW - boxW - 30
-    local boxY = 96
-    local p1 = vec2(boxX, boxY)
-    local p2 = p1 + vec2(boxW, boxH)
+    local posX = screenW - 270
+    local posY = 88
 
-    ui.drawRectFilled(p1, p2, COLORS.BG_CARD, 6)
-    ui.drawRect(p1, p2, COLORS.BORDER_GREY, 6, ui.CornerFlags.All, 1)
+    -- Header label: "TIME"
+    drawGTText("TIME", 13, vec2(posX, posY), COLORS.WHITE, "Regular")
 
-    -- Header label
-    ui.pushFont(ui.Font.Small)
-    ui.drawText("TIME", p1 + vec2(14, 8), COLORS.GREY_TEXT)
-    ui.popFont()
-
-    -- Digital Clock Display
-    ui.pushFont(ui.Font.Huge)
-    local timeCol = COLORS.WHITE
-    if currentState == GTLicenseHUD.STATE.PASSED then
-        timeCol = COLORS.SUCCESS_GREEN
-    elseif currentState == GTLicenseHUD.STATE.FAILED then
-        timeCol = COLORS.FAIL_RED
-    end
+    -- Digital Clock Display (Official GT7 Paired Outline & Digit Font)
     local timeText = formatTime(sessionTime)
-    ui.drawText(timeText, p1 + vec2(14, 26), timeCol)
-    ui.popFont()
+    drawTimingText(timeText, 40, vec2(posX, posY + 16), COLORS.WHITE)
 
-    -- 3. Live Medal Target Delta Pill
+    -- Live Medal Target Delta
     if targets and targets.gold_seconds and currentState == GTLicenseHUD.STATE.RUNNING then
         local deltaText = ""
-        local deltaCol = COLORS.ACCENT_CYAN
-        local targetLabel = "GOLD"
-
         if sessionTime < targets.gold_seconds then
             local delta = sessionTime - targets.gold_seconds
             deltaText = string.format("GOLD %s", formatDelta(delta))
-            deltaCol = COLORS.ACCENT_CYAN
         elseif targets.silver_seconds and sessionTime < targets.silver_seconds then
             local delta = sessionTime - targets.silver_seconds
             deltaText = string.format("SILVER %s", formatDelta(delta))
-            deltaCol = COLORS.WARN_AMBER
         elseif targets.bronze_seconds and sessionTime < targets.bronze_seconds then
             local delta = sessionTime - targets.bronze_seconds
             deltaText = string.format("BRONZE %s", formatDelta(delta))
-            deltaCol = COLORS.BRONZE
         else
             local delta = sessionTime - (targets.bronze_seconds or 0)
             deltaText = string.format("LIMIT %s", formatDelta(delta))
-            deltaCol = COLORS.FAIL_RED
         end
 
-        local pillP1 = p1 + vec2(14, 66)
-        local pillP2 = p1 + vec2(boxW - 14, 86)
-        ui.drawRectFilled(pillP1, pillP2, rgbm(0, 0, 0, 0.4), 3)
-        ui.pushFont(ui.Font.Small)
-        ui.drawTextClipped(deltaText, pillP1, pillP2, deltaCol, vec2(0.5, 0.5))
-        ui.popFont()
+        drawGTText(deltaText, 17, vec2(posX, posY + 66), COLORS.WHITE, "Regular")
     end
 end
 
@@ -278,30 +365,16 @@ end
 local function drawGhostDelta(screenW, ghostState)
     if not ghostState or not ghostState.active then return end
 
-    local boxW = 280
-    local boxH = 34
-    local boxX = screenW - boxW - 30
-    local boxY = 194
-    local p1 = vec2(boxX, boxY)
-    local p2 = p1 + vec2(boxW, boxH)
-
-    ui.drawRectFilled(p1, p2, rgbm(0.06, 0.08, 0.12, 0.85), 4)
-    ui.drawRect(p1, p2, rgbm(0.2, 0.7, 1.0, 0.4), 4, ui.CornerFlags.All, 1)
+    local posX = screenW - 270
+    local posY = 182
 
     local delta = ghostState.delta or 0.0
-    local deltaCol = delta >= 0 and COLORS.SUCCESS_GREEN or COLORS.FAIL_RED
     local prefix = delta >= 0 and "+" or "-"
     local absD = math.abs(delta)
     local deltaStr = string.format("%s%.2fs", prefix, absD)
-    local label = string.format("GHOST [%s]:", ghostState.mode == 2 and "PACER" or "GOLD")
+    local label = string.format("GHOST [%s]: %s", ghostState.mode == 2 and "PACER" or "GOLD", deltaStr)
 
-    ui.pushFont(ui.Font.Tiny)
-    ui.drawText(label, p1 + vec2(10, 10), COLORS.ACCENT_CYAN)
-    ui.popFont()
-
-    ui.pushFont(ui.Font.Main)
-    ui.drawTextClipped(deltaStr, p1 + vec2(boxW - 90, 6), p2 - vec2(10, 6), deltaCol, vec2(1.0, 0.5))
-    ui.popFont()
+    drawGTText(label, 14, vec2(posX, posY), COLORS.WHITE, "Regular")
 end
 
 --------------------------------------------------------------------------------
@@ -311,108 +384,56 @@ local function drawGhostOSD(screenW, screenH, ghostState)
     if not ghostState or not ghostState.osd_message then return end
 
     local bannerW = 420
-    local bannerH = 40
-    local bannerX = (screenW - bannerW) * 0.5
-    local bannerY = screenH - 120
-    local p1 = vec2(bannerX, bannerY)
+    local bannerH = 36
+    local p1 = vec2((screenW - bannerW) * 0.5, screenH - 120)
     local p2 = p1 + vec2(bannerW, bannerH)
 
-    ui.drawRectFilled(p1, p2, rgbm(0.05, 0.07, 0.12, 0.92), 6)
-    ui.drawRect(p1, p2, COLORS.GOLD, 6, ui.CornerFlags.All, 1.5)
-
-    ui.pushFont(ui.Font.Main)
-    ui.drawTextClipped(ghostState.osd_message, p1, p2, COLORS.WHITE, vec2(0.5, 0.5))
-    ui.popFont()
+    local hAlign = ui.Alignment and ui.Alignment.Center or 0
+    local vAlign = ui.Alignment and ui.Alignment.Center or 0
+    drawGTTextClipped(ghostState.osd_message, 16, p1, p2, hAlign, vAlign, COLORS.WHITE, "Regular")
 end
 
 --------------------------------------------------------------------------------
--- 4. SPEED INDICATOR & TACHOMETER BAR
---------------------------------------------------------------------------------
-local function drawSpeedIndicator(screenW, screenH, speedKmh)
-    local boxW = 220
-    local boxH = 64
-    local boxX = screenW - boxW - 30
-    local boxY = screenH - boxH - 30
-    local p1 = vec2(boxX, boxY)
-    local p2 = p1 + vec2(boxW, boxH)
-
-    ui.drawRectFilled(p1, p2, COLORS.BG_CARD, 6)
-    ui.drawRect(p1, p2, COLORS.BORDER_GREY, 6, ui.CornerFlags.All, 1)
-
-    local spd = math.floor(math.max(0, speedKmh or 0))
-    ui.pushFont(ui.Font.Huge)
-    ui.drawText(tostring(spd), p1 + vec2(14, 10), COLORS.WHITE)
-    ui.popFont()
-
-    ui.pushFont(ui.Font.Small)
-    ui.drawText("KM/H", p1 + vec2(140, 26), COLORS.GREY_TEXT)
-    ui.popFont()
-
-    -- Dynamic Speed Bar Gauge
-    local barP1 = p1 + vec2(14, 50)
-    local barP2 = p1 + vec2(boxW - 14, 56)
-    local maxDisplaySpeed = 240.0
-    local fillFrac = math.min(1.0, math.max(0.0, spd / maxDisplaySpeed))
-
-    ui.drawRectFilled(barP1, barP2, rgbm(0.15, 0.17, 0.22, 0.8), 2)
-    if fillFrac > 0 then
-        local fillP2 = vec2(barP1.x + (barP2.x - barP1.x) * fillFrac, barP2.y)
-        local barColor = COLORS.ACCENT_CYAN
-        if spd > 140 then
-            barColor = COLORS.WARN_AMBER
-        elseif spd > 200 then
-            barColor = COLORS.FAIL_RED
-        end
-        ui.drawRectFilled(barP1, fillP2, barColor, 2)
-    end
-end
-
---------------------------------------------------------------------------------
--- 5. CENTER COUNTDOWN (3 - 2 - 1 - GO!)
+-- 3. CENTER COUNTDOWN (3 - 2 - 1 - START! Authentic GT7 Countdown)
 --------------------------------------------------------------------------------
 local function drawCountdown(screenW, screenH, timer, isGo)
     local centerX = screenW * 0.5
     local centerY = screenH * 0.42
 
     local displayText = ""
-    local textColor = COLORS.WHITE
-    local scale = 1.0
-
+    local isText = false
     if isGo then
         displayText = "START!"
-        textColor = COLORS.SUCCESS_GREEN
+        isText = true
     elseif timer > 2.0 then
         displayText = "3"
-        textColor = COLORS.WARN_AMBER
-        scale = 1.0 + 0.3 * (timer - 2.0)
     elseif timer > 1.0 then
         displayText = "2"
-        textColor = COLORS.WARN_AMBER
-        scale = 1.0 + 0.3 * (timer - 1.0)
     elseif timer > 0.0 then
         displayText = "1"
-        textColor = COLORS.WARN_AMBER
-        scale = 1.0 + 0.3 * timer
     end
 
     if displayText == "" then return end
 
-    -- Central Backing Glow Pill
-    local glowW = isGo and 360 or 220
-    local glowH = 110
+    local glowW = isGo and 400 or 240
+    local glowH = 120
     local p1 = vec2(centerX - glowW * 0.5, centerY - glowH * 0.5)
     local p2 = vec2(centerX + glowW * 0.5, centerY + glowH * 0.5)
 
-    ui.drawRectFilled(p1, p2, rgbm(0, 0, 0, 0.75), 12)
-    ui.drawRect(p1, p2, textColor, 12, ui.CornerFlags.All, 2)
+    local hAlign = ui.Alignment and ui.Alignment.Center or 0
+    local vAlign = ui.Alignment and ui.Alignment.Center or 0
 
-    ui.pushFont(ui.Font.Huge)
-    ui.drawTextClipped(displayText, p1, p2, textColor, vec2(0.5, 0.5))
-    ui.popFont()
+    if isText then
+        -- START! using clean GT7 Regular typography
+        drawGTTextClipped(displayText, 64, p1, p2, hAlign, vAlign, COLORS.WHITE, "Regular")
+    else
+        -- 3, 2, 1 using GT7 Timing paired outline font
+        drawTimingTextClipped(displayText, 76, p1, p2, hAlign, vAlign, COLORS.WHITE, 1.0)
+    end
 end
 
 --------------------------------------------------------------------------------
--- 6. PROMINENT RED 'DISQUALIFIED' BANNER
+-- 4. PROMINENT RED 'DISQUALIFIED' BANNER
 --------------------------------------------------------------------------------
 local function drawDisqualifiedBanner(screenW, screenH, failReason, callbacks)
     local bannerH = 180
@@ -428,16 +449,15 @@ local function drawDisqualifiedBanner(screenW, screenH, failReason, callbacks)
     ui.drawRectFilled(p1, vec2(screenW, p1.y + 6), borderCol, 0)
     ui.drawRectFilled(vec2(0, p2.y - 6), p2, borderCol, 0)
 
-    -- Primary Warning Title
-    ui.pushFont(ui.Font.Huge)
-    ui.drawTextClipped("DISQUALIFIED", p1 + vec2(0, 14), vec2(screenW, p1.y + 64), COLORS.WHITE, vec2(0.5, 0.5))
-    ui.popFont()
+    local hAlign = ui.Alignment and ui.Alignment.Center or 0
+    local vAlign = ui.Alignment and ui.Alignment.Center or 0
+
+    -- Primary Warning Title (Clean GT7 Typography)
+    drawGTTextClipped("DISQUALIFIED", 32, p1 + vec2(0, 16), vec2(screenW, p1.y + 64), hAlign, vAlign, COLORS.WHITE, "Regular")
 
     -- Failure Reason Subtitle
     local reasonText = string.upper(failReason or "FAILED CRITERIA")
-    ui.pushFont(ui.Font.Title)
-    ui.drawTextClipped(reasonText, p1 + vec2(0, 66), vec2(screenW, p1.y + 104), rgbm(1, 0.85, 0.85, 0.95), vec2(0.5, 0.5))
-    ui.popFont()
+    drawGTTextClipped(reasonText, 17, p1 + vec2(0, 68), vec2(screenW, p1.y + 104), hAlign, vAlign, COLORS.OFF_WHITE, "Regular")
 
     -- Interactive Retry Button
     local btnW = 200
@@ -465,18 +485,14 @@ local function drawDisqualifiedBanner(screenW, screenH, failReason, callbacks)
     ui.drawRectFilled(btnP1, btnP2, btnBg, 4)
     ui.drawRect(btnP1, btnP2, btnBorder, 4, ui.CornerFlags.All, 1.2)
 
-    ui.pushFont(ui.Font.Main)
-    ui.drawTextClipped("RETRY  (R)", btnP1, btnP2, COLORS.WHITE, vec2(0.5, 0.5))
-    ui.popFont()
+    drawGTTextClipped("RETRY  (R)", 15, btnP1, btnP2, hAlign, vAlign, COLORS.WHITE, "Regular")
 
     -- Prompt to Retry via Hotkey / Gamepad
-    ui.pushFont(ui.Font.Small)
-    ui.drawTextClipped("PRESS  [ R ],  [ ENTER ],  [ SPACE ]  OR  CLICK  TO  RETRY", p1 + vec2(0, 152), vec2(screenW, p1.y + 174), rgbm(0.85, 0.85, 0.85, 0.8), vec2(0.5, 0.5))
-    ui.popFont()
+    drawGTTextClipped("PRESS  [ R ],  [ ENTER ],  [ SPACE ]  OR  CLICK  TO  RETRY", 13, p1 + vec2(0, 152), vec2(screenW, p1.y + 174), hAlign, vAlign, COLORS.OFF_WHITE, "Regular")
 end
 
 --------------------------------------------------------------------------------
--- 7. CELEBRATORY RESULTS SCREEN
+-- 5. CELEBRATORY RESULTS SCREEN (Neutral dark backdrop, zero blue)
 --------------------------------------------------------------------------------
 local function drawResultsScreen(screenW, screenH, finalTime, targets, medalAchieved, callbacks)
     local cardW = 620
@@ -484,7 +500,7 @@ local function drawResultsScreen(screenW, screenH, finalTime, targets, medalAchi
     local p1 = vec2((screenW - cardW) * 0.5, (screenH - cardH) * 0.45)
     local p2 = p1 + vec2(cardW, cardH)
 
-    -- Translucent Brushed Glass Card
+    -- Translucent Dark Glass Card (Neutral dark, no blue)
     ui.drawRectFilled(p1, p2, COLORS.BG_CARD, 12)
     ui.drawRect(p1, p2, COLORS.BORDER_GREY, 12, ui.CornerFlags.All, 1.5)
 
@@ -505,29 +521,26 @@ local function drawResultsScreen(screenW, screenH, finalTime, targets, medalAchi
         headerCol = COLORS.BRONZE
         medalTitle = "★ BRONZE MEDAL AWARDED ★"
     else
-        headerCol = COLORS.ACCENT_CYAN
+        headerCol = COLORS.WHITE
         medalTitle = "TEST COMPLETED"
     end
 
-    ui.drawRectFilled(ribbonP1, ribbonP2, rgbm(headerCol.r * 0.35, headerCol.g * 0.35, headerCol.b * 0.35, 0.9), 12, ui.CornerFlags.Top)
+    ui.drawRectFilled(ribbonP1, ribbonP2, rgbm(headerCol.r * 0.25, headerCol.g * 0.25, headerCol.b * 0.25, 0.95), 12, ui.CornerFlags.Top)
     ui.drawRectFilled(vec2(ribbonP1.x, ribbonP2.y - 3), ribbonP2, headerCol, 0)
 
-    ui.pushFont(ui.Font.Title)
-    ui.drawTextClipped(medalTitle, ribbonP1, ribbonP2, COLORS.WHITE, vec2(0.5, 0.5))
-    ui.popFont()
+    local hCenter = ui.Alignment and ui.Alignment.Center or 0
+    local vCenter = ui.Alignment and ui.Alignment.Center or 0
+    local hEnd = ui.Alignment and ui.Alignment.End or 1
+
+    drawGTTextClipped(medalTitle, 22, ribbonP1, ribbonP2, hCenter, vCenter, COLORS.WHITE, "Regular")
 
     -- Final Recorded Time Box
     local timeBoxP1 = p1 + vec2(30, 88)
     local timeBoxP2 = p1 + vec2(cardW - 30, 160)
-    ui.drawRectFilled(timeBoxP1, timeBoxP2, rgbm(0, 0, 0, 0.4), 6)
+    ui.drawRectFilled(timeBoxP1, timeBoxP2, rgbm(0, 0, 0, 0.5), 6)
 
-    ui.pushFont(ui.Font.Small)
-    ui.drawText("RECORDED TIME", timeBoxP1 + vec2(16, 10), COLORS.GREY_TEXT)
-    ui.popFont()
-
-    ui.pushFont(ui.Font.Huge)
-    ui.drawTextClipped(formatTime(finalTime), timeBoxP1, timeBoxP2, COLORS.WHITE, vec2(0.5, 0.65))
-    ui.popFont()
+    drawGTText("RECORDED TIME", 13, timeBoxP1 + vec2(16, 10), COLORS.WHITE, "Regular")
+    drawTimingTextClipped(formatTime(finalTime), 46, timeBoxP1, timeBoxP2, hCenter, vCenter, COLORS.WHITE)
 
     -- Target Times Breakdown Table
     if targets then
@@ -543,25 +556,23 @@ local function drawResultsScreen(screenW, screenH, finalTime, targets, medalAchi
             local rP1 = vec2(p1.x + 30, rowY)
             local rP2 = vec2(p1.x + cardW - 30, rowY + 30)
 
-            ui.drawRectFilled(rP1, rP2, rgbm(0.1, 0.12, 0.16, 0.5), 4)
+            ui.drawRectFilled(rP1, rP2, rgbm(0.1, 0.1, 0.1, 0.5), 4)
 
-            -- Medal Name with color dot
+            -- Medal color indicator dot
             ui.drawCircleFilled(rP1 + vec2(14, 15), 5, row.col)
-            ui.pushFont(ui.Font.Main)
-            ui.drawText(row.name, rP1 + vec2(28, 6), COLORS.WHITE)
+            drawGTText(row.name, 14, rP1 + vec2(28, 6), COLORS.WHITE, "Regular")
 
-            -- Target Time
+            -- Target Time (GT7 Timing font)
             local targetStr = row.target and formatTime(row.target) or "--'--.---"
-            ui.drawTextClipped(targetStr, rP1, rP2 - vec2(100, 0), COLORS.GREY_TEXT, vec2(1.0, 0.5))
+            drawTimingTextClipped(targetStr, 18, rP1, rP2 - vec2(100, 0), hEnd, vCenter, COLORS.WHITE)
 
             -- Delta / Status
             if row.target and finalTime then
                 local delta = finalTime - row.target
                 local deltaStr = formatDelta(delta)
                 local dCol = delta <= 0 and COLORS.SUCCESS_GREEN or COLORS.FAIL_RED
-                ui.drawTextClipped(deltaStr, rP1, rP2 - vec2(14, 0), dCol, vec2(1.0, 0.5))
+                drawGTTextClipped(deltaStr, 15, rP1, rP2 - vec2(14, 0), hEnd, vCenter, dCol, "Regular")
             end
-            ui.popFont()
         end
     end
 
@@ -576,24 +587,23 @@ local function drawResultsScreen(screenW, screenH, finalTime, targets, medalAchi
     -- Restart Button
     local b1P1 = vec2(startBtnX, btnY)
     local b1P2 = b1P1 + vec2(btnW, btnH)
-    ui.drawRectFilled(b1P1, b1P2, rgbm(0.2, 0.24, 0.3, 0.8), 4)
+    ui.drawRectFilled(b1P1, b1P2, rgbm(0.18, 0.18, 0.18, 0.8), 4)
     ui.drawRect(b1P1, b1P2, COLORS.BORDER_GREY, 4, ui.CornerFlags.All, 1)
-    ui.pushFont(ui.Font.Main)
-    ui.drawTextClipped("RESTART (R)", b1P1, b1P2, COLORS.WHITE, vec2(0.5, 0.5))
+    drawGTTextClipped("RESTART (R)", 14, b1P1, b1P2, hCenter, vCenter, COLORS.WHITE, "Regular")
 
-    -- Next Event Button
+    -- Next Event Button (Neutral Dark with Highlight Border, NO BLUE)
     local b2P1 = vec2(startBtnX + btnW + btnSpacing, btnY)
     local b2P2 = b2P1 + vec2(btnW, btnH)
-    ui.drawRectFilled(b2P1, b2P2, COLORS.ACCENT_BLUE, 4)
-    ui.drawTextClipped("NEXT EVENT", b2P1, b2P2, COLORS.WHITE, vec2(0.5, 0.5))
+    ui.drawRectFilled(b2P1, b2P2, rgbm(0.25, 0.25, 0.25, 0.9), 4)
+    ui.drawRect(b2P1, b2P2, rgbm(0.8, 0.8, 0.8, 0.8), 4, ui.CornerFlags.All, 1)
+    drawGTTextClipped("NEXT EVENT", 14, b2P1, b2P2, hCenter, vCenter, COLORS.WHITE, "Regular")
 
     -- Exit Button
     local b3P1 = vec2(startBtnX + (btnW + btnSpacing) * 2, btnY)
     local b3P2 = b3P1 + vec2(btnW, btnH)
-    ui.drawRectFilled(b3P1, b3P2, rgbm(0.18, 0.20, 0.24, 0.8), 4)
+    ui.drawRectFilled(b3P1, b3P2, rgbm(0.15, 0.15, 0.15, 0.8), 4)
     ui.drawRect(b3P1, b3P2, COLORS.BORDER_GREY, 4, ui.CornerFlags.All, 1)
-    ui.drawTextClipped("EXIT (ESC)", b3P1, b3P2, COLORS.GREY_TEXT, vec2(0.5, 0.5))
-    ui.popFont()
+    drawGTTextClipped("EXIT (ESC)", 14, b3P1, b3P2, hCenter, vCenter, COLORS.WHITE, "Regular")
 
     -- Click Detection for interactive mouse control
     local uiState = ac.getUI and ac.getUI()
@@ -646,10 +656,10 @@ function GTLicenseHUD.draw(sessionTime, targetsOrConfig, currentState, failReaso
     -- Transparent window wrapper to ensure proper layering in CSP UI
     ui.beginTransparentWindow("gtLicenseHudWindow", vec2(0, 0), vec2(screenW, screenH), false)
 
-    -- 1. Top Banner (visible in all states)
+    -- 1. Top Banner (visible in all states, floating GT7 typography)
     drawTopBanner(screenW, config, targets)
 
-    -- 2. Stopwatch and Live Target Delta
+    -- 2. Stopwatch and Live Target Delta (floating GT7 typography)
     drawStopwatchCluster(screenW, sessionTime, targets, currentState)
 
     -- 2.1 Live Ghost / Pace Car Delta Widget
@@ -662,24 +672,19 @@ function GTLicenseHUD.draw(sessionTime, targetsOrConfig, currentState, failReaso
         drawGhostOSD(screenW, screenH, ghostState)
     end
 
-    -- 3. Speed Indicator (visible during Countdown and Running)
-    if currentState == GTLicenseHUD.STATE.COUNTDOWN or currentState == GTLicenseHUD.STATE.RUNNING then
-        drawSpeedIndicator(screenW, screenH, speedKmh)
-    end
-
-    -- 4. Countdown 3-2-1-GO
+    -- 3. Countdown 3-2-1-GO (huge floating GT7 typography)
     if currentState == GTLicenseHUD.STATE.COUNTDOWN then
         drawCountdown(screenW, screenH, countdownTimer, false)
     elseif goDisplayTimer > 0 then
         drawCountdown(screenW, screenH, 0, true)
     end
 
-    -- 5. Disqualification Banner
+    -- 4. Disqualification Banner
     if currentState == GTLicenseHUD.STATE.FAILED then
         drawDisqualifiedBanner(screenW, screenH, failReason, callbacks)
     end
 
-    -- 6. Results Screen
+    -- 5. Results Screen
     if currentState == GTLicenseHUD.STATE.PASSED then
         drawResultsScreen(screenW, screenH, sessionTime, targets, cachedMedalAchieved, callbacks)
     end

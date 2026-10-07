@@ -89,7 +89,7 @@ def build_sync_mappings(repo_root: str, ac_root: str) -> List[Tuple[str, str]]:
                     dst = os.path.join(gt_mode_base, "data", "tests", rel)
                     mappings.append((src, dst))
 
-    # 4. Media Assets (Audio & Textures)
+    # 4. Media Assets (Audio, Textures, Fonts)
     assets_src = os.path.join(repo_root, "assets")
     if os.path.isdir(assets_src):
         for root, _, files in os.walk(assets_src):
@@ -98,6 +98,10 @@ def build_sync_mappings(repo_root: str, ac_root: str) -> List[Tuple[str, str]]:
                 rel = os.path.relpath(src, assets_src)
                 dst = os.path.join(gt_mode_base, "assets", rel)
                 mappings.append((src, dst))
+                # Expose fonts directly at mode root (gt_mode_base/fonts) for seamless DWrite font loading
+                if "fonts" in root.lower() and f.endswith(".ttf"):
+                    dst_root_font = os.path.join(gt_mode_base, "fonts", f)
+                    mappings.append((src, dst_root_font))
 
     # 5. Career Series
     career_src = os.path.join(repo_root, "content", "career")
@@ -136,8 +140,20 @@ def main():
             print(f"[DRY-RUN] Copy {os.path.relpath(src, REPO_ROOT)} -> {dst}")
         else:
             os.makedirs(os.path.dirname(dst), exist_ok=True)
-            shutil.copy2(src, dst)
-            copied_count += 1
+            if os.path.exists(dst):
+                try:
+                    if os.path.getsize(src) == os.path.getsize(dst) and os.path.getmtime(src) <= os.path.getmtime(dst):
+                        continue
+                except OSError:
+                    pass
+            try:
+                shutil.copy2(src, dst)
+                copied_count += 1
+            except OSError as ex:
+                if os.path.exists(dst) and os.path.getsize(src) == os.path.getsize(dst):
+                    pass
+                else:
+                    raise
 
     # Synthesize manifest.ini and scenario.lua if missing
     manifest_dst = os.path.join(gt_mode_base, "manifest.ini")
