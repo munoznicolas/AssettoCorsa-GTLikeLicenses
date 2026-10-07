@@ -395,15 +395,27 @@ function GTLicenseEngine:startCountdown()
   local isStanding = (self.testConfig.start_mode == "STANDING")
   local initialSpeed = tonumber(self.testConfig.spawn and self.testConfig.spawn.initial_speed_kmh or 0) or 0
   self.isAIRollingActive = (not isStanding) and (initialSpeed > 0)
+
+  local targetGear = tonumber(self.testConfig.spawn and self.testConfig.spawn.gear)
+  if not targetGear or targetGear <= 0 then
+    targetGear = isStanding and 1 or GTPhysicsHooks.estimateStartingGear(initialSpeed)
+  end
+  local targetRPM = tonumber(self.testConfig.spawn and self.testConfig.spawn.rpm)
+  if not targetRPM or targetRPM <= 0 then
+    targetRPM = isStanding and 1000 or 3500
+  end
+  self.targetStartingGear = targetGear
+  self.targetStartingRPM = targetRPM
+
   GTPhysicsHooks.setupSpawn(self.testConfig, 0)
 
   -- Lock controls during countdown
-  GTPhysicsHooks.lockControls(3.0, isStanding)
+  GTPhysicsHooks.lockControls(3.0, isStanding, targetGear, targetRPM)
 
   if ac and ac.log then
-    ac.log(string.format("[GTLicense] Countdown started | start_mode=%s | isStanding=%s | initial_speed=%.1f km/h",
+    ac.log(string.format("[GTLicense] Countdown started | start_mode=%s | isStanding=%s | initial_speed=%.1f km/h | gear=%d | rpm=%d",
       tostring(self.testConfig.start_mode), tostring(isStanding),
-      tonumber(self.testConfig.spawn and self.testConfig.spawn.initial_speed_kmh or 0) or 0))
+      initialSpeed, targetGear, targetRPM))
   end
 end
 
@@ -487,19 +499,50 @@ function GTLicenseEngine:update(dt)
     self.spawnInitialized = true
     GTPhysicsHooks.setupSpawn(self.testConfig, 0)
     local isStanding = (self.testConfig.start_mode == "STANDING")
-    GTPhysicsHooks.lockControls(3.0, isStanding)
+    GTPhysicsHooks.lockControls(3.0, isStanding, self.targetStartingGear, self.targetStartingRPM)
 
     if ac and ac.log then
       ac.log(string.format("[GTLicense] First live frame spawn applied: pos=(%.2f, %.2f, %.2f), look=(%.2f, %.2f, %.2f), speed=%.2f km/h",
         car.position.x, car.position.y, car.position.z,
         car.look.x, car.look.y, car.look.z, car.speedKmh))
     end
+    -- Allow one physics integration step for car kinematics & gear engagement to settle
+    return
   end
 
   -- 2. State machine evaluation
   if self.state == GTLicenseEngine.STATE.COUNTDOWN then
     self.countdownTimer = self.countdownTimer - dt
     local currentStep = math.ceil(self.countdownTimer)
+
+    -- AI / rolling / standing physics maintenance during countdown:
+    if self.testConfig and self.testConfig.spawn then
+      local initialSpeed = tonumber(self.testConfig.spawn.initial_speed_kmh) or 0
+      local isStanding = (self.testConfig.start_mode == "STANDING") or (initialSpeed <= 0)
+      local targetGear = self.targetStartingGear
+        or (tonumber(self.testConfig.spawn.gear) and tonumber(self.testConfig.spawn.gear) > 0 and tonumber(self.testConfig.spawn.gear))
+        or (isStanding and 1 or GTPhysicsHooks.estimateStartingGear(initialSpeed))
+      local targetRPM = self.targetStartingRPM
+        or (tonumber(self.testConfig.spawn.rpm) and tonumber(self.testConfig.spawn.rpm) > 0 and tonumber(self.testConfig.spawn.rpm))
+        or (isStanding and 1000 or 3500)
+
+      if initialSpeed > 0 then
+        GTPhysicsHooks.maintainAIRolling(0, initialSpeed, self.testConfig.spawn.forward_vector, dt, targetGear, targetRPM)
+      else
+        -- Standing start: maintain 1st gear engaged and brakes held during countdown
+        if not car or car.gear ~= 1 then
+          if physics and physics.engageGear then
+            physics.engageGear(0, 1)
+          end
+        end
+        if ac and ac.overrideCarControls then
+          local ctrl = ac.overrideCarControls(0)
+          if ctrl then
+            ctrl.requestedGearIndex = 1
+          end
+        end
+      end
+    end
 
     if currentStep >= 1 and currentStep < self.countdownLastStep then
       self.countdownLastStep = currentStep
@@ -529,21 +572,13 @@ function GTLicenseEngine:update(dt)
       end
     end
 
-    -- AI-controlled rolling start during countdown:
-    -- Assetto Corsa native AI drives the car along the ideal racing line up to target rolling speed.
-    if self.testConfig and self.testConfig.spawn then
-      local initialSpeed = tonumber(self.testConfig.spawn.initial_speed_kmh) or 0
-      if initialSpeed > 0 then
-        GTPhysicsHooks.maintainAIRolling(0, initialSpeed, self.testConfig.spawn.forward_vector, dt)
-      end
-    end
-
     if self.countdownTimer <= 0 then
       -- Release AI autopilot and hand control to player on GO!
       local initSpeed = tonumber(self.testConfig.spawn and self.testConfig.spawn.initial_speed_kmh) or 0
-      local targetGear = (self.testConfig.spawn and self.testConfig.spawn.gear and tonumber(self.testConfig.spawn.gear) > 0)
-        and tonumber(self.testConfig.spawn.gear)
-        or ((initSpeed > 0) and GTPhysicsHooks.estimateStartingGear(initSpeed) or 0)
+      local isStanding = (self.testConfig.start_mode == "STANDING") or (initSpeed <= 0)
+      local targetGear = self.targetStartingGear
+        or (self.testConfig.spawn and self.testConfig.spawn.gear and tonumber(self.testConfig.spawn.gear) > 0 and tonumber(self.testConfig.spawn.gear))
+        or (isStanding and 1 or GTPhysicsHooks.estimateStartingGear(initSpeed))
       if self.isAIRollingActive or initSpeed > 0 then
         GTPhysicsHooks.stopAIRolling(0, targetGear)
         self.isAIRollingActive = false
@@ -623,22 +658,21 @@ function GTLicenseEngine:update(dt)
   elseif self.state == GTLicenseEngine.STATE.RUNNING then
     self.sessionTime = self.sessionTime + dt
 
-    -- Ensure gear remains firmly engaged right after handover on rolling starts
+    -- Ensure gear remains firmly engaged right after handover on rolling and standing starts
     if self.sessionTime < 0.5 and self.testConfig and self.testConfig.spawn then
       local initSpeed = tonumber(self.testConfig.spawn.initial_speed_kmh) or 0
-      if initSpeed > 0 then
-        local targetGear = (self.testConfig.spawn.gear and tonumber(self.testConfig.spawn.gear) > 0)
-          and tonumber(self.testConfig.spawn.gear)
-          or GTPhysicsHooks.estimateStartingGear(initSpeed)
-        local targetRPM = (self.testConfig.spawn.rpm and tonumber(self.testConfig.spawn.rpm) > 1000)
-          and tonumber(self.testConfig.spawn.rpm)
-          or 3500
-        if car and car.gear == 0 and physics and physics.engageGear then
-          physics.engageGear(0, targetGear)
-        end
-        if car and car.rpm < 2000 and physics and physics.setEngineRPM then
-          physics.setEngineRPM(0, targetRPM)
-        end
+      local isStanding = (self.testConfig.start_mode == "STANDING") or (initSpeed <= 0)
+      local targetGear = self.targetStartingGear
+        or (tonumber(self.testConfig.spawn.gear) and tonumber(self.testConfig.spawn.gear) > 0 and tonumber(self.testConfig.spawn.gear))
+        or (isStanding and 1 or GTPhysicsHooks.estimateStartingGear(initSpeed))
+      local targetRPM = self.targetStartingRPM
+        or (tonumber(self.testConfig.spawn.rpm) and tonumber(self.testConfig.spawn.rpm) > 0 and tonumber(self.testConfig.spawn.rpm))
+        or (isStanding and 1000 or 3500)
+      if car and car.gear < targetGear and physics and physics.engageGear then
+        physics.engageGear(0, targetGear)
+      end
+      if car and car.rpm < 2000 and physics and physics.setEngineRPM and not isStanding then
+        physics.setEngineRPM(0, targetRPM)
       end
     end
 
