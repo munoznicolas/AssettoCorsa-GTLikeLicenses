@@ -258,6 +258,36 @@ function GTPhysicsHooks.unlockControls(carIndex, targetGear)
   end
 end
 
+---Deploys car brakes at specified intensity upon test failure/disqualification.
+---Also zeroes user throttle so the vehicle slows down in a smooth, controlled manner.
+---@param carIndex integer? @0-based car index (default: 0)
+---@param intensity number? @Braking intensity between 0.0 and 1.0 (default: 0.5 for 50%)
+function GTPhysicsHooks.applyFailureBraking(carIndex, intensity)
+  carIndex = carIndex or 0
+  intensity = tonumber(intensity) or 0.5
+  if physics and physics.setCarAutopilot then
+    physics.setCarAutopilot(false)
+  end
+  if physics and physics.forceUserThrottleFor then
+    physics.forceUserThrottleFor(1.0, 0.0)
+  end
+  if physics and physics.forceUserBrakesFor then
+    physics.forceUserBrakesFor(1.0, intensity)
+  end
+end
+
+---Releases failure braking and restores user throttle and brake control.
+---@param carIndex integer? @0-based car index (default: 0)
+function GTPhysicsHooks.releaseFailureBraking(carIndex)
+  carIndex = carIndex or 0
+  if physics and physics.forceUserThrottleFor then
+    physics.forceUserThrottleFor(0, 0)
+  end
+  if physics and physics.forceUserBrakesFor then
+    physics.forceUserBrakesFor(0, 0)
+  end
+end
+
 ---Engages native AI autopilot on user car for rolling start countdown.
 ---The car is driven by Assetto Corsa's native AI along the ideal racing line.
 ---@param carIndex integer? @0-based car index (default: 0)

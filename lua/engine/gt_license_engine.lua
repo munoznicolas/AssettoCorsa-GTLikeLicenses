@@ -359,12 +359,26 @@ function GTLicenseEngine:setState(newState)
   if self.state ~= newState then
     local oldState = self.state
     self.state = newState
+
+    if newState == GTLicenseEngine.STATE.FAILED then
+      GTPhysicsHooks.applyFailureBraking(0, 0.5)
+      if ac and ac.log then
+        ac.log(string.format("[GTLicense] Failure triggered: reason='%s' | Deploying 50%% emergency braking", tostring(self.failReason)))
+      end
+    elseif oldState == GTLicenseEngine.STATE.FAILED then
+      GTPhysicsHooks.releaseFailureBraking(0)
+      if ac and ac.log then
+        ac.log("[GTLicense] Leaving FAILED state | Releasing failure braking")
+      end
+    end
+
     dispatchEvent(self, "stateChanged", newState, oldState)
   end
 end
 
 ---Starts or restarts the 3-2-1 countdown sequence.
 function GTLicenseEngine:startCountdown()
+  GTPhysicsHooks.releaseFailureBraking(0)
   self:setState(GTLicenseEngine.STATE.COUNTDOWN)
   self.sessionTime = 0
   self.countdownTimer = 3.0
@@ -440,6 +454,7 @@ end
 ---Called when GTSessionReset fires a reset.
 ---@param reason string
 function GTLicenseEngine:onSessionResetTriggered(reason)
+  GTPhysicsHooks.releaseFailureBraking(0)
   if self.isAIRollingActive then
     GTPhysicsHooks.stopAIRolling(0, 0)
     self.isAIRollingActive = false
@@ -667,8 +682,9 @@ function GTLicenseEngine:update(dt)
     end
 
   elseif self.state == GTLicenseEngine.STATE.FAILED then
-    -- Fail banner active, waiting for auto-reset timer or manual 'R' keypress
-    -- Handled via sessionReset:update(dt)
+    -- Fail banner active, waiting for manual restart ('R', space, gamepad) or retry
+    -- Continuously maintain 50% failure braking to bring vehicle to a controlled stop
+    GTPhysicsHooks.applyFailureBraking(0, 0.5)
 
   elseif self.state == GTLicenseEngine.STATE.RESULTS then
     -- Results modal active, waiting for player to retry or exit
