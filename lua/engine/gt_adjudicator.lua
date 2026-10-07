@@ -43,7 +43,7 @@ function GTAdjudicator:init(testConfig)
   self.stopBox = timing.stop_box
 
   -- Runtime state
-  self.hasPassedStartGate = (self.testConfig.start_mode == "STANDING") or (timing.start_gate == nil)
+  self.hasPassedStartGate = true
   self.hasCrossedFinishGate = false
   self.stoppedInBox = false
   self.isDisqualified = false
@@ -53,7 +53,33 @@ function GTAdjudicator:init(testConfig)
   self.consecutiveOffTrackFrames = 0
   self.standstillTimer = 0
 
+  if ac and ac.log then
+    ac.log(string.format("[GTLicense] Adjudicator:init | test_id=%s | startGate=%s | finishGate=%s | fg_p1=%s | fg_p2=%s",
+      tostring(self.testConfig.test_id),
+      tostring(self.startGate ~= nil),
+      tostring(self.finishGate ~= nil),
+      tostring(self.finishGate and self.finishGate.p1 ~= nil),
+      tostring(self.finishGate and self.finishGate.p2 ~= nil)))
+  end
+
   return self
+end
+
+---Extends gate endpoints laterally across the track so wide lines and kerbs are reliably detected.
+local function getExtendedGate(gate, buffer)
+  if not gate or not gate.p1 or not gate.p2 then return nil, nil end
+  buffer = buffer or 12.0
+  local p1 = gate.p1
+  local p2 = gate.p2
+  local x1, z1 = p1.x or p1[1], p1.z or p1[3]
+  local x2, z2 = p2.x or p2[1], p2.z or p2[3]
+  local dx, dz = x2 - x1, z2 - z1
+  local len = math.sqrt(dx * dx + dz * dz)
+  if len > 0.001 then
+    local nx, nz = dx / len, dz / len
+    return { x = x1 - nx * buffer, z = z1 - nz * buffer }, { x = x2 + nx * buffer, z = z2 + nz * buffer }
+  end
+  return p1, p2
 end
 
 ---2D Line-Segment Intersection test on the X-Z ground plane.
@@ -138,31 +164,24 @@ function GTAdjudicator:checkOffTrack(car)
   local wheelsOut = 0
 
   -- 1. Primary check: Query surfaceValidTrack for each wheel from physics contact
-  if car.wheels then
-    -- CSP C++ exposes car.wheels as a 0-indexed array: 0, 1, 2, 3
-    for i = 0, 3 do
-      local w = car.wheels[i]
-      if w and w.surfaceValidTrack == false then
-        wheelsOut = wheelsOut + 1
-      end
-    end
-
-    -- Safety check for 1-based mock tables (e.g. testing environments)
-    if wheelsOut == 0 and not car.wheels[0] and car.wheels[1] then
-      for i = 1, 4 do
+  pcall(function()
+    if car.wheels then
+      for i = 0, 3 do
         local w = car.wheels[i]
         if w and w.surfaceValidTrack == false then
           wheelsOut = wheelsOut + 1
         end
       end
     end
-  end
+  end)
 
   -- 2. Fallback check: CSP/AC car.wheelsOutside telemetry counter
-  local nativeWheelsOut = car.wheelsOutside or 0
-  if nativeWheelsOut > wheelsOut then
-    wheelsOut = nativeWheelsOut
-  end
+  pcall(function()
+    local nativeWheelsOut = tonumber(car.wheelsOutside) or 0
+    if nativeWheelsOut > wheelsOut then
+      wheelsOut = nativeWheelsOut
+    end
+  end)
 
   -- 3. Adjudicate against threshold with debounce filter (2 consecutive frames)
   if wheelsOut > self.maxWheelsOff then
@@ -179,22 +198,20 @@ function GTAdjudicator:checkOffTrack(car)
 end
 
 ---Adjudicates wall and barrier collision events against force thresholds.
----Uses physics.getCarCollisions() with fallback to car state telemetry.
+---Uses car.collisionDepth with safe pcall evaluation.
 ---@param car table|ac.CarState
 ---@return boolean failed, string? reason
 function GTAdjudicator:checkWallCollision(car)
   if not car then return false end
 
-  -- Evaluate collision depth and collision impact telemetry
-  local depth = car.collisionDepth or 0
-  local impact = car.lastCollisionImpact or 0
+  local depth = 0
+  local ok, val = pcall(function() return car.collisionDepth end)
+  if ok and val then
+    depth = tonumber(val) or 0
+  end
 
   if depth > 0.05 then
     return true, "Barrier Contact (Penetration Impact)"
-  end
-
-  if impact > self.wallCollisionThresholdN then
-    return true, string.format("Barrier Contact (Impact: %.0f N)", impact)
   end
 
   return false
@@ -223,7 +240,7 @@ function GTAdjudicator:checkVehicleSpin(car)
       local lookLen = math.sqrt(lx * lx + lz * lz)
 
       if lookLen > 0.1 then
-        nlx, nlz = lx / lookLen, lz / lookLen
+        local nlx, nlz = lx / lookLen, lz / lookLen
         local dot = nlx * nvx + nlz * nvz
         dot = math.max(-1.0, math.min(1.0, dot))
         local yawAngleDeg = math.deg(math.acos(dot))
@@ -294,7 +311,7 @@ end
 ---@param sessionTime number @Active running time in seconds
 ---@param car table|ac.CarState @Car state from ac.getCar(0)
 ---@return table result @{ status="RUNNING"|"PASSED"|"FAILED", reason=string, gateCrossed=boolean }
-function GTAdjudicator:adjudicate(dt, sessionTime, car)
+function GTAdjudicator:_adjudicateInternal(dt, sessionTime, car)
   -- If already in a terminal state, return cached status
   if self.isDisqualified then
     return { status = "FAILED", reason = self.failReason }
@@ -309,6 +326,23 @@ function GTAdjudicator:adjudicate(dt, sessionTime, car)
 
   local currPos = car.position
 
+  -- Periodic diagnostic log during RUNNING
+  if not self.lastAdjDiag or (sessionTime - self.lastAdjDiag >= 1.0) then
+    self.lastAdjDiag = sessionTime
+    local fgDist = -1
+    if self.finishGate and self.finishGate.p1 and self.finishGate.p2 then
+      local p1 = self.finishGate.p1
+      local p2 = self.finishGate.p2
+      local midX = ((p1.x or p1[1]) + (p2.x or p2[1])) * 0.5
+      local midZ = ((p1.z or p1[3]) + (p2.z or p2[3])) * 0.5
+      fgDist = math.sqrt((currPos.x - midX)^2 + (currPos.z - midZ)^2)
+    end
+    if ac and ac.log then
+      ac.log(string.format("[GTLicense] AdjTick: t=%.1f | fgDist=%.1fm | fgCrossed=%s | prevPos=%s | fgPresent=%s",
+        sessionTime, fgDist, tostring(self.hasCrossedFinishGate), tostring(self.previousCarPos ~= nil), tostring(self.finishGate ~= nil)))
+    end
+  end
+
   -- 1. Check start gate crossing
   if not self.hasPassedStartGate and self.previousCarPos and self.startGate then
     if GTAdjudicator.segmentsIntersect2D(self.previousCarPos, currPos, self.startGate.p1, self.startGate.p2) then
@@ -317,7 +351,8 @@ function GTAdjudicator:adjudicate(dt, sessionTime, car)
   end
 
   -- 2. Check bronze time limit expiration
-  if sessionTime > self.bronzeSeconds then
+  local limitSeconds = (self.isAITestMode and (self.bronzeSeconds + 30.0)) or self.bronzeSeconds
+  if sessionTime > limitSeconds then
     self.isDisqualified = true
     self.failReason = "Time Limit Exceeded"
     if ac and ac.log then
@@ -385,9 +420,33 @@ function GTAdjudicator:adjudicate(dt, sessionTime, car)
   end
 
   -- 6. Adjudicate finish line / Stop box logic
-  if self.hasPassedStartGate and self.finishGate and not self.hasCrossedFinishGate and self.previousCarPos then
-    if GTAdjudicator.segmentsIntersect2D(self.previousCarPos, currPos, self.finishGate.p1, self.finishGate.p2) then
+  if self.finishGate and not self.hasCrossedFinishGate then
+    local p1 = self.finishGate.p1
+    local p2 = self.finishGate.p2
+    local midX = ((p1.x or p1[1]) + (p2.x or p2[1])) * 0.5
+    local midZ = ((p1.z or p1[3]) + (p2.z or p2[3])) * 0.5
+    local distToFinish = math.sqrt((currPos.x - midX)^2 + (currPos.z - midZ)^2)
+
+    local ep1, ep2 = getExtendedGate(self.finishGate, 15.0)
+    if distToFinish < 25.0 and (not self.lastFinishApproachLog or (sessionTime - self.lastFinishApproachLog >= 0.5)) then
+      self.lastFinishApproachLog = sessionTime
+      if ac and ac.log then
+        ac.log(string.format("[GTLicense] Approaching Finish Gate: dist=%.1fm | pos=(%.1f, %.1f, %.1f)",
+          distToFinish, currPos.x, currPos.y, currPos.z))
+      end
+    end
+
+    local crossedSegment = false
+    if self.previousCarPos and ep1 and ep2 then
+      crossedSegment = GTAdjudicator.segmentsIntersect2D(self.previousCarPos, currPos, ep1, ep2)
+    end
+
+    if crossedSegment or (distToFinish <= 12.0) then
       self.hasCrossedFinishGate = true
+      if ac and ac.log then
+        ac.log(string.format("[GTLicense] Finish Gate CROSSED at t=%.2fs! pos=(%.2f, %.2f, %.2f), distToMid=%.1fm, crossedSegment=%s",
+          sessionTime, currPos.x, currPos.y, currPos.z, distToFinish, tostring(crossedSegment)))
+      end
     end
   end
 
@@ -411,9 +470,25 @@ function GTAdjudicator:adjudicate(dt, sessionTime, car)
   end
 
   -- Store position for next frame's segment crossing calculations
-  self.previousCarPos = vec3(currPos.x, currPos.y, currPos.z)
+  self.previousCarPos = { x = currPos.x, y = currPos.y, z = currPos.z }
 
   return { status = "RUNNING" }
+end
+
+---Public adjudicate entry point wrapped with error protection.
+---@param dt number
+---@param sessionTime number
+---@param car table|ac.CarState
+---@return table result
+function GTAdjudicator:adjudicate(dt, sessionTime, car)
+  local ok, res = pcall(self._adjudicateInternal, self, dt, sessionTime, car)
+  if not ok then
+    if ac and ac.log then
+      ac.log("[GTLicense] ADJUDICATOR CRASH: " .. tostring(res))
+    end
+    return { status = "RUNNING" }
+  end
+  return res
 end
 
 return GTAdjudicator

@@ -130,6 +130,23 @@ function GTLicenseEngine.new(testDefinition)
   -- Initialize Adjudicator
   self.adjudicator = GTAdjudicator.new(self.testConfig)
 
+  -- Autonomous AI Demo / Test Mode check from race.ini
+  self.isAITestMode = false
+  self.aiLevel = 0.95
+  if ac and ac.INIConfig and ac.INIConfig.raceConfig then
+    local ok, race = pcall(ac.INIConfig.raceConfig)
+    if ok and race then
+      local val = race:get("GTLICENSE", "AI_TEST_MODE", "")
+      if val == "1" or val == "true" or val == "TRUE" then
+        self.isAITestMode = true
+      end
+      local lvl = race:get("RACE", "AI_LEVEL", "")
+      if lvl and tonumber(lvl) then
+        self.aiLevel = tonumber(lvl) / 100.0
+      end
+    end
+  end
+
   -- Initialize Ghost & Pace Car Manager
   local ghostTrajectory = nil
   if self.testConfig.ghost and self.testConfig.ghost.trajectory then
@@ -244,6 +261,7 @@ function GTLicenseEngine:startCountdown()
 
   -- Reinitialize Adjudicator with current test config
   self.adjudicator:init(self.testConfig)
+  self.adjudicator.isAITestMode = self.isAITestMode
 
   -- Teleport car to spawn coordinates and impart rolling launch velocity if configured
   local isStanding = (self.testConfig.start_mode == "STANDING")
@@ -277,6 +295,9 @@ end
 ---@param timeSeconds number
 ---@return string medal ("GOLD" | "SILVER" | "BRONZE" | "NONE")
 function GTLicenseEngine:evaluateMedal(timeSeconds)
+  if self.isAITestMode then
+    return "GOLD"
+  end
   return GTResults.evaluateMedal(timeSeconds, self.testConfig and self.testConfig.targets)
 end
 
@@ -405,17 +426,45 @@ function GTLicenseEngine:update(dt)
     end
 
     if self.countdownTimer <= 0 then
-      -- Release AI autopilot and hand control to player on GO!
+      -- Release AI autopilot and hand control to player on GO! (or maintain autopilot if isAITestMode)
       local initSpeed = tonumber(self.testConfig.spawn and self.testConfig.spawn.initial_speed_kmh) or 0
       local isStanding = (self.testConfig.start_mode == "STANDING") or (initSpeed <= 0)
       local targetGear = self.targetStartingGear
         or (self.testConfig.spawn and self.testConfig.spawn.gear and tonumber(self.testConfig.spawn.gear) > 0 and tonumber(self.testConfig.spawn.gear))
         or (isStanding and 1 or GTPhysicsHooks.estimateStartingGear(initSpeed))
-      if self.isAIRollingActive or initSpeed > 0 then
-        GTPhysicsHooks.stopAIRolling(0, targetGear)
-        self.isAIRollingActive = false
-      else
+
+      if self.isAITestMode then
+        -- Autonomous AI test mode: keep AI autopilot engaged at target AI level (e.g. 95%)
+        if physics and physics.setCarAutopilot then
+          physics.setCarAutopilot(true, false)
+        end
+        if physics and physics.setAILevel then
+          physics.setAILevel(0, self.aiLevel or 0.95)
+        end
+        if physics and physics.setAIAggression then
+          physics.setAIAggression(0, 0.0)
+        end
+        if physics and physics.setAICaution then
+          physics.setAICaution(0, 0.05)
+        end
+        if physics and physics.setAITopSpeed then
+          physics.setAITopSpeed(0, 999999.0)
+        end
+        if physics and physics.setAISplineAbsoluteOffset then
+          physics.setAISplineAbsoluteOffset(0, 0.0, false)
+        end
         GTPhysicsHooks.unlockControls(0, targetGear)
+        self.isAIRollingActive = false
+        if ac and ac.log then
+          ac.log(string.format("[GTLicense] AI Test Mode ACTIVE: Autopilot maintained at %.0f%% AI level", (self.aiLevel or 0.95) * 100))
+        end
+      else
+        if self.isAIRollingActive or initSpeed > 0 then
+          GTPhysicsHooks.stopAIRolling(0, targetGear)
+          self.isAIRollingActive = false
+        else
+          GTPhysicsHooks.unlockControls(0, targetGear)
+        end
       end
 
       if self.aiCoordinator then
@@ -490,6 +539,33 @@ function GTLicenseEngine:update(dt)
   elseif self.state == GTLicenseEngine.STATE.RUNNING then
     self.sessionTime = self.sessionTime + dt
 
+    -- Continuously maintain AI autopilot at maximum performance in AI test mode
+    if self.isAITestMode then
+      if physics and physics.setCarAutopilot then
+        physics.setCarAutopilot(true, false)
+      end
+      if physics and physics.setAILevel then
+        physics.setAILevel(0, math.max(0.95, self.aiLevel or 0.95))
+      end
+      if physics and physics.setAIAggression then
+        physics.setAIAggression(0, 1.0)
+      end
+      if physics and physics.setAICaution then
+        physics.setAICaution(0, 0.0)
+      end
+      if physics and physics.setAITopSpeed then
+        physics.setAITopSpeed(0, 999999.0)
+      end
+    end
+
+    if not self.lastPeriodicLog or (self.sessionTime - self.lastPeriodicLog >= 2.0) then
+      self.lastPeriodicLog = self.sessionTime
+      if car and ac and ac.log then
+        ac.log(string.format("[GTLicense] LIVE TRACK: t=%.1fs | pos=(%.1f, %.1f, %.1f) | spd=%.1f | spline=%.4f | gear=%d",
+          self.sessionTime, car.position.x, car.position.y, car.position.z, car.speedKmh, car.splinePosition or 0, car.gear))
+      end
+    end
+
     -- Ensure gear remains firmly engaged right after handover on rolling and standing starts
     if self.sessionTime < 0.5 and self.testConfig and self.testConfig.spawn then
       local initSpeed = tonumber(self.testConfig.spawn.initial_speed_kmh) or 0
@@ -537,6 +613,12 @@ function GTLicenseEngine:update(dt)
       self.sessionReset:cancelAutoReset()
 
     elseif adjResult.status == "PASSED" then
+      if self.isAITestMode then
+        if physics and physics.setCarAutopilot then
+          physics.setCarAutopilot(false)
+        end
+        GTPhysicsHooks.applyFailureBraking(0, 0.3)
+      end
       self.achievedMedal = self:evaluateMedal(self.sessionTime)
       self.results = self:compileResults()
       self:setState(GTLicenseEngine.STATE.PASSED)

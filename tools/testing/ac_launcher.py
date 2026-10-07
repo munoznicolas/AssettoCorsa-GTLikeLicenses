@@ -69,6 +69,8 @@ def find_car_skin(car_id: str, ac_root: str = DEFAULT_AC_ROOT) -> str:
 def generate_race_ini(
     test_data: Dict[str, Any],
     ac_root: str = DEFAULT_AC_ROOT,
+    ai_level: int = 95,
+    ai_test_mode: bool = False,
 ) -> str:
     """Synthesizes a valid Assetto Corsa race.ini string for a given test configuration."""
     car_id = test_data["car_id"]
@@ -83,7 +85,7 @@ CONFIG_TRACK={track_layout}
 MODEL={car_id}
 MODEL_CONFIG=
 CARS=1
-AI_LEVEL=100
+AI_LEVEL={ai_level}
 FIXED_SETUP=0
 PENALTIES=1
 AUTO_START_SESSION=1
@@ -125,6 +127,7 @@ SESSION_TRANSFER=100
 [GTLICENSE]
 TEST_ID={test_id}
 ACTIVE=1
+AI_TEST_MODE={1 if ai_test_mode else 0}
 """
     return ini_content
 
@@ -202,6 +205,9 @@ def run_launch_test(
     timeout_seconds: float = 6.0,
     dry_run: bool = False,
     verbose: bool = False,
+    watch: bool = False,
+    ai_test_mode: bool = False,
+    ai_level: int = 95,
 ) -> Dict[str, Any]:
     """Runs a single in-engine launch test."""
     with open(test_json_path, "r", encoding="utf-8") as f:
@@ -236,7 +242,12 @@ def run_launch_test(
         }
 
     # Generate race.ini
-    race_ini_str = generate_race_ini(test_data, ac_root=ac_root)
+    race_ini_str = generate_race_ini(
+        test_data,
+        ac_root=ac_root,
+        ai_level=ai_level,
+        ai_test_mode=ai_test_mode,
+    )
 
     if dry_run:
         # In dry-run mode, verify race.ini validity and asset paths without launching
@@ -258,6 +269,7 @@ def run_launch_test(
         os.path.join(ALT_USER_DOCS_AC, "cfg", "race.ini"),
         os.path.join(ac_root, "cfg", "race.ini"),
     ]
+
     for rp in target_race_paths:
         try:
             os.makedirs(os.path.dirname(rp), exist_ok=True)
@@ -286,8 +298,15 @@ def run_launch_test(
             stderr=subprocess.DEVNULL,
         )
 
+        if watch:
+            print(f">>> [LIVE WATCH MODE] Assetto Corsa launched for {test_id}! AI driving at {ai_level}% AI level. <<<")
+            print(">>> The game will stay open so you can watch. Close Assetto Corsa when you are finished. <<<")
+            max_duration = max(timeout_seconds, 600.0)
+        else:
+            max_duration = timeout_seconds
+
         t_start = time.time()
-        while time.time() - t_start < timeout_seconds:
+        while time.time() - t_start < max_duration:
             poll_res = proc.poll()
             if poll_res is not None:
                 exit_code = poll_res
@@ -304,8 +323,8 @@ def run_launch_test(
             "dry_run": False,
         }
     finally:
-        if proc and proc.poll() is None:
-            # Process survived the required warm-up / initialization window
+        if proc and proc.poll() is None and not watch:
+            # Terminate only if not in interactive watch mode
             try:
                 proc.terminate()
                 proc.wait(timeout=3)
@@ -358,6 +377,9 @@ def main():
     parser.add_argument("--all", action="store_true", help="Launch all 58 tests.")
     parser.add_argument("--dry-run", action="store_true", help="Synthesize race.ini and verify asset paths without launching acs.exe.")
     parser.add_argument("--timeout", type=float, default=6.0, help="Per-test execution window before auto-termination (seconds). Default 6.0.")
+    parser.add_argument("--watch", action="store_true", help="Watch mode: Keep Assetto Corsa running interactively so user can watch AI drive.")
+    parser.add_argument("--ai-test-mode", action="store_true", help="Autonomous AI mode: AI drives the car hands-free throughout the entire test.")
+    parser.add_argument("--ai-level", type=int, default=95, help="AI skill level percentage (default: 95).")
     parser.add_argument("--ac-root", type=str, default=DEFAULT_AC_ROOT, help="Assetto Corsa root installation folder.")
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose milestone output.")
 
@@ -417,6 +439,9 @@ def main():
             timeout_seconds=args.timeout,
             dry_run=args.dry_run,
             verbose=args.verbose,
+            watch=args.watch,
+            ai_test_mode=args.ai_test_mode,
+            ai_level=args.ai_level,
         )
 
         test_id = res["test_id"]
