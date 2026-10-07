@@ -30,7 +30,7 @@ function GTGhostManager.new(testConfig, ghostTrajectory)
 
   self.testConfig = testConfig or {}
   self.trajectory = ghostTrajectory or {}
-  self.mode = GTGhostManager.MODE.PACER -- Default to PACER for guiding drivers
+  self.mode = GTGhostManager.MODE.OFF -- Default to OFF (disabled)
   self.leadOffset = 0.5 -- 0.5s lead in PACER mode
 
   self.goldTime = 20.0

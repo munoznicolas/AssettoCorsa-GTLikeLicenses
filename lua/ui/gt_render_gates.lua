@@ -177,17 +177,12 @@ function GTRenderGates.init(testConfig)
         cachedStopBoxCorners = computeStopBoxCorners(center, size, rot)
     end
 
-    -- Precompute guide line points if waypoints exist or interpolate
+    -- Precompute guide line points only if explicit guide spline waypoints exist
     if testConfig.guide_spline and #testConfig.guide_spline >= 2 then
         cachedGuideLine = {}
         for _, pt in ipairs(testConfig.guide_spline) do
             table.insert(cachedGuideLine, toVec3(pt))
         end
-    elseif cachedStartPoints and cachedFinishPoints then
-        -- Generate smooth reference line between start and finish gates
-        local startMid = (cachedStartPoints.p1 + cachedStartPoints.p2) * 0.5
-        local finishMid = (cachedFinishPoints.p1 + cachedFinishPoints.p2) * 0.5
-        cachedGuideLine = { startMid, finishMid }
     end
 end
 
@@ -355,9 +350,6 @@ function GTRenderGates.drawGuideLine(pulse)
     -- Render smooth trajectory ribbon
     local guideColor = rgbm(0.2, 0.85, 1.0, 0.35 + 0.1 * pulse)
     render.drawRibbon(cachedGuideLine, 0.35, guideColor)
-
-    -- Center laser thread line
-    render.polyline(cachedGuideLine, rgbm(0.6, 0.95, 1.0, 0.6), 0.04)
 end
 
 --- Main 3D render hook, called inside script.draw3D(dt)

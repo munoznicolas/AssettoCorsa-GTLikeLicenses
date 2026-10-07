@@ -49,7 +49,6 @@ end
 
 local GTLicenseHUD   = tryRequireUI("gt_license_hud")
 local GTRenderGates  = tryRequireUI("gt_render_gates")
-local GTRenderGhost  = tryRequireUI("gt_render_ghost")
 local GTAudioManager = tryRequireUI("gt_audio_manager")
 
 local GTLicenseShared = nil
@@ -297,9 +296,6 @@ function GTLicenseEngine:onSessionResetTriggered(reason)
   end
   if self.ghostManager then
     self.ghostManager:reset()
-  end
-  if GTRenderGhost and GTRenderGhost.reset then
-    GTRenderGhost.reset()
   end
   dispatchEvent(self, "reset", reason)
   self:startCountdown()
@@ -684,9 +680,7 @@ function GTLicenseEngine:draw3D(dt)
     GTRenderGates.draw3D(dt, carPos, self:getNumericState(), speedKmh)
   end
 
-  if GTRenderGhost and GTRenderGhost.render and self.ghostManager then
-    GTRenderGhost.render(self.ghostManager:getState(), dt)
-  end
+  -- Ghost wireframe rendering completely removed
 end
 
 function GTLicenseEngine:drawUI()

@@ -120,20 +120,6 @@ class TestUIModules(unittest.TestCase):
         ]:
             self.assertIn(req, audio_code, f"gt_audio_manager.lua missing requirement: {req}")
 
-        # 4. gt_render_ghost.lua
-        ghost_path = REPO_ROOT / "lua" / "ui" / "gt_render_ghost.lua"
-        self.assertTrue(ghost_path.is_file(), "Missing gt_render_ghost.lua")
-        ghost_code = ghost_path.read_text(encoding="utf-8")
-        for req in [
-            "GTRenderGhost.render",
-            "GTRenderGhost.reset",
-            "COLOR_BRAKE_ON",
-            "COLOR_PACER_GOLD",
-            "COLOR_TRAIL_RIBBON",
-            "draw3DLine",
-        ]:
-            self.assertIn(req, ghost_code, f"gt_render_ghost.lua missing requirement: {req}")
-
     def test_ui_screens_modular_contracts(self):
         """Verifies modular widget contracts in lua/ui/screens and common."""
         screens_dir = REPO_ROOT / "lua" / "ui" / "screens"
