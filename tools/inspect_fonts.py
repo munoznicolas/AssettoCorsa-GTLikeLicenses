@@ -1,15 +1,22 @@
+#!/usr/bin/env python3
+"""
+inspect_fonts.py
+TrueType Font (TTF) Inspector for Assetto Corsa CSP DWrite.
+
+CLI Entry Point & Backward-Compatibility Wrapper.
+Implementation has been modularized into `tools.assets.font_inspector`.
+"""
+
 import os
-from fontTools.ttLib import TTFont
+import sys
 
-font_dir = 'assets/fonts'
-for fn in sorted(os.listdir(font_dir)):
-    if fn.endswith('.ttf'):
-        f = TTFont(os.path.join(font_dir, fn))
-        name_record = f['name']
-        family = name_record.getDebugName(1)
-        subfamily = name_record.getDebugName(2)
-        full = name_record.getDebugName(4)
-        postscript = name_record.getDebugName(6)
-        weight = f['OS/2'].usWeightClass if 'OS/2' in f else 'N/A'
-        print(f"{fn:28s} | Weight: {weight:<4} | Family: '{family}' | Subfamily: '{subfamily}' | PostScript: '{postscript}'")
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, REPO_ROOT)
+sys.path.insert(0, os.path.join(REPO_ROOT, "tools"))
 
+from tools.assets.font_inspector import inspect_fonts, main
+
+__all__ = ["inspect_fonts", "main"]
+
+if __name__ == "__main__":
+    main()

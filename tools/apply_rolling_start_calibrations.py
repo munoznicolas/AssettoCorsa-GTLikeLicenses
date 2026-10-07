@@ -156,20 +156,40 @@ def compute_calibrations():
     return calibrations
 
 
+def get_tier_file_for_test(test_id: str) -> str:
+    """Returns the file path for the tier catalog file containing test_id."""
+    prefix = test_id.split("-")[0]
+    mapping = {
+        "B": "national_b.py",
+        "A": "national_a.py",
+        "IB": "international_b.py",
+        "IA": "international_a.py",
+        "S": "super_license.py",
+    }
+    filename = mapping.get(prefix, "national_b.py")
+    return os.path.join(REPO_ROOT, "tools", "content", "catalog", filename)
+
+
 def update_catalog_in_file(calibrations):
-    """Updates TEST_CATALOG in tools/generate_all_content.py."""
-    catalog_path = os.path.join(REPO_ROOT, "tools", "generate_all_content.py")
-    with open(catalog_path, "r", encoding="utf-8") as f:
-        content = f.read()
+    """Updates TEST_CATALOG in modular tier catalog files."""
+    files_to_update = {}
+    for t_id in calibrations:
+        fpath = get_tier_file_for_test(t_id)
+        if fpath not in files_to_update:
+            with open(fpath, "r", encoding="utf-8") as f:
+                files_to_update[fpath] = f.read()
 
     updated_count = 0
 
     for t_id, cal in calibrations.items():
+        fpath = get_tier_file_for_test(t_id)
+        content = files_to_update[fpath]
+
         # Match test dictionary block for this test_id
         pattern = rf'({{\s*"test_id":\s*"{re.escape(t_id)}",.*?}})'
         match = re.search(pattern, content, re.DOTALL)
         if not match:
-            print(f"[!] Warning: Could not match test block for {t_id}")
+            print(f"[!] Warning: Could not match test block for {t_id} in {os.path.basename(fpath)}")
             continue
 
         block = match.group(1)
@@ -182,7 +202,7 @@ def update_catalog_in_file(calibrations):
         block = re.sub(r'"spawn_offset":\s*[\d\.]+', f'"spawn_offset": {cal["spawn_offset"]}', block)
         # Update speed
         block = re.sub(r'"speed":\s*[\d\.]+', f'"speed": {cal["speed"]}', block)
-        
+
         # Insert or update gear and rpm
         if '"gear":' in block:
             block = re.sub(r'"gear":\s*\d+', f'"gear": {cal["gear"]}', block)
@@ -199,13 +219,14 @@ def update_catalog_in_file(calibrations):
         tg_str = f'"targets": {{"gold_seconds": {tg["gold_seconds"]:.3f}, "silver_seconds": {tg["silver_seconds"]:.3f}, "bronze_seconds": {tg["bronze_seconds"]:.3f}}}'
         block = re.sub(r'"targets":\s*\{[^}]+\}', tg_str, block)
 
-        content = content[:match.start(1)] + block + content[match.end(1):]
+        files_to_update[fpath] = content[:match.start(1)] + block + content[match.end(1):]
         updated_count += 1
 
-    with open(catalog_path, "w", encoding="utf-8") as f:
-        f.write(content)
+    for fpath, content in files_to_update.items():
+        with open(fpath, "w", encoding="utf-8") as f:
+            f.write(content)
 
-    print(f"Updated {updated_count} / {len(calibrations)} rolling test entries in {os.path.relpath(catalog_path, REPO_ROOT)}.")
+    print(f"Updated {updated_count} / {len(calibrations)} rolling test entries across {len(files_to_update)} tier catalog files.")
 
 
 def main():
@@ -217,7 +238,7 @@ def main():
     calibrations = compute_calibrations()
     print(f"  + Calibrated {len(calibrations)} tests successfully.")
 
-    print("\n[Step 2] Updating TEST_CATALOG in tools/generate_all_content.py...")
+    print("\n[Step 2] Updating modular catalog files in tools/content/catalog/...")
     update_catalog_in_file(calibrations)
 
     print("\nCalibration application complete!")

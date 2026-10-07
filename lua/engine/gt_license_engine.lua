@@ -22,6 +22,8 @@ local GTPhysicsHooks = safeRequire("gt_physics_hooks")
 local GTAdjudicator  = safeRequire("gt_adjudicator")
 local GTSessionReset = safeRequire("gt_session_reset")
 local GTGhostManager = safeRequire("gt_ghost_manager")
+local GTConfigLoader = safeRequire("gt_config_loader")
+local GTResults      = safeRequire("gt_results")
 
 local function tryRequireEngine(name)
   local ok, mod = pcall(require, name)
@@ -62,168 +64,10 @@ GTLicenseEngine.STATE = {
   RESULTS      = "RESULTS"
 }
 
--- Default fallback test configuration (used if no JSON file is found)
-local DEFAULT_TEST_CONFIG = {
-  test_id = "B-1",
-  tier = "National B",
-  title = "Starting & Stopping: 1000m Acceleration & Braking",
-  description = "Launch cleanly and bring the car to a full stop inside the marked grid box.",
-  lesson_objective = "Straight-line threshold braking without locking wheels.",
-  car_id = "abarth500",
-  track_id = "magione",
-  track_layout = "",
-  start_mode = "STANDING",
-  spawn = {
-    position = { 0.0, 0.5, 0.0 },
-    forward_vector = { 0.0, 0.0, 1.0 },
-    initial_speed_kmh = 0
-  },
-  timing = {
-    start_gate = {
-      p1 = { -10.0, 0.0, 0.0 },
-      p2 = { 10.0, 0.0, 0.0 }
-    },
-    finish_gate = {
-      p1 = { -10.0, 0.0, 1000.0 },
-      p2 = { 10.0, 0.0, 1000.0 }
-    },
-    stop_box = {
-      center = { 0.0, 0.0, 1025.0 },
-      size = { 12.0, 4.0, 50.0 },
-      rotation_deg = 0
-    }
-  },
-  fail_rules = {
-    max_wheels_off = 2,
-    wall_collision_threshold_n = 1500,
-    max_yaw_angle_deg = 90,
-    stop_box_overshoot_fail = true
-  },
-  targets = {
-    gold_seconds = 26.500,
-    silver_seconds = 28.000,
-    bronze_seconds = 31.000
-  }
-}
-
-local parseJSONSafe = GTUtils.parseJSONSafe
-local getTestFilePath = GTUtils.getTestFilePath
-
----Loads a JSON test definition file from disk.
----@param filepath string? @Path to test JSON file
----@return table testConfig
-function GTLicenseEngine.loadTestConfig(filepath)
-  local content = nil
-
-  if filepath then
-    if io.load then
-      content = io.load(filepath)
-    end
-    if not content then
-      local f = io.open(filepath, "r")
-      if f then
-        content = f:read("*all")
-        f:close()
-      end
-    end
-  end
-
-  -- Search standard CSP directory locations if no content yet
-  if not content and ac and ac.getFolder then
-    local scriptFolders = {}
-    if ac.FolderID then
-      if ac.FolderID.ScriptOrigin then
-        local origin = ac.getFolder(ac.FolderID.ScriptOrigin)
-        if origin and #origin > 0 and not origin:find("AppData") then
-          table.insert(scriptFolders, origin)
-        end
-      end
-      if ac.FolderID.Root then
-        local root = ac.getFolder(ac.FolderID.Root)
-        if root and #root > 0 then
-          table.insert(scriptFolders, root .. "/extension/lua/new-modes/gt-license")
-        end
-      end
-      if ac.FolderID.ExtLua then
-        local extLua = ac.getFolder(ac.FolderID.ExtLua)
-        if extLua and #extLua > 0 then
-          table.insert(scriptFolders, extLua .. "/new-modes/gt-license")
-        end
-      end
-    end
-    table.insert(scriptFolders, "D:/SteamLibrary/steamapps/common/assettocorsa/extension/lua/new-modes/gt-license")
-
-    -- Try to determine active test ID from race.ini
-    local testId = nil
-    if ac.INIConfig and ac.INIConfig.raceConfig then
-      local ok, race = pcall(ac.INIConfig.raceConfig)
-      if ok and race then
-        testId = race:get("GTLICENSE", "TEST_ID", "")
-        if not testId or #testId == 0 then
-          testId = race:get("RACE", "TEST_ID", "")
-        end
-        if not testId or #testId == 0 then
-          local sName = race:get("SESSION_0", "NAME", "")
-          testId = sName:match("([%a]+%-%d+)") or sName:match("^([%w%-]+):")
-        end
-        if not testId or #testId == 0 then
-          local eventName = race:get("EVENT", "NAME", "")
-          testId = eventName:match("([%a]+%-%d+)") or eventName:match("^([%w%-]+):")
-        end
-        if not testId or #testId == 0 then
-          local raceName = race:get("RACE", "NAME", "")
-          testId = raceName:match("([%a]+%-%d+)")
-        end
-      end
-    end
-
-    if ac and ac.log then
-      ac.log(string.format("[GTLicense] loadTestConfig: detected testId='%s'", tostring(testId)))
-    end
-
-    local candidates = {}
-    local relFile = (testId and #testId > 0) and getTestFilePath(testId) or nil
-
-    for _, baseFolder in ipairs(scriptFolders) do
-      if relFile then
-        table.insert(candidates, baseFolder .. "/data/tests/" .. relFile)
-        table.insert(candidates, baseFolder .. "/data/" .. relFile)
-        table.insert(candidates, baseFolder .. "/" .. relFile)
-      end
-      table.insert(candidates, baseFolder .. "/active_test.json")
-      table.insert(candidates, baseFolder .. "/data/active_test.json")
-      table.insert(candidates, baseFolder .. "/data/tests/active_test.json")
-    end
-
-    for _, path in ipairs(candidates) do
-      if io.load then
-        content = io.load(path)
-      end
-      if not content then
-        local f = io.open(path, "r")
-        if f then
-          content = f:read("*all")
-          f:close()
-        end
-      end
-      if content and #content > 0 then
-        if ac and ac.log then
-          ac.log(string.format("[GTLicense] loadTestConfig: successfully loaded JSON from '%s' (%d bytes)", path, #content))
-        end
-        break
-      end
-    end
-  end
-
-  if content and #content > 0 then
-    local parsed = parseJSONSafe(content)
-    if parsed and parsed.test_id then
-      return parsed
-    end
-  end
-
-  return DEFAULT_TEST_CONFIG
-end
+-- Default fallback test configuration & loader delegation
+GTLicenseEngine.DEFAULT_TEST_CONFIG = GTConfigLoader.DEFAULT_TEST_CONFIG
+GTLicenseEngine.loadTestConfig = GTConfigLoader.loadTestConfig
+local DEFAULT_TEST_CONFIG = GTConfigLoader.DEFAULT_TEST_CONFIG
 
 ---Creates and initializes the master license engine coordinator.
 ---@param testDefinition table|string? @Test config table or path to test JSON
@@ -423,44 +267,13 @@ end
 ---@param timeSeconds number
 ---@return string medal ("GOLD" | "SILVER" | "BRONZE" | "NONE")
 function GTLicenseEngine:evaluateMedal(timeSeconds)
-  local targets = self.testConfig.targets or {}
-  local gold = tonumber(targets.gold_seconds) or 999
-  local silver = tonumber(targets.silver_seconds) or 999
-  local bronze = tonumber(targets.bronze_seconds) or 999
-
-  if timeSeconds <= gold then
-    return "GOLD"
-  elseif timeSeconds <= silver then
-    return "SILVER"
-  elseif timeSeconds <= bronze then
-    return "BRONZE"
-  else
-    return "NONE"
-  end
+  return GTResults.evaluateMedal(timeSeconds, self.testConfig and self.testConfig.targets)
 end
 
 ---Builds the results report table.
 ---@return table results
 function GTLicenseEngine:compileResults()
-  local targets = self.testConfig.targets or {}
-  local gold = tonumber(targets.gold_seconds) or 0
-  local silver = tonumber(targets.silver_seconds) or 0
-  local bronze = tonumber(targets.bronze_seconds) or 0
-
-  return {
-    test_id = self.testConfig.test_id,
-    title = self.testConfig.title,
-    time = self.sessionTime,
-    medal = self.achievedMedal or "NONE",
-    target_gold = gold,
-    target_silver = silver,
-    target_bronze = bronze,
-    delta_gold = self.sessionTime - gold,
-    delta_silver = self.sessionTime - silver,
-    delta_bronze = self.sessionTime - bronze,
-    passed = (self.achievedMedal ~= nil and self.achievedMedal ~= "NONE"),
-    fail_reason = self.failReason
-  }
+  return GTResults.compileResults(self.testConfig, self.sessionTime, self.achievedMedal, self.failReason)
 end
 
 ---Called when GTSessionReset fires a reset.

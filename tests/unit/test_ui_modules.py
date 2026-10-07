@@ -72,7 +72,7 @@ class TestUIModules(unittest.TestCase):
             "ui.endTransparentWindow",
             "drawTopBanner",
             "drawStopwatchCluster",
-            "drawSpeedIndicator",
+            "drawGhostDelta",
             "drawCountdown",
             "drawDisqualifiedBanner",
             "drawResultsScreen",
