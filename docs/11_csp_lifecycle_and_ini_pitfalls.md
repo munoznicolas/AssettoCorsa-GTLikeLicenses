@@ -190,7 +190,8 @@ When a test is launched through Content Manager (career mode or custom race), Co
 | Rolling start car has no drive / engine at idle (850 RPM) | Gearbox remains in neutral (`gear=0`) during countdown | Call `physics.engageGear(0, gear)` and `physics.setEngineRPM(0, 3500)` during `maintainRollingVelocity`. |
 | `KEY_NOT_FOUND: [CAR_0] BALLAST` / `RESTRICTOR` | Missing ballast/restrictor entries in `[CAR_0]` | Add `BALLAST=0` and `RESTRICTOR=0` to `[CAR_0]`. |
 | Car flips or sinks into road mesh on spawn | Spawn coordinates flush with road collision surface | Ensure `verticalOffset` (+0.05m to +0.10m) is applied during `teleportCar`. |
-| Rolling start car decelerates during countdown | AC native physics clear linear velocity before lights out | Call `maintainRollingVelocity` on every frame while in `COUNTDOWN` state. |
+| Rolling start car decelerates during countdown | AC native physics clear linear velocity before lights out | Engage native AI autopilot (`physics.setCarAutopilot(true, false)`) and preserve AI top speed (`setAITopSpeed`). |
+| Tires leaving skid marks & suspension droop during countdown | Frame-by-frame `setCarVelocity` clamps $v_y$ (negating gravity) while forced 0% throttle causes drivetrain drag at 40%+ slip | Never call `setCarVelocity` or `forceUserThrottleFor(0)` frame-by-frame. Use native AI autopilot so vehicle drives naturally with full gravity and proper wheel rotation. |
 
 ---
 

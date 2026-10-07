@@ -385,21 +385,26 @@ function GTLicenseEngine:update(dt)
         local lz = car and car.look and car.look.z or 0
         local hb = car and car.handbrake or 0
         local brk = car and car.brake or 0
+        local gas = car and car.gas or 0
+        local vy = car and car.velocity and car.velocity.y or 0
         local wFL = (car and car.wheels and car.wheels[0] and car.wheels[0].angularSpeed) or 0
         local wFR = (car and car.wheels and car.wheels[1] and car.wheels[1].angularSpeed) or 0
         local wRL = (car and car.wheels and car.wheels[2] and car.wheels[2].angularSpeed) or 0
         local wRR = (car and car.wheels and car.wheels[3] and car.wheels[3].angularSpeed) or 0
+        local sFL = (car and car.wheels and car.wheels[0] and car.wheels[0].suspensionTravel) or 0
+        local sRL = (car and car.wheels and car.wheels[2] and car.wheels[2].suspensionTravel) or 0
+        local ldFL = (car and car.wheels and car.wheels[0] and car.wheels[0].load) or 0
+        local ldRL = (car and car.wheels and car.wheels[2] and car.wheels[2].load) or 0
+        local slpRL = (car and car.wheels and car.wheels[2] and car.wheels[2].slipRatio) or 0
         local cphys = ac.getCarPhysics and ac.getCarPhysics(0)
         local dtVel = cphys and cphys.drivetrainVelocity or 0
         local clState = cphys and cphys.clutchState or 0
-        local rBrk = cphys and cphys.wheels and cphys.wheels[2] and cphys.wheels[2].brakeTorque or 0
-        local rHb = cphys and cphys.wheels and cphys.wheels[2] and cphys.wheels[2].handbrakeTorque or 0
         local px = car and car.position and car.position.x or 0
         local py = car and car.position and car.position.y or 0
         local pz = car and car.position and car.position.z or 0
         local st = car and car.steer or 0
-        ac.log(string.format("[GTLicense] Countdown Tick %d | Spd=%.1f | Gear=%d | pos=(%.1f, %.1f, %.1f) | look=(%.2f, %.2f) | Steer=%.1f deg | Omegas=(FL:%.1f, FR:%.1f, RL:%.1f, RR:%.1f) | DT=%.1f | Cl=%.2f",
-          currentStep, spd, gear, px, py, pz, lx, lz, st, wFL, wFR, wRL, wRR, dtVel, clState))
+        ac.log(string.format("[GTLicense] Countdown Tick %d | Spd=%.1f | Gear=%d | pos=(%.1f, %.1f, %.1f) | vy=%.2f | Gas=%.2f | Susp=(FL:%.3f, RL:%.3f) | Load=(FL:%.0f, RL:%.0f) | SlipRL=%.2f | Omegas=(FL:%.1f, FR:%.1f, RL:%.1f, RR:%.1f) | DT=%.1f | Cl=%.2f",
+          currentStep, spd, gear, px, py, pz, vy, gas, sFL, sRL, ldFL, ldRL, slpRL, wFL, wFR, wRL, wRR, dtVel, clState))
       end
     end
 
@@ -507,7 +512,7 @@ function GTLicenseEngine:update(dt)
       end
     end
 
-    -- Telemetry logging of wheel speeds right after GO
+    -- Telemetry logging of wheel speeds and suspension right after GO
     if self.sessionTime <= 1.2 and ac and ac.log then
       if not self.lastPostGoLog or (self.sessionTime - self.lastPostGoLog >= 0.2) then
         self.lastPostGoLog = self.sessionTime
@@ -515,8 +520,13 @@ function GTLicenseEngine:update(dt)
         local wFR = (car and car.wheels and car.wheels[1] and car.wheels[1].angularSpeed) or 0
         local wRL = (car and car.wheels and car.wheels[2] and car.wheels[2].angularSpeed) or 0
         local wRR = (car and car.wheels and car.wheels[3] and car.wheels[3].angularSpeed) or 0
-        ac.log(string.format("[GTLicense] Post-GO t=%.2fs | Speed=%.1f km/h | Gear=%d | RPM=%d | Omegas=(FL:%.1f, FR:%.1f, RL:%.1f, RR:%.1f)",
-          self.sessionTime, car and car.speedKmh or 0, car and car.gear or 0, car and car.rpm or 0, wFL, wFR, wRL, wRR))
+        local sFL = (car and car.wheels and car.wheels[0] and car.wheels[0].suspensionTravel) or 0
+        local sRL = (car and car.wheels and car.wheels[2] and car.wheels[2].suspensionTravel) or 0
+        local ldFL = (car and car.wheels and car.wheels[0] and car.wheels[0].load) or 0
+        local ldRL = (car and car.wheels and car.wheels[2] and car.wheels[2].load) or 0
+        local vy = car and car.velocity and car.velocity.y or 0
+        ac.log(string.format("[GTLicense] Post-GO t=%.2fs | Spd=%.1f | Gear=%d | vy=%.2f | Susp=(FL:%.3f, RL:%.3f) | Load=(FL:%.0f, RL:%.0f) | Omegas=(FL:%.1f, FR:%.1f, RL:%.1f, RR:%.1f)",
+          self.sessionTime, car and car.speedKmh or 0, car and car.gear or 0, vy, sFL, sRL, ldFL, ldRL, wFL, wFR, wRL, wRR))
       end
     end
 

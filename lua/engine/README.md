@@ -48,4 +48,6 @@ lua/engine/
    - `physics.setAITopSpeed(carIndex, speedKmh)` caps rolling speed.
    - At "GO!", `physics.setCarAutopilot(false)` and `physics.setAITopSpeed(carIndex, 999999)` handover control seamlessly.
 4. **Track Limits**: Adjudicate using `car.wheels[i].surfaceValidTrack` from `ac.StateWheel` (debounce 2 consecutive frames). Never rely solely on `car.wheelsOutside`.
+5. **No Synthetic Velocity Overrides or Forced Zero Throttle**:
+   Never call `physics.setCarVelocity` or `physics.forceUserThrottleFor(..., 0.0)` on every frame during countdown. Clamping vertical velocity ($v_y$) nullifies gravity ($g = -9.81\text{ m/s}^2$), lifting the vehicle into unweighted suspension droop (~60mm extension), while zero throttle causes internal drivetrain resistance to drag driven wheels at 40%+ slip, producing constant rubber skid marks. Always let native AI autopilot (`physics.setCarAutopilot(true, false)` + `physics.setAITopSpeed`) drive the car smoothly along the spline.
 

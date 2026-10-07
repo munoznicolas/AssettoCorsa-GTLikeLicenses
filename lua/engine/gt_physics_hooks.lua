@@ -228,7 +228,8 @@ function GTPhysicsHooks.lockControls(durationSeconds, isStandingStart, targetGea
     -- Note: We deliberately bypass physics.lockUserGearboxFor because AC's starting line logic
     -- resets the transmission into neutral, which breaks seamless in-gear launch.
   else
-    -- Rolling start: Override steering dead straight, zero throttle/brakes, assert targetGear
+    -- Rolling start: Native AI autopilot handles vehicle driving.
+    -- Ensure user locks and pedal forces are released so native AI can throttle and steer smoothly.
     if physics and physics.lockUserControlsFor then
       physics.lockUserControlsFor(0)
     end
@@ -236,7 +237,7 @@ function GTPhysicsHooks.lockControls(durationSeconds, isStandingStart, targetGea
       physics.setCarNoInput(false)
     end
     if physics and physics.forceUserThrottleFor then
-      physics.forceUserThrottleFor(durationSeconds, 0.0)
+      physics.forceUserThrottleFor(0, 0)
     end
     if physics and physics.forceUserBrakesFor then
       physics.forceUserBrakesFor(0, 0)
@@ -244,22 +245,12 @@ function GTPhysicsHooks.lockControls(durationSeconds, isStandingStart, targetGea
     if physics and physics.forceUserHandbrakeFor then
       physics.forceUserHandbrakeFor(0, 0)
     end
-    if physics and physics.overrideSteering then
-      physics.overrideSteering(0, 0.0)
-    end
     if targetGear and targetGear > 0 then
       if physics and physics.engageGear then
         physics.engageGear(0, targetGear)
       end
       if physics and physics.setEngineRPM then
         physics.setEngineRPM(0, targetRPM or 3500)
-      end
-      if ac and ac.overrideCarControls then
-        local ctrl = ac.overrideCarControls(0)
-        if ctrl then
-          ctrl.requestedGearIndex = targetGear
-          ctrl.clutch = 1.0
-        end
       end
     end
   end
@@ -340,8 +331,8 @@ function GTPhysicsHooks.releaseFailureBraking(carIndex)
   end
 end
 
----Engages rolling start countdown physics along the straight sector line.
----Locks controls, asserts target gear, sets engine RPM, and points steering dead ahead.
+---Engages rolling start countdown physics along the straight sector line via native AI autopilot.
+---Enables autopilot, caps AI speed to target rolling speed, and locks to the ideal racing line.
 ---@param carIndex integer? @0-based car index (default: 0)
 ---@param targetSpeedKmh number @Target rolling speed in km/h
 ---@param targetGear integer? @Target gear to engage and maintain
@@ -353,7 +344,7 @@ function GTPhysicsHooks.startAIRolling(carIndex, targetSpeedKmh, targetGear, tar
   targetGear = (targetGear and targetGear > 0) and targetGear or GTPhysicsHooks.estimateStartingGear(targetSpeedKmh)
   targetRPM = (targetRPM and targetRPM > 0) and targetRPM or 3500
 
-  -- Ensure no forced brakes, clutch, or handbrake hold the car back
+  -- Ensure no forced pedal locks hold the car or starve AI throttle
   if physics and physics.lockUserControlsFor then
     physics.lockUserControlsFor(0)
   end
@@ -361,7 +352,7 @@ function GTPhysicsHooks.startAIRolling(carIndex, targetSpeedKmh, targetGear, tar
     physics.setCarNoInput(false)
   end
   if physics and physics.forceUserThrottleFor then
-    physics.forceUserThrottleFor(3.0, 0.0)
+    physics.forceUserThrottleFor(0, 0)
   end
   if physics and physics.forceUserBrakesFor then
     physics.forceUserBrakesFor(0, 0)
@@ -369,8 +360,29 @@ function GTPhysicsHooks.startAIRolling(carIndex, targetSpeedKmh, targetGear, tar
   if physics and physics.forceUserHandbrakeFor then
     physics.forceUserHandbrakeFor(0, 0)
   end
-  if physics and physics.overrideSteering then
-    physics.overrideSteering(carIndex, 0.0)
+
+  -- Engage native AI autopilot for car 0
+  if physics and physics.setCarAutopilot then
+    physics.setCarAutopilot(true, false)
+  end
+
+  -- Configure AI parameters to strictly follow the racing line at target rolling speed
+  if physics and physics.setAITopSpeed then
+    physics.setAITopSpeed(carIndex, targetSpeedKmh)
+  end
+  if physics and physics.setAILevel then
+    physics.setAILevel(carIndex, 1.0)
+  end
+  if physics and physics.setAIAggression then
+    physics.setAIAggression(carIndex, 0.0)
+  end
+  if physics and physics.setAICaution then
+    physics.setAICaution(carIndex, 0.1)
+  end
+  if physics and physics.setAISplineAbsoluteOffset then
+    physics.setAISplineAbsoluteOffset(carIndex, 0.0, false)
+  elseif physics and physics.setAISplineOffset then
+    physics.setAISplineOffset(carIndex, 0.0, false)
   end
 
   -- Firmly engage target gear and RPM
@@ -380,25 +392,28 @@ function GTPhysicsHooks.startAIRolling(carIndex, targetSpeedKmh, targetGear, tar
   if physics and physics.setEngineRPM then
     physics.setEngineRPM(carIndex, targetRPM)
   end
-  if ac and ac.overrideCarControls then
-    local ctrl = ac.overrideCarControls(carIndex)
-    if ctrl then
-      ctrl.requestedGearIndex = targetGear
-      ctrl.clutch = 1.0
-    end
-  end
 
   if ac and ac.log then
-    ac.log(string.format("[GTPhysicsHooks] startAIRolling car=%d: speed=%.1f km/h, gear=%d, rpm=%d",
+    ac.log(string.format("[GTPhysicsHooks] startAIRolling car=%d: autopilot=true, speed=%.1f km/h, gear=%d, rpm=%d",
       carIndex, targetSpeedKmh, targetGear, targetRPM))
   end
 end
 
----Disengages rolling countdown overrides and seamlessly returns full control to the player at GO!
+---Disengages AI autopilot and seamlessly returns full control to the player at GO!
 ---@param carIndex integer? @0-based car index (default: 0)
 ---@param targetGear integer? @Optional gear to engage upon control release
 function GTPhysicsHooks.stopAIRolling(carIndex, targetGear)
   carIndex = carIndex or 0
+
+  -- Deactivate AI autopilot
+  if physics and physics.setCarAutopilot then
+    physics.setCarAutopilot(false)
+  end
+
+  -- Remove AI top speed ceiling so player can accelerate without restriction
+  if physics and physics.setAITopSpeed then
+    physics.setAITopSpeed(carIndex, 999999.0)
+  end
 
   -- Unlock steering override so player has immediate steering control
   local nan = (math and math.nan) or (0 / 0)
@@ -410,12 +425,13 @@ function GTPhysicsHooks.stopAIRolling(carIndex, targetGear)
   GTPhysicsHooks.unlockControls(carIndex, targetGear)
 
   if ac and ac.log then
-    ac.log(string.format("[GTPhysicsHooks] stopAIRolling car=%d: handover complete, gear=%d", carIndex, targetGear or 0))
+    ac.log(string.format("[GTPhysicsHooks] stopAIRolling car=%d: autopilot=false, handover complete, gear=%d", carIndex, targetGear or 0))
   end
 end
 
----Maintains rolling motion along the straight sector line during COUNTDOWN state.
----Continuously re-applies exact road velocity vector, wheel rotation, gear, and RPM so the car never bogs or shifts.
+---Maintains rolling motion under AI control along the racing line during COUNTDOWN state.
+---Continuously re-asserts AI target speed and zero spline offset so the car adheres to the ideal line.
+---Falls back to velocity maintenance if no track spline is present, preserving natural vertical gravity.
 ---@param carIndex integer? @0-based car index (default: 0)
 ---@param targetSpeedKmh number @Target rolling speed in km/h
 ---@param fallbackFwd table|vec3|number[]? @Forward vector
@@ -428,64 +444,46 @@ function GTPhysicsHooks.maintainAIRolling(carIndex, targetSpeedKmh, fallbackFwd,
   targetGear = (targetGear and targetGear > 0) and targetGear or GTPhysicsHooks.estimateStartingGear(targetSpeedKmh)
   targetRPM = (targetRPM and targetRPM > 0) and targetRPM or 3500
 
-  -- Continuously re-apply forward velocity vector along the straight sector
-  local fwd = safeNormalize(GTPhysicsHooks.toVec3(fallbackFwd))
-  local speedMs = targetSpeedKmh / 3.6
-  local vel = vec3(fwd.x * speedMs, fwd.y * speedMs, fwd.z * speedMs)
-  if physics and physics.setCarVelocity then
-    physics.setCarVelocity(carIndex, vel)
+  local hasSpline = (ac and ac.hasTrackSpline) and ac.hasTrackSpline() or true
+  if hasSpline then
+    -- Native AI Autopilot rolling maintenance:
+    -- Preserve AI top speed ceiling, full AI level, and zero spline offset
+    if physics and physics.setCarAutopilot then
+      physics.setCarAutopilot(true, false)
+    end
+    if physics and physics.setAITopSpeed then
+      physics.setAITopSpeed(carIndex, targetSpeedKmh)
+    end
+    if physics and physics.setAISplineAbsoluteOffset then
+      physics.setAISplineAbsoluteOffset(carIndex, 0.0, false)
+    elseif physics and physics.setAISplineOffset then
+      physics.setAISplineOffset(carIndex, 0.0, false)
+    end
+  else
+    -- Fallback when track has no AI spline:
+    -- Maintain horizontal forward velocity while preserving vertical velocity (vy)
+    -- so natural gravity and suspension compression remain fully active
+    local car = ac.getCar and ac.getCar(carIndex)
+    local fwd = safeNormalize(GTPhysicsHooks.toVec3(fallbackFwd))
+    local speedMs = targetSpeedKmh / 3.6
+    local curVy = (car and car.velocity and car.velocity.y) or (fwd.y * speedMs)
+    local vel = vec3(fwd.x * speedMs, curVy, fwd.z * speedMs)
+    if physics and physics.setCarVelocity then
+      physics.setCarVelocity(carIndex, vel)
+    end
   end
 
-  -- Synchronize all wheel rotation speeds with road velocity
+  -- Ensure target gear remains engaged if clutch or transmission slipped
   local car = ac.getCar and ac.getCar(carIndex)
-  local tyreRadius = (car and car.wheels and car.wheels[0] and car.wheels[0].tyreRadius and car.wheels[0].tyreRadius > 0.1) and car.wheels[0].tyreRadius or 0.30
-  local targetOmega = speedMs / tyreRadius
-  if physics and physics.setWheelAngularVelocity then
-    local allWheels = (ac and ac.Wheel and ac.Wheel.All) or 60
-    physics.setWheelAngularVelocity(carIndex, allWheels, targetOmega)
-  end
-
-  -- Firmly lock target gear and RPM
-  if targetGear and targetGear > 0 then
+  if targetGear and targetGear > 0 and car and car.gear ~= targetGear then
     local now = (os and (os.preciseClock or os.clock) and (os.preciseClock or os.clock)()) or 0
     local lastTime = lastGearEngageTime[carIndex] or 0
-    if not car or car.gear ~= targetGear then
-      if (now - lastTime) >= 0.25 then
-        lastGearEngageTime[carIndex] = now
-        if physics and physics.engageGear then
-          physics.engageGear(carIndex, targetGear)
-        end
+    if (now - lastTime) >= 0.25 then
+      lastGearEngageTime[carIndex] = now
+      if physics and physics.engageGear then
+        physics.engageGear(carIndex, targetGear)
       end
     end
-    if ac and ac.overrideCarControls then
-      local ctrl = ac.overrideCarControls(carIndex)
-      if ctrl then
-        ctrl.requestedGearIndex = targetGear
-        ctrl.clutch = 1.0
-        if car and car.gear < targetGear then
-          ctrl.gearUp = true
-        end
-      end
-    end
-  end
-  if targetRPM and targetRPM > 0 and physics and physics.setEngineRPM then
-    if not car or car.rpm < targetRPM * 0.85 or car.rpm > targetRPM * 1.15 then
-      physics.setEngineRPM(carIndex, targetRPM)
-    end
-  end
-
-  -- Keep steering dead straight and prevent user pedal overrides during countdown
-  if physics and physics.overrideSteering then
-    physics.overrideSteering(carIndex, 0.0)
-  end
-  if physics and physics.forceUserThrottleFor then
-    physics.forceUserThrottleFor(0.1, 0.0)
-  end
-  if physics and physics.forceUserBrakesFor then
-    physics.forceUserBrakesFor(0, 0)
-  end
-  if physics and physics.forceUserHandbrakeFor then
-    physics.forceUserHandbrakeFor(0, 0)
   end
 end
 

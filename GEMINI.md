@@ -131,4 +131,6 @@ When diagnosing launch issues or crashes:
     Engine was not instantiated at top level or `testConfig` was not loaded dynamically.
   - `Car coasting in neutral / 0 km/h drive power at "GO!" on rolling starts`:
     `lockUserGearboxFor(0, false)` was triggered, resetting engaged gear. Ensure `unlockControls` asserts `targetGear` and the 0.5s `RUNNING` guard window is active.
+  - `Tires leaving marks on track / suspension extended into droop during countdown`:
+    Never use synthetic `physics.setCarVelocity` or `forceUserThrottleFor(..., 0.0)` frame-by-frame during rolling countdown. Overwriting `vel.y` erases gravitational acceleration ($g = -9.81\text{ m/s}^2$), causing the chassis to float with unweighted suspension droop (chassis drops ~60mm at GO!), while zero throttle forces drivetrain engine braking against the road at 40%+ slip ratio (skid marks). Always use native AI autopilot (`physics.setCarAutopilot(true, false)` with `physics.setAITopSpeed`) to drive the car naturally on the spline.
 
