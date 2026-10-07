@@ -186,48 +186,10 @@ function GTRenderGates.init(testConfig)
     end
 end
 
---- Draw Glowing Start Line Ribbon and Laser Pylons
+--- Draw Glowing Start Line Ribbon and Laser Pylons (Disabled: wireframe removed, finish gate only)
 function GTRenderGates.drawStartGate(pulse)
-    if not cachedStartPoints then return end
-    local p1 = cachedStartPoints.p1
-    local p2 = cachedStartPoints.p2
-    local gateWidth = (p2 - p1):length()
-    if gateWidth < 0.1 then return end
-
-    local gateDir = (p2 - p1):normalize()
-    local gateMid = (p1 + p2) * 0.5
-    local gateNormal = gateDir:cross(vec3(0, 1, 0)):normalize()
-
-    -- Glowing neon cyan ribbon on track surface
-    local glowAlpha = 0.65 + 0.25 * pulse
-    local ribbonColor = rgbm(0.1, 0.75, 1.0, glowAlpha)
-    local ribbonPts = {
-        p1 - gateNormal * 0.4 + vec3(0, 0.05, 0),
-        p2 - gateNormal * 0.4 + vec3(0, 0.05, 0),
-    }
-    render.drawRibbon(ribbonPts, 0.8, ribbonColor)
-
-    -- Vertical laser light curtain ribbon (2.5m tall)
-    local curtainColor = rgbm(0.05, 0.6, 1.0, 0.25 + 0.15 * pulse)
-    local curtainTopPts = {
-        p1 + vec3(0, 2.5, 0),
-        p2 + vec3(0, 2.5, 0),
-    }
-    render.drawRibbon({ (p1 + p2) * 0.5, (p1 + p2) * 0.5 + vec3(0, 2.5, 0) }, gateWidth, curtainColor)
-
-    -- Start line perimeter border lines
-    local borderCol = rgbm(0.8, 0.95, 1.0, 0.9)
-    render.polyline({
-        p1 + vec3(0, 0.08, 0),
-        p2 + vec3(0, 0.08, 0),
-    }, borderCol, 0.05)
-
-    -- Neon gate endpoint pillars
-    local pylonHeight = vec3(0, 3.2, 0)
-    render.debugLine(p1, p1 + pylonHeight, borderCol, ribbonColor)
-    render.debugLine(p2, p2 + pylonHeight, borderCol, ribbonColor)
-    render.debugSphere(p1 + pylonHeight, 0.22, ribbonColor)
-    render.debugSphere(p2 + pylonHeight, 0.22, ribbonColor)
+    -- Start gate visual wireframe removed per user preference; only finish gate is rendered at the end
+    return
 end
 
 --- Draw Chequered Finish Line Ribbon and Finish Banner
