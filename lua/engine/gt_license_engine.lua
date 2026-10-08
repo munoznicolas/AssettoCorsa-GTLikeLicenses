@@ -140,11 +140,34 @@ function GTLicenseEngine.new(testDefinition)
       if val == "1" or val == "true" or val == "TRUE" then
         self.isAITestMode = true
       end
+      local rstVal = race:get("GTLICENSE", "RESTART_AT_TIME", "")
+      if rstVal and tonumber(rstVal) and tonumber(rstVal) > 0 then
+        self.restartAtTime = tonumber(rstVal)
+      end
       local lvl = race:get("RACE", "AI_LEVEL", "")
       if lvl and tonumber(lvl) then
         self.aiLevel = tonumber(lvl) / 100.0
       end
     end
+  end
+
+  self.restartCount = 0
+  self.telemetrySamples = {}
+
+  -- Listen for Assetto Corsa native session restart (e.g. from ESC menu)
+  if ac and ac.onSessionStart then
+    ac.onSessionStart(function(sessionIndex, restarted)
+      if ac and ac.log then
+        ac.log(string.format("[GTLicense] ac.onSessionStart: sessionIndex=%d, restarted=%s", sessionIndex, tostring(restarted)))
+      end
+      if restarted then
+        self.spawnInitialized = false
+        self.gearOverrideReleased = false
+        self.lastAIShiftTime = 0
+        self.restartCount = (self.restartCount or 0) + 1
+        self:startCountdown()
+      end
+    end)
   end
 
   -- Initialize Ghost & Pace Car Manager
@@ -268,6 +291,7 @@ function GTLicenseEngine:startCountdown()
   GTPhysicsHooks.releaseFailureBraking(0)
   self:setState(GTLicenseEngine.STATE.COUNTDOWN)
   self.sessionTime = 0
+  self.spawnInitialized = false
   self.countdownTimer = 3.0
   self.countdownLastStep = 4
   self.failReason = nil
@@ -326,11 +350,12 @@ end
 ---Called when GTSessionReset fires a reset.
 ---@param reason string
 function GTLicenseEngine:onSessionResetTriggered(reason)
+  self.restartCount = (self.restartCount or 0) + 1
+  self.gearOverrideReleased = false
+  self.lastAIShiftTime = 0
+  self.spawnInitialized = false
   GTPhysicsHooks.releaseFailureBraking(0)
-  if self.isAIRollingActive then
-    GTPhysicsHooks.stopAIRolling(0, 0)
-    self.isAIRollingActive = false
-  end
+  self.isAIRollingActive = false
   if self.ghostManager then
     self.ghostManager:reset()
   end
@@ -368,6 +393,15 @@ function GTLicenseEngine:update(dt)
   -- Check for UI App requested restart
   if self.sharedState and self.sharedState.requestRestart then
     self.sharedState.requestRestart = false
+    self:restart()
+    return
+  end
+
+  -- Check for automated programmed test restart (used for automated telemetry validation)
+  if self.restartAtTime and self.state == GTLicenseEngine.STATE.RUNNING and (self.restartCount or 0) == 0 and self.sessionTime >= self.restartAtTime then
+    if ac and ac.log then
+      ac.log(string.format("[GTLicense] Automated programmed restart triggered at sessionTime=%.2fs", self.sessionTime))
+    end
     self:restart()
     return
   end
@@ -554,52 +588,11 @@ function GTLicenseEngine:update(dt)
       end
     end
 
-    -- Periodic telemetry sampling
-    if not self.telemetrySamples then
-      self.telemetrySamples = {}
-      self.lastTelemetrySampleTime = 0
-    end
-    self.lastTelemetrySampleTime = (self.lastTelemetrySampleTime or 0) + dt
-    if self.lastTelemetrySampleTime >= 0.25 then
-      self.lastTelemetrySampleTime = 0
-      if car then
-        table.insert(self.telemetrySamples, {
-          t = self.sessionTime,
-          countdown = self.countdownTimer,
-          state = self.state,
-          speedKmh = car.speedKmh,
-          posX = car.position.x,
-          posY = car.position.y,
-          posZ = car.position.z,
-          velX = car.velocity.x,
-          velY = car.velocity.y,
-          velZ = car.velocity.z,
-          gear = car.gear,
-          rpm = car.rpm
-        })
-        if io and io.save and JSON and JSON.stringify then
-          local dump = {
-            test_id = self.testConfig.test_id,
-            start_mode = self.testConfig.start_mode,
-            initial_speed_kmh = (self.testConfig.spawn and self.testConfig.spawn.initial_speed_kmh) or 0,
-            samples = self.telemetrySamples
-          }
-          local scriptFolder = ac and ac.getFolder and ac.getFolder(ac.FolderID.ExtScript)
-          if scriptFolder then
-            io.save(scriptFolder .. "/data/telemetry_eval.json", JSON.stringify(dump))
-          end
-        end
-      end
-    end
-
   elseif self.state == GTLicenseEngine.STATE.RUNNING then
     self.sessionTime = self.sessionTime + dt
 
-    -- Continuously maintain AI autopilot at maximum performance in AI test mode
+    -- Continuously maintain AI autopilot parameters at maximum performance in AI test mode
     if self.isAITestMode then
-      if physics and physics.setCarAutopilot then
-        physics.setCarAutopilot(true, false)
-      end
       if physics and physics.setAILevel then
         physics.setAILevel(0, math.max(0.95, self.aiLevel or 0.95))
       end
@@ -637,6 +630,44 @@ function GTLicenseEngine:update(dt)
       end
       if car and car.rpm < 2000 and physics and physics.setEngineRPM and not isStanding then
         physics.setEngineRPM(0, targetRPM)
+      end
+    elseif self.sessionTime >= 0.5 and not self.gearOverrideReleased then
+      self.gearOverrideReleased = true
+      GTPhysicsHooks.releaseGearOverride(0)
+      if ac and ac.log then
+        ac.log("[GTLicense] Handover gear guard expired (t>=0.5s) | Released sticky gearbox control override")
+      end
+    end
+
+    -- Autonomous AI shifting assistance in AI test mode
+    if self.isAITestMode and self.sessionTime >= 0.5 and car then
+      local maxRpm = (car.rpmLimiter and car.rpmLimiter > 3000) and car.rpmLimiter or 6800
+      local minRpm = (car.rpmMinimum and car.rpmMinimum > 500) and car.rpmMinimum or 1000
+      local gearCount = (car.gearCount and car.gearCount > 0) and car.gearCount or 6
+      local now = (os and (os.preciseClock or os.clock) and (os.preciseClock or os.clock)()) or 0
+
+      if car.rpm >= (maxRpm * 0.93) and car.gear > 0 and car.gear < gearCount then
+        if not self.lastAIShiftTime or (now - self.lastAIShiftTime >= 0.75) then
+          self.lastAIShiftTime = now
+          local nextGear = car.gear + 1
+          if physics and physics.engageGear then
+            physics.engageGear(0, nextGear)
+          end
+          if ac and ac.log then
+            ac.log(string.format("[GTLicense] AI Shifting UP: gear %d -> %d at %.0f RPM (spd=%.1f km/h)", car.gear, nextGear, car.rpm, car.speedKmh))
+          end
+        end
+      elseif car.rpm <= math.max(2200, minRpm + 1000) and car.gear > 1 and car.speedKmh > 15 then
+        if not self.lastAIShiftTime or (now - self.lastAIShiftTime >= 0.75) then
+          self.lastAIShiftTime = now
+          local prevGear = car.gear - 1
+          if physics and physics.engageGear then
+            physics.engageGear(0, prevGear)
+          end
+          if ac and ac.log then
+            ac.log(string.format("[GTLicense] AI Shifting DOWN: gear %d -> %d at %.0f RPM (spd=%.1f km/h)", car.gear, prevGear, car.rpm, car.speedKmh))
+          end
+        end
       end
     end
 
@@ -744,6 +775,47 @@ function GTLicenseEngine:update(dt)
         self.sharedState.ghostActive = gState.active or false
         self.sharedState.ghostMode = gState.mode or 1
         self.sharedState.ghostOSD = gState.osd_message or ""
+      end
+    end
+  end
+
+  -- 6. Continuous in-game telemetry recording (samples across countdown, running, and restarts)
+  if not self.telemetrySamples then
+    self.telemetrySamples = {}
+    self.lastTelemetrySampleTime = 0
+  end
+  self.lastTelemetrySampleTime = (self.lastTelemetrySampleTime or 0) + dt
+  if self.lastTelemetrySampleTime >= 0.15 then
+    self.lastTelemetrySampleTime = 0
+    if car then
+      table.insert(self.telemetrySamples, {
+        t = self.sessionTime,
+        countdown = (self.state == GTLicenseEngine.STATE.COUNTDOWN) and self.countdownTimer or 0,
+        state = self.state,
+        speedKmh = car.speedKmh,
+        posX = car.position.x,
+        posY = car.position.y,
+        posZ = car.position.z,
+        lookX = car.look.x,
+        lookY = car.look.y,
+        lookZ = car.look.z,
+        gear = car.gear,
+        rpm = car.rpm,
+        restartCount = self.restartCount or 0
+      })
+      if io and io.save and JSON and JSON.stringify then
+        local dump = {
+          test_id = self.testConfig and self.testConfig.test_id or "UNKNOWN",
+          start_mode = self.testConfig and self.testConfig.start_mode or "STANDING",
+          initial_speed_kmh = (self.testConfig and self.testConfig.spawn and self.testConfig.spawn.initial_speed_kmh) or 0,
+          target_gear = self.targetStartingGear or 1,
+          restart_count = self.restartCount or 0,
+          samples = self.telemetrySamples
+        }
+        local scriptFolder = ac and ac.getFolder and (ac.getFolder(ac.FolderID.ScriptOrigin) or ac.getFolder(1024))
+        if scriptFolder then
+          io.save(scriptFolder .. "/data/telemetry_eval.json", JSON.stringify(dump))
+        end
       end
     end
   end

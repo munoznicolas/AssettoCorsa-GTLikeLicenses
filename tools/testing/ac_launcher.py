@@ -71,6 +71,7 @@ def generate_race_ini(
     ac_root: str = DEFAULT_AC_ROOT,
     ai_level: int = 95,
     ai_test_mode: bool = False,
+    restart_at_time: Optional[float] = None,
 ) -> str:
     """Synthesizes a valid Assetto Corsa race.ini string for a given test configuration."""
     car_id = test_data["car_id"]
@@ -78,6 +79,8 @@ def generate_race_ini(
     track_layout = test_data.get("track_layout", "")
     test_id = test_data.get("test_id", "TEST")
     skin = find_car_skin(car_id, ac_root)
+
+    restart_line = f"RESTART_AT_TIME={restart_at_time:.2f}\n" if restart_at_time else ""
 
     ini_content = f"""[RACE]
 TRACK={track_id}
@@ -124,11 +127,15 @@ RANDOMNESS=0
 LAP_GAIN=0
 SESSION_TRANSFER=100
 
+[ASSISTS]
+AUTO_SHIFTER={1 if ai_test_mode else 0}
+AUTO_CLUTCH=1
+
 [GTLICENSE]
 TEST_ID={test_id}
 ACTIVE=1
 AI_TEST_MODE={1 if ai_test_mode else 0}
-"""
+{restart_line}"""
     return ini_content
 
 
@@ -208,6 +215,7 @@ def run_launch_test(
     watch: bool = False,
     ai_test_mode: bool = False,
     ai_level: int = 95,
+    restart_at_time: Optional[float] = None,
 ) -> Dict[str, Any]:
     """Runs a single in-engine launch test."""
     with open(test_json_path, "r", encoding="utf-8") as f:
@@ -247,6 +255,7 @@ def run_launch_test(
         ac_root=ac_root,
         ai_level=ai_level,
         ai_test_mode=ai_test_mode,
+        restart_at_time=restart_at_time,
     )
 
     if dry_run:

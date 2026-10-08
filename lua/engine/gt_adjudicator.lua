@@ -45,6 +45,7 @@ function GTAdjudicator:init(testConfig)
   -- Runtime state
   self.hasPassedStartGate = true
   self.hasCrossedFinishGate = false
+  self.hasLaunched = false
   self.stoppedInBox = false
   self.isDisqualified = false
   self.failReason = nil
@@ -283,8 +284,13 @@ function GTAdjudicator:checkStopBoxStatus(car, dt)
   local isInside, localX, localZ = GTAdjudicator.isInsideStopBox(pos, self.stopBox)
   local halfZ = (self.stopBox.size[3] or 20) * 0.5
 
-  -- Check if car came to a complete stop (speed < 0.5 km/h)
-  if speedKmh < 0.5 then
+  -- Track whether vehicle has launched from initial standing start
+  if speedKmh >= 5.0 then
+    self.hasLaunched = true
+  end
+
+  -- Check if car came to a complete stop (speed < 0.5 km/h) after launching
+  if self.hasLaunched and speedKmh < 0.5 then
     self.standstillTimer = self.standstillTimer + dt
     -- Require 0.3s of verified standstill to prevent transient speed dips
     if self.standstillTimer >= 0.3 then

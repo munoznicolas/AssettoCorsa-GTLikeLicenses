@@ -70,7 +70,7 @@ end
 ---@return boolean success
 function GTPhysicsHooks.teleportCar(carIndex, position, forwardVector, verticalOffset)
   carIndex = carIndex or 0
-  verticalOffset = verticalOffset or 0.05
+  verticalOffset = verticalOffset or 0.5
 
   local rawPos = GTPhysicsHooks.toVec3(position)
   local fwd = safeNormalize(GTPhysicsHooks.toVec3(forwardVector))
@@ -301,6 +301,24 @@ function GTPhysicsHooks.unlockControls(carIndex, targetGear)
   end
 end
 
+---Releases sticky gearbox override flags in overrideCarControls, allowing player and AI to freely shift gears.
+---@param carIndex integer? @0-based car index (default: 0)
+function GTPhysicsHooks.releaseGearOverride(carIndex)
+  carIndex = carIndex or 0
+  if ac and ac.overrideCarControls then
+    local ctrl = ac.overrideCarControls(carIndex)
+    if ctrl then
+      ctrl.requestedGearIndex = 0
+      ctrl.gearUp = false
+      ctrl.gearDown = false
+      ctrl.clutch = 0.0
+    end
+  end
+  if physics and physics.setAIShiftingThresholds then
+    physics.setAIShiftingThresholds(carIndex, 6500, 3000)
+  end
+end
+
 ---Deploys car brakes at specified intensity upon test failure/disqualification or completion.
 ---Also zeroes user throttle so the vehicle slows down in a smooth, controlled manner.
 ---@param carIndex integer? @0-based car index (default: 0)
@@ -465,6 +483,19 @@ function GTPhysicsHooks.maintainAIRolling(carIndex, targetSpeedKmh, fallbackFwd,
     elseif physics and physics.setAISplineOffset then
       physics.setAISplineOffset(carIndex, 0.0, false)
     end
+
+    -- If car speed dropped significantly below target rolling speed (e.g. spawn settling or session restart),
+    -- re-assert forward velocity so the vehicle doesn't bog down or crawl in 1st gear
+    local car = ac.getCar and ac.getCar(carIndex)
+    if targetSpeedKmh > 0 and car and car.speedKmh < (targetSpeedKmh * 0.75) then
+      local fwd = safeNormalize(GTPhysicsHooks.toVec3(fallbackFwd))
+      local speedMs = targetSpeedKmh / 3.6
+      local curVy = (car.velocity and car.velocity.y) or (fwd.y * speedMs)
+      local vel = vec3(fwd.x * speedMs, curVy, fwd.z * speedMs)
+      if physics and physics.setCarVelocity then
+        physics.setCarVelocity(carIndex, vel)
+      end
+    end
   else
     -- Fallback when track has no AI spline:
     -- Maintain horizontal forward velocity while preserving vertical velocity (vy)
@@ -479,15 +510,20 @@ function GTPhysicsHooks.maintainAIRolling(carIndex, targetSpeedKmh, fallbackFwd,
     end
   end
 
-  -- Ensure target gear remains engaged if clutch or transmission slipped
+  -- Ensure target gear remains firmly engaged during countdown
   local car = ac.getCar and ac.getCar(carIndex)
-  if targetGear and targetGear > 0 and car and car.gear ~= targetGear then
-    local now = (os and (os.preciseClock or os.clock) and (os.preciseClock or os.clock)()) or 0
-    local lastTime = lastGearEngageTime[carIndex] or 0
-    if (now - lastTime) >= 0.25 then
-      lastGearEngageTime[carIndex] = now
+  if targetGear and targetGear > 0 then
+    if not car or car.gear ~= targetGear then
       if physics and physics.engageGear then
         physics.engageGear(carIndex, targetGear)
+      end
+    end
+    if ac and ac.overrideCarControls then
+      local ctrl = ac.overrideCarControls(carIndex)
+      if ctrl then
+        ctrl.requestedGearIndex = targetGear
+        ctrl.clutch = 0.0 -- Force clutch release
+        ctrl.gas = 1.0    -- Force gas to crank the engine if it is off
       end
     end
   end
@@ -516,14 +552,40 @@ function GTPhysicsHooks.setupSpawn(testConfig, carIndex)
     targetRPM = isStanding and 1000 or 3500
   end
 
-  -- 1. Reposition car to target sector coordinates
+  -- 1. Prevent engine stall by engaging neutral, disabling stall, and pressing clutch before teleporting
+  if physics and physics.setEngineStallEnabled then
+    physics.setEngineStallEnabled(carIndex, false)
+  end
+  if physics and physics.resetCarState then
+    physics.resetCarState(carIndex)
+  end
+  if physics and physics.engageGear then
+    physics.engageGear(carIndex, 0)
+  end
+  if ac and ac.overrideCarControls then
+    local ctrl = ac.overrideCarControls(carIndex)
+    if ctrl then
+      ctrl.requestedGearIndex = 0
+      ctrl.clutch = 1.0
+    end
+  end
+
+  -- Reposition car to target sector coordinates
   lastGearEngageTime[carIndex] = 0
   local ok = GTPhysicsHooks.teleportCar(carIndex, spawn.position, spawn.forward_vector)
   if not ok then
     return false, "Failed to teleport car to spawn coordinates"
   end
 
-  -- 2. Impart initial rolling launch velocity if defined
+  -- 2. Prevent AI from shifting down due to engine stall on spawn
+  if physics and physics.setAIShiftingThresholds then
+    physics.setAIShiftingThresholds(carIndex, 99999, -1)
+  end
+  if physics and physics.setEngineRPM then
+    physics.setEngineRPM(carIndex, targetRPM)
+  end
+
+  -- 3. Impart initial rolling launch velocity if defined
   if initialSpeed > 0 then
     if physics and physics.forceUserHandbrakeFor then
       physics.forceUserHandbrakeFor(0, 0)
@@ -540,16 +602,14 @@ function GTPhysicsHooks.setupSpawn(testConfig, carIndex)
     GTPhysicsHooks.applyRollingVelocity(carIndex, spawn.forward_vector, 0, targetGear, targetRPM)
   end
 
-  -- 3. Firmly assert target gear, RPM, and lock gearbox immediately upon spawn
+  -- 4. Firmly assert target gear and lock gearbox immediately upon spawn
   if physics and physics.engageGear then
     physics.engageGear(carIndex, targetGear)
-  end
-  if physics and physics.setEngineRPM then
-    physics.setEngineRPM(carIndex, targetRPM)
   end
   if ac and ac.overrideCarControls then
     local ctrl = ac.overrideCarControls(carIndex)
     if ctrl then
+      ctrl.clutch = 1.0 -- Release clutch override
       ctrl.requestedGearIndex = targetGear
     end
   end

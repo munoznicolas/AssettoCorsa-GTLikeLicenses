@@ -71,15 +71,7 @@ function GTSessionReset:executeReset(reason)
     end
   end
 
-  -- 2. Execute CSP session restart API if available
-  if ac and ac.tryToRestartSession then
-    local restarted = ac.tryToRestartSession()
-    if restarted then
-      return true
-    end
-  end
-
-  -- 4. In case of soft simulation or test harness without full session restart, return true
+  -- 2. In-memory session reset completed via registered listeners (teleports car, engages gear, restarts countdown)
   return true
 end
 
