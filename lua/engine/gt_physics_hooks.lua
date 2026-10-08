@@ -18,30 +18,6 @@ end
 local GTUtils = safeRequire("gt_utils")
 local GTPhysicsHooks = {}
 
-local isAITestModeCached = nil
-local function getIsAITestMode()
-  if isAITestModeCached ~= nil then return isAITestModeCached end
-  isAITestModeCached = false
-  if ac and ac.INIConfig and ac.INIConfig.raceConfig then
-    local ok, race = pcall(ac.INIConfig.raceConfig)
-    if ok and race then
-      local val = race:get("GTLICENSE", "AI_TEST_MODE", "")
-      if val == "1" or val == "true" or val == "TRUE" then
-        isAITestModeCached = true
-      end
-    end
-  end
-  return isAITestModeCached
-end
-
-local function safeEngageGear(physics, carIndex, gear)
-  if getIsAITestMode() then return end
-    if physics and physics.engageGear then
-    physics.engageGear(carIndex, gear)
-  end
-end
-
-
 GTPhysicsHooks.toVec3 = GTUtils and GTUtils.toVec3 or function(v)
   if v == nil then return vec3(0, 0, 0) end
   if type(v) == 'cdata' or (type(v) == 'userdata') then return v end
@@ -145,14 +121,15 @@ function GTPhysicsHooks.applyRollingVelocity(carIndex, forwardVector, speedKmh, 
     end
     local gear = (targetGear and targetGear > 0) and targetGear or 1
     local rpm = (targetRPM and targetRPM > 0) and targetRPM or 1000
-    safeEngageGear(physics, carIndex, gear)
+    if physics and physics.engageGear then
+      physics.engageGear(carIndex, gear)
+    end
     if physics and physics.setEngineRPM then
       physics.setEngineRPM(carIndex, rpm)
     end
     if ac and ac.overrideCarControls then
       local ctrl = ac.overrideCarControls(carIndex)
       if ctrl then
-        if not getIsAITestMode() then ctrl.requestedGearIndex = gear end
       end
     end
     return true
@@ -178,14 +155,15 @@ function GTPhysicsHooks.applyRollingVelocity(carIndex, forwardVector, speedKmh, 
   local gear = (targetGear and targetGear > 0) and targetGear or GTPhysicsHooks.estimateStartingGear(speedKmh)
   local rpm = (targetRPM and targetRPM > 0) and targetRPM or 3500
 
-  safeEngageGear(physics, carIndex, gear)
+  if physics and physics.engageGear then
+    physics.engageGear(carIndex, gear)
+  end
   if physics and physics.setEngineRPM then
     physics.setEngineRPM(carIndex, rpm)
   end
   if ac and ac.overrideCarControls then
     local ctrl = ac.overrideCarControls(carIndex)
     if ctrl then
-      if not getIsAITestMode() then ctrl.requestedGearIndex = gear end
     end
   end
 
@@ -223,14 +201,15 @@ function GTPhysicsHooks.lockControls(durationSeconds, isStandingStart, targetGea
   if isStandingStart then
     local gear = (targetGear and targetGear > 0) and targetGear or 1
     local rpm = (targetRPM and targetRPM > 0) and targetRPM or 1000
-    safeEngageGear(physics, 0, gear)
+    if physics and physics.engageGear then
+      physics.engageGear(0, gear)
+    end
     if physics and physics.setEngineRPM then
       physics.setEngineRPM(0, rpm)
     end
     if ac and ac.overrideCarControls then
       local ctrl = ac.overrideCarControls(0)
       if ctrl then
-        if not getIsAITestMode() then ctrl.requestedGearIndex = gear end
       end
     end
     if physics and physics.lockUserControlsFor then
@@ -264,7 +243,9 @@ function GTPhysicsHooks.lockControls(durationSeconds, isStandingStart, targetGea
       physics.forceUserHandbrakeFor(0, 0)
     end
     if targetGear and targetGear > 0 then
-      safeEngageGear(physics, 0, targetGear)
+      if physics and physics.engageGear then
+        physics.engageGear(0, targetGear)
+      end
       if physics and physics.setEngineRPM then
         physics.setEngineRPM(0, targetRPM or 3500)
       end
@@ -298,14 +279,15 @@ function GTPhysicsHooks.unlockControls(carIndex, targetGear)
   end
   -- Note: We deliberately bypass physics.lockUserGearboxFor(0, false) as it triggers AC starting line reset
   if targetGear and targetGear > 0 then
-    safeEngageGear(physics, carIndex, targetGear)
+    if physics and physics.engageGear then
+      physics.engageGear(carIndex, targetGear)
+    end
     if physics and physics.setEngineRPM then
       physics.setEngineRPM(carIndex, 3500)
     end
     if ac and ac.overrideCarControls then
       local ctrl = ac.overrideCarControls(carIndex)
       if ctrl then
-        if not getIsAITestMode() then ctrl.requestedGearIndex = targetGear end
         ctrl.steer = math.huge
       end
     end
@@ -322,7 +304,6 @@ function GTPhysicsHooks.releaseGearOverride(carIndex)
   if ac and ac.overrideCarControls then
     local ctrl = ac.overrideCarControls(carIndex)
     if ctrl then
-      if not getIsAITestMode() then ctrl.requestedGearIndex = 0 end
       ctrl.gearUp = false
       ctrl.gearDown = false
       ctrl.clutch = 0.0
@@ -424,7 +405,9 @@ function GTPhysicsHooks.startAIRolling(carIndex, targetSpeedKmh, targetGear, tar
   end
 
   -- Firmly engage target gear and RPM
-  safeEngageGear(physics, carIndex, targetGear)
+  if physics and physics.engageGear then
+    physics.engageGear(carIndex, targetGear)
+  end
   if physics and physics.setEngineRPM then
     physics.setEngineRPM(carIndex, targetRPM)
   end
@@ -526,12 +509,13 @@ function GTPhysicsHooks.maintainAIRolling(carIndex, targetSpeedKmh, fallbackFwd,
   local car = ac.getCar and ac.getCar(carIndex)
   if targetGear and targetGear > 0 then
     if not car or car.gear ~= targetGear then
-      safeEngageGear(physics, carIndex, targetGear)
+      if physics and physics.engageGear then
+        physics.engageGear(carIndex, targetGear)
+      end
     end
     if ac and ac.overrideCarControls then
       local ctrl = ac.overrideCarControls(carIndex)
       if ctrl then
-        if not getIsAITestMode() then ctrl.requestedGearIndex = targetGear end
         ctrl.clutch = 0.0 -- Force clutch release
       end
     end
@@ -568,11 +552,12 @@ function GTPhysicsHooks.setupSpawn(testConfig, carIndex)
   if physics and physics.resetCarState then
     physics.resetCarState(carIndex)
   end
-  safeEngageGear(physics, carIndex, 0)
+  if physics and physics.engageGear then
+    physics.engageGear(carIndex, 0)
+  end
   if ac and ac.overrideCarControls then
     local ctrl = ac.overrideCarControls(carIndex)
     if ctrl then
-      if not getIsAITestMode() then ctrl.requestedGearIndex = 0 end
       ctrl.clutch = 1.0
     end
   end
@@ -610,12 +595,13 @@ function GTPhysicsHooks.setupSpawn(testConfig, carIndex)
   end
 
   -- 4. Firmly assert target gear and lock gearbox immediately upon spawn
-  safeEngageGear(physics, carIndex, targetGear)
+  if physics and physics.engageGear then
+    physics.engageGear(carIndex, targetGear)
+  end
   if ac and ac.overrideCarControls then
     local ctrl = ac.overrideCarControls(carIndex)
     if ctrl then
       ctrl.clutch = 1.0 -- Release clutch override
-      if not getIsAITestMode() then ctrl.requestedGearIndex = targetGear end
     end
   end
 
@@ -647,7 +633,9 @@ function GTPhysicsHooks.maintainRollingVelocity(carIndex, forwardVector, speedKm
   end
 
   local gear = GTPhysicsHooks.estimateStartingGear(speedKmh)
-  safeEngageGear(physics, carIndex, gear)
+  if physics and physics.engageGear then
+    physics.engageGear(carIndex, gear)
+  end
   -- Clear brakes and spin wheels at road speed
   if physics and physics.forceUserBrakesFor then
     physics.forceUserBrakesFor(0, 0)

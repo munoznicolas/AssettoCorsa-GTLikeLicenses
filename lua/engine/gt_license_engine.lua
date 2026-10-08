@@ -272,11 +272,8 @@ function GTLicenseEngine:setState(newState)
         if newState == GTLicenseEngine.STATE.FAILED then
           ac.log(string.format("[GTLicense] Failure triggered: reason='%s' | Deploying 50%% emergency braking", tostring(self.failReason)))
         else
-          ac.log(string.format("[GTLicense] Test completed: medal='%s' | Time=%.3fs | Deploying 50%% controlled braking", tostring(self.achievedMedal or "NONE"), self.sessionTime))
+          ac.log(string.format("[GTLicense] Test completed: medal='%s' | Deploying 50%% controlled braking", tostring(self.achievedMedal or "NONE")))
         end
-      end
-      if self.isAITestMode and ac and ac.endSession then
-        ac.endSession("AI Test Mode Auto-Exit", false, nil)
       end
     elseif wasBraking and not isBraking then
       GTPhysicsHooks.releaseFailureBraking(0)
@@ -471,7 +468,7 @@ function GTLicenseEngine:update(dt)
         GTPhysicsHooks.maintainAIRolling(0, initialSpeed, self.testConfig.spawn.forward_vector, dt, targetGear, targetRPM)
       else
         -- Standing start: maintain 1st gear engaged and brakes held during countdown
-        if not self.isAITestMode and (not car or car.gear ~= 1) then
+        if not car or car.gear ~= 1 then
           if physics and physics.engageGear then
             physics.engageGear(0, 1)
           end
@@ -479,7 +476,6 @@ function GTLicenseEngine:update(dt)
         if ac and ac.overrideCarControls then
           local ctrl = ac.overrideCarControls(0)
           if ctrl then
-            if not self.isAITestMode then ctrl.requestedGearIndex = 1 end
           end
         end
       end
@@ -546,7 +542,7 @@ function GTLicenseEngine:update(dt)
         if physics and physics.setAISplineAbsoluteOffset then
           physics.setAISplineAbsoluteOffset(0, 0.0, false)
         end
-        GTPhysicsHooks.unlockControls(0, nil)
+        GTPhysicsHooks.unlockControls(0, targetGear)
         self.isAIRollingActive = false
         if ac and ac.log then
           ac.log(string.format("[GTLicense] AI Test Mode ACTIVE: Autopilot maintained at %.0f%% AI level", (self.aiLevel or 0.95) * 100))
@@ -600,10 +596,10 @@ function GTLicenseEngine:update(dt)
         physics.setAILevel(0, math.max(0.95, self.aiLevel or 0.95))
       end
       if physics and physics.setAIAggression then
-        physics.setAIAggression(0, 0.0)
+        physics.setAIAggression(0, 1.0)
       end
       if physics and physics.setAICaution then
-        physics.setAICaution(0, 0.05)
+        physics.setAICaution(0, 0.0)
       end
       if physics and physics.setAITopSpeed then
         physics.setAITopSpeed(0, 999999.0)
@@ -619,7 +615,7 @@ function GTLicenseEngine:update(dt)
     end
 
     -- Ensure gear remains firmly engaged right after handover on rolling and standing starts
-    if self.sessionTime < 0.5 and not self.isAITestMode and self.testConfig and self.testConfig.spawn then
+    if self.sessionTime < 0.5 and self.testConfig and self.testConfig.spawn then
       local initSpeed = tonumber(self.testConfig.spawn.initial_speed_kmh) or 0
       local isStanding = (self.testConfig.start_mode == "STANDING") or (initSpeed <= 0)
       local targetGear = self.targetStartingGear
@@ -642,7 +638,39 @@ function GTLicenseEngine:update(dt)
       end
     end
 
-      -- Telemetry logging of wheel speeds and suspension right after GO
+    -- Autonomous AI shifting assistance in AI test mode
+    if self.isAITestMode and self.sessionTime >= 0.5 and car then
+      local maxRpm = (car.rpmLimiter and car.rpmLimiter > 3000) and car.rpmLimiter or 6800
+      local minRpm = (car.rpmMinimum and car.rpmMinimum > 500) and car.rpmMinimum or 1000
+      local gearCount = (car.gearCount and car.gearCount > 0) and car.gearCount or 6
+      local now = (os and (os.preciseClock or os.clock) and (os.preciseClock or os.clock)()) or 0
+
+      if car.rpm >= (maxRpm * 0.93) and car.gear > 0 and car.gear < gearCount then
+        if not self.lastAIShiftTime or (now - self.lastAIShiftTime >= 0.75) then
+          self.lastAIShiftTime = now
+          local nextGear = car.gear + 1
+          if physics and physics.engageGear then
+            physics.engageGear(0, nextGear)
+          end
+          if ac and ac.log then
+            ac.log(string.format("[GTLicense] AI Shifting UP: gear %d -> %d at %.0f RPM (spd=%.1f km/h)", car.gear, nextGear, car.rpm, car.speedKmh))
+          end
+        end
+      elseif car.rpm <= math.max(2200, minRpm + 1000) and car.gear > 1 and car.speedKmh > 15 then
+        if not self.lastAIShiftTime or (now - self.lastAIShiftTime >= 0.75) then
+          self.lastAIShiftTime = now
+          local prevGear = car.gear - 1
+          if physics and physics.engageGear then
+            physics.engageGear(0, prevGear)
+          end
+          if ac and ac.log then
+            ac.log(string.format("[GTLicense] AI Shifting DOWN: gear %d -> %d at %.0f RPM (spd=%.1f km/h)", car.gear, prevGear, car.rpm, car.speedKmh))
+          end
+        end
+      end
+    end
+
+    -- Telemetry logging of wheel speeds and suspension right after GO
     if self.sessionTime <= 1.2 and ac and ac.log then
       if not self.lastPostGoLog or (self.sessionTime - self.lastPostGoLog >= 0.2) then
         self.lastPostGoLog = self.sessionTime
