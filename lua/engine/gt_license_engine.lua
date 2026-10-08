@@ -267,12 +267,13 @@ function GTLicenseEngine:setState(newState)
     local isBraking = GTLicenseEngine.isBrakingState(newState)
 
     if isBraking and not wasBraking then
-      GTPhysicsHooks.applyFailureBraking(0, 0.5)
+      local enableAI = (newState == GTLicenseEngine.STATE.PASSED or newState == GTLicenseEngine.STATE.RESULTS)
+      GTPhysicsHooks.applyFailureBraking(0, 0.5, enableAI)
       if ac and ac.log then
         if newState == GTLicenseEngine.STATE.FAILED then
           ac.log(string.format("[GTLicense] Failure triggered: reason='%s' | Deploying 50%% emergency braking", tostring(self.failReason)))
         else
-          ac.log(string.format("[GTLicense] Test completed: medal='%s' | Deploying 50%% controlled braking", tostring(self.achievedMedal or "NONE")))
+          ac.log(string.format("[GTLicense] Test completed: medal='%s' | Deploying 50%% controlled braking with AI steering", tostring(self.achievedMedal or "NONE")))
         end
       end
     elseif wasBraking and not isBraking then
@@ -699,9 +700,6 @@ function GTLicenseEngine:update(dt)
       self.sessionReset:cancelAutoReset()
 
     elseif adjResult.status == "PASSED" then
-      if physics and physics.setCarAutopilot then
-        physics.setCarAutopilot(false)
-      end
       self.achievedMedal = self:evaluateMedal(self.sessionTime)
       self.results = self:compileResults()
       self:setState(GTLicenseEngine.STATE.PASSED)
@@ -711,7 +709,8 @@ function GTLicenseEngine:update(dt)
 
   elseif GTLicenseEngine.isBrakingState(self.state) then
     -- Continuously maintain 50% braking across completed and failed states (PASSED, RESULTS, FAILED)
-    GTPhysicsHooks.applyFailureBraking(0, 0.5)
+    local enableAI = (self.state == GTLicenseEngine.STATE.PASSED or self.state == GTLicenseEngine.STATE.RESULTS)
+    GTPhysicsHooks.applyFailureBraking(0, 0.5, enableAI)
 
     if self.state == GTLicenseEngine.STATE.PASSED then
       -- Brief celebration delay before showing results dialog

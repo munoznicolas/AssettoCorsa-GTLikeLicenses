@@ -277,6 +277,9 @@ function GTPhysicsHooks.unlockControls(carIndex, targetGear)
   if physics and physics.overrideSteering then
     physics.overrideSteering(carIndex, nan)
   end
+  if physics and physics.setAIThrottleLimit then
+    physics.setAIThrottleLimit(carIndex, 1.0)
+  end
   -- Note: We deliberately bypass physics.lockUserGearboxFor(0, false) as it triggers AC starting line reset
   if targetGear and targetGear > 0 then
     if physics and physics.engageGear then
@@ -289,6 +292,8 @@ function GTPhysicsHooks.unlockControls(carIndex, targetGear)
       local ctrl = ac.overrideCarControls(carIndex)
       if ctrl then
         ctrl.steer = math.huge
+        ctrl.gas = math.huge
+        ctrl.brake = math.huge
       end
     end
   end
@@ -318,17 +323,29 @@ end
 ---Also zeroes user throttle so the vehicle slows down in a smooth, controlled manner.
 ---@param carIndex integer? @0-based car index (default: 0)
 ---@param intensity number? @Braking intensity between 0.0 and 1.0 (default: 0.5 for 50%)
-function GTPhysicsHooks.applyFailureBraking(carIndex, intensity)
+---@param enableAI boolean? @Whether to enable AI autopilot for steering
+function GTPhysicsHooks.applyFailureBraking(carIndex, intensity, enableAI)
   carIndex = carIndex or 0
   intensity = tonumber(intensity) or 0.5
   if physics and physics.setCarAutopilot then
-    physics.setCarAutopilot(false)
+    physics.setCarAutopilot(enableAI == true, false)
   end
   if physics and physics.forceUserThrottleFor then
     physics.forceUserThrottleFor(1.0, 0.0)
   end
   if physics and physics.forceUserBrakesFor then
     physics.forceUserBrakesFor(1.0, intensity)
+  end
+  if enableAI and physics and physics.setAIThrottleLimit then
+    physics.setAIThrottleLimit(carIndex, 0.0)
+  end
+  if ac and ac.overrideCarControls then
+    local ctrl = ac.overrideCarControls(carIndex)
+    if ctrl then
+      ctrl.gas = 0.0
+      ctrl.brake = intensity
+      -- Note: Do NOT override steer (leave as math.huge or don't touch) so AI can steer
+    end
   end
 end
 
@@ -344,6 +361,16 @@ function GTPhysicsHooks.releaseFailureBraking(carIndex)
   end
   if physics and physics.forceUserBrakesFor then
     physics.forceUserBrakesFor(0, 0)
+  end
+  if physics and physics.setAIThrottleLimit then
+    physics.setAIThrottleLimit(carIndex, 1.0)
+  end
+  if ac and ac.overrideCarControls then
+    local ctrl = ac.overrideCarControls(carIndex)
+    if ctrl then
+      ctrl.gas = math.huge
+      ctrl.brake = math.huge
+    end
   end
 end
 
