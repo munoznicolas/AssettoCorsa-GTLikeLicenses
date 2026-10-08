@@ -128,6 +128,12 @@ class TestUIModules(unittest.TestCase):
         self.assertTrue((screens_dir / "gt_ghost_widget.lua").is_file())
         self.assertTrue((screens_dir / "gt_modal_overlays.lua").is_file())
 
+        overlay_file = screens_dir / "gt_modal_overlays.lua"
+        overlay_code = overlay_file.read_text(encoding="utf-8")
+        self.assertIn("RESTART (R)", overlay_code)
+        self.assertIn("EXIT (ESC)", overlay_code)
+        self.assertNotIn("NEXT EVENT", overlay_code)
+
         theme_file = REPO_ROOT / "lua" / "ui" / "common" / "gt_ui_theme.lua"
         self.assertTrue(theme_file.is_file())
         theme_code = theme_file.read_text(encoding="utf-8")

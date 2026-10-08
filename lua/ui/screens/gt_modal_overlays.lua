@@ -206,51 +206,49 @@ function GTModalOverlays.drawResultsScreen(screenW, screenH, finalTime, targets,
         end
     end
 
-    -- Action Buttons (Retry, Next, Exit)
-    local btnW = 160
+    -- Action Buttons (Restart, Exit)
+    local btnW = 180
     local btnH = 40
     local btnY = p1.y + cardH - 60
-    local btnSpacing = 20
-    local totalBtnsW = (btnW * 3) + (btnSpacing * 2)
+    local btnSpacing = 30
+    local totalBtnsW = (btnW * 2) + btnSpacing
     local startBtnX = p1.x + (cardW - totalBtnsW) * 0.5
 
     -- Restart Button
     local b1P1 = vec2(startBtnX, btnY)
     local b1P2 = b1P1 + vec2(btnW, btnH)
 
-    -- Next Event Button
+    -- Exit Button
     local b2P1 = vec2(startBtnX + btnW + btnSpacing, btnY)
     local b2P2 = b2P1 + vec2(btnW, btnH)
 
-    -- Exit Button
-    local b3P1 = vec2(startBtnX + (btnW + btnSpacing) * 2, btnY)
-    local b3P2 = b3P1 + vec2(btnW, btnH)
+    -- Mouse Hover Detection
+    local uiState = ac and ac.getUI and ac.getUI()
+    local mPos = uiState and uiState.mousePos
+    local isB1Hovered = mPos and (mPos.x >= b1P1.x and mPos.x <= b1P2.x and mPos.y >= b1P1.y and mPos.y <= b1P2.y)
+    local isB2Hovered = mPos and (mPos.x >= b2P1.x and mPos.x <= b2P2.x and mPos.y >= b2P1.y and mPos.y <= b2P2.y)
 
     if ui and ui.drawRectFilled and ui.CornerFlags then
-        ui.drawRectFilled(b1P1, b1P2, rgbm(0.18, 0.18, 0.18, 0.8), 4)
-        ui.drawRect(b1P1, b1P2, Theme.COLORS.BORDER_GREY, 4, ui.CornerFlags.All, 1)
+        local b1Bg = isB1Hovered and rgbm(0.28, 0.28, 0.28, 0.95) or rgbm(0.18, 0.18, 0.18, 0.8)
+        local b1Border = isB1Hovered and rgbm(0.9, 0.9, 0.9, 1.0) or Theme.COLORS.BORDER_GREY
+        ui.drawRectFilled(b1P1, b1P2, b1Bg, 4)
+        ui.drawRect(b1P1, b1P2, b1Border, 4, ui.CornerFlags.All, 1)
 
-        ui.drawRectFilled(b2P1, b2P2, rgbm(0.25, 0.25, 0.25, 0.9), 4)
-        ui.drawRect(b2P1, b2P2, rgbm(0.8, 0.8, 0.8, 0.8), 4, ui.CornerFlags.All, 1)
-
-        ui.drawRectFilled(b3P1, b3P2, rgbm(0.15, 0.15, 0.15, 0.8), 4)
-        ui.drawRect(b3P1, b3P2, Theme.COLORS.BORDER_GREY, 4, ui.CornerFlags.All, 1)
+        local b2Bg = isB2Hovered and rgbm(0.25, 0.25, 0.25, 0.95) or rgbm(0.15, 0.15, 0.15, 0.8)
+        local b2Border = isB2Hovered and rgbm(0.9, 0.9, 0.9, 1.0) or Theme.COLORS.BORDER_GREY
+        ui.drawRectFilled(b2P1, b2P2, b2Bg, 4)
+        ui.drawRect(b2P1, b2P2, b2Border, 4, ui.CornerFlags.All, 1)
     end
 
     Theme.drawGTTextClipped("RESTART (R)", 14, b1P1, b1P2, hCenter, vCenter, Theme.COLORS.WHITE, "Regular")
-    Theme.drawGTTextClipped("NEXT EVENT", 14, b2P1, b2P2, hCenter, vCenter, Theme.COLORS.WHITE, "Regular")
-    Theme.drawGTTextClipped("EXIT (ESC)", 14, b3P1, b3P2, hCenter, vCenter, Theme.COLORS.WHITE, "Regular")
+    Theme.drawGTTextClipped("EXIT (ESC)", 14, b2P1, b2P2, hCenter, vCenter, Theme.COLORS.WHITE, "Regular")
 
     -- Click Detection for interactive mouse control
-    local uiState = ac and ac.getUI and ac.getUI()
     if uiState and uiState.isMouseLeftKeyClicked and callbacks then
-        local mPos = uiState.mousePos
-        if mPos and mPos.x >= b1P1.x and mPos.x <= b1P2.x and mPos.y >= b1P1.y and mPos.y <= b1P2.y then
-            if callbacks.onRestart then callbacks.onRestart() end
-        elseif mPos and mPos.x >= b2P1.x and mPos.x <= b2P2.x and mPos.y >= b2P1.y and mPos.y <= b2P2.y then
-            if callbacks.onNext then callbacks.onNext() end
-        elseif mPos and mPos.x >= b3P1.x and mPos.x <= b3P2.x and mPos.y >= b3P1.y and mPos.y <= b3P2.y then
-            if callbacks.onExit then callbacks.onExit() end
+        if isB1Hovered and callbacks.onRestart then
+            callbacks.onRestart()
+        elseif isB2Hovered and callbacks.onExit then
+            callbacks.onExit()
         end
     end
 end

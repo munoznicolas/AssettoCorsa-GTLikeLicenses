@@ -24,7 +24,7 @@ lua/ui/
 - **Ghost Delta & OSD**: real-time lead/lag distance widget and hotkey display (`[G] Toggle Ghost`, `[O] Cycle Mode`).
 - **3-2-1-GO Graphics**: large centered countdown with sound synchronization.
 - **Disqualification Banner**: red header with specific violation reason (e.g. `OFF-TRACK (3+ WHEELS OUTSIDE)`).
-- **Results Modal**: final time, medal award graphic (Gold/Silver/Bronze), delta breakdown, and Retry/Next buttons.
+- **Results Modal**: final time, medal award graphic (Gold/Silver/Bronze), delta breakdown, and Retry/Exit buttons.
 
 ### 2. `gt_render_gates.lua` (`script.draw3D()`)
 - Renders 3D start/finish arch ribbons via CSP `render.drawRibbon()` and `render.polyline()`.
