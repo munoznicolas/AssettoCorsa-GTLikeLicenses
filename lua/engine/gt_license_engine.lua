@@ -224,6 +224,15 @@ local function dispatchEvent(self, eventName, ...)
   end
 end
 
+---Returns true if the specified state requires vehicle braking (FAILED, PASSED, RESULTS).
+---@param state string
+---@return boolean
+function GTLicenseEngine.isBrakingState(state)
+  return state == GTLicenseEngine.STATE.FAILED
+      or state == GTLicenseEngine.STATE.PASSED
+      or state == GTLicenseEngine.STATE.RESULTS
+end
+
 ---Changes the current state and notifies listeners.
 ---@param newState string
 function GTLicenseEngine:setState(newState)
@@ -231,15 +240,22 @@ function GTLicenseEngine:setState(newState)
     local oldState = self.state
     self.state = newState
 
-    if newState == GTLicenseEngine.STATE.FAILED then
+    local wasBraking = GTLicenseEngine.isBrakingState(oldState)
+    local isBraking = GTLicenseEngine.isBrakingState(newState)
+
+    if isBraking and not wasBraking then
       GTPhysicsHooks.applyFailureBraking(0, 0.5)
       if ac and ac.log then
-        ac.log(string.format("[GTLicense] Failure triggered: reason='%s' | Deploying 50%% emergency braking", tostring(self.failReason)))
+        if newState == GTLicenseEngine.STATE.FAILED then
+          ac.log(string.format("[GTLicense] Failure triggered: reason='%s' | Deploying 50%% emergency braking", tostring(self.failReason)))
+        else
+          ac.log(string.format("[GTLicense] Test completed: medal='%s' | Deploying 50%% controlled braking", tostring(self.achievedMedal or "NONE")))
+        end
       end
-    elseif oldState == GTLicenseEngine.STATE.FAILED then
+    elseif wasBraking and not isBraking then
       GTPhysicsHooks.releaseFailureBraking(0)
       if ac and ac.log then
-        ac.log("[GTLicense] Leaving FAILED state | Releasing failure braking")
+        ac.log("[GTLicense] Leaving completed/failed state | Releasing failure braking")
       end
     end
 
@@ -613,11 +629,8 @@ function GTLicenseEngine:update(dt)
       self.sessionReset:cancelAutoReset()
 
     elseif adjResult.status == "PASSED" then
-      if self.isAITestMode then
-        if physics and physics.setCarAutopilot then
-          physics.setCarAutopilot(false)
-        end
-        GTPhysicsHooks.applyFailureBraking(0, 0.3)
+      if physics and physics.setCarAutopilot then
+        physics.setCarAutopilot(false)
       end
       self.achievedMedal = self:evaluateMedal(self.sessionTime)
       self.results = self:compileResults()
@@ -626,22 +639,18 @@ function GTLicenseEngine:update(dt)
       self.resultsTimer = 1.2
     end
 
-  elseif self.state == GTLicenseEngine.STATE.PASSED then
-    -- Brief celebration delay before showing results dialog
-    self.resultsTimer = self.resultsTimer - dt
-    if self.resultsTimer <= 0 then
-      self:setState(GTLicenseEngine.STATE.RESULTS)
-      dispatchEvent(self, "resultsShown", self.results)
-    end
-
-  elseif self.state == GTLicenseEngine.STATE.FAILED then
-    -- Fail banner active, waiting for manual restart ('R', space, gamepad) or retry
-    -- Continuously maintain 50% failure braking to bring vehicle to a controlled stop
+  elseif GTLicenseEngine.isBrakingState(self.state) then
+    -- Continuously maintain 50% braking across completed and failed states (PASSED, RESULTS, FAILED)
     GTPhysicsHooks.applyFailureBraking(0, 0.5)
 
-  elseif self.state == GTLicenseEngine.STATE.RESULTS then
-    -- Results modal active, waiting for player to retry or exit
-    -- Handled via UI input
+    if self.state == GTLicenseEngine.STATE.PASSED then
+      -- Brief celebration delay before showing results dialog
+      self.resultsTimer = self.resultsTimer - dt
+      if self.resultsTimer <= 0 then
+        self:setState(GTLicenseEngine.STATE.RESULTS)
+        dispatchEvent(self, "resultsShown", self.results)
+      end
+    end
   end
 
   -- 3. Update AI Traffic & Pace Car Coordinator

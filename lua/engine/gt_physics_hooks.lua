@@ -301,7 +301,7 @@ function GTPhysicsHooks.unlockControls(carIndex, targetGear)
   end
 end
 
----Deploys car brakes at specified intensity upon test failure/disqualification.
+---Deploys car brakes at specified intensity upon test failure/disqualification or completion.
 ---Also zeroes user throttle so the vehicle slows down in a smooth, controlled manner.
 ---@param carIndex integer? @0-based car index (default: 0)
 ---@param intensity number? @Braking intensity between 0.0 and 1.0 (default: 0.5 for 50%)
@@ -319,7 +319,10 @@ function GTPhysicsHooks.applyFailureBraking(carIndex, intensity)
   end
 end
 
----Releases failure braking and restores user throttle and brake control.
+-- Aliases for completion and general controlled post-test braking
+GTPhysicsHooks.applyControlledBraking = GTPhysicsHooks.applyFailureBraking
+
+---Releases failure or completion braking and restores user throttle and brake control.
 ---@param carIndex integer? @0-based car index (default: 0)
 function GTPhysicsHooks.releaseFailureBraking(carIndex)
   carIndex = carIndex or 0
@@ -330,6 +333,9 @@ function GTPhysicsHooks.releaseFailureBraking(carIndex)
     physics.forceUserBrakesFor(0, 0)
   end
 end
+
+-- Aliases for completion and general controlled post-test braking
+GTPhysicsHooks.releaseControlledBraking = GTPhysicsHooks.releaseFailureBraking
 
 ---Engages rolling start countdown physics along the straight sector line via native AI autopilot.
 ---Enables autopilot, caps AI speed to target rolling speed, and locks to the ideal racing line.

@@ -332,6 +332,10 @@ class TestEngineMath(unittest.TestCase):
 
         self.assertIn("GTPhysicsHooks.applyFailureBraking(0, 0.5)", engine_code)
         self.assertIn("GTPhysicsHooks.releaseFailureBraking(0)", engine_code)
+        self.assertIn("function GTLicenseEngine.isBrakingState(state)", engine_code)
+        self.assertIn("GTLicenseEngine.isBrakingState(self.state)", engine_code)
+        self.assertIn("GTPhysicsHooks.applyControlledBraking = GTPhysicsHooks.applyFailureBraking", hooks_code)
+        self.assertIn("GTPhysicsHooks.releaseControlledBraking = GTPhysicsHooks.releaseFailureBraking", hooks_code)
 
 
 if __name__ == "__main__":
