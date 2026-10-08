@@ -55,7 +55,7 @@
   },
   "targets": {
     "gold_seconds": 14.2,
-    "silver_seconds": 14.9,
-    "bronze_seconds": 16.1
+    "silver_seconds": 15.3,
+    "bronze_seconds": 16.7
   }
 }

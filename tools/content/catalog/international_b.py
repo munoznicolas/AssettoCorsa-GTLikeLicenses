@@ -22,7 +22,7 @@ INTERNATIONAL_B_TESTS = [
         "gear": 2,
         "rpm": 5269,
         "with_stop_box": False,
-        "targets": {"gold_seconds": 32.882, "silver_seconds": 35.230, "bronze_seconds": 38.586},
+        "targets": {"gold_seconds": 32.900, "silver_seconds": 35.300, "bronze_seconds": 38.600},
     },
     {
         "test_id": "IB-2",
@@ -41,7 +41,7 @@ INTERNATIONAL_B_TESTS = [
         "gear": 3,
         "rpm": 3633,
         "with_stop_box": False,
-        "targets": {"gold_seconds": 27.824, "silver_seconds": 29.811, "bronze_seconds": 32.650},
+        "targets": {"gold_seconds": 27.900, "silver_seconds": 29.900, "bronze_seconds": 32.700},
     },
     {
         "test_id": "IB-3",
@@ -60,7 +60,7 @@ INTERNATIONAL_B_TESTS = [
         "gear": 2,
         "rpm": 5215,
         "with_stop_box": False,
-        "targets": {"gold_seconds": 39.300, "silver_seconds": 42.108, "bronze_seconds": 46.118},
+        "targets": {"gold_seconds": 39.400, "silver_seconds": 42.200, "bronze_seconds": 46.200},
     },
     {
         "test_id": "IB-4",
@@ -79,7 +79,7 @@ INTERNATIONAL_B_TESTS = [
         "gear": 2,
         "rpm": 4265,
         "with_stop_box": False,
-        "targets": {"gold_seconds": 31.061, "silver_seconds": 33.280, "bronze_seconds": 36.450},
+        "targets": {"gold_seconds": 31.100, "silver_seconds": 33.300, "bronze_seconds": 36.500},
     },
     {
         "test_id": "IB-5",
@@ -98,7 +98,7 @@ INTERNATIONAL_B_TESTS = [
         "gear": 2,
         "rpm": 3758,
         "with_stop_box": False,
-        "targets": {"gold_seconds": 30.420, "silver_seconds": 32.593, "bronze_seconds": 35.697},
+        "targets": {"gold_seconds": 30.500, "silver_seconds": 32.600, "bronze_seconds": 35.700},
     },
     {
         "test_id": "IB-6",
@@ -117,7 +117,7 @@ INTERNATIONAL_B_TESTS = [
         "gear": 2,
         "rpm": 3707,
         "with_stop_box": False,
-        "targets": {"gold_seconds": 55.058, "silver_seconds": 58.991, "bronze_seconds": 64.609},
+        "targets": {"gold_seconds": 55.100, "silver_seconds": 59.000, "bronze_seconds": 64.700},
     },
     {
         "test_id": "IB-7",
@@ -136,7 +136,7 @@ INTERNATIONAL_B_TESTS = [
         "gear": 3,
         "rpm": 6092,
         "with_stop_box": False,
-        "targets": {"gold_seconds": 20.568, "silver_seconds": 22.037, "bronze_seconds": 24.136},
+        "targets": {"gold_seconds": 20.600, "silver_seconds": 22.100, "bronze_seconds": 24.200},
     },
     {
         "test_id": "IB-8",
@@ -155,7 +155,7 @@ INTERNATIONAL_B_TESTS = [
         "gear": 2,
         "rpm": 4196,
         "with_stop_box": False,
-        "targets": {"gold_seconds": 36.239, "silver_seconds": 38.828, "bronze_seconds": 42.526},
+        "targets": {"gold_seconds": 36.300, "silver_seconds": 38.900, "bronze_seconds": 42.600},
     },
     {
         "test_id": "IB-9",
@@ -174,7 +174,7 @@ INTERNATIONAL_B_TESTS = [
         "gear": 2,
         "rpm": 5124,
         "with_stop_box": False,
-        "targets": {"gold_seconds": 36.439, "silver_seconds": 39.042, "bronze_seconds": 42.760},
+        "targets": {"gold_seconds": 36.500, "silver_seconds": 39.100, "bronze_seconds": 42.800},
     },
     {
         "test_id": "IB-10",
@@ -193,7 +193,7 @@ INTERNATIONAL_B_TESTS = [
         "gear": 2,
         "rpm": 4094,
         "with_stop_box": False,
-        "targets": {"gold_seconds": 32.578, "silver_seconds": 34.905, "bronze_seconds": 38.229},
+        "targets": {"gold_seconds": 32.600, "silver_seconds": 35.000, "bronze_seconds": 38.300},
     },
     {
         "test_id": "IB-11",
@@ -212,7 +212,7 @@ INTERNATIONAL_B_TESTS = [
         "gear": 3,
         "rpm": 4632,
         "with_stop_box": False,
-        "targets": {"gold_seconds": 21.793, "silver_seconds": 23.349, "bronze_seconds": 25.573},
+        "targets": {"gold_seconds": 21.800, "silver_seconds": 23.400, "bronze_seconds": 25.600},
     },
     {
         "test_id": "IB-12",
@@ -229,7 +229,7 @@ INTERNATIONAL_B_TESTS = [
         "spawn_offset": 60.0,
         "speed": 160.0,
         "with_stop_box": False,
-        "targets": {"gold_seconds": 96.500, "silver_seconds": 100.000, "bronze_seconds": 106.000},
+        "targets": {"gold_seconds": 96.500, "silver_seconds": 103.400, "bronze_seconds": 113.300},
     },
 
     # =========================================================================

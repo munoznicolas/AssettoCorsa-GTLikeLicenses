@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 23.716,
-    "silver_seconds": 25.41,
-    "bronze_seconds": 27.83
+    "gold_seconds": 23.8,
+    "silver_seconds": 25.5,
+    "bronze_seconds": 27.9
   }
 }

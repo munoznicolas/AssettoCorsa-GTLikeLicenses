@@ -8,6 +8,7 @@ import os
 import sys
 import re
 import json
+import math
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(REPO_ROOT, "tools"))
@@ -133,9 +134,9 @@ def compute_calibrations():
             dist_traveled += step
             curr_d = (curr_d + step) % tot
 
-        gold = round(t_accum * 0.98, 3)
-        silver = round(t_accum * 1.05, 3)
-        bronze = round(t_accum * 1.15, 3)
+        gold = math.ceil(round(t_accum * 0.98, 4) * 10.0) / 10.0
+        silver = math.ceil(round(t_accum * 1.05, 4) * 10.0) / 10.0
+        bronze = math.ceil(round(t_accum * 1.15, 4) * 10.0) / 10.0
 
         calibrations[t_id] = {
             "start_s": gate_s,

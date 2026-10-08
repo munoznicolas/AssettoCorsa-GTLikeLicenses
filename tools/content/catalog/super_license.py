@@ -20,7 +20,7 @@ SUPER_LICENSE_TESTS = [
         "spawn_offset": 60.0,
         "speed": 160.0,
         "with_stop_box": False,
-        "targets": {"gold_seconds": 80.500, "silver_seconds": 84.000, "bronze_seconds": 90.000},
+        "targets": {"gold_seconds": 80.500, "silver_seconds": 86.300, "bronze_seconds": 94.500},
     },
     {
         "test_id": "S-2",
@@ -37,7 +37,7 @@ SUPER_LICENSE_TESTS = [
         "spawn_offset": 55.0,
         "speed": 150.0,
         "with_stop_box": False,
-        "targets": {"gold_seconds": 84.200, "silver_seconds": 88.000, "bronze_seconds": 94.000},
+        "targets": {"gold_seconds": 84.200, "silver_seconds": 90.300, "bronze_seconds": 98.900},
     },
     {
         "test_id": "S-3",
@@ -54,7 +54,7 @@ SUPER_LICENSE_TESTS = [
         "spawn_offset": 60.0,
         "speed": 170.0,
         "with_stop_box": False,
-        "targets": {"gold_seconds": 99.800, "silver_seconds": 104.000, "bronze_seconds": 111.000},
+        "targets": {"gold_seconds": 99.800, "silver_seconds": 107.000, "bronze_seconds": 117.200},
     },
     {
         "test_id": "S-4",
@@ -71,7 +71,7 @@ SUPER_LICENSE_TESTS = [
         "spawn_offset": 75.0,
         "speed": 200.0,
         "with_stop_box": False,
-        "targets": {"gold_seconds": 94.500, "silver_seconds": 99.000, "bronze_seconds": 106.000},
+        "targets": {"gold_seconds": 94.500, "silver_seconds": 101.300, "bronze_seconds": 110.900},
     },
     {
         "test_id": "S-5",
@@ -88,7 +88,7 @@ SUPER_LICENSE_TESTS = [
         "spawn_offset": 65.0,
         "speed": 180.0,
         "with_stop_box": False,
-        "targets": {"gold_seconds": 107.800, "silver_seconds": 112.500, "bronze_seconds": 120.000},
+        "targets": {"gold_seconds": 107.800, "silver_seconds": 115.500, "bronze_seconds": 126.500},
     },
     {
         "test_id": "S-6",
@@ -105,7 +105,7 @@ SUPER_LICENSE_TESTS = [
         "spawn_offset": 65.0,
         "speed": 180.0,
         "with_stop_box": False,
-        "targets": {"gold_seconds": 95.200, "silver_seconds": 99.500, "bronze_seconds": 106.000},
+        "targets": {"gold_seconds": 95.200, "silver_seconds": 102.000, "bronze_seconds": 111.800},
     },
     {
         "test_id": "S-7",
@@ -122,7 +122,7 @@ SUPER_LICENSE_TESTS = [
         "spawn_offset": 75.0,
         "speed": 200.0,
         "with_stop_box": False,
-        "targets": {"gold_seconds": 114.000, "silver_seconds": 119.000, "bronze_seconds": 127.000},
+        "targets": {"gold_seconds": 114.000, "silver_seconds": 122.200, "bronze_seconds": 133.800},
     },
     {
         "test_id": "S-8",
@@ -139,7 +139,7 @@ SUPER_LICENSE_TESTS = [
         "spawn_offset": 70.0,
         "speed": 190.0,
         "with_stop_box": False,
-        "targets": {"gold_seconds": 78.500, "silver_seconds": 82.000, "bronze_seconds": 88.000},
+        "targets": {"gold_seconds": 78.500, "silver_seconds": 84.200, "bronze_seconds": 92.200},
     },
     {
         "test_id": "S-9",
@@ -156,7 +156,7 @@ SUPER_LICENSE_TESTS = [
         "spawn_offset": 80.0,
         "speed": 220.0,
         "with_stop_box": False,
-        "targets": {"gold_seconds": 74.200, "silver_seconds": 77.500, "bronze_seconds": 83.000},
+        "targets": {"gold_seconds": 74.200, "silver_seconds": 79.500, "bronze_seconds": 87.100},
     },
     {
         "test_id": "S-10",
@@ -173,6 +173,6 @@ SUPER_LICENSE_TESTS = [
         "spawn_offset": 60.0,
         "speed": 160.0,
         "with_stop_box": False,
-        "targets": {"gold_seconds": 428.500, "silver_seconds": 445.000, "bronze_seconds": 475.000},
+        "targets": {"gold_seconds": 428.500, "silver_seconds": 459.200, "bronze_seconds": 502.900},
     }
 ]
