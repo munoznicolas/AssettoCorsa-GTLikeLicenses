@@ -343,6 +343,25 @@ function GTLicenseEngine:restart()
   self.sessionReset:executeReset("MANUAL_CALL")
 end
 
+---Ends the current session and exits back to Content Manager or AC menu.
+function GTLicenseEngine:exitSession()
+  if ac and ac.log then
+    ac.log("[GTLicense] User requested session exit via Exit button or ESC")
+  end
+  if ac and ac.endSession then
+    local medal = self.achievedMedal or "NONE"
+    local passed = (self.state == GTLicenseEngine.STATE.PASSED or self.state == GTLicenseEngine.STATE.RESULTS)
+    local resultsObj = nil
+    if self.results and self.results.final_time then
+      resultsObj = {
+        summary = passed and ("Test Passed: " .. medal) or "Test Incomplete",
+        message = string.format("Time: %.3fs", self.results.final_time)
+      }
+    end
+    ac.endSession(passed and ("License Test Completed (" .. medal .. ")") or "License Test Exited", passed, resultsObj)
+  end
+end
+
 ---Main per-frame simulation update step.
 ---@param dt number @Frame delta time in seconds
 function GTLicenseEngine:update(dt)
@@ -351,6 +370,27 @@ function GTLicenseEngine:update(dt)
     self.sharedState.requestRestart = false
     self:restart()
     return
+  end
+
+  -- Check for UI App requested exit
+  if self.sharedState and self.sharedState.requestExit then
+    self.sharedState.requestExit = false
+    self:exitSession()
+    return
+  end
+
+  -- Check ESC key for exit during terminal/results states
+  if self.state == GTLicenseEngine.STATE.RESULTS or self.state == GTLicenseEngine.STATE.PASSED or self.state == GTLicenseEngine.STATE.FAILED then
+    local escPressed = false
+    if ui and ui.keyboardButtonPressed and ui.KeyIndex and ui.KeyIndex.Escape then
+      escPressed = ui.keyboardButtonPressed(ui.KeyIndex.Escape)
+    elseif ac and ac.isKeyPressed and ac.KeyIndex and ac.KeyIndex.Escape then
+      escPressed = ac.isKeyPressed(ac.KeyIndex.Escape)
+    end
+    if escPressed then
+      self:exitSession()
+      return
+    end
   end
 
   -- 1. Check restart inputs and auto-reset countdown
@@ -779,7 +819,8 @@ function GTLicenseEngine:drawUI()
     local car = ac and ac.getCar and ac.getCar(0)
     local speedKmh = car and car.speedKmh or 0
     local callbacks = {
-      onRestart = function() self:restart() end
+      onRestart = function() self:restart() end,
+      onExit = function() self:exitSession() end
     }
     local ghostState = self.ghostManager and self.ghostManager:getState() or nil
     GTLicenseHUD.draw(

@@ -334,6 +334,8 @@ class TestEngineMath(unittest.TestCase):
         self.assertIn("GTPhysicsHooks.releaseFailureBraking(0)", engine_code)
         self.assertIn("function GTLicenseEngine.isBrakingState(state)", engine_code)
         self.assertIn("GTLicenseEngine.isBrakingState(self.state)", engine_code)
+        self.assertIn("function GTLicenseEngine:exitSession()", engine_code)
+        self.assertIn("onExit = function() self:exitSession() end", engine_code)
         self.assertIn("GTPhysicsHooks.applyControlledBraking = GTPhysicsHooks.applyFailureBraking", hooks_code)
         self.assertIn("GTPhysicsHooks.releaseControlledBraking = GTPhysicsHooks.releaseFailureBraking", hooks_code)
 
