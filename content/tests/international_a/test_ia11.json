@@ -38,14 +38,14 @@
     },
     "finish_gate": {
       "p1": [
-        -190.96,
-        188.702,
-        -27.353
+        -156.345,
+        190.985,
+        63.533
       ],
       "p2": [
-        -183.073,
-        188.702,
-        -19.095
+        -148.323,
+        190.985,
+        54.078
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 38.3,
-    "silver_seconds": 41.0,
-    "bronze_seconds": 44.9
+    "gold_seconds": 47.4,
+    "silver_seconds": 50.8,
+    "bronze_seconds": 55.7
   }
 }
