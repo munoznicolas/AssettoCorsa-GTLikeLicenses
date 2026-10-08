@@ -4,10 +4,12 @@ National B License Test Catalog (12 Tests: B-1 to B-12).
 Fundamentals of vehicle dynamics: longitudinal threshold braking, out-in-out trajectory, weight transfer.
 """
 
+TIER_NAME = "National B"
+
 NATIONAL_B_TESTS = [
-{
+    {
         "test_id": "B-1",
-        "tier": "National B",
+        "tier": TIER_NAME,
         "title": "200m Acceleration & Braking (Short Threshold)",
         "description": "Launch cleanly with minimal front wheelspin and execute threshold braking into the stop box.",
         "lesson_objective": "Straight-line threshold braking without locking wheels or overshooting.",
@@ -24,7 +26,7 @@ NATIONAL_B_TESTS = [
     },
     {
         "test_id": "B-2",
-        "tier": "National B",
+        "tier": TIER_NAME,
         "title": "500m Acceleration & High-Speed Stop",
         "description": "High-speed braking from 170+ km/h managing curb weight into the marked stop box.",
         "lesson_objective": "Managing heavier curb weight braking without triggering front wheel lockup.",
@@ -41,7 +43,7 @@ NATIONAL_B_TESTS = [
     },
     {
         "test_id": "B-3",
-        "tier": "National B",
+        "tier": TIER_NAME,
         "title": "Out-In-Out Hairpin Trajectory",
         "description": "Brake in a straight line, clip the rumble strip late, and open the wheel on exit.",
         "lesson_objective": "Late apex out-in-out line to preserve rolling momentum in a lightweight roadster.",
@@ -60,7 +62,7 @@ NATIONAL_B_TESTS = [
     },
     {
         "test_id": "B-4",
-        "tier": "National B",
+        "tier": TIER_NAME,
         "title": "Front-Wheel Drive Understeer Management",
         "description": "Modulate throttle mid-corner until front tires regain grip, then squeeze full throttle on exit.",
         "lesson_objective": "Managing FWD power understeer through Curva del Muro.",
@@ -79,7 +81,7 @@ NATIONAL_B_TESTS = [
     },
     {
         "test_id": "B-5",
-        "tier": "National B",
+        "tier": TIER_NAME,
         "title": "Low-Speed Weight Transfer & Transition",
         "description": "Trail-brake into Brooklands and smoothly transfer lateral load into the looping Luffield radius.",
         "lesson_objective": "Managing classic live-axle rear-wheel drive chassis dynamics.",
@@ -98,7 +100,7 @@ NATIONAL_B_TESTS = [
     },
     {
         "test_id": "B-6",
-        "tier": "National B",
+        "tier": TIER_NAME,
         "title": "Threshold Braking from 190 km/h into Chicane",
         "description": "Heavy straight-line braking at the 150m board down to 60 km/h and hopping the curb cleanly.",
         "lesson_objective": "High-speed threshold braking and curb hopping through Prima Variante.",
@@ -117,7 +119,7 @@ NATIONAL_B_TESTS = [
     },
     {
         "test_id": "B-7",
-        "tier": "National B",
+        "tier": TIER_NAME,
         "title": "Slalom Rhythm & Transient Agility",
         "description": "Steering cadence and throttle feathering in 2nd gear through staggered cones without sliding.",
         "lesson_objective": "Weight transfer control in a mid-engine roadster.",
@@ -134,7 +136,7 @@ NATIONAL_B_TESTS = [
     },
     {
         "test_id": "B-8",
-        "tier": "National B",
+        "tier": TIER_NAME,
         "title": "Blind Compression Corner Entry",
         "description": "Downhill compression turn-in over a blind crest and soaking vertical compression at the bottom.",
         "lesson_objective": "Committing to blind crest turn-in and elevation drop at Paddock Hill Bend.",
@@ -153,7 +155,7 @@ NATIONAL_B_TESTS = [
     },
     {
         "test_id": "B-9",
-        "tier": "National B",
+        "tier": TIER_NAME,
         "title": "All-Wheel Drive Launch & Traction Cornering",
         "description": "Aggressive AWD launch, braking uphill deep into Turn 1, and leveraging quattro pull on exit.",
         "lesson_objective": "Quattro all-wheel drive traction on uphill corner exit without understeer.",
@@ -170,7 +172,7 @@ NATIONAL_B_TESTS = [
     },
     {
         "test_id": "B-10",
-        "tier": "National B",
+        "tier": TIER_NAME,
         "title": "High-Speed Carousel Feathering",
         "description": "Balancing the car on the edge of adhesion through a long tightening carousel turn.",
         "lesson_objective": "Throttle modulation through the Mercedes Arena carousel.",
@@ -189,7 +191,7 @@ NATIONAL_B_TESTS = [
     },
     {
         "test_id": "B-11",
-        "tier": "National B",
+        "tier": TIER_NAME,
         "title": "S-Bend Line Straightening",
         "description": "Sacrificing entry speed in Turn 2 to straighten the line and maximize exit speed up Hugenholtz.",
         "lesson_objective": "Line straightening across linked corners in a classic rear-wheel drive coupe.",
@@ -208,7 +210,7 @@ NATIONAL_B_TESTS = [
     },
     {
         "test_id": "B-12",
-        "tier": "National B",
+        "tier": TIER_NAME,
         "title": "Graduation: Vallelunga Club Full Lap",
         "description": "Comprehensive graduation trial connecting all corners cleanly with zero track limit violations.",
         "lesson_objective": "Synthesizing all National B fundamentals across a complete 1,746m lap.",

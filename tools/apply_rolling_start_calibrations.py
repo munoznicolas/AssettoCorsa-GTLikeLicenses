@@ -9,13 +9,16 @@ import sys
 import re
 import json
 import math
+from typing import Any, Dict, Optional
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, REPO_ROOT)
 sys.path.insert(0, os.path.join(REPO_ROOT, "tools"))
 
 from generate_all_content import TEST_CATALOG
 from extract_spline_coords import SplineParser, find_spline_file
 from track_straight_analyzer import TrackStraightAnalyzer
+from tools.spline.straight_analyzer import RollingStartCandidate
 
 CONFIG_40 = {
     # TIER 1: NATIONAL B (7 rolling tests - Beginner Driving School: 65 - 90 km/h, with B-6 high-speed threshold braking)
@@ -68,91 +71,123 @@ CONFIG_40 = {
 }
 
 
-def compute_calibrations():
+def _calc_cyclic_distance(dist_a: float, dist_b: float, total_len: float) -> float:
+    """Calculates the shortest distance between two points along a closed track spline."""
+    delta = abs((dist_a - dist_b + total_len) % total_len)
+    return total_len - delta if delta > total_len / 2.0 else delta
+
+
+def _find_best_candidate(
+    analyzer: TrackStraightAnalyzer,
+    target_d: float,
+    tot: float,
+    post_go: float,
+    custom_speed: Optional[float] = None,
+) -> Optional[RollingStartCandidate]:
+    """Finds the best straight approach candidate closest to target_d across steer tolerances."""
+    best_cand = None
+    min_dist = float("inf")
+
+    for tol in [2.5, 3.5, 4.5, 5.5]:
+        straights = analyzer.find_straight_segments(max_steer_deg=tol, min_length_m=20.0)
+        cands = analyzer.evaluate_rolling_candidates(
+            straights,
+            countdown_sec=3.0,
+            post_go_sec=post_go,
+            target_speed_kmh=custom_speed,
+        )
+        for c in cands:
+            d = _calc_cyclic_distance(c.start_gate_distance_m, target_d, tot)
+            if d < min_dist:
+                min_dist = d
+                best_cand = c
+        if best_cand and min_dist < 250.0:
+            break
+
+    return best_cand
+
+
+def _calculate_sector_time(
+    analyzer: TrackStraightAnalyzer,
+    gate_d: float,
+    sec_len: float,
+    tot: float,
+    step: float = 1.0,
+) -> float:
+    """Integrates sector traversal time using 95% AI speed telemetry."""
+    t_accum = 0.0
+    curr_d = gate_d
+    dist_traveled = 0.0
+    while dist_traveled < sec_len:
+        spd_kmh, _, _ = analyzer.telemetry.query_sample(curr_d)
+        v_ms = max(5.0, spd_kmh / 3.6)
+        t_accum += step / v_ms
+        dist_traveled += step
+        curr_d = (curr_d + step) % tot
+    return t_accum
+
+
+def calibrate_single_test(test_info: Dict[str, Any], cfg: Dict[str, Any]) -> Dict[str, Any]:
+    """Computes calibrated rolling start parameters and medal targets for a single test."""
+    t_id = test_info["test_id"]
+    track = test_info["track_id"]
+    layout = test_info["track_layout"]
+    car = test_info["car_id"]
+
+    sf = find_spline_file(track, layout)
+    p = SplineParser(sf)
+    a = TrackStraightAnalyzer(p, track_id=track, layout=layout, car_id=car)
+    tot = p.total_length
+
+    target_d = cfg["straight_s"] * tot
+    post_go = cfg.get("post_go", 1.0)
+    c_spd = cfg.get("custom_speed")
+
+    best_cand = _find_best_candidate(a, target_d, tot, post_go, c_spd)
+    if not best_cand:
+        raise RuntimeError(f"No candidate straight found for test {t_id}")
+
+    gate_d = best_cand.start_gate_distance_m
+    gate_s = best_cand.start_gate_progress
+    fin_d = cfg["finish_s"] * tot
+    sec_len = (fin_d - gate_d + tot) % tot
+
+    if sec_len < 100.0:
+        sec_len = 250.0
+        fin_d = (gate_d + sec_len) % tot
+    fin_s = round(fin_d / tot, 4)
+
+    t_accum = _calculate_sector_time(a, gate_d, sec_len, tot)
+
+    gold = math.ceil(round(t_accum * 0.98, 4) * 10.0) / 10.0
+    silver = math.ceil(round(t_accum * 1.05, 4) * 10.0) / 10.0
+    bronze = math.ceil(round(t_accum * 1.15, 4) * 10.0) / 10.0
+
+    return {
+        "start_s": gate_s,
+        "finish_s": fin_s,
+        "spawn_offset": best_cand.spawn_offset_m,
+        "speed": best_cand.target_speed_kmh,
+        "gear": best_cand.engaged_gear,
+        "rpm": best_cand.engine_rpm,
+        "max_steer": best_cand.max_countdown_steer_deg,
+        "sec_len": round(sec_len, 1),
+        "targets": {
+            "gold_seconds": gold,
+            "silver_seconds": silver,
+            "bronze_seconds": bronze,
+        },
+    }
+
+
+def compute_calibrations() -> Dict[str, Dict[str, Any]]:
     """Calculates all 40 calibrated configurations."""
     calibrations = {}
-    
-    for t in [t for t in TEST_CATALOG if t.get("start_mode") == "ROLLING"]:
+    rolling_tests = [t for t in TEST_CATALOG if t.get("start_mode") == "ROLLING"]
+    for t in rolling_tests:
         t_id = t["test_id"]
         cfg = CONFIG_40[t_id]
-        track = t["track_id"]
-        layout = t["track_layout"]
-        car = t["car_id"]
-
-        sf = find_spline_file(track, layout)
-        p = SplineParser(sf)
-        a = TrackStraightAnalyzer(p, track_id=track, layout=layout, car_id=car)
-        tot = p.total_length
-
-        target_d = cfg["straight_s"] * tot
-        post_go = cfg.get("post_go", 1.0)
-        c_spd = cfg.get("custom_speed")
-
-        best_cand = None
-        min_dist = float("inf")
-
-        for tol in [2.5, 3.5, 4.5, 5.5]:
-            straights = a.find_straight_segments(max_steer_deg=tol, min_length_m=20.0)
-            cands = a.evaluate_rolling_candidates(
-                straights,
-                countdown_sec=3.0,
-                post_go_sec=post_go,
-                target_speed_kmh=c_spd
-            )
-            if cands:
-                for c in cands:
-                    d = abs((c.start_gate_distance_m - target_d + tot) % tot)
-                    if d > tot / 2:
-                        d = tot - d
-                    if d < min_dist:
-                        min_dist = d
-                        best_cand = c
-                if best_cand and min_dist < 250.0:
-                    break
-
-        if not best_cand:
-            raise RuntimeError(f"No candidate straight found for test {t_id}")
-
-        gate_d = best_cand.start_gate_distance_m
-        gate_s = best_cand.start_gate_progress
-        fin_d = cfg["finish_s"] * tot
-        sec_len = (fin_d - gate_d + tot) % tot
-
-        if sec_len < 100.0:
-            sec_len = 250.0
-            fin_d = (gate_d + sec_len) % tot
-        fin_s = round(fin_d / tot, 4)
-
-        t_accum = 0.0
-        curr_d = gate_d
-        step = 1.0
-        dist_traveled = 0.0
-        while dist_traveled < sec_len:
-            spd_kmh, _, _ = a.telemetry.query_sample(curr_d)
-            v_ms = max(5.0, spd_kmh / 3.6)
-            t_accum += step / v_ms
-            dist_traveled += step
-            curr_d = (curr_d + step) % tot
-
-        gold = math.ceil(round(t_accum * 0.98, 4) * 10.0) / 10.0
-        silver = math.ceil(round(t_accum * 1.05, 4) * 10.0) / 10.0
-        bronze = math.ceil(round(t_accum * 1.15, 4) * 10.0) / 10.0
-
-        calibrations[t_id] = {
-            "start_s": gate_s,
-            "finish_s": fin_s,
-            "spawn_offset": best_cand.spawn_offset_m,
-            "speed": best_cand.target_speed_kmh,
-            "gear": best_cand.engaged_gear,
-            "rpm": best_cand.engine_rpm,
-            "max_steer": best_cand.max_countdown_steer_deg,
-            "sec_len": round(sec_len, 1),
-            "targets": {
-                "gold_seconds": gold,
-                "silver_seconds": silver,
-                "bronze_seconds": bronze
-            }
-        }
+        calibrations[t_id] = calibrate_single_test(t, cfg)
 
     return calibrations
 

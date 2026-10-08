@@ -4,10 +4,12 @@ Super License Test Catalog (10 Full-Lap Tests: S-1 to S-10).
 The ultimate test of speed and discipline: full timed laps with zero margin for error.
 """
 
+TIER_NAME = "Super License"
+
 SUPER_LICENSE_TESTS = [
-{
+    {
         "test_id": "S-1",
-        "tier": "Super License",
+        "tier": TIER_NAME,
         "title": "Supercar Hot Lap: Laguna Seca",
         "description": "Managing explosive hybrid torque out of Andretti Hairpin and the blind Corkscrew drop.",
         "lesson_objective": "Full unassisted hot lap in a 963 bhp hybrid hypercar.",
@@ -24,7 +26,7 @@ SUPER_LICENSE_TESTS = [
     },
     {
         "test_id": "S-2",
-        "tier": "Super License",
+        "tier": TIER_NAME,
         "title": "British Heritage Time Attack: Brands Hatch GP",
         "description": "Active aero and DRS deployment through narrow, barrier-lined woodland curves.",
         "lesson_objective": "Full lap time attack in a 916 bhp hypercar around Brands Hatch GP.",
@@ -41,7 +43,7 @@ SUPER_LICENSE_TESTS = [
     },
     {
         "test_id": "S-3",
-        "tier": "Super License",
+        "tier": TIER_NAME,
         "title": "High-Downforce Aerodynamic Flow: Mugello",
         "description": "Zero driving assists; connecting Casanova-Savelli and Arrabbiata 1 & 2 into one high-g rhythm.",
         "lesson_objective": "Naturally aspirated V12 track special full circuit flow.",
@@ -58,7 +60,7 @@ SUPER_LICENSE_TESTS = [
     },
     {
         "test_id": "S-4",
-        "tier": "Super License",
+        "tier": TIER_NAME,
         "title": "High-Velocity Temple of Speed: Monza GP",
         "description": "Exceeding 340 km/h on straights, managing heavy turbo spool, and threshold braking into chicanes.",
         "lesson_objective": "1989 Group C Le Mans legend at maximum velocity around Monza.",
@@ -75,7 +77,7 @@ SUPER_LICENSE_TESTS = [
     },
     {
         "test_id": "S-5",
-        "tier": "Super License",
+        "tier": TIER_NAME,
         "title": "The 4-Rotor Symphony: Silverstone GP",
         "description": "Heel-toe downshifting without synchros and pinning throttle through Copse and Maggotts-Becketts.",
         "lesson_objective": "1991 Le Mans-winning rotary prototype full lap mastery.",
@@ -92,7 +94,7 @@ SUPER_LICENSE_TESTS = [
     },
     {
         "test_id": "S-6",
-        "tier": "Super License",
+        "tier": TIER_NAME,
         "title": "Undulating Perfection: Imola GP",
         "description": "Ground-effect underbody tunnels keep the car glued through Piratella and Acque Minerali.",
         "lesson_objective": "High ground-effect prototype discipline with zero curb slamming.",
@@ -109,7 +111,7 @@ SUPER_LICENSE_TESTS = [
     },
     {
         "test_id": "S-7",
-        "tier": "Super License",
+        "tier": TIER_NAME,
         "title": "Modern Hybrid Prototype Mastery: Spa-Francorchamps",
         "description": "Electric AWD boost out of La Source, flat-out through Eau Rouge, and energy regeneration into Bus Stop.",
         "lesson_objective": "8-Megajoule LMP1 hybrid prototype mastery across 7 km of Spa.",
@@ -126,7 +128,7 @@ SUPER_LICENSE_TESTS = [
     },
     {
         "test_id": "S-8",
-        "tier": "Super License",
+        "tier": TIER_NAME,
         "title": "1,000 Horsepower Hybrid Attack: Red Bull Ring",
         "description": "Capacitor boost down the uphill straights and massive speed through the final two sweepers.",
         "lesson_objective": "Complete hot lap in Toyota's WEC World Championship LMP1 hybrid.",
@@ -143,7 +145,7 @@ SUPER_LICENSE_TESTS = [
     },
     {
         "test_id": "S-9",
-        "tier": "Super License",
+        "tier": TIER_NAME,
         "title": "Formula 1 V10 Apex Velocity: Barcelona GP",
         "description": "Pulling over 4.5G lateral cornering and 100m braking distances from 310 km/h with 19,000 RPM V10.",
         "lesson_objective": "The benchmark Formula 1 car of all time at absolute qualifying limits.",
@@ -160,7 +162,7 @@ SUPER_LICENSE_TESTS = [
     },
     {
         "test_id": "S-10",
-        "tier": "Super License",
+        "tier": TIER_NAME,
         "title": "The Ultimate Trial: Nürburgring Nordschleife Hot Lap",
         "description": "Complete, unassisted hot lap of the Green Hell (154 turns, 20.8 km) in an authentic DTM touring car.",
         "lesson_objective": "The ultimate test of endurance, precision, and car control with zero margin for error.",

@@ -4,10 +4,12 @@ International B License Test Catalog (12 Tests: IB-1 to IB-12).
 High performance & downforce commitment: modern supercars, slipstream overtaking, low-grip control.
 """
 
+TIER_NAME = "International B"
+
 INTERNATIONAL_B_TESTS = [
-{
+    {
         "test_id": "IB-1",
-        "tier": "International B",
+        "tier": TIER_NAME,
         "title": "High-Speed Heavy Braking into Tamburello",
         "description": "Hard initial brake hit from 250 km/h, bleed off pressure, and flick left-right across high curbs.",
         "lesson_objective": "High-speed deceleration and curb compliance in a mid-engine supercar.",
@@ -26,7 +28,7 @@ INTERNATIONAL_B_TESTS = [
     },
     {
         "test_id": "IB-2",
-        "tier": "International B",
+        "tier": TIER_NAME,
         "title": "Rear-Engine Pendulum Dynamics & Traction",
         "description": "Trail-braking to pin front tires into Cimini 1 and utilizing rear traction out of Cimini 2.",
         "lesson_objective": "Mastering 911 rear-engine weight distribution and exit drive.",
@@ -45,7 +47,7 @@ INTERNATIONAL_B_TESTS = [
     },
     {
         "test_id": "IB-3",
-        "tier": "International B",
+        "tier": TIER_NAME,
         "title": "Downforce Commitment: Pouhon Double-Apex",
         "description": "Tap brake lightly, tuck into the first apex at 170 km/h, float mid-track, and pull tight for apex 2.",
         "lesson_objective": "High-speed aero downforce commitment through Spa's downhill double-left.",
@@ -64,7 +66,7 @@ INTERNATIONAL_B_TESTS = [
     },
     {
         "test_id": "IB-4",
-        "tier": "International B",
+        "tier": TIER_NAME,
         "title": "Big Displacement V8 Torque Modulation",
         "description": "Managing 630 Nm of torque in 2nd gear through Laguna Seca's tight double-apex hairpin.",
         "lesson_objective": "High-torque throttle modulation to prevent power oversteer on corner exit.",
@@ -83,7 +85,7 @@ INTERNATIONAL_B_TESTS = [
     },
     {
         "test_id": "IB-5",
-        "tier": "International B",
+        "tier": TIER_NAME,
         "title": "Active Aerodynamics at 230 km/h",
         "description": "Trusting ALA vectoring downforce through the long uphill Turn 3 right sweeper.",
         "lesson_objective": "High-g cornering with active aerodynamics at Barcelona.",
@@ -102,7 +104,7 @@ INTERNATIONAL_B_TESTS = [
     },
     {
         "test_id": "IB-6",
-        "tier": "International B",
+        "tier": TIER_NAME,
         "title": "High-Speed Chicane Precision: Ascari",
         "description": "Hard braking into Turn 8, clipping the right curb at Turn 9, and carrying full acceleration in Turn 10.",
         "lesson_objective": "High-speed directional transition through Variante Ascari.",
@@ -121,7 +123,7 @@ INTERNATIONAL_B_TESTS = [
     },
     {
         "test_id": "IB-7",
-        "tier": "International B",
+        "tier": TIER_NAME,
         "title": "Heavyweight Digital AWD Traction",
         "description": "Braking in a straight line, letting ATTESA sort traction, and rocketing out of the final chicane.",
         "lesson_objective": "Managing 1.7 tonnes of AWD supercar through tight chicane transitions.",
@@ -140,7 +142,7 @@ INTERNATIONAL_B_TESTS = [
     },
     {
         "test_id": "IB-8",
-        "tier": "International B",
+        "tier": TIER_NAME,
         "title": "Blind Crest Downhill Esses: Casanova-Savelli",
         "description": "Unloading suspension over Casanova crest, quick dab of brakes, and pitching left into Savelli.",
         "lesson_objective": "Weight transfer control over crests and high-speed downhill transitions.",
@@ -159,7 +161,7 @@ INTERNATIONAL_B_TESTS = [
     },
     {
         "test_id": "IB-9",
-        "tier": "International B",
+        "tier": TIER_NAME,
         "title": "Slipstream Drafting & Clean Overtake",
         "description": "Tucking into the slipstream to gain 15 km/h, pulling out for a clean non-contact pass into Turn 3.",
         "lesson_objective": "High-speed drafting and out-braking without body contact.",
@@ -178,7 +180,7 @@ INTERNATIONAL_B_TESTS = [
     },
     {
         "test_id": "IB-10",
-        "tier": "International B",
+        "tier": TIER_NAME,
         "title": "High-Speed Parabolica Exit Momentum",
         "description": "Trail-braking deep, hugging the inside line, and opening steering early to reach 260+ km/h.",
         "lesson_objective": "Maximizing corner exit velocity onto Monza's main straight.",
@@ -197,7 +199,7 @@ INTERNATIONAL_B_TESTS = [
     },
     {
         "test_id": "IB-11",
-        "tier": "International B",
+        "tier": TIER_NAME,
         "title": "Historic High-Speed Drifting: Stowe & Club",
         "description": "Controlling sustained 4-wheel slip angle through high-speed sweeping bends on vintage tires.",
         "lesson_objective": "Managing high power-to-weight and four-wheel drift on vintage tires.",
@@ -216,7 +218,7 @@ INTERNATIONAL_B_TESTS = [
     },
     {
         "test_id": "IB-12",
-        "tier": "International B",
+        "tier": TIER_NAME,
         "title": "Graduation: Red Bull Ring GP Full Lap",
         "description": "Full 4.3 km lap linking uphill heavy braking, off-camber drops, and fast aerodynamic sweeps.",
         "lesson_objective": "Complete high-speed circuit mastery in a track-focused supercar.",

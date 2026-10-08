@@ -4,10 +4,12 @@ International A License Test Catalog (12 Tests: IA-1 to IA-12).
 Professional motorsport racecraft: GT3, GT4, and DTM race machinery with full slick tires.
 """
 
+TIER_NAME = "International A"
+
 INTERNATIONAL_A_TESTS = [
-{
+    {
         "test_id": "IA-1",
-        "tier": "International A",
+        "tier": TIER_NAME,
         "title": "The Benchmark: Eau Rouge & Raidillon Flat-Out",
         "description": "Compressing at the bottom of Eau Rouge, flicking right up the 18% hill onto Kemmel Straight.",
         "lesson_objective": "Flat-out high-downforce commitment through motorsport's most famous complex.",
@@ -26,7 +28,7 @@ INTERNATIONAL_A_TESTS = [
     },
     {
         "test_id": "IA-2",
-        "tier": "International A",
+        "tier": TIER_NAME,
         "title": "GT4 Trail-Braking & Weight Conservation",
         "description": "Hard trail braking into Westfield, carrying momentum through the dip and clipping Dingle Dell.",
         "lesson_objective": "Managing momentum and trail-braking with GT4 race slicks.",
@@ -45,7 +47,7 @@ INTERNATIONAL_A_TESTS = [
     },
     {
         "test_id": "IA-3",
-        "tier": "International A",
+        "tier": TIER_NAME,
         "title": "Extreme Downforce Cornering: Arrabbiata 1 & 2",
         "description": "Back-to-back uphill right sweepers pulling over 2.5G with GT3 downforce.",
         "lesson_objective": "High-g aerodynamic downforce line discipline through Mugello's Arrabbiata curves.",
@@ -64,7 +66,7 @@ INTERNATIONAL_A_TESTS = [
     },
     {
         "test_id": "IA-4",
-        "tier": "International A",
+        "tier": TIER_NAME,
         "title": "Classic DTM Aggressive Curb Hopping",
         "description": "Launching over the high yellow curb stones with 12,000 RPM high-downforce AWD touring car.",
         "lesson_objective": "Aggressive curb riding and immediate AWD landing stabilization.",
@@ -83,7 +85,7 @@ INTERNATIONAL_A_TESTS = [
     },
     {
         "test_id": "IA-5",
-        "tier": "International A",
+        "tier": TIER_NAME,
         "title": "Front-Mid GT3 Platform Stability",
         "description": "Heavy braking into Turn 1/2 uphill flick followed immediately by the long Turn 3 sweeper.",
         "lesson_objective": "Front-mid engine platform aero balance and tire heat conservation.",
@@ -102,7 +104,7 @@ INTERNATIONAL_A_TESTS = [
     },
     {
         "test_id": "IA-6",
-        "tier": "International A",
+        "tier": TIER_NAME,
         "title": "Bus Stop Chicane: Braking from 270 km/h",
         "description": "Setting racing brake bias, stopping from 260 km/h down to 65 km/h, and squaring off the exit.",
         "lesson_objective": "Threshold braking into tight chicane from top speed with ABS.",
@@ -121,7 +123,7 @@ INTERNATIONAL_A_TESTS = [
     },
     {
         "test_id": "IA-7",
-        "tier": "International A",
+        "tier": TIER_NAME,
         "title": "Rear-Engine GT3 Pivot & Curb Launch",
         "description": "Trail-braking downhill into tight chicane, bouncing over left curb, and hammering exit curb.",
         "lesson_objective": "Rotating a rear-engine GT3 chassis under heavy trail-braking.",
@@ -140,7 +142,7 @@ INTERNATIONAL_A_TESTS = [
     },
     {
         "test_id": "IA-8",
-        "tier": "International A",
+        "tier": TIER_NAME,
         "title": "GTE Aerodynamic Diffuser Suction",
         "description": "Dab brake, turn in decisively at 230+ km/h through Copse, and ride the exit rumble strip.",
         "lesson_objective": "Exploiting inverted mid-engine GTE diffuser downforce.",
@@ -159,7 +161,7 @@ INTERNATIONAL_A_TESTS = [
     },
     {
         "test_id": "IA-9",
-        "tier": "International A",
+        "tier": TIER_NAME,
         "title": "Analog 1960s Prototype Mastery",
         "description": "Vintage cross-ply racing slicks, heavy clutch, zero assists through Curva Grande and Lesmo 1 & 2.",
         "lesson_objective": "Controlling a high-power historic prototype on vintage tires.",
@@ -178,7 +180,7 @@ INTERNATIONAL_A_TESTS = [
     },
     {
         "test_id": "IA-10",
-        "tier": "International A",
+        "tier": TIER_NAME,
         "title": "Multi-Car GT3 Traffic Overtake",
         "description": "Overtake slower GT4 cars cleanly without body contact before crossing the sector line.",
         "lesson_objective": "Multi-class racecraft, vision placement, and clean non-contact overtaking.",
@@ -197,7 +199,7 @@ INTERNATIONAL_A_TESTS = [
     },
     {
         "test_id": "IA-11",
-        "tier": "International A",
+        "tier": TIER_NAME,
         "title": "Classic DTM Heel-and-Toe Dogfight",
         "description": "Rev-matching downshifts into Semaforo hairpin and maximizing mechanical grip.",
         "lesson_objective": "Heel-and-toe precision in an analog touring car chassis.",
@@ -216,7 +218,7 @@ INTERNATIONAL_A_TESTS = [
     },
     {
         "test_id": "IA-12",
-        "tier": "International A",
+        "tier": TIER_NAME,
         "title": "Graduation: Circuit de Spa-Francorchamps Sector Trial",
         "description": "Connecting Les Combes, Bruxelles, Pouhon, and Stavelot without a single tire exceeding track limits.",
         "lesson_objective": "Complete high-speed GT3 sector mastery across Spa Sector 2.",

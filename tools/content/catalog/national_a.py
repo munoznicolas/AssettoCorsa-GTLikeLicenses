@@ -4,10 +4,12 @@ National A License Test Catalog (12 Tests: A-1 to A-12).
 Intermediate sports car dynamics: high-speed chicanes, blind off-camber drops, mid-engine balance.
 """
 
+TIER_NAME = "National A"
+
 NATIONAL_A_TESTS = [
-{
+    {
         "test_id": "A-1",
-        "tier": "National A",
+        "tier": TIER_NAME,
         "title": "1000m Maximum Acceleration & High-Speed Stop",
         "description": "High-velocity braking from 225+ km/h managing inertia into the designated stop box.",
         "lesson_objective": "Threshold braking from maximum speed in a powerful V8 sports coupe.",
@@ -24,7 +26,7 @@ NATIONAL_A_TESTS = [
     },
     {
         "test_id": "A-2",
-        "tier": "National A",
+        "tier": TIER_NAME,
         "title": "The Corkscrew: Severe Elevation Drop",
         "description": "Braking uphill into a blind crest, dropping 5 stories through Turns 8 and 8A.",
         "lesson_objective": "Navigating blind downhill elevation drops and bottom compression.",
@@ -43,7 +45,7 @@ NATIONAL_A_TESTS = [
     },
     {
         "test_id": "A-3",
-        "tier": "National A",
+        "tier": TIER_NAME,
         "title": "Turbo Torque Modulation on Corner Exit",
         "description": "Managing twin-turbo boost onset progressively out of Magione hairpins.",
         "lesson_objective": "Preventing sudden boost spikes from breaking rear traction.",
@@ -62,7 +64,7 @@ NATIONAL_A_TESTS = [
     },
     {
         "test_id": "A-4",
-        "tier": "National A",
+        "tier": TIER_NAME,
         "title": "Mid-Engine Snap Oversteer Control",
         "description": "Avoiding abrupt throttle lift through off-camber Graham Hill Bend.",
         "lesson_objective": "Controlling mid-engine lift-off snap oversteer in a carbon-tub sports car.",
@@ -81,7 +83,7 @@ NATIONAL_A_TESTS = [
     },
     {
         "test_id": "A-5",
-        "tier": "National A",
+        "tier": TIER_NAME,
         "title": "High-Speed Curb Bouncing Chicane",
         "description": "Attacking Variante Alta kerbs with straight steering before impact to avoid rear kicks.",
         "lesson_objective": "Chicane curb jumping without unsettling suspension equilibrium.",
@@ -100,7 +102,7 @@ NATIONAL_A_TESTS = [
     },
     {
         "test_id": "A-6",
-        "tier": "National A",
+        "tier": TIER_NAME,
         "title": "Group B Rally Homologation AWD Handling",
         "description": "Initiating turn-in early to overcome initial understeer, then powering through stone walls.",
         "lesson_objective": "Taming a short-wheelbase front-heavy turbo AWD rally legend.",
@@ -119,7 +121,7 @@ NATIONAL_A_TESTS = [
     },
     {
         "test_id": "A-7",
-        "tier": "National A",
+        "tier": TIER_NAME,
         "title": "Downhill Hairpin Trail-Braking",
         "description": "Steep uphill braking followed by a sharp downhill drop into Remus Hairpin.",
         "lesson_objective": "Trailing brake pressure past turn-in to keep load on front tires.",
@@ -138,7 +140,7 @@ NATIONAL_A_TESTS = [
     },
     {
         "test_id": "A-8",
-        "tier": "National A",
+        "tier": TIER_NAME,
         "title": "High-Speed Blind Crest Commitment",
         "description": "Carrying 160+ km/h through the downhill Scheivlak crest without backing off.",
         "lesson_objective": "Trusting aerodynamic and mechanical grip on blind corner exit.",
@@ -157,7 +159,7 @@ NATIONAL_A_TESTS = [
     },
     {
         "test_id": "A-9",
-        "tier": "National A",
+        "tier": TIER_NAME,
         "title": "High-Speed Esses Precision",
         "description": "Precision rhythm: lift for Maggotts, dab brakes into Becketts, wide exit into Chapel.",
         "lesson_objective": "Linking high-speed S-curves at 180+ km/h.",
@@ -176,7 +178,7 @@ NATIONAL_A_TESTS = [
     },
     {
         "test_id": "A-10",
-        "tier": "National A",
+        "tier": TIER_NAME,
         "title": "Rotary Engine High-RPM Throttle Feathering",
         "description": "Maintaining the twin-rotary in its peak powerband while feathering throttle through Campagnano.",
         "lesson_objective": "High-RPM power delivery control in a lightweight sports car.",
@@ -195,7 +197,7 @@ NATIONAL_A_TESTS = [
     },
     {
         "test_id": "A-11",
-        "tier": "National A",
+        "tier": TIER_NAME,
         "title": "Classic Rally 4WD Slide & Exit",
         "description": "Using 4WD traction to stabilize across looping Clearways and launch onto Brabham Straight.",
         "lesson_objective": "Managing off-camber corner exit traction with all-wheel drive.",
@@ -214,7 +216,7 @@ NATIONAL_A_TESTS = [
     },
     {
         "test_id": "A-12",
-        "tier": "National A",
+        "tier": TIER_NAME,
         "title": "Graduation: Brands Hatch Indy Full Lap",
         "description": "Synthesizes blind drops, hairpin patience, and exit momentum across a complete sub-minute lap.",
         "lesson_objective": "Mastering the undulating Brands Hatch Indy layout in a mid-engine coupe.",
