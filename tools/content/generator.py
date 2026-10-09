@@ -205,6 +205,12 @@ def generate_career() -> None:
             with open(event_ini_path, "w", encoding="utf-8") as f:
                 ecp.write(f, space_around_delimiters=False)
 
+            # Copy event preview image
+            preview_src = os.path.join(REPO_ROOT, "assets", "previews", "numbers", f"{idx}.png")
+            preview_dest = os.path.join(event_dir, "preview.png")
+            if os.path.isfile(preview_src):
+                shutil.copyfile(preview_src, preview_dest)
+
         print(f"  + Generated Series: {s_meta['folder']} ({len(tier_tests)} events)")
 
 
