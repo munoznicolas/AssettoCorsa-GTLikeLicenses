@@ -436,6 +436,20 @@ body {
   box-shadow: 0 0 0 1px var(--border-focus);
 }
 
+.form-control[readonly],
+.form-control:read-only {
+  background-color: rgba(16, 20, 26, 0.55);
+  color: var(--text-muted);
+  border-color: rgba(38, 46, 59, 0.7);
+  cursor: default;
+}
+
+.form-control[readonly]:focus,
+.form-control:read-only:focus {
+  border-color: rgba(38, 46, 59, 0.7);
+  box-shadow: none;
+}
+
 .form-control.mono {
   font-family: var(--font-mono);
 }
