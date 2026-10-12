@@ -1,51 +1,51 @@
 {
   "test_id": "A-6",
   "tier": "National A",
-  "title": "Group B Rally Homologation AWD Handling",
-  "description": "Initiating turn-in early to overcome initial understeer, then powering through stone walls.",
-  "lesson_objective": "Taming a short-wheelbase front-heavy turbo AWD rally legend.",
-  "car_id": "ks_audi_sport_quattro",
-  "track_id": "ks_highlands",
-  "track_layout": "layout_short",
+  "title": "Turbo Torque Modulation on Corner Exit",
+  "description": "Managing twin-turbo boost onset progressively out of Magione hairpins.",
+  "lesson_objective": "Preventing sudden boost spikes from breaking rear traction.",
+  "car_id": "ks_toyota_supra_mkiv",
+  "track_id": "magione",
+  "track_layout": "",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      565.253,
-      5.442,
-      555.652
+      -10.133,
+      5.29,
+      -211.962
     ],
     "forward_vector": [
-      -0.9348,
-      0.0014,
-      0.3552
+      -0.2661,
+      -0.0014,
+      -0.9639
     ],
-    "initial_speed_kmh": 70.0,
-    "gear": 2,
-    "rpm": 5550
+    "initial_speed_kmh": 80.0,
+    "gear": 3,
+    "rpm": 3825
   },
   "timing": {
     "start_gate": {
       "p1": [
-        509.887,
-        5.435,
-        573.754
+        -17.419,
+        5.301,
+        -278.936
       ],
       "p2": [
-        512.852,
-        5.435,
-        582.559
+        -28.378,
+        5.301,
+        -276.139
       ]
     },
     "finish_gate": {
       "p1": [
-        633.89,
-        6.226,
-        399.496
+        -23.332,
+        5.292,
+        -363.884
       ],
       "p2": [
-        630.805,
-        6.226,
-        391.77
+        -12.112,
+        5.292,
+        -366.215
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 14.3,
-    "silver_seconds": 15.3,
-    "bronze_seconds": 16.8
+    "gold_seconds": 20.5,
+    "silver_seconds": 22.0,
+    "bronze_seconds": 24.1
   }
 }

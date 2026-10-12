@@ -1,0 +1,61 @@
+{
+  "test_id": "IA-14",
+  "tier": "International A",
+  "title": "1 Lap Guide Run: N\u00fcrburgring Nordschleife (GT4 IA-15)",
+  "description": "Full lap benchmark time attack around the Green Hell in the Mercedes-Benz 190E Evo II touring car.",
+  "lesson_objective": "Endurance pacing, rhythm, and track mastery across all 154 corners of the Nordschleife.",
+  "car_id": "ks_mercedes_190_evo2",
+  "track_id": "ks_nordschleife",
+  "track_layout": "nordschleife",
+  "start_mode": "FLYING_LAP",
+  "spawn": {
+    "position": [
+      -459.77,
+      137.776,
+      2358.742
+    ],
+    "forward_vector": [
+      -0.843,
+      0.0246,
+      0.5373
+    ],
+    "initial_speed_kmh": 140.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        -513.141,
+        139.699,
+        2347.144
+      ],
+      "p2": [
+        -519.157,
+        139.699,
+        2355.057
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        -494.421,
+        138.925,
+        2354.332
+      ],
+      "p2": [
+        -497.582,
+        138.925,
+        2363.713
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 542.6,
+    "silver_seconds": 563.0,
+    "bronze_seconds": 600.0
+  }
+}

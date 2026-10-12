@@ -1,49 +1,49 @@
 {
   "test_id": "S-4",
   "tier": "Super License",
-  "title": "High-Velocity Temple of Speed: Monza GP",
-  "description": "Exceeding 340 km/h on straights, managing heavy turbo spool, and threshold braking into chicanes.",
-  "lesson_objective": "1989 Group C Le Mans legend at maximum velocity around Monza.",
-  "car_id": "ks_mercedes_c9",
-  "track_id": "monza",
-  "track_layout": "",
+  "title": "Lightweight Time Attack: Silverstone GP (GT6 S-3)",
+  "description": "Exploit pure mechanical downforce and lightweight 790 kg chassis through Maggotts-Becketts and Stowe.",
+  "lesson_objective": "Cornering commitment and high apex speeds in an ultra-lightweight track weapon.",
+  "car_id": "ktm_xbow_r",
+  "track_id": "ks_silverstone",
+  "track_layout": "gp",
   "start_mode": "FLYING_LAP",
   "spawn": {
     "position": [
-      -210.931,
-      -8.768,
-      490.438
+      -418.148,
+      -6.51,
+      278.208
     ],
     "forward_vector": [
-      0.0282,
-      0.005,
-      -0.9996
+      0.5888,
+      0.0078,
+      -0.8082
     ],
-    "initial_speed_kmh": 200.0
+    "initial_speed_kmh": 140.0
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -203.956,
-        -8.408,
-        414.207
+        -383.844,
+        -5.99,
+        234.166
       ],
       "p2": [
-        -215.768,
-        -8.408,
-        413.395
+        -395.088,
+        -5.99,
+        226.166
       ]
     },
     "finish_gate": {
       "p1": [
-        -204.292,
-        -8.442,
-        421.515
+        -387.519,
+        -6.064,
+        239.639
       ],
       "p2": [
-        -216.093,
-        -8.442,
-        420.688
+        -398.965,
+        -6.064,
+        231.473
       ]
     }
   },
@@ -54,8 +54,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 94.5,
-    "silver_seconds": 101.3,
-    "bronze_seconds": 110.9
+    "gold_seconds": 57.3,
+    "silver_seconds": 58.5,
+    "bronze_seconds": 64.0
   }
 }

@@ -1,51 +1,51 @@
 {
   "test_id": "IB-2",
   "tier": "International B",
-  "title": "Rear-Engine Pendulum Dynamics & Traction",
-  "description": "Trail-braking to pin front tires into Cimini 1 and utilizing rear traction out of Cimini 2.",
-  "lesson_objective": "Mastering 911 rear-engine weight distribution and exit drive.",
-  "car_id": "ks_porsche_911_gt3_rs",
-  "track_id": "ks_vallelunga",
-  "track_layout": "extended_circuit",
+  "title": "High-Speed Heavy Braking into Tamburello",
+  "description": "Hard initial brake hit from 250 km/h, bleed off pressure, and flick left-right across high curbs.",
+  "lesson_objective": "High-speed deceleration and curb compliance in a mid-engine supercar.",
+  "car_id": "ferrari_458",
+  "track_id": "imola",
+  "track_layout": "",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      -26.878,
-      191.914,
-      -147.825
+      301.723,
+      -85.361,
+      -388.707
     ],
     "forward_vector": [
-      0.9632,
-      0.0217,
-      -0.2677
+      -0.9998,
+      0.0043,
+      0.0187
     ],
-    "initial_speed_kmh": 75.1,
-    "gear": 3,
-    "rpm": 3633
+    "initial_speed_kmh": 66.7,
+    "gear": 2,
+    "rpm": 5269
   },
   "timing": {
     "start_gate": {
       "p1": [
-        38.61,
-        193.341,
-        -164.157
+        249.005,
+        -85.148,
+        -397.188
       ],
       "p2": [
-        35.65,
-        193.341,
-        -175.062
+        248.89,
+        -85.148,
+        -382.358
       ]
     },
     "finish_gate": {
       "p1": [
-        -72.042,
-        190.989,
-        -59.177
+        -324.296,
+        -82.643,
+        -412.405
       ],
       "p2": [
-        -70.416,
-        190.989,
-        -47.53
+        -322.758,
+        -82.643,
+        -402.352
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 27.9,
-    "silver_seconds": 29.9,
-    "bronze_seconds": 32.7
+    "gold_seconds": 32.9,
+    "silver_seconds": 35.3,
+    "bronze_seconds": 38.6
   }
 }

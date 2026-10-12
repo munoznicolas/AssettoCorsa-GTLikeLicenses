@@ -1,7 +1,8 @@
 """
 national_a.py
-National A License Test Catalog (12 Tests: A-1 to A-12).
+National A License Test Catalog (17 Tests: A-1 to A-17).
 Intermediate sports car dynamics: high-speed chicanes, blind off-camber drops, mid-engine balance.
+Updated with historical Gran Turismo official Kunos car+track combinations.
 """
 
 TIER_NAME = "National A"
@@ -27,6 +28,63 @@ NATIONAL_A_TESTS = [
     {
         "test_id": "A-2",
         "tier": TIER_NAME,
+        "title": "Practical Cornering: Laguna Seca Hairpin (GT3 A-2)",
+        "description": "Downhill approach into the tight Andretti Hairpin. Manage trail braking and engage early 2nd-gear exit drive in the iconic AWD Godzilla.",
+        "lesson_objective": "Mastering trail-braking and AWD traction through a low-speed hairpin.",
+        "car_id": "ks_nissan_skyline_r34",
+        "track_id": "ks_laguna_seca",
+        "track_layout": "",
+        "start_mode": "ROLLING",
+        "start_s": 0.04,
+        "finish_s": 0.14,
+        "spawn_offset": 50.0,
+        "speed": 60.0,
+        "gear": 2,
+        "rpm": 4500,
+        "with_stop_box": False,
+        "targets": {"gold_seconds": 26.000, "silver_seconds": 26.300, "bronze_seconds": 27.600},
+    },
+    {
+        "test_id": "A-3",
+        "tier": TIER_NAME,
+        "title": "Approaching a Low-Visibility Corner: Paddock Hill (GT6 A-2)",
+        "description": "High-speed blind plunge down Paddock Hill Bend. Keep the lightweight chassis balanced without upsetting the rear over the compression.",
+        "lesson_objective": "Carrying speed through a blind downhill compression corner.",
+        "car_id": "lotus_elise_sc",
+        "track_id": "ks_brands_hatch",
+        "track_layout": "indy",
+        "start_mode": "ROLLING",
+        "start_s": 0.02,
+        "finish_s": 0.15,
+        "spawn_offset": 50.0,
+        "speed": 65.0,
+        "gear": 2,
+        "rpm": 4200,
+        "with_stop_box": False,
+        "targets": {"gold_seconds": 14.500, "silver_seconds": 15.200, "bronze_seconds": 18.000},
+    },
+    {
+        "test_id": "A-4",
+        "tier": TIER_NAME,
+        "title": "Racing Line & Heavy Braking: Variante del Rettifilo (GT7 A-3)",
+        "description": "Approach the first chicane at maximum velocity. Execute threshold braking in a hot hatchback, hop the kerbs cleanly, and accelerate out.",
+        "lesson_objective": "Front-wheel drive chicane braking and curb hopping.",
+        "car_id": "abarth500",
+        "track_id": "monza",
+        "track_layout": "",
+        "start_mode": "ROLLING",
+        "start_s": 0.10,
+        "finish_s": 0.22,
+        "spawn_offset": 55.0,
+        "speed": 70.0,
+        "gear": 2,
+        "rpm": 4000,
+        "with_stop_box": False,
+        "targets": {"gold_seconds": 21.900, "silver_seconds": 22.500, "bronze_seconds": 24.100},
+    },
+    {
+        "test_id": "A-5",
+        "tier": TIER_NAME,
         "title": "The Corkscrew: Severe Elevation Drop",
         "description": "Braking uphill into a blind crest, dropping 5 stories through Turns 8 and 8A.",
         "lesson_objective": "Navigating blind downhill elevation drops and bottom compression.",
@@ -44,7 +102,7 @@ NATIONAL_A_TESTS = [
         "targets": {"gold_seconds": 24.400, "silver_seconds": 26.100, "bronze_seconds": 28.600},
     },
     {
-        "test_id": "A-3",
+        "test_id": "A-6",
         "tier": TIER_NAME,
         "title": "Turbo Torque Modulation on Corner Exit",
         "description": "Managing twin-turbo boost onset progressively out of Magione hairpins.",
@@ -63,7 +121,26 @@ NATIONAL_A_TESTS = [
         "targets": {"gold_seconds": 20.500, "silver_seconds": 22.000, "bronze_seconds": 24.100},
     },
     {
-        "test_id": "A-4",
+        "test_id": "A-7",
+        "tier": TIER_NAME,
+        "title": "Consecutive Corners: Variante della Roggia (GT7 A-6)",
+        "description": "Negotiate Curva Grande and brake into the tight left-right chicane of Variante della Roggia, balancing mid-engine agility.",
+        "lesson_objective": "Mid-engine direction changes through high-speed chicane transitions.",
+        "car_id": "ks_alfa_romeo_4c",
+        "track_id": "monza",
+        "track_layout": "",
+        "start_mode": "ROLLING",
+        "start_s": 0.32,
+        "finish_s": 0.44,
+        "spawn_offset": 65.0,
+        "speed": 80.0,
+        "gear": 3,
+        "rpm": 4200,
+        "with_stop_box": False,
+        "targets": {"gold_seconds": 18.100, "silver_seconds": 18.700, "bronze_seconds": 20.100},
+    },
+    {
+        "test_id": "A-8",
         "tier": TIER_NAME,
         "title": "Mid-Engine Snap Oversteer Control",
         "description": "Avoiding abrupt throttle lift through off-camber Graham Hill Bend.",
@@ -82,7 +159,7 @@ NATIONAL_A_TESTS = [
         "targets": {"gold_seconds": 15.600, "silver_seconds": 16.700, "bronze_seconds": 18.300},
     },
     {
-        "test_id": "A-5",
+        "test_id": "A-9",
         "tier": TIER_NAME,
         "title": "High-Speed Curb Bouncing Chicane",
         "description": "Attacking Variante Alta kerbs with straight steering before impact to avoid rear kicks.",
@@ -101,7 +178,7 @@ NATIONAL_A_TESTS = [
         "targets": {"gold_seconds": 29.400, "silver_seconds": 31.400, "bronze_seconds": 34.400},
     },
     {
-        "test_id": "A-6",
+        "test_id": "A-10",
         "tier": TIER_NAME,
         "title": "Group B Rally Homologation AWD Handling",
         "description": "Initiating turn-in early to overcome initial understeer, then powering through stone walls.",
@@ -120,7 +197,7 @@ NATIONAL_A_TESTS = [
         "targets": {"gold_seconds": 14.300, "silver_seconds": 15.300, "bronze_seconds": 16.800},
     },
     {
-        "test_id": "A-7",
+        "test_id": "A-11",
         "tier": TIER_NAME,
         "title": "Downhill Hairpin Trail-Braking",
         "description": "Steep uphill braking followed by a sharp downhill drop into Remus Hairpin.",
@@ -139,7 +216,7 @@ NATIONAL_A_TESTS = [
         "targets": {"gold_seconds": 20.000, "silver_seconds": 21.400, "bronze_seconds": 23.500},
     },
     {
-        "test_id": "A-8",
+        "test_id": "A-12",
         "tier": TIER_NAME,
         "title": "High-Speed Blind Crest Commitment",
         "description": "Carrying 160+ km/h through the downhill Scheivlak crest without backing off.",
@@ -158,7 +235,7 @@ NATIONAL_A_TESTS = [
         "targets": {"gold_seconds": 28.000, "silver_seconds": 30.000, "bronze_seconds": 32.900},
     },
     {
-        "test_id": "A-9",
+        "test_id": "A-13",
         "tier": TIER_NAME,
         "title": "High-Speed Esses Precision",
         "description": "Precision rhythm: lift for Maggotts, dab brakes into Becketts, wide exit into Chapel.",
@@ -177,7 +254,7 @@ NATIONAL_A_TESTS = [
         "targets": {"gold_seconds": 33.000, "silver_seconds": 35.300, "bronze_seconds": 38.700},
     },
     {
-        "test_id": "A-10",
+        "test_id": "A-14",
         "tier": TIER_NAME,
         "title": "Rotary Engine High-RPM Throttle Feathering",
         "description": "Maintaining the twin-rotary in its peak powerband while feathering throttle through Campagnano.",
@@ -196,7 +273,7 @@ NATIONAL_A_TESTS = [
         "targets": {"gold_seconds": 19.100, "silver_seconds": 20.400, "bronze_seconds": 22.400},
     },
     {
-        "test_id": "A-11",
+        "test_id": "A-15",
         "tier": TIER_NAME,
         "title": "Classic Rally 4WD Slide & Exit",
         "description": "Using 4WD traction to stabilize across looping Clearways and launch onto Brabham Straight.",
@@ -215,7 +292,26 @@ NATIONAL_A_TESTS = [
         "targets": {"gold_seconds": 19.400, "silver_seconds": 20.800, "bronze_seconds": 22.800},
     },
     {
-        "test_id": "A-12",
+        "test_id": "A-16",
+        "tier": TIER_NAME,
+        "title": "Green Hell Sector Trial: Hohe Acht to Brünnchen (GT4 A-16)",
+        "description": "Tackle the technical mid-section of the Nürburgring Nordschleife in the twin-turbo RX-7 Spirit R, mastering Wippermann, Eschbach, and Brünnchen.",
+        "lesson_objective": "Consecutive blind corner links and elevation management on the Nordschleife.",
+        "car_id": "ks_mazda_rx7_spirit_r",
+        "track_id": "ks_nordschleife",
+        "track_layout": "nordschleife",
+        "start_mode": "ROLLING",
+        "start_s": 0.65,
+        "finish_s": 0.73,
+        "spawn_offset": 75.0,
+        "speed": 90.0,
+        "gear": 3,
+        "rpm": 4500,
+        "with_stop_box": False,
+        "targets": {"gold_seconds": 54.150, "silver_seconds": 56.000, "bronze_seconds": 62.700},
+    },
+    {
+        "test_id": "A-17",
         "tier": TIER_NAME,
         "title": "Graduation: Brands Hatch Indy Full Lap",
         "description": "Synthesizes blind drops, hairpin patience, and exit momentum across a complete sub-minute lap.",
@@ -231,6 +327,4 @@ NATIONAL_A_TESTS = [
         "with_stop_box": False,
         "targets": {"gold_seconds": 52.800, "silver_seconds": 56.600, "bronze_seconds": 62.000},
     },
-
-    # =========================================================================
 ]

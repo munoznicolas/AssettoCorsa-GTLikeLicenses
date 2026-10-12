@@ -1,51 +1,51 @@
 {
   "test_id": "A-2",
   "tier": "National A",
-  "title": "The Corkscrew: Severe Elevation Drop",
-  "description": "Braking uphill into a blind crest, dropping 5 stories through Turns 8 and 8A.",
-  "lesson_objective": "Navigating blind downhill elevation drops and bottom compression.",
-  "car_id": "ks_porsche_718_cayman_s",
+  "title": "Practical Cornering: Laguna Seca Hairpin (GT3 A-2)",
+  "description": "Downhill approach into the tight Andretti Hairpin. Manage trail braking and engage early 2nd-gear exit drive in the iconic AWD Godzilla.",
+  "lesson_objective": "Mastering trail-braking and AWD traction through a low-speed hairpin.",
+  "car_id": "ks_nissan_skyline_r34",
   "track_id": "ks_laguna_seca",
   "track_layout": "",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      187.317,
-      2.649,
-      462.1
+      -346.789,
+      -5.416,
+      -153.445
     ],
     "forward_vector": [
-      0.9876,
-      0.0459,
-      -0.1501
+      -0.4291,
+      0.0691,
+      0.9006
     ],
-    "initial_speed_kmh": 55.0,
+    "initial_speed_kmh": 60.0,
     "gear": 2,
-    "rpm": 4275
+    "rpm": 4500
   },
   "timing": {
     "start_gate": {
       "p1": [
-        233.904,
-        4.801,
-        463.37
+        -373.235,
+        -2.751,
+        -110.317
       ],
       "p2": [
-        232.319,
-        4.801,
-        453.933
+        -363.003,
+        -2.751,
+        -106.199
       ]
     },
     "finish_gate": {
       "p1": [
-        372.553,
-        25.162,
-        207.154
+        -342.551,
+        -14.782,
+        210.25
       ],
       "p2": [
-        362.753,
-        25.162,
-        207.245
+        -347.696,
+        -14.782,
+        193.524
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 24.4,
-    "silver_seconds": 26.1,
-    "bronze_seconds": 28.6
+    "gold_seconds": 26.0,
+    "silver_seconds": 26.3,
+    "bronze_seconds": 27.6
   }
 }

@@ -10,6 +10,7 @@ import importlib
 import json
 import math
 import os
+import re
 import sys
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -486,3 +487,117 @@ def generate_and_validate(ac_root: str = DEFAULT_AC_ROOT) -> Dict[str, Any]:
             for iss in report.issues if iss.severity == "WARNING"
         ],
     }
+
+
+def get_ac_curriculum_reference_tests() -> List[Dict[str, Any]]:
+    """Converts the active 58 AC Mod career license tests into the standard reference format."""
+    ac_cars_dir = os.path.join(DEFAULT_AC_ROOT, "content", "cars")
+    tracks = get_available_tracks(kunos_only=False)
+    track_map = {t["track_id"]: t["name"] for t in tracks}
+    cars = get_available_cars(kunos_only=False)
+    car_name_map = {c["car_id"]: c["name"] for c in cars}
+
+    car_specs_cache: Dict[str, Tuple[int, int, float, str]] = {
+        "ferrari_laferrari": (963, 1255, 1.30, "MR"),
+        "ks_ferrari_f2004": (865, 605, 0.70, "MR"),
+        "ks_toyota_ts040": (1000, 870, 0.87, "MAWD"),
+    }
+
+    layout_map: Dict[str, str] = {
+        "abarth500": "FF", "alfa_romeo_giulietta_qv": "FF", "ks_alfa_mito_qv": "FF",
+        "ks_audi_a1s1": "FAWD", "ks_audi_sport_quattro": "FAWD", "ks_toyota_celica_st185": "FAWD",
+        "ks_nissan_gtr": "FAWD", "ks_alfa_romeo_155_v6": "FAWD",
+        "ks_lamborghini_huracan_performante": "MAWD", "ks_porsche_919_hybrid_2016": "MAWD", "ks_toyota_ts040": "MAWD",
+        "ks_porsche_911_gt3_r_2016": "RR", "ks_porsche_911_gt3_rs": "RR", "ks_porsche_911_rsr_2017": "RR",
+        "ferrari_458": "MR", "ferrari_laferrari": "MR", "ks_alfa_romeo_4c": "MR", "ks_audi_r8_lms_2016": "MR",
+        "ks_ferrari_488_gt3": "MR", "ks_ferrari_488_gtb": "MR", "ks_ferrari_f2004": "MR", "ks_ford_gt40": "MR",
+        "ks_mazda_787b": "MR", "ks_mclaren_650_gt3": "MR", "ks_mclaren_p1": "MR", "ks_mercedes_c9": "MR",
+        "ks_porsche_718_cayman_s": "MR", "ks_porsche_962c_shorttail": "MR", "ks_porsche_cayman_gt4_clubsport": "MR",
+        "lotus_2_eleven": "MR", "lotus_elise_sc": "MR", "lotus_exige_240": "MR", "pagani_zonda_r": "MR",
+    }
+
+    curriculum = load_curriculum()
+    ac_tests: List[Dict[str, Any]] = []
+    progression = 1
+
+    for tier in curriculum:
+        tier_name = tier["tier_name"]
+        for test in tier["tests"]:
+            car_id = test.get("car_id", "")
+            car_display_name = car_name_map.get(car_id, car_id)
+            hp: Optional[int] = None
+            wt: Optional[int] = None
+            pw: Optional[float] = None
+
+            # Check cache/fallback first
+            if car_id in car_specs_cache:
+                hp, wt, pw, _ = car_specs_cache[car_id]
+            else:
+                ui_path = os.path.join(ac_cars_dir, car_id, "ui", "ui_car.json")
+                if os.path.isfile(ui_path):
+                    try:
+                        with open(ui_path, "r", encoding="utf-8", errors="ignore") as f:
+                            d = json.loads(f.read(), strict=False)
+                            car_display_name = d.get("name", car_display_name)
+                            specs = d.get("specs", {})
+                            bhp_m = re.search(r"(\d+)", specs.get("bhp", ""))
+                            if bhp_m: hp = int(bhp_m.group(1))
+                            wt_m = re.search(r"(\d+)", specs.get("weight", ""))
+                            if wt_m: wt = int(wt_m.group(1))
+                            pw_m = re.search(r"([\d.]+)", specs.get("pwratio", ""))
+                            if pw_m: pw = float(pw_m.group(1))
+                    except Exception:
+                        pass
+
+            if hp and wt and not pw:
+                pw = round(wt / hp, 2)
+            if hp and pw and not wt:
+                wt = round(hp * pw)
+
+            layout = layout_map.get(car_id, "FR")
+            track_id = test.get("track_id", "")
+            track_name = track_map.get(track_id, track_id)
+            layout_id = test.get("track_layout", "")
+            if layout_id:
+                track_name += f" ({layout_id})"
+
+            targets = test.get("targets", {})
+            gold_sec = targets.get("gold_seconds")
+            silver_sec = targets.get("silver_seconds")
+            bronze_sec = targets.get("bronze_seconds")
+
+            def format_time_str(s: Optional[float]) -> str:
+                if s is None: return "N/A"
+                if s < 60: return f"{s:.3f}s"
+                m = int(s // 60)
+                sec_part = s % 60
+                return f"{m}:{sec_part:06.3f}"
+
+            entry = {
+                "id": f"AC_{test.get('test_id', progression)}",
+                "game": "AC Mod",
+                "license": tier_name,
+                "section": f"AC Mod {tier_name}",
+                "code": test.get("test_id", f"T-{progression}"),
+                "title": test.get("title", ""),
+                "test": f"{test.get('test_id', '')} - {test.get('title', '')}",
+                "car": car_display_name,
+                "car_id": car_id,
+                "hp": hp or 200,
+                "weight_kg": wt,
+                "pw_kg_hp": pw,
+                "drivetrain_layout": layout,
+                "track": track_name,
+                "gold": format_time_str(gold_sec),
+                "silver": format_time_str(silver_sec),
+                "bronze": format_time_str(bronze_sec),
+                "gold_seconds": gold_sec,
+                "silver_seconds": silver_sec,
+                "bronze_seconds": bronze_sec,
+                "target_type": "time",
+                "test_progression": progression,
+            }
+            ac_tests.append(entry)
+            progression += 1
+
+    return ac_tests

@@ -1,51 +1,51 @@
 {
   "test_id": "IA-12",
   "tier": "International A",
-  "title": "Graduation: Circuit de Spa-Francorchamps Sector Trial",
-  "description": "Connecting Les Combes, Bruxelles, Pouhon, and Stavelot without a single tire exceeding track limits.",
-  "lesson_objective": "Complete high-speed GT3 sector mastery across Spa Sector 2.",
+  "title": "Multi-Car GT3 Traffic Overtake",
+  "description": "Start P3 into Mercedes Arena, pass two AI competitors cleanly, and defend position through exit.",
+  "lesson_objective": "Wheel-to-wheel racecraft and overtaking under braking in GT3 machinery.",
   "car_id": "ks_ferrari_488_gt3",
-  "track_id": "spa",
-  "track_layout": "",
+  "track_id": "ks_nurburgring",
+  "track_layout": "layout_sprint_a",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      584.633,
-      62.833,
-      492.984
+      -4.299,
+      63.368,
+      -672.618
     ],
     "forward_vector": [
-      0.3146,
-      0.0476,
-      0.948
+      0.0059,
+      -0.0063,
+      1.0
     ],
-    "initial_speed_kmh": 79.2,
+    "initial_speed_kmh": 113.8,
     "gear": 3,
-    "rpm": 3774
+    "rpm": 5500
   },
   "timing": {
     "start_gate": {
       "p1": [
-        607.284,
-        66.339,
-        565.726
+        -6.689,
+        62.759,
+        -585.799
       ],
       "p2": [
-        617.886,
-        66.339,
-        562.273
+        6.841,
+        62.759,
+        -585.904
       ]
     },
     "finish_gate": {
       "p1": [
-        -69.253,
-        -19.59,
-        619.695
+        -270.975,
+        50.448,
+        -186.732
       ],
       "p2": [
-        -59.337,
-        -19.59,
-        622.517
+        -258.155,
+        50.448,
+        -179.498
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 106.7,
-    "silver_seconds": 114.3,
-    "bronze_seconds": 125.2
+    "gold_seconds": 36.8,
+    "silver_seconds": 39.4,
+    "bronze_seconds": 43.1
   }
 }

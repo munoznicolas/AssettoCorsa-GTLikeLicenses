@@ -1,49 +1,49 @@
 {
   "test_id": "S-6",
   "tier": "Super License",
-  "title": "Undulating Perfection: Imola GP",
-  "description": "Ground-effect underbody tunnels keep the car glued through Piratella and Acque Minerali.",
-  "lesson_objective": "High ground-effect prototype discipline with zero curb slamming.",
-  "car_id": "ks_porsche_962c_shorttail",
-  "track_id": "imola",
+  "title": "High-Downforce Aerodynamic Flow: Mugello",
+  "description": "Zero driving assists; connecting Casanova-Savelli and Arrabbiata 1 & 2 into one high-g rhythm.",
+  "lesson_objective": "Naturally aspirated V12 track special full circuit flow.",
+  "car_id": "pagani_zonda_r",
+  "track_id": "mugello",
   "track_layout": "",
   "start_mode": "FLYING_LAP",
   "spawn": {
     "position": [
-      274.544,
-      -85.249,
-      -388.368
+      6.537,
+      -0.129,
+      25.551
     ],
     "forward_vector": [
-      -1.0,
-      0.0041,
-      0.0047
+      -0.9999,
+      0.0124,
+      -0.0037
     ],
-    "initial_speed_kmh": 180.0
+    "initial_speed_kmh": 170.0
   },
   "timing": {
     "start_gate": {
       "p1": [
-        208.482,
-        -85.014,
-        -400.85
+        -54.957,
+        0.574,
+        17.575
       ],
       "p2": [
-        207.769,
-        -85.014,
-        -385.696
+        -55.165,
+        0.574,
+        32.163
       ]
     },
     "finish_gate": {
       "p1": [
-        214.895,
-        -85.036,
-        -400.035
+        -48.183,
+        0.494,
+        17.773
       ],
       "p2": [
-        214.249,
-        -85.036,
-        -385.039
+        -48.34,
+        0.494,
+        32.373
       ]
     }
   },
@@ -54,8 +54,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 95.2,
-    "silver_seconds": 102.0,
-    "bronze_seconds": 111.8
+    "gold_seconds": 99.8,
+    "silver_seconds": 107.0,
+    "bronze_seconds": 117.2
   }
 }

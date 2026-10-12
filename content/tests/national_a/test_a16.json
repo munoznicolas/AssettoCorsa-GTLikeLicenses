@@ -1,0 +1,63 @@
+{
+  "test_id": "A-16",
+  "tier": "National A",
+  "title": "Green Hell Sector Trial: Hohe Acht to Br\u00fcnnchen (GT4 A-16)",
+  "description": "Tackle the technical mid-section of the N\u00fcrburgring Nordschleife in the twin-turbo RX-7 Spirit R, mastering Wippermann, Eschbach, and Br\u00fcnnchen.",
+  "lesson_objective": "Consecutive blind corner links and elevation management on the Nordschleife.",
+  "car_id": "ks_mazda_rx7_spirit_r",
+  "track_id": "ks_nordschleife",
+  "track_layout": "nordschleife",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      3089.322,
+      119.861,
+      -1764.823
+    ],
+    "forward_vector": [
+      0.5197,
+      -0.048,
+      0.853
+    ],
+    "initial_speed_kmh": 90.0,
+    "gear": 3,
+    "rpm": 4500
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        3138.682,
+        115.883,
+        -1710.444
+      ],
+      "p2": [
+        3143.203,
+        115.883,
+        -1717.842
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        3042.491,
+        58.012,
+        -609.124
+      ],
+      "p2": [
+        3050.486,
+        58.012,
+        -609.432
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 54.15,
+    "silver_seconds": 56.0,
+    "bronze_seconds": 62.7
+  }
+}

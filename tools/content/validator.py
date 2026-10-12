@@ -263,8 +263,9 @@ class CurriculumValidator:
                 file_path=filepath
             ))
 
-        # Check test number range (1-12 for standard, 1-10 for Super License)
-        max_num = 10 if tier == "Super License" else 12
+        # Check test number range based on active catalog tier capacity
+        from tools.content.catalog import TESTS_BY_TIER
+        max_num = len(TESTS_BY_TIER.get(tier, [])) or (15 if tier == "Super License" else 17)
         if num < 1 or num > max_num:
             issues.append(ValidationIssue(
                 severity="ERROR",

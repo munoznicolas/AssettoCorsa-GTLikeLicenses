@@ -1,51 +1,51 @@
 {
   "test_id": "A-4",
   "tier": "National A",
-  "title": "Mid-Engine Snap Oversteer Control",
-  "description": "Avoiding abrupt throttle lift through off-camber Graham Hill Bend.",
-  "lesson_objective": "Controlling mid-engine lift-off snap oversteer in a carbon-tub sports car.",
-  "car_id": "ks_alfa_romeo_4c",
-  "track_id": "ks_brands_hatch",
-  "track_layout": "indy",
+  "title": "Racing Line & Heavy Braking: Variante del Rettifilo (GT7 A-3)",
+  "description": "Approach the first chicane at maximum velocity. Execute threshold braking in a hot hatchback, hop the kerbs cleanly, and accelerate out.",
+  "lesson_objective": "Front-wheel drive chicane braking and curb hopping.",
+  "car_id": "abarth500",
+  "track_id": "monza",
+  "track_layout": "",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      163.349,
-      -17.416,
-      -280.089
+      -156.599,
+      -5.628,
+      -104.233
     ],
     "forward_vector": [
-      -0.0443,
-      0.1115,
-      0.9928
+      0.0789,
+      0.0055,
+      -0.9969
     ],
-    "initial_speed_kmh": 90.0,
-    "gear": 3,
-    "rpm": 4475
+    "initial_speed_kmh": 70.0,
+    "gear": 2,
+    "rpm": 4000
   },
   "timing": {
     "start_gate": {
       "p1": [
-        156.315,
-        -9.01,
-        -205.918
+        -149.401,
+        -5.36,
+        -158.815
       ],
       "p2": [
-        166.578,
-        -9.01,
-        -204.941
+        -160.719,
+        -5.36,
+        -159.785
       ]
     },
     "finish_gate": {
       "p1": [
-        -37.852,
-        -16.762,
-        -349.887
+        -96.977,
+        -1.486,
+        -818.961
       ],
       "p2": [
-        -34.857,
-        -16.762,
-        -338.432
+        -106.595,
+        -1.486,
+        -820.054
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 15.6,
-    "silver_seconds": 16.7,
-    "bronze_seconds": 18.3
+    "gold_seconds": 21.9,
+    "silver_seconds": 22.5,
+    "bronze_seconds": 24.1
   }
 }

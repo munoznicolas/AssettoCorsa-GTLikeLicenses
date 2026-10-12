@@ -1,49 +1,49 @@
 {
   "test_id": "S-5",
   "tier": "Super License",
-  "title": "The 4-Rotor Symphony: Silverstone GP",
-  "description": "Heel-toe downshifting without synchros and pinning throttle through Copse and Maggotts-Becketts.",
-  "lesson_objective": "1991 Le Mans-winning rotary prototype full lap mastery.",
-  "car_id": "ks_mazda_787b",
-  "track_id": "ks_silverstone",
+  "title": "V12 AWD Supercar Lap: Brands Hatch GP (GT6 S-4)",
+  "description": "740 bhp V12 naturally aspirated fury coupled with all-wheel drive stability on a historic natural amphitheater.",
+  "lesson_objective": "Managing high vehicle mass and extreme horsepower through narrow undulating bends.",
+  "car_id": "ks_lamborghini_aventador_sv",
+  "track_id": "ks_brands_hatch",
   "track_layout": "gp",
   "start_mode": "FLYING_LAP",
   "spawn": {
     "position": [
-      -424.011,
-      -6.585,
-      286.307
+      -189.593,
+      -7.532,
+      -367.02
     ],
     "forward_vector": [
-      0.5837,
-      0.006,
-      -0.812
+      0.9125,
+      -0.0344,
+      -0.4077
     ],
-    "initial_speed_kmh": 180.0
+    "initial_speed_kmh": 150.0
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -383.844,
-        -5.99,
-        234.166
+        -136.651,
+        -7.661,
+        -387.201
       ],
       "p2": [
-        -395.088,
-        -5.99,
-        226.166
+        -141.115,
+        -7.661,
+        -397.875
       ]
     },
     "finish_gate": {
       "p1": [
-        -387.519,
-        -6.064,
-        239.639
+        -141.759,
+        -7.755,
+        -385.078
       ],
       "p2": [
-        -398.965,
-        -6.064,
-        231.473
+        -146.27,
+        -7.755,
+        -395.754
       ]
     }
   },
@@ -54,8 +54,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 107.8,
-    "silver_seconds": 115.5,
-    "bronze_seconds": 126.5
+    "gold_seconds": 94.5,
+    "silver_seconds": 96.0,
+    "bronze_seconds": 99.0
   }
 }

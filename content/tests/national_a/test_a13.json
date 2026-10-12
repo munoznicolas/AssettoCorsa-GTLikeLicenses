@@ -1,0 +1,63 @@
+{
+  "test_id": "A-13",
+  "tier": "National A",
+  "title": "High-Speed Esses Precision",
+  "description": "Precision rhythm: lift for Maggotts, dab brakes into Becketts, wide exit into Chapel.",
+  "lesson_objective": "Linking high-speed S-curves at 180+ km/h.",
+  "car_id": "bmw_m3_e30_s1",
+  "track_id": "ks_silverstone",
+  "track_layout": "gp",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      -7.901,
+      2.889,
+      -531.464
+    ],
+    "forward_vector": [
+      -0.7485,
+      -0.0076,
+      -0.6631
+    ],
+    "initial_speed_kmh": 85.0,
+    "gear": 3,
+    "rpm": 4150
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        -52.12,
+        2.135,
+        -588.398
+      ],
+      "p2": [
+        -61.88,
+        2.135,
+        -577.246
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        -324.592,
+        -0.835,
+        -646.459
+      ],
+      "p2": [
+        -339.19,
+        -0.835,
+        -654.15
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 33.0,
+    "silver_seconds": 35.3,
+    "bronze_seconds": 38.7
+  }
+}

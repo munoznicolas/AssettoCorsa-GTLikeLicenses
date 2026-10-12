@@ -2,50 +2,50 @@
   "test_id": "IA-3",
   "tier": "International A",
   "title": "Extreme Downforce Cornering: Arrabbiata 1 & 2",
-  "description": "Back-to-back uphill right sweepers pulling over 2.5G with GT3 downforce.",
-  "lesson_objective": "High-g aerodynamic downforce line discipline through Mugello's Arrabbiata curves.",
+  "description": "Flat-out right kink into Arrabbiata 1, dab brakes uphill, hook Arrabbiata 2 on the throttle.",
+  "lesson_objective": "Harnessing 800+ kg of GT3 aerodynamic downforce at 200+ km/h sustained.",
   "car_id": "ks_audi_r8_lms_2016",
   "track_id": "mugello",
   "track_layout": "",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      126.07,
-      19.0,
-      -254.181
+      444.815,
+      -7.66,
+      -57.923
     ],
     "forward_vector": [
-      0.9665,
-      -0.0471,
-      0.2524
+      0.9926,
+      -0.0443,
+      -0.1126
     ],
-    "initial_speed_kmh": 60.5,
-    "gear": 2,
-    "rpm": 4741
+    "initial_speed_kmh": 129.5,
+    "gear": 4,
+    "rpm": 5410
   },
   "timing": {
     "start_gate": {
       "p1": [
-        176.975,
-        16.308,
-        -238.163
+        541.444,
+        -10.699,
+        -71.481
       ],
       "p2": [
-        179.713,
-        16.308,
-        -248.197
+        540.761,
+        -10.699,
+        -82.24
       ]
     },
     "finish_gate": {
       "p1": [
-        674.937,
-        -3.882,
-        94.262
+        164.076,
+        12.627,
+        172.039
       ],
       "p2": [
-        686.847,
-        -3.882,
-        94.746
+        165.375,
+        12.627,
+        184.15
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 38.3,
-    "silver_seconds": 41.1,
-    "bronze_seconds": 45.0
+    "gold_seconds": 22.8,
+    "silver_seconds": 24.4,
+    "bronze_seconds": 26.7
   }
 }

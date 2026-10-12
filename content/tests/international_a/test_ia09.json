@@ -1,51 +1,51 @@
 {
   "test_id": "IA-9",
   "tier": "International A",
-  "title": "Analog 1960s Prototype Mastery",
-  "description": "Vintage cross-ply racing slicks, heavy clutch, zero assists through Curva Grande and Lesmo 1 & 2.",
-  "lesson_objective": "Controlling a high-power historic prototype on vintage tires.",
-  "car_id": "ks_ford_gt40",
-  "track_id": "ks_monza66",
-  "track_layout": "road",
+  "title": "GTE Aerodynamic Diffuser Suction",
+  "description": "High-downforce mid-engine 911 RSR through Copse Corner: 225 km/h apex, zero steering wiggle.",
+  "lesson_objective": "Maximum commitment to ground-effect diffuser suction at very high speed.",
+  "car_id": "ks_porsche_911_rsr_2017",
+  "track_id": "ks_silverstone",
+  "track_layout": "gp",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      402.032,
-      1.424,
-      -1133.584
+      150.577,
+      2.109,
+      -107.562
     ],
     "forward_vector": [
-      0.9996,
-      0.0034,
-      -0.028
+      0.7007,
+      0.008,
+      -0.7134
     ],
-    "initial_speed_kmh": 93.9,
-    "gear": 3,
-    "rpm": 4730
+    "initial_speed_kmh": 130.0,
+    "gear": 4,
+    "rpm": 6100
   },
   "timing": {
     "start_gate": {
       "p1": [
-        480.48,
-        1.672,
-        -1132.569
+        227.743,
+        2.228,
+        -132.079
       ],
       "p2": [
-        479.529,
-        1.672,
-        -1142.111
+        234.755,
+        2.228,
+        -147.741
       ]
     },
     "finish_gate": {
       "p1": [
-        944.346,
-        -2.587,
-        -893.582
+        -17.693,
+        2.7,
+        -557.146
       ],
       "p2": [
-        948.928,
-        -2.587,
-        -885.203
+        -27.585,
+        2.7,
+        -545.99
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 47.7,
-    "silver_seconds": 51.1,
-    "bronze_seconds": 55.9
+    "gold_seconds": 19.8,
+    "silver_seconds": 21.2,
+    "bronze_seconds": 23.2
   }
 }

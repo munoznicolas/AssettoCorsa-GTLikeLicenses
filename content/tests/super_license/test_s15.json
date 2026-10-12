@@ -1,0 +1,61 @@
+{
+  "test_id": "S-15",
+  "tier": "Super License",
+  "title": "The Ultimate Trial: N\u00fcrburgring Nordschleife Silver Arrow (GT4 S-16)",
+  "description": "The definitive Gran Turismo final test: a full, unassisted flying lap of the Green Hell in the 720 bhp Sauber-Mercedes C9.",
+  "lesson_objective": "Flawless mastery of all 154 corners of the N\u00fcrburgring Nordschleife in a Group C Le Mans winner.",
+  "car_id": "ks_mercedes_c9",
+  "track_id": "ks_nordschleife",
+  "track_layout": "nordschleife",
+  "start_mode": "FLYING_LAP",
+  "spawn": {
+    "position": [
+      -451.487,
+      137.52,
+      2353.269
+    ],
+    "forward_vector": [
+      -0.8246,
+      0.0334,
+      0.5647
+    ],
+    "initial_speed_kmh": 170.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        -513.141,
+        139.699,
+        2347.144
+      ],
+      "p2": [
+        -519.157,
+        139.699,
+        2355.057
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        -494.421,
+        138.925,
+        2354.332
+      ],
+      "p2": [
+        -497.582,
+        138.925,
+        2363.713
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 427.7,
+    "silver_seconds": 450.0,
+    "bronze_seconds": 478.3
+  }
+}

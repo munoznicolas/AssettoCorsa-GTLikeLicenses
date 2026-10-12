@@ -2,50 +2,50 @@
   "test_id": "IA-2",
   "tier": "International A",
   "title": "GT4 Trail-Braking & Weight Conservation",
-  "description": "Hard trail braking into Westfield, carrying momentum through the dip and clipping Dingle Dell.",
-  "lesson_objective": "Managing momentum and trail-braking with GT4 race slicks.",
+  "description": "Trailing brake deep into Westfield and Sheene Curve, managing natural understeer.",
+  "lesson_objective": "Conservation of momentum in a customer racing GT4 car without aero downforce.",
   "car_id": "ks_porsche_cayman_gt4_clubsport",
   "track_id": "ks_brands_hatch",
   "track_layout": "gp",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      138.368,
-      -0.112,
-      13.498
+      354.48,
+      -1.044,
+      131.512
     ],
     "forward_vector": [
-      0.8811,
-      -0.0543,
-      0.4697
+      0.7671,
+      0.0673,
+      0.638
     ],
-    "initial_speed_kmh": 135.7,
-    "gear": 4,
-    "rpm": 5337
+    "initial_speed_kmh": 115.1,
+    "gear": 3,
+    "rpm": 4486
   },
   "timing": {
     "start_gate": {
       "p1": [
-        277.924,
-        -7.273,
-        88.131
+        389.457,
+        4.677,
+        206.017
       ],
       "p2": [
-        281.88,
-        -7.273,
-        80.472
+        399.085,
+        4.677,
+        204.299
       ]
     },
     "finish_gate": {
       "p1": [
-        146.43,
-        5.712,
-        474.95
+        10.104,
+        8.322,
+        134.59
       ],
       "p2": [
-        143.287,
-        5.712,
-        485.292
+        0.901,
+        8.322,
+        133.88
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 22.2,
-    "silver_seconds": 23.8,
-    "bronze_seconds": 26.0
+    "gold_seconds": 29.8,
+    "silver_seconds": 31.9,
+    "bronze_seconds": 34.9
   }
 }

@@ -1,51 +1,51 @@
 {
   "test_id": "IA-8",
   "tier": "International A",
-  "title": "GTE Aerodynamic Diffuser Suction",
-  "description": "Dab brake, turn in decisively at 230+ km/h through Copse, and ride the exit rumble strip.",
-  "lesson_objective": "Exploiting inverted mid-engine GTE diffuser downforce.",
-  "car_id": "ks_porsche_911_rsr_2017",
-  "track_id": "ks_silverstone",
-  "track_layout": "gp",
+  "title": "Rear-Engine GT3 Pivot & Curb Launch",
+  "description": "Braking deep into Ford Kurve: use rear weight bias to pivot car, open steering, power out.",
+  "lesson_objective": "Exploiting rear weight bias for corner rotation and traction drive in a GT3.",
+  "car_id": "ks_porsche_911_gt3_r_2016",
+  "track_id": "ks_nurburgring",
+  "track_layout": "layout_gp_a",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      120.413,
-      1.082,
-      -856.768
+      -65.293,
+      50.711,
+      -11.72
     ],
     "forward_vector": [
-      0.9937,
-      0.0065,
-      -0.1119
+      0.5352,
+      -0.0121,
+      0.8446
     ],
-    "initial_speed_kmh": 65.0,
-    "gear": 2,
-    "rpm": 5126
+    "initial_speed_kmh": 113.8,
+    "gear": 3,
+    "rpm": 5400
   },
   "timing": {
     "start_gate": {
       "p1": [
-        195.103,
-        1.555,
-        -863.06
+        -25.902,
+        49.623,
+        65.722
       ],
       "p2": [
-        193.586,
-        1.555,
-        -876.535
+        -18.092,
+        49.623,
+        61.209
       ]
     },
     "finish_gate": {
       "p1": [
-        414.138,
-        4.086,
-        -437.345
+        226.016,
+        14.539,
+        631.134
       ],
       "p2": [
-        428.31,
-        4.086,
-        -439.66
+        236.578,
+        14.539,
+        630.018
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 24.2,
-    "silver_seconds": 26.0,
-    "bronze_seconds": 28.4
+    "gold_seconds": 27.0,
+    "silver_seconds": 28.9,
+    "bronze_seconds": 31.6
   }
 }

@@ -1,51 +1,51 @@
 {
   "test_id": "IA-5",
   "tier": "International A",
-  "title": "Front-Mid GT3 Platform Stability",
-  "description": "Heavy braking into Turn 1/2 uphill flick followed immediately by the long Turn 3 sweeper.",
-  "lesson_objective": "Front-mid engine platform aero balance and tire heat conservation.",
-  "car_id": "ks_mercedes_amg_gt3",
-  "track_id": "ks_barcelona",
-  "track_layout": "layout_gp",
+  "title": "Classic DTM Aggressive Curb Hopping",
+  "description": "High-revving 11,500 RPM V6: ride curbs through Acque Minerali compression and climb out.",
+  "lesson_objective": "Aggressive kerb usage and high-RPM naturally aspirated powerband management.",
+  "car_id": "ks_alfa_romeo_155_v6",
+  "track_id": "imola",
+  "track_layout": "",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      -27.338,
-      -25.479,
-      425.129
+      -346.8,
+      -53.029,
+      455.41
     ],
     "forward_vector": [
-      -0.5503,
-      -0.0129,
-      0.8349
+      0.9651,
+      -0.001,
+      -0.262
     ],
-    "initial_speed_kmh": 49.0,
-    "gear": 2,
-    "rpm": 3758
+    "initial_speed_kmh": 114.7,
+    "gear": 4,
+    "rpm": 8200
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -52.514,
-        -25.995,
-        461.156
+        -276.114,
+        -54.487,
+        402.181
       ],
       "p2": [
-        -41.41,
-        -25.995,
-        468.068
+        -287.092,
+        -54.487,
+        397.826
       ]
     },
     "finish_gate": {
       "p1": [
-        -418.141,
-        -9.892,
-        276.842
+        176.223,
+        -55.807,
+        -20.359
       ],
       "p2": [
-        -429.245,
-        -9.892,
-        269.359
+        175.77,
+        -55.807,
+        -30.369
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 48.0,
-    "silver_seconds": 51.4,
-    "bronze_seconds": 56.3
+    "gold_seconds": 23.9,
+    "silver_seconds": 25.6,
+    "bronze_seconds": 28.0
   }
 }

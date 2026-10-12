@@ -1,49 +1,49 @@
 {
   "test_id": "S-9",
   "tier": "Super License",
-  "title": "Formula 1 V10 Apex Velocity: Barcelona GP",
-  "description": "Pulling over 4.5G lateral cornering and 100m braking distances from 310 km/h with 19,000 RPM V10.",
-  "lesson_objective": "The benchmark Formula 1 car of all time at absolute qualifying limits.",
-  "car_id": "ks_ferrari_f2004",
-  "track_id": "ks_barcelona",
-  "track_layout": "layout_gp",
+  "title": "Undulating Perfection: Imola GP",
+  "description": "Porsche ground-effects prototype attacking Piratella, Acque Minerali, and Variante Alta curbs.",
+  "lesson_objective": "Group C ground effect venturi tunnel suction through undulations.",
+  "car_id": "ks_porsche_962c_shorttail",
+  "track_id": "imola",
+  "track_layout": "",
   "start_mode": "FLYING_LAP",
   "spawn": {
     "position": [
-      414.794,
-      -17.636,
-      -261.937
+      269.545,
+      -85.229,
+      -388.355
     ],
     "forward_vector": [
-      -0.5734,
-      -0.0155,
-      0.8192
+      -1.0,
+      0.004,
+      0.0014
     ],
-    "initial_speed_kmh": 220.0
+    "initial_speed_kmh": 165.0
   },
   "timing": {
     "start_gate": {
       "p1": [
-        366.752,
-        -18.539,
-        -195.835
+        208.482,
+        -85.014,
+        -400.85
       ],
       "p2": [
-        377.535,
-        -18.539,
-        -188.827
+        207.769,
+        -85.014,
+        -385.696
       ]
     },
     "finish_gate": {
       "p1": [
-        370.175,
-        -18.501,
-        -201.04
+        214.895,
+        -85.036,
+        -400.035
       ],
       "p2": [
-        380.941,
-        -18.501,
-        -194.005
+        214.249,
+        -85.036,
+        -385.039
       ]
     }
   },
@@ -54,8 +54,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 74.2,
-    "silver_seconds": 79.5,
-    "bronze_seconds": 87.1
+    "gold_seconds": 95.5,
+    "silver_seconds": 102.2,
+    "bronze_seconds": 111.9
   }
 }

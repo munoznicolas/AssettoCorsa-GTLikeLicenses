@@ -1,51 +1,51 @@
 {
   "test_id": "A-7",
   "tier": "National A",
-  "title": "Downhill Hairpin Trail-Braking",
-  "description": "Steep uphill braking followed by a sharp downhill drop into Remus Hairpin.",
-  "lesson_objective": "Trailing brake pressure past turn-in to keep load on front tires.",
-  "car_id": "ks_nissan_370z",
-  "track_id": "ks_red_bull_ring",
-  "track_layout": "layout_gp",
+  "title": "Consecutive Corners: Variante della Roggia (GT7 A-6)",
+  "description": "Negotiate Curva Grande and brake into the tight left-right chicane of Variante della Roggia, balancing mid-engine agility.",
+  "lesson_objective": "Mid-engine direction changes through high-speed chicane transitions.",
+  "car_id": "ks_alfa_romeo_4c",
+  "track_id": "monza",
+  "track_layout": "",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      -325.885,
-      10.442,
-      6.079
+      259.429,
+      0.465,
+      -1120.468
     ],
     "forward_vector": [
-      -0.4387,
-      0.0243,
-      -0.8983
+      0.9949,
+      0.0086,
+      -0.1002
     ],
-    "initial_speed_kmh": 75.0,
+    "initial_speed_kmh": 80.0,
     "gear": 3,
-    "rpm": 3500
+    "rpm": 4200
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -347.402,
-        12.151,
-        -53.145
+        324.266,
+        0.92,
+        -1121.598
       ],
       "p2": [
-        -357.931,
-        12.151,
-        -47.644
+        323.802,
+        0.92,
+        -1131.307
       ]
     },
     "finish_gate": {
       "p1": [
-        -578.459,
-        43.078,
-        -316.026
+        973.349,
+        -1.326,
+        -1261.842
       ],
       "p2": [
-        -586.618,
-        43.078,
-        -307.501
+        977.467,
+        -1.326,
+        -1270.844
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 20.0,
-    "silver_seconds": 21.4,
-    "bronze_seconds": 23.5
+    "gold_seconds": 18.1,
+    "silver_seconds": 18.7,
+    "bronze_seconds": 20.1
   }
 }

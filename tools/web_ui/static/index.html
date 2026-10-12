@@ -30,10 +30,20 @@
       </div>
     </header>
 
-    <!-- License Tabs (Fixed, per requirements: names and images cannot be changed) -->
+    <!-- License Tabs & Reference Tab -->
     <nav class="license-nav">
-      <div id="license-tabs" class="tab-container">
-        <!-- Rendered dynamically from curriculum -->
+      <div class="nav-tabs-wrapper">
+        <div id="license-tabs" class="tab-container">
+          <!-- Rendered dynamically from curriculum -->
+        </div>
+        <div class="nav-divider"></div>
+        <div class="extra-tabs-container">
+          <button id="tab-btn-reference" class="license-tab reference-tab" title="Gran Turismo Benchmark Data & Visualizations">
+            <span class="tab-icon">📊</span>
+            <span>GT Constant Values</span>
+            <span class="tab-count" id="ref-total-badge">406</span>
+          </button>
+        </div>
       </div>
     </nav>
 
@@ -273,6 +283,184 @@
       </main>
     </div>
 
+    <!-- Gran Turismo Reference & Constant Values View -->
+    <div id="reference-view" class="reference-view" style="display: none;">
+      <!-- Reference View Header -->
+      <div class="ref-header">
+        <div class="ref-title-group">
+          <h2>GRAN TURISMO DRIVING SCHOOL CONSTANT VALUES & BENCHMARKS</h2>
+          <p class="ref-subtitle">Authoritative GT1–GT7 curriculum telemetry: horsepower progression, power-to-weight calibration, medal durations, and powertrain layouts.</p>
+        </div>
+
+        <!-- Game Selector Controls -->
+        <div class="ref-controls">
+          <label class="ref-control-label">SELECT GAME:</label>
+          <div id="game-selector-pills" class="game-pills">
+            <button class="pill-btn active" data-game="ALL">All Games</button>
+            <button class="pill-btn" data-game="GT1">GT1</button>
+            <button class="pill-btn" data-game="GT2">GT2</button>
+            <button class="pill-btn" data-game="GT3">GT3</button>
+            <button class="pill-btn" data-game="GT4">GT4</button>
+            <button class="pill-btn" data-game="GT5">GT5</button>
+            <button class="pill-btn" data-game="GT6">GT6</button>
+            <button class="pill-btn" data-game="GT7">GT7</button>
+            <button class="pill-btn pill-btn-ac" data-game="AC Mod" title="Assetto Corsa GT-Like Career Driving School">AC Mod</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Metrics Summary Cards -->
+      <div class="ref-metrics-grid">
+        <div class="ref-card metric-card">
+          <div class="metric-icon">🏁</div>
+          <div class="metric-info">
+            <span class="metric-label">Total Tests</span>
+            <span id="metric-total-tests" class="metric-value">406</span>
+          </div>
+        </div>
+        <div class="ref-card metric-card">
+          <div class="metric-icon">🥇</div>
+          <div class="metric-info">
+            <span class="metric-label">Total Gold Time</span>
+            <span id="metric-total-gold" class="metric-value">292:17.2</span>
+          </div>
+        </div>
+        <div class="ref-card metric-card">
+          <div class="metric-icon">⏱️</div>
+          <div class="metric-info">
+            <span class="metric-label">Avg Gold Duration</span>
+            <span id="metric-avg-gold" class="metric-value">0:45.670</span>
+          </div>
+        </div>
+        <div class="ref-card metric-card">
+          <div class="metric-icon">🐎</div>
+          <div class="metric-info">
+            <span class="metric-label">Average Horsepower</span>
+            <span id="metric-avg-hp" class="metric-value">318 HP</span>
+          </div>
+        </div>
+        <div class="ref-card metric-card">
+          <div class="metric-icon">⚖️</div>
+          <div class="metric-info">
+            <span class="metric-label">Avg Power / Weight</span>
+            <span id="metric-avg-pw" class="metric-value">5.12 kg/hp</span>
+          </div>
+        </div>
+        <div class="ref-card metric-card">
+          <div class="metric-icon">⚙️</div>
+          <div class="metric-info">
+            <span class="metric-label">Drivetrain Distribution</span>
+            <span id="metric-drivetrain-breakdown" class="metric-value sm">FR: 157 | FF: 84</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4 Visualizations Grid -->
+      <div class="ref-charts-grid">
+        <!-- Chart 1: Power & Power-to-Weight Ratio vs Test Progression (Dual Y-Axis) -->
+        <div class="ref-card chart-card">
+          <div class="chart-header">
+            <div class="chart-title">
+              <span class="chart-dot hp"></span>
+              <h3>Power & Power-to-Weight Ratio vs Test Progression</h3>
+            </div>
+            <div class="chart-legend-badges">
+              <span class="chart-badge text-red">● Left: HP</span>
+              <span class="chart-badge text-amber">● Right: kg/hp</span>
+            </div>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-power-pw"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 2: Gold Medal Duration vs Test Progression -->
+        <div class="ref-card chart-card">
+          <div class="chart-header">
+            <div class="chart-title">
+              <span class="chart-dot gold"></span>
+              <h3>Gold Medal Duration vs Test Progression</h3>
+            </div>
+            <span class="chart-badge">Y: Duration (Seconds)</span>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-gold"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 3: Distribution of Gold Times -->
+        <div class="ref-card chart-card">
+          <div class="chart-header">
+            <div class="chart-title">
+              <span class="chart-dot dist"></span>
+              <h3>Distribution of Gold Times</h3>
+            </div>
+            <div class="chart-legend-badges">
+              <span id="badge-p80" class="chart-badge text-amber" title="80th Percentile of Gold Target Durations">P80: --</span>
+              <span id="badge-p90" class="chart-badge text-rose" title="90th Percentile of Gold Target Durations">P90: --</span>
+              <span class="chart-badge">Density Curve</span>
+            </div>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-gold-dist"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 4: Car Drivetrain Layout vs Test Progression -->
+        <div class="ref-card chart-card">
+          <div class="chart-header">
+            <div class="chart-title">
+              <span class="chart-dot drivetrain"></span>
+              <h3>Car Drivetrain Layout vs Test Progression</h3>
+            </div>
+            <span class="chart-badge">Y: Layout (FF, FR, MR, RR, FAWD)</span>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-drivetrain"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reference Constant Values Documentation Table -->
+      <div class="ref-card table-card">
+        <div class="table-card-header">
+          <div class="table-title">
+            <h3>Constant Values Documentation Table</h3>
+            <span id="table-count-label" class="badge">406 Tests</span>
+          </div>
+          <div class="table-filters">
+            <input type="text" id="ref-search-input" class="form-control table-search" placeholder="Search test, car, track, drivetrain...">
+            <select id="ref-tier-select" class="form-control table-select">
+              <option value="ALL">All License Tiers</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="ref-data-table">
+            <thead>
+              <tr>
+                <th>Test ID</th>
+                <th>Game</th>
+                <th>Tier</th>
+                <th>Title</th>
+                <th>Car Model</th>
+                <th>HP</th>
+                <th>P/W (kg/hp)</th>
+                <th>Layout</th>
+                <th>Track / Sector</th>
+                <th>Gold Target</th>
+                <th>Silver</th>
+                <th>Bronze</th>
+              </tr>
+            </thead>
+            <tbody id="ref-table-body">
+              <!-- Dynamically rendered -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- Modal for Generation / Validation Logs -->
     <div id="log-modal" class="modal" style="display: none;">
       <div class="modal-content">
@@ -294,6 +482,7 @@
     <div id="toast" class="toast" style="display: none;"></div>
   </div>
 
+  <script src="chart.umd.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

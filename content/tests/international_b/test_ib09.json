@@ -1,51 +1,51 @@
 {
   "test_id": "IB-9",
   "tier": "International B",
-  "title": "Slipstream Drafting & Clean Overtake",
-  "description": "Tucking into the slipstream to gain 15 km/h, pulling out for a clean non-contact pass into Turn 3.",
-  "lesson_objective": "High-speed drafting and out-braking without body contact.",
-  "car_id": "ks_mazda_mx5_cup",
-  "track_id": "ks_red_bull_ring",
-  "track_layout": "layout_gp",
+  "title": "Heavyweight Digital AWD Traction",
+  "description": "Managing 1,720 kg curb weight through the tight Schumacher-S and Kumho chicane complexes.",
+  "lesson_objective": "Harnessing ATTESA E-TS all-wheel drive vectoring on chicane direction changes.",
+  "car_id": "ks_nissan_gtr",
+  "track_id": "ks_nurburgring",
+  "track_layout": "layout_gp_a",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      60.825,
-      -7.104,
-      372.886
+      -232.114,
+      50.43,
+      39.146
     ],
     "forward_vector": [
-      -0.9511,
-      0.0593,
-      0.3032
+      -0.8602,
+      -0.0115,
+      0.5099
     ],
-    "initial_speed_kmh": 65.0,
-    "gear": 2,
-    "rpm": 5124
+    "initial_speed_kmh": 111.4,
+    "gear": 3,
+    "rpm": 4323
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -0.538,
-        -2.638,
-        390.463
+        -311.959,
+        48.226,
+        55.958
       ],
       "p2": [
-        3.032,
-        -2.638,
-        402.463
+        -313.62,
+        48.226,
+        67.186
       ]
     },
     "finish_gate": {
       "p1": [
-        -399.89,
-        16.768,
-        -133.106
+        -200.836,
+        47.198,
+        -696.6
       ],
       "p2": [
-        -409.549,
-        16.768,
-        -126.45
+        -209.901,
+        47.198,
+        -701.88
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 36.5,
-    "silver_seconds": 39.1,
-    "bronze_seconds": 42.8
+    "gold_seconds": 27.6,
+    "silver_seconds": 29.5,
+    "bronze_seconds": 32.3
   }
 }

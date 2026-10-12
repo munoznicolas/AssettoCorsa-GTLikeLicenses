@@ -1,51 +1,51 @@
 {
   "test_id": "IA-10",
   "tier": "International A",
-  "title": "Multi-Car GT3 Traffic Overtake",
-  "description": "Overtake slower GT4 cars cleanly without body contact before crossing the sector line.",
-  "lesson_objective": "Multi-class racecraft, vision placement, and clean non-contact overtaking.",
-  "car_id": "ks_ferrari_488_gt3",
-  "track_id": "ks_nurburgring",
-  "track_layout": "layout_sprint_a",
+  "title": "Analog 1960s Prototype Mastery",
+  "description": "Historic Monza banking and pre-chicane flat-out sweepers: manual gearbox, bias-ply tires.",
+  "lesson_objective": "High-speed stability in an unfiltered 1960s endurance prototype.",
+  "car_id": "ks_ford_gt40",
+  "track_id": "ks_monza66",
+  "track_layout": "road",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      -84.128,
-      50.948,
-      -41.331
+      93.185,
+      -7.109,
+      151.096
     ],
     "forward_vector": [
-      0.5403,
-      -0.0011,
-      0.8414
+      -0.0863,
+      -0.0069,
+      0.9962
     ],
-    "initial_speed_kmh": 89.6,
-    "gear": 3,
-    "rpm": 4449
+    "initial_speed_kmh": 125.0,
+    "gear": 4,
+    "rpm": 4800
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -46.559,
-        50.161,
-        22.454
+        82.133,
+        -7.699,
+        246.3
       ],
       "p2": [
-        -37.402,
-        50.161,
-        16.286
+        90.423,
+        -7.699,
+        247.005
       ]
     },
     "finish_gate": {
       "p1": [
-        -388.767,
-        35.214,
-        -164.418
+        -179.594,
+        -7.098,
+        165.139
       ],
       "p2": [
-        -399.692,
-        35.214,
-        -163.43
+        -191.235,
+        -7.098,
+        164.077
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 49.1,
-    "silver_seconds": 52.6,
-    "bronze_seconds": 57.6
+    "gold_seconds": 37.5,
+    "silver_seconds": 40.1,
+    "bronze_seconds": 43.9
   }
 }

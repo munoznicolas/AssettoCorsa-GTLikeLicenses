@@ -1,0 +1,61 @@
+{
+  "test_id": "IB-15",
+  "tier": "International B",
+  "title": "Graduation: Red Bull Ring GP Full Lap",
+  "description": "Full flying lap around Spielberg combining elevation braking, fast sweepers, and curb discipline.",
+  "lesson_objective": "Putting all high-performance vehicle dynamics lessons together in a GT3 RS.",
+  "car_id": "ks_porsche_911_gt3_rs",
+  "track_id": "ks_red_bull_ring",
+  "track_layout": "layout_gp",
+  "start_mode": "FLYING_LAP",
+  "spawn": {
+    "position": [
+      292.192,
+      -11.878,
+      304.574
+    ],
+    "forward_vector": [
+      -0.9607,
+      0.0016,
+      0.2775
+    ],
+    "initial_speed_kmh": 160.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        232.166,
+        -11.851,
+        318.397
+      ],
+      "p2": [
+        235.649,
+        -11.851,
+        330.88
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        237.789,
+        -11.863,
+        316.885
+      ],
+      "p2": [
+        241.304,
+        -11.863,
+        329.359
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 96.5,
+    "silver_seconds": 103.3,
+    "bronze_seconds": 113.2
+  }
+}

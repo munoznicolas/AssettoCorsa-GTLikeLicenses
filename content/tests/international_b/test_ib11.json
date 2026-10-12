@@ -1,51 +1,51 @@
 {
   "test_id": "IB-11",
   "tier": "International B",
-  "title": "Historic High-Speed Drifting: Stowe & Club",
-  "description": "Controlling sustained 4-wheel slip angle through high-speed sweeping bends on vintage tires.",
-  "lesson_objective": "Managing high power-to-weight and four-wheel drift on vintage tires.",
-  "car_id": "shelby_cobra_427sc",
-  "track_id": "ks_silverstone1967",
+  "title": "Blind Crest Downhill Esses: Casanova-Savelli",
+  "description": "Right-hand crest into plunging left off-camber descent at Mugello: settle chassis before load shift.",
+  "lesson_objective": "Managing high-speed lateral load shifts with simultaneous elevation drops.",
+  "car_id": "ks_alfa_giulia_qv",
+  "track_id": "mugello",
   "track_layout": "",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      93.774,
-      -3.517,
-      719.057
+      -248.624,
+      28.88,
+      -230.066
     ],
     "forward_vector": [
-      -0.4404,
-      0.0123,
-      0.8977
+      0.986,
+      -0.0173,
+      0.1659
     ],
-    "initial_speed_kmh": 92.5,
-    "gear": 3,
-    "rpm": 4632
+    "initial_speed_kmh": 113.8,
+    "gear": 4,
+    "rpm": 3848
   },
   "timing": {
     "start_gate": {
       "p1": [
-        52.254,
-        -2.023,
-        800.105
+        -163.021,
+        27.398,
+        -221.497
       ],
       "p2": [
-        64.968,
-        -2.023,
-        806.495
+        -165.619,
+        27.398,
+        -231.567
       ]
     },
     "finish_gate": {
       "p1": [
-        -392.736,
-        -4.136,
-        608.314
+        570.194,
+        -11.063,
+        -69.46
       ],
       "p2": [
-        -402.173,
-        -4.136,
-        618.965
+        571.722,
+        -11.063,
+        -79.363
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 21.8,
-    "silver_seconds": 23.4,
-    "bronze_seconds": 25.6
+    "gold_seconds": 21.0,
+    "silver_seconds": 22.5,
+    "bronze_seconds": 24.6
   }
 }

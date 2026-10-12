@@ -1,0 +1,63 @@
+{
+  "test_id": "IA-13",
+  "tier": "International A",
+  "title": "Classic DTM Heel-and-Toe Dogfight",
+  "description": "Dogleg manual H-pattern gearbox: heel-and-toe downshifts under heavy braking into Tornantino.",
+  "lesson_objective": "Mastering manual heel-and-toe rev-matching under extreme deceleration.",
+  "car_id": "ks_mercedes_190_evo2",
+  "track_id": "ks_vallelunga",
+  "track_layout": "extended_circuit",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      -5.885,
+      191.264,
+      111.2
+    ],
+    "forward_vector": [
+      0.9975,
+      -0.0157,
+      -0.0684
+    ],
+    "initial_speed_kmh": 113.8,
+    "gear": 3,
+    "rpm": 5500
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        81.304,
+        190.479,
+        106.437
+      ],
+      "p2": [
+        78.862,
+        190.479,
+        92.387
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        427.287,
+        193.122,
+        81.421
+      ],
+      "p2": [
+        426.903,
+        193.122,
+        69.807
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 30.5,
+    "silver_seconds": 32.6,
+    "bronze_seconds": 35.7
+  }
+}

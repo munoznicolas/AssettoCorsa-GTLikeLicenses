@@ -1,0 +1,63 @@
+{
+  "test_id": "IA-15",
+  "tier": "International A",
+  "title": "Graduation: Circuit de Spa-Francorchamps Sector Trial",
+  "description": "Full middle sector trial (Les Combes through Stavelot): high speed, curb hopping, trail braking.",
+  "lesson_objective": "Flawless execution of high-downforce GT3 motorsport dynamics across a multi-kilometer sector.",
+  "car_id": "ks_ferrari_488_gt3",
+  "track_id": "spa",
+  "track_layout": "",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      457.833,
+      44.312,
+      109.587
+    ],
+    "forward_vector": [
+      0.3077,
+      0.0454,
+      0.9504
+    ],
+    "initial_speed_kmh": 121.2,
+    "gear": 4,
+    "rpm": 5740
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        483.793,
+        48.485,
+        198.276
+      ],
+      "p2": [
+        494.427,
+        48.485,
+        194.891
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        -542.904,
+        -20.887,
+        617.478
+      ],
+      "p2": [
+        -550.231,
+        -20.887,
+        611.198
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 68.5,
+    "silver_seconds": 73.3,
+    "bronze_seconds": 80.2
+  }
+}

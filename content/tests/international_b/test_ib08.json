@@ -1,51 +1,51 @@
 {
   "test_id": "IB-8",
   "tier": "International B",
-  "title": "Blind Crest Downhill Esses: Casanova-Savelli",
-  "description": "Unloading suspension over Casanova crest, quick dab of brakes, and pitching left into Savelli.",
-  "lesson_objective": "Weight transfer control over crests and high-speed downhill transitions.",
-  "car_id": "ks_alfa_giulia_qv",
-  "track_id": "mugello",
+  "title": "High-Speed Chicane Precision: Ascari",
+  "description": "Braking from 230 km/h into Variante Ascari, clipping left, right, and exit curbs in one fluid arc.",
+  "lesson_objective": "Precision high-speed direction changes across kerb complexes.",
+  "car_id": "bmw_m3_e92_s1",
+  "track_id": "monza",
   "track_layout": "",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      -274.078,
-      29.302,
-      -234.409
+      196.499,
+      -4.427,
+      -307.546
     ],
     "forward_vector": [
-      0.984,
-      -0.0161,
-      0.1776
+      -0.3236,
+      -0.0052,
+      0.9462
     ],
-    "initial_speed_kmh": 54.1,
-    "gear": 2,
-    "rpm": 4196
+    "initial_speed_kmh": 95.8,
+    "gear": 3,
+    "rpm": 4531
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -231.49,
-        28.564,
-        -218.681
+        182.026,
+        -4.813,
+        -234.357
       ],
       "p2": [
-        -229.787,
-        28.564,
-        -228.92
+        191.748,
+        -4.813,
+        -232.597
       ]
     },
     "finish_gate": {
       "p1": [
-        484.185,
-        -9.249,
-        -59.22
+        67.62,
+        -8.503,
+        392.125
       ],
       "p2": [
-        482.012,
-        -9.249,
-        -68.807
+        77.714,
+        -8.503,
+        393.086
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 47.9,
-    "silver_seconds": 51.3,
-    "bronze_seconds": 56.1
+    "gold_seconds": 22.0,
+    "silver_seconds": 23.5,
+    "bronze_seconds": 25.8
   }
 }

@@ -1,0 +1,2652 @@
+{
+  "Mazda DEMIO GL-X '97": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT1"
+    ]
+  },
+  "Mitsubishi GTO Twin Turbo '96": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT1"
+    ]
+  },
+  "Honda CR-X del Sol VXi '92": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT1"
+    ]
+  },
+  "Nissan SILVIA K's AERO (S14) '96": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT1"
+    ]
+  },
+  "Mitsubishi FTO GP Version R '97": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT1"
+    ]
+  },
+  "Mazda Eunos Roadster (NA) '93": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT1"
+    ]
+  },
+  "Toyota SUPRA RZ '96": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT1"
+    ]
+  },
+  "Mazda éfini RX-7 Type RZ (FD) '96": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT1"
+    ]
+  },
+  "Nissan SKYLINE GT-R (R33) '97": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT1"
+    ]
+  },
+  "Honda PRELUDE Type S '96": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT1"
+    ]
+  },
+  "Toyota MR2 GT-S '96": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT1"
+    ]
+  },
+  "Subaru IMPREZA Sedan WRX STi Version III '96": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT1"
+    ]
+  },
+  "TVR Griffith Blackpool B340": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT1"
+    ]
+  },
+  "Dodge Viper GTS '96": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT1"
+    ]
+  },
+  "Toyota VITZ F '99": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Fiat Coupe 2.0 20V Turbo": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Nissan SKYLINE GT-R V • spec (R34) '99": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Nissan March G♯ '97": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Subaru IMPREZA Sedan WRX STi Version V '98": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Mazda DEMIO GL-X '99": {
+    "pw": 9.6,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT2",
+      "GT4"
+    ]
+  },
+  "Honda INTEGRA TYPE R (DC2) '98": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Ford Cougar 2.5i 24V '99": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Nissan SKYLINE GT-R V • spec (R32) '93": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Subaru LEGACY B4 RSK '98": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Toyota ALTEZZA RS200 '98": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Mitsubishi 3000GT MR (J) '98": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Toyota SUPRA RZ '97": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT2",
+      "GT7"
+    ]
+  },
+  "Mazda Roadster 1.8 RS (NB) '98": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT2",
+      "GT3"
+    ]
+  },
+  "Nissan SILVIA spec-R AERO (S15) '99": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Chevrolet Camaro Z28 Coupe '97": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT2",
+      "GT3"
+    ]
+  },
+  "Toyota CELICA SS-II (ZZT231) '99": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Honda S2000 '99": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT2",
+      "GT3",
+      "GT7"
+    ]
+  },
+  "Alfa Romeo 156 2.5 V6 24V '98": {
+    "pw": 6.95,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT2",
+      "GT4"
+    ]
+  },
+  "Chevrolet Corvette GRAND SPORT (C4) '96": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Subaru IMPREZA Rally Car '99": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Mitsubishi Lancer Evolution V Rally Car '98": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Mitsubishi FTO GPX '97": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Honda NSX Type S Zero '97": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT2",
+      "GT3"
+    ]
+  },
+  "Ford Mustang SVT Cobra '98": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Peugeot 106 1.6 Rallye": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Nissan SKYLINE GT-R V • spec (R33) '97": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT2",
+      "GT7"
+    ]
+  },
+  "Mazda RX-7 Type RS (FD) '98": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Dodge Viper GTS '99": {
+    "pw": 3.44,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT2",
+      "GT3",
+      "GT4"
+    ]
+  },
+  "TVR Griffith 500 '94": {
+    "pw": 3.16,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT2",
+      "GT3",
+      "GT4"
+    ]
+  },
+  "Ford Escort Rally Car '98": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT2",
+      "GT3"
+    ]
+  },
+  "Suzuki Escudo Pikes Peak Version": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "AWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "[R]Peugeot 306 S16": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Alfa Romeo 155 Touring Car": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Jaguar XJ220 '92": {
+    "pw": 2.62,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT2",
+      "GT4",
+      "GT7"
+    ]
+  },
+  "Nissan R390 GT1 Race Car '98": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Toyota GT-ONE Race Car (TS020) '98": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Rover Mini Cooper 1275S Mark 1": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Ford GT40 '66": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Nissan PENNZOIL Nismo GT-R (JGTC) '99": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT2",
+      "GT3"
+    ]
+  },
+  "[R]Lotus Europa": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "[R]Peugeot 406 Sedan": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Dodge Viper GTS-R Team Oreca '99": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT2"
+    ]
+  },
+  "Mitsubishi Lancer Evolution VI Rally Car '99": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT2",
+      "GT3"
+    ]
+  },
+  "Toyota GT-ONE Race Car (TS020) '99": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT2",
+      "GT3"
+    ]
+  },
+  "Volkswagen New Beetle 2.0 '00": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT3"
+    ]
+  },
+  "Fiat Coupe Turbo Plus '00": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT3"
+    ]
+  },
+  "Honda CIVIC TYPE R (EK) '98": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT3",
+      "GT7"
+    ]
+  },
+  "Mazda Eunos Roadster (NA Special Package) '89": {
+    "pw": 7.9,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT3",
+      "GT5"
+    ]
+  },
+  "Toyota MR-S S Edition '99": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT3"
+    ]
+  },
+  "Nissan SKYLINE GT-R V • spec II (R32) '94": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT3",
+      "GT4",
+      "GT7"
+    ]
+  },
+  "Nissan SKYLINE GT-R V • spec II (R34) '00": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT3",
+      "GT4"
+    ]
+  },
+  "Mazda RX-7 Type RZ (FD) '00": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT3"
+    ]
+  },
+  "Jaguar XKR Coupe '99": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT3"
+    ]
+  },
+  "Mitsubishi Lancer Evolution IV GSR '96": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT3",
+      "GT7"
+    ]
+  },
+  "Chevrolet Corvette Z06 (C5) '00": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT3"
+    ]
+  },
+  "Honda S2000 Type V '00": {
+    "pw": 5.04,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT3",
+      "GT4"
+    ]
+  },
+  "RUF 3400S '00": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT3"
+    ]
+  },
+  "RUF RGT '00": {
+    "pw": null,
+    "engine": "Rear",
+    "drivetrain": "RWD",
+    "games": [
+      "GT3"
+    ]
+  },
+  "Spoon S2000 '00": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT3"
+    ]
+  },
+  "Honda Castrol MUGEN NSX (JGTC) '00": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT3"
+    ]
+  },
+  "Pagani Zonda C12 '00": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT3"
+    ]
+  },
+  "Mine's BNR34 SKYLINE GT-R N1 V • spec base '00": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT3"
+    ]
+  },
+  "Opel Speedster '00/Vauxhall VX220 '00": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT3"
+    ]
+  },
+  "Ford GT40 Race Car '69": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT3"
+    ]
+  },
+  "Toyota SPRINTER TRUENO GT-APEX (AE86) '83": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT3"
+    ]
+  },
+  "Dodge Viper GTS-R Team Oreca Race Car '00": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT3"
+    ]
+  },
+  "Peugeot 206 Rally Car '99": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT3"
+    ]
+  },
+  "Toyota COROLLA Rally Car '98": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT3"
+    ]
+  },
+  "Toyota CELICA GT-FOUR Rally Car (ST205) '95": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT3",
+      "GT5",
+      "GT7"
+    ]
+  },
+  "Lancia DELTA HF Integrale Rally Car '92": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT3"
+    ]
+  },
+  "Subaru IMPREZA Rally Car Prototype '01": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT3"
+    ]
+  },
+  "Mitsubishi Lancer Evolution VII Rally Car Prototype": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT3"
+    ]
+  },
+  "Mitsubishi GTO Twin Turbo '95": {
+    "pw": 6.11,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Honda CR-X del Sol SiR '92": {
+    "pw": 6.47,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Nissan SILVIA Q's AERO (S14) '96": {
+    "pw": null,
+    "engine": "Unknown",
+    "drivetrain": "Unknown",
+    "games": [
+      "GT4"
+    ]
+  },
+  "MINI ONE '02": {
+    "pw": 12.5,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Renault Megane 2.0 16V '03": {
+    "pw": null,
+    "engine": "Unknown",
+    "drivetrain": "Unknown",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Mazda Eunos Roadster J-Limited (NA) '91": {
+    "pw": 7.83,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Daihatsu Copen Active Top '02": {
+    "pw": 13.17,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT4",
+      "GT7"
+    ]
+  },
+  "BMW M3 CSL '03": {
+    "pw": 3.85,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Citroën C3 1.6 '02": {
+    "pw": 9.66,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Toyota CELICA 2000GT-FOUR (ST165) '86": {
+    "pw": 7.36,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Peugeot 205 Turbo 16 '85": {
+    "pw": 5.98,
+    "engine": "Mid",
+    "drivetrain": "AWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Fiat Barchetta Giovane Due '00": {
+    "pw": 8.38,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Nissan SKYLINE Coupe 350GT '03/Infiniti G35 COUPE '03": {
+    "pw": 12.23,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Chrysler PT Cruiser '00": {
+    "pw": 8.36,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "BMW 120d '04": {
+    "pw": 8.68,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Mitsubishi FTO GPX '94": {
+    "pw": 5.85,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Lotus Elise 111R '04": {
+    "pw": 4.48,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Mitsubishi ECLIPSE Spyder GTS '03": {
+    "pw": 7.09,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Subaru LEGACY B4 3.0R '03": {
+    "pw": 5.83,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Audi A3 3.2 quattro '03": {
+    "pw": 5.98,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Mercedes-Benz SLK 230 Kompressor '98": {
+    "pw": 6.76,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Volkswagen Golf V GTI '05": {
+    "pw": 6.68,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT4",
+      "GT5"
+    ]
+  },
+  "Mazda RX-8 Type S '03": {
+    "pw": 5.24,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Peugeot 206 CC '01": {
+    "pw": 8.67,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Honda CIVIC TYPE R (EP) '04": {
+    "pw": 5.53,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Honda INTEGRA TYPE R (DC5) '03": {
+    "pw": 5.32,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Lancia DELTA HF Integrale Evoluzione '91": {
+    "pw": null,
+    "engine": "Unknown",
+    "drivetrain": "Unknown",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Subaru IMPREZA Sedan WRX STi (Type-II) '02": {
+    "pw": 5.03,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Audi TT Coupe 1.8T quattro '00": {
+    "pw": 6.2,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Mazda Atenza Sports 23Z '03": {
+    "pw": 7.81,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Mazda RX-7 Spirit R Type A (FD) '02": {
+    "pw": 4.28,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4",
+      "GT7"
+    ]
+  },
+  "Hyundai Coupe FX '01/Hyundai Tiburon GT '01/Hyundai Tuscani '01": {
+    "pw": null,
+    "engine": "Unknown",
+    "drivetrain": "Unknown",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Mercedes-Benz SL 500 (R129) '98": {
+    "pw": 5.88,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Honda PRELUDE Type S '98": {
+    "pw": 5.95,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Audi S4 '03": {
+    "pw": 4.83,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Peugeot 206 RC '03": {
+    "pw": 6.05,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "BMW Z4 '03": {
+    "pw": null,
+    "engine": "Unknown",
+    "drivetrain": "Unknown",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Chrysler Crossfire '04": {
+    "pw": 6.24,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Volkswagen Bora V6 4MOTION '01": {
+    "pw": 7.83,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "MGF '97": {
+    "pw": 7.38,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Mitsubishi Lancer Evolution VIII MR GSR '04": {
+    "pw": 5.0,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Toyota CELICA GT-FOUR RC (ST185) '91": {
+    "pw": 6.17,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Ford Focus RS '02": {
+    "pw": 4.88,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Mercedes-Benz SL 600 (R230) '04": {
+    "pw": 4.05,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Alfa Romeo Giulia Sprint GTA 1600 '65": {
+    "pw": 6.48,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Lotus Esprit V8 '02": {
+    "pw": 3.89,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Alfa Romeo Spider 3.0i V6 24V '01": {
+    "pw": 6.65,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "FPV GT '04": {
+    "pw": 4.63,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Seat Ibiza Cupra '04": {
+    "pw": 6.47,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "RUF CTR \"Yellow Bird\" '87": {
+    "pw": 2.45,
+    "engine": "Rear",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Nissan Fairlady Z Roadster (Z33) '03": {
+    "pw": 5.54,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Citroën Xsara VTR '03": {
+    "pw": 10.93,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Toyota CALDINA GT-FOUR '02": {
+    "pw": 5.96,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Mitsubishi PAJERO Evolution Rally Raid Car '03": {
+    "pw": 14.78,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Toyota CELICA GT-FOUR Rally Car (ST185) '95": {
+    "pw": 3.67,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "BMW M5 '05": {
+    "pw": 3.38,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "TVR Tamora '02": {
+    "pw": 3.03,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Mercedes-Benz 190 E 2.5 - 16 Evolution II '91": {
+    "pw": null,
+    "engine": "Unknown",
+    "drivetrain": "Unknown",
+    "games": [
+      "GT4",
+      "GT7"
+    ]
+  },
+  "Nissan R92CP '92": {
+    "pw": 1.12,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4",
+      "GT7"
+    ]
+  },
+  "Honda Gathers Drider CIVIC '98": {
+    "pw": 5.03,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Alfa Romeo Spider 1600 Duetto '66": {
+    "pw": 8.73,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Saleen S7 '02": {
+    "pw": 2.24,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Lancia STRATOS Rally Car '77": {
+    "pw": 3.21,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Ford GT '05": {
+    "pw": 2.6,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Hyundai Accent Rally Car '01": {
+    "pw": 4.1,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Mercedes-Benz SLR McLaren '03": {
+    "pw": 2.83,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Honda TAKATA DOME NSX '03": {
+    "pw": 2.44,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Honda BEAT Version F '92": {
+    "pw": 11.88,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Dodge Viper SRT10 '03": {
+    "pw": 3.02,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Mitsubishi STARION 4WD Rally Car '84": {
+    "pw": 3.47,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Clio Renault Sport V6 Phase 2 '03": {
+    "pw": null,
+    "engine": "Unknown",
+    "drivetrain": "Unknown",
+    "games": [
+      "GT4"
+    ]
+  },
+  "PlayStation Pescarolo C60/Judd Race Car '04": {
+    "pw": null,
+    "engine": "Unknown",
+    "drivetrain": "Unknown",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Nissan MOTUL PITWORK Z '04": {
+    "pw": 2.32,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Audi R8 Race Car '01": {
+    "pw": 1.48,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Peugeot 205 Turbo 16 Rally Car '85": {
+    "pw": 2.68,
+    "engine": "Mid",
+    "drivetrain": "AWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Bentley Speed 8 '03": {
+    "pw": 1.42,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "AMG Mercedes 190 E 2.5 - 16 Evolution II Touring Car '92": {
+    "pw": null,
+    "engine": "Unknown",
+    "drivetrain": "Unknown",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Sauber Mercedes C9 '89": {
+    "pw": 1.24,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT4"
+    ]
+  },
+  "Toyota VITZ RS 1.5 '07": {
+    "pw": null,
+    "engine": "Unknown",
+    "drivetrain": "Unknown",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Alfa Romeo 147 TI 2.0 TWIN SPARK '06": {
+    "pw": 8.53,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Suzuki SWIFT Sport '07": {
+    "pw": null,
+    "engine": "Unknown",
+    "drivetrain": "Unknown",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Honda CIVIC TYPE R '08": {
+    "pw": 5.64,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT5",
+      "GT6"
+    ]
+  },
+  "Peugeot 207 GTi '07": {
+    "pw": 7.2,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Megane Renault Sport '08": {
+    "pw": null,
+    "engine": "Unknown",
+    "drivetrain": "Unknown",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Honda S2000 '06": {
+    "pw": 5.04,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Mazda RX-8 Type S '07": {
+    "pw": 5.24,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Honda CR-Z α '10": {
+    "pw": 9.91,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Audi TTS Coupe '09": {
+    "pw": null,
+    "engine": "Unknown",
+    "drivetrain": "Unknown",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Mazda Atenza Sport 25Z '07": {
+    "pw": 8.65,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "MINI COOPER S '07": {
+    "pw": 7.12,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "BMW 135i Coupe '07": {
+    "pw": null,
+    "engine": "Unknown",
+    "drivetrain": "Unknown",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Lotus Evora '09": {
+    "pw": 4.73,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Ford Focus ST '06": {
+    "pw": 6.36,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "BMW Concept 1 Series tii '07": {
+    "pw": 4.92,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Citroën C4 Coupe 2.0VTS '05": {
+    "pw": 7.39,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Mitsubishi Lancer Evolution X GSR Premium Package '07": {
+    "pw": 4.8,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Aston Martin DB9 Coupe '06": {
+    "pw": 3.75,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "BMW M5 '08": {
+    "pw": 3.66,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Nissan Fairlady Z (Z34) '08": {
+    "pw": 4.55,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT5",
+      "GT7"
+    ]
+  },
+  "Mitsubishi Lancer Evolution IX GSR '05": {
+    "pw": 5.02,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Infiniti G35 Coupe '06": {
+    "pw": 5.29,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Nissan SILVIA spec-R AERO (S15) '02": {
+    "pw": null,
+    "engine": "Unknown",
+    "drivetrain": "Unknown",
+    "games": [
+      "GT5",
+      "GT7"
+    ]
+  },
+  "Subaru IMPREZA Sedan WRX STI (18inch BBS Wheel Option) '10": {
+    "pw": null,
+    "engine": "Unknown",
+    "drivetrain": "Unknown",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Alfa Romeo Brera Sky Window 3.2 JTS Q4 '06": {
+    "pw": 6.73,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Chevrolet Corvette Z06 (C6) '06": {
+    "pw": 2.78,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Ferrari 512BB '76": {
+    "pw": null,
+    "engine": "Unknown",
+    "drivetrain": "Unknown",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Nissan GT-R SpecV '09": {
+    "pw": 3.36,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Audi R8 5.2 FSI quattro '09": {
+    "pw": 3.09,
+    "engine": "Mid",
+    "drivetrain": "AWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Toyota FT-86 Concept '09": {
+    "pw": 4.33,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Suzuki SX4 WRC '08": {
+    "pw": 3.84,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Honda NSX Type R '02": {
+    "pw": 4.31,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT5",
+      "GT6",
+      "GT7"
+    ]
+  },
+  "Toyota SUPRA 3.0GT Turbo A '88": {
+    "pw": null,
+    "engine": "Unknown",
+    "drivetrain": "Unknown",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Ford Focus RS WRC 07 '08": {
+    "pw": 4.03,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Ferrari F40 '92": {
+    "pw": 2.3,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Honda INSIGHT LS '09": {
+    "pw": 13.64,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "BMW Z4 M Coupe '08": {
+    "pw": null,
+    "engine": "Unknown",
+    "drivetrain": "Unknown",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Nissan SKYLINE Coupe 370GT Type SP '07": {
+    "pw": 4.98,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Lexus IS F '07": {
+    "pw": 4.0,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Chevrolet Corvette Stingray Convertible (C3) '69": {
+    "pw": 5.12,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Lamborghini Murcielago LP670-4 SuperVeloce '09": {
+    "pw": null,
+    "engine": "Unknown",
+    "drivetrain": "Unknown",
+    "games": [
+      "GT5"
+    ]
+  },
+  "TVR Tuscan Speed 6 '00": {
+    "pw": 3.01,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Subaru IMPREZA WRC 2008 '08": {
+    "pw": null,
+    "engine": "Unknown",
+    "drivetrain": "Unknown",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Mercedes-Benz C 63 AMG '08": {
+    "pw": 3.79,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT5",
+      "GT6"
+    ]
+  },
+  "Volvo C30 R-Design '09": {
+    "pw": 6.22,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Lamborghini Gallardo LP 560-4 '08": {
+    "pw": 2.52,
+    "engine": "Mid",
+    "drivetrain": "AWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Ferrari 430 Scuderia '07": {
+    "pw": 2.65,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Maserati GranTurismo S '08": {
+    "pw": 3.99,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Mercedes-Benz SLS AMG '10": {
+    "pw": 2.8,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Ferrari 330 P4 Race Car '67": {
+    "pw": null,
+    "engine": "Unknown",
+    "drivetrain": "Unknown",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Chevrolet Camaro SS '10": {
+    "pw": 4.05,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Lamborghini Miura P400 Bertone Prototype CN0706 '67 (Pebble Beach Concours d'Elegance Polyphony Digital Trophy '08)": {
+    "pw": null,
+    "engine": "Unknown",
+    "drivetrain": "Unknown",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Jaguar XKR Coupe '10": {
+    "pw": 3.55,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Alfa Romeo 8C Competizione '08": {
+    "pw": 3.53,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Lexus LFA '10": {
+    "pw": 2.64,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT5",
+      "GT7"
+    ]
+  },
+  "McLaren MP4-12C '10": {
+    "pw": 2.22,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT5"
+    ]
+  },
+  "Alfa Romeo MiTo 1.4 T Sport '09": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT6"
+    ]
+  },
+  "Mazda DEMIO SPORT '10": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT6"
+    ]
+  },
+  "Renault Sport Mégane R.S. '08": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT6"
+    ]
+  },
+  "Ford Focus ST '13": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT6"
+    ]
+  },
+  "Peugeot RCZ '10": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT6"
+    ]
+  },
+  "Ford Mustang Boss 302 '13": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT6"
+    ]
+  },
+  "Lotus Elise '11": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT6"
+    ]
+  },
+  "Subaru BRZ S '12": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT6"
+    ]
+  },
+  "Mazda Roadster Touring Car": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT6"
+    ]
+  },
+  "Volkswagen Scirocco R '10": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT6",
+      "GT7"
+    ]
+  },
+  "Fisker Karma EcoSport '12": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT6"
+    ]
+  },
+  "Ford Shelby GT500 '13": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT6"
+    ]
+  },
+  "Aston Martin V12 Vantage '10": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT6"
+    ]
+  },
+  "Subaru IMPREZA Sedan WRX STI spec C Type RA '05": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT6"
+    ]
+  },
+  "Chevrolet Corvette Stingray (C7) '14": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT6",
+      "GT7"
+    ]
+  },
+  "Nissan GT-R Black Edition '12": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT6"
+    ]
+  },
+  "Ferrari 458 Italia '09": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT6"
+    ]
+  },
+  "Toyota 86 GT '12": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT6"
+    ]
+  },
+  "Alfa Romeo TZ3 Stradale '11": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT6"
+    ]
+  },
+  "KTM X-BOW R '12": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT6"
+    ]
+  },
+  "Lamborghini Aventador LP700-4 '11": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "AWD",
+    "games": [
+      "GT6"
+    ]
+  },
+  "Bugatti Veyron 16.4 '09": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "AWD",
+    "games": [
+      "GT6"
+    ]
+  },
+  "Mazda Demio XD Touring '15": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Mitsubishi GTO Twin Turbo '91": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Audi TT Coupe 3.2 quattro '03": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Autobianchi A112 Abarth '85": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Toyota GR86 RZ '21": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Honda Civic Type R Limited Edition (FK8) '20": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Renault Sport Clio R.S. 220 EDC Trophy '16": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Subaru BRZ STI Sport '18": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Abarth 500 '09": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Nissan 180SX Type X '96": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Alfa Romeo 4C '14": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "BMW M3 '03": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Toyota Tundra TRD Pro '19": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Honda NSX Type R '92": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Ferrari F430 '06": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Lexus RC F '14": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Nissan SKYLINE GT-R V • spec II Nür (R34) '02": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Mitsubishi Lancer Evolution V GSR '98": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "BMW M3 Sport Evolution '89": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Porsche Taycan Turbo S '19": {
+    "pw": null,
+    "engine": "Rear",
+    "drivetrain": "AWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Mercedes-AMG C 63 S '15": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "BMW 3.0 CSL '73": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Aston Martin DB11 '16": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Lamborghini Diablo GT '00": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "AWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Ford Focus Gr.B Rally Car": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Ferrari Testarossa '91": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Dodge Viper GTS '02": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Alpine A110 '17": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Toyota GR Supra RZ '20": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Renault Sport Mégane Trophy '11": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Mercedes-AMG GT R '17": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Lamborghini Aventador LP 750-4 Superveloce '15": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "AWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Ferrari F50 '95": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Nissan SILVIA spec-R AERO (S15) Touring Car": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Toyota Supra GT500 '97": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Toyota GR Yaris 1st Edition RZ \"High Performance\" '20": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Ford Shelby GT350R '16": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Dallara SF19 Super Formula / Honda '19": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Pagani Zonda R '09": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Nissan GT-R GT500 '08": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Porsche 917K '70": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Mazda3 X Burgundy Selection '19": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Dodge Viper GTS '13": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Honda S660 '15": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Porsche 911 Carrera RS (964) '92": {
+    "pw": null,
+    "engine": "Rear",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Mazda RX-8 Spirit R '12": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Ford Sierra RS 500 Cosworth '87": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "1932 Ford Roadster '63": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Peugeot 208 GTi by Peugeot Sport '14": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Alfa Romeo Giulia GTAm '20": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Ferrari F12berlinetta '12": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Ford Focus RS '18": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Genesis G70 3.3T AWD Prestige Package '22": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "BMW M3 Coupé '07": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Porsche 911 Carrera RS (993) '95": {
+    "pw": null,
+    "engine": "Rear",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Mercedes-AMG GT Black Series '20": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Ferrari GTO '84": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Chevrolet Corvette ZR-1 (C4) '89": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Subaru IMPREZA Premium Sport Coupe 22B-STi Version '98": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Lexus LC500 '17": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Porsche Cayman GT4 '16": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Maserati MC20 '20": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "BMW M2 Competition '18": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Porsche 959 '87": {
+    "pw": null,
+    "engine": "Rear",
+    "drivetrain": "AWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Chevrolet Corvette C7 ZR1 '19": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Chevrolet Corvette (C1) '58": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Subaru Impreza Sedan WRX STi '04": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "AWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Mercedes-Benz SLR McLaren '09": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Nissan SKYLINE 2000GT-R (KPGC110) '73": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Ferrari 512 BB '76": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Dallara SF23 Super Formula / Honda '23": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Lamborghini Countach LP400 '74": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Porsche 962 C '88": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Honda Civic Type R (FL5) '22": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "FWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Porsche 911 Turbo (930) '81": {
+    "pw": null,
+    "engine": "Rear",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Honda RA272 '65": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Peugeot 205 Turbo 16 Evolution 2 '86": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "AWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Porsche 911 GT1 Strassenversion '97": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Shelby Cobra Daytona Coupe '64": {
+    "pw": null,
+    "engine": "Front",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Mercedes-Benz CLK-LM '98": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "Aston Martin Valkyrie '21": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  },
+  "McLaren MP4/4 '88": {
+    "pw": null,
+    "engine": "Mid",
+    "drivetrain": "RWD",
+    "games": [
+      "GT7"
+    ]
+  }
+}

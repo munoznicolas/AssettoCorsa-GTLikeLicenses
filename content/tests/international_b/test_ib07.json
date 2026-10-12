@@ -1,51 +1,51 @@
 {
   "test_id": "IB-7",
   "tier": "International B",
-  "title": "Heavyweight Digital AWD Traction",
-  "description": "Braking in a straight line, letting ATTESA sort traction, and rocketing out of the final chicane.",
-  "lesson_objective": "Managing 1.7 tonnes of AWD supercar through tight chicane transitions.",
-  "car_id": "ks_nissan_gtr",
-  "track_id": "ks_nurburgring",
-  "track_layout": "layout_gp_a",
+  "title": "Cornering from High Speed: Red Bull Ring Turn 1 (GT7 IB-6)",
+  "description": "High-velocity uphill braking into Niki Lauda Kurve. Clip the sausage kerb flat and exploit classic DTM balance onto the long straight.",
+  "lesson_objective": "Uphill deceleration and curb riding in an iconic homologation sports saloon.",
+  "car_id": "bmw_m3_e30",
+  "track_id": "ks_red_bull_ring",
+  "track_layout": "layout_gp",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      -389.243,
-      35.821,
-      -149.524
+      208.35,
+      -11.748,
+      328.67
     ],
     "forward_vector": [
-      -0.0976,
-      -0.0415,
-      -0.9944
+      -0.9587,
+      0.0058,
+      0.2842
     ],
-    "initial_speed_kmh": 114.9,
+    "initial_speed_kmh": 80.0,
     "gear": 3,
-    "rpm": 6092
+    "rpm": 4200
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -397.057,
-        32.998,
-        -242.331
+        150.068,
+        -10.875,
+        343.089
       ],
       "p2": [
-        -407.881,
-        32.998,
-        -241.329
+        153.73,
+        -10.875,
+        355.52
       ]
     },
     "finish_gate": {
       "p1": [
-        -172.541,
-        58.914,
-        -882.41
+        -230.682,
+        6.35,
+        164.244
       ],
       "p2": [
-        -181.51,
-        58.914,
-        -887.792
+        -240.647,
+        6.35,
+        170.639
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 31.5,
-    "silver_seconds": 33.7,
-    "bronze_seconds": 36.9
+    "gold_seconds": 38.8,
+    "silver_seconds": 40.0,
+    "bronze_seconds": 43.0
   }
 }

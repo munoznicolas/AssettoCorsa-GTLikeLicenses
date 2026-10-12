@@ -1,0 +1,63 @@
+{
+  "test_id": "IB-14",
+  "tier": "International B",
+  "title": "Historic High-Speed Drifting: Stowe & Club",
+  "description": "Bias-ply tires and big-block 7.0L V8: use throttle steer through Stowe and Club corners.",
+  "lesson_objective": "Managing high slip angles and mechanical chassis balance on historic layouts.",
+  "car_id": "shelby_cobra_427sc",
+  "track_id": "ks_silverstone1967",
+  "track_layout": "",
+  "start_mode": "ROLLING",
+  "spawn": {
+    "position": [
+      62.816,
+      -2.379,
+      783.164
+    ],
+    "forward_vector": [
+      -0.4389,
+      0.0187,
+      0.8984
+    ],
+    "initial_speed_kmh": 122.9,
+    "gear": 3,
+    "rpm": 3816
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        9.011,
+        -0.693,
+        860.158
+      ],
+      "p2": [
+        18.689,
+        -0.693,
+        869.841
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        -310.339,
+        -4.727,
+        163.631
+      ],
+      "p2": [
+        -321.629,
+        -4.727,
+        154.97
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 43.1,
+    "silver_seconds": 46.1,
+    "bronze_seconds": 50.5
+  }
+}

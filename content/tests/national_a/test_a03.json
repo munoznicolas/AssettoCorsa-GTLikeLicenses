@@ -1,51 +1,51 @@
 {
   "test_id": "A-3",
   "tier": "National A",
-  "title": "Turbo Torque Modulation on Corner Exit",
-  "description": "Managing twin-turbo boost onset progressively out of Magione hairpins.",
-  "lesson_objective": "Preventing sudden boost spikes from breaking rear traction.",
-  "car_id": "ks_toyota_supra_mkiv",
-  "track_id": "magione",
-  "track_layout": "",
+  "title": "Approaching a Low-Visibility Corner: Paddock Hill (GT6 A-2)",
+  "description": "High-speed blind plunge down Paddock Hill Bend. Keep the lightweight chassis balanced without upsetting the rear over the compression.",
+  "lesson_objective": "Carrying speed through a blind downhill compression corner.",
+  "car_id": "lotus_elise_sc",
+  "track_id": "ks_brands_hatch",
+  "track_layout": "indy",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      -10.133,
-      5.29,
-      -211.962
+      -148.795,
+      -7.928,
+      -383.619
     ],
     "forward_vector": [
-      -0.2661,
-      -0.0014,
-      -0.9639
+      0.9138,
+      0.0097,
+      -0.406
     ],
-    "initial_speed_kmh": 80.0,
-    "gear": 3,
-    "rpm": 3825
+    "initial_speed_kmh": 65.0,
+    "gear": 2,
+    "rpm": 4200
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -17.419,
-        5.301,
-        -278.936
+        -99.254,
+        -6.855,
+        -398.122
       ],
       "p2": [
-        -28.378,
-        5.301,
-        -276.139
+        -103.356,
+        -6.855,
+        -409.239
       ]
     },
     "finish_gate": {
       "p1": [
-        -23.332,
-        5.292,
-        -363.884
+        122.856,
+        -13.394,
+        -406.704
       ],
       "p2": [
-        -12.112,
-        5.292,
-        -366.215
+        131.67,
+        -13.394,
+        -414.609
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 20.5,
-    "silver_seconds": 22.0,
-    "bronze_seconds": 24.1
+    "gold_seconds": 14.5,
+    "silver_seconds": 15.2,
+    "bronze_seconds": 18.0
   }
 }

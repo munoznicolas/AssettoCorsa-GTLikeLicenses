@@ -27,6 +27,7 @@ if os.path.join(REPO_ROOT, "tools") not in sys.path:
 
 from tools.web_ui.catalog_manager import (
     generate_and_validate,
+    get_ac_curriculum_reference_tests,
     get_available_cars,
     get_available_tracks,
     get_track_spline_data,
@@ -96,6 +97,29 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
                 kunos_only = query.get("all", ["0"])[0] != "1"
                 cars = get_available_cars(kunos_only=kunos_only)
                 self.send_json_response({"success": True, "cars": cars, "kunos_only": kunos_only})
+            except Exception as e:
+                self.send_json_response({"success": False, "error": str(e)}, status=500)
+            return
+
+        if path == "/api/reference_tests":
+            try:
+                json_path = os.path.join(REPO_ROOT, "docs", "Gran_Turismo_License_Tests.json")
+                ref_tests = []
+                if os.path.isfile(json_path):
+                    with open(json_path, "r", encoding="utf-8") as f:
+                        ref_tests = json.load(f)
+
+                # Append live Assetto Corsa Mod tests
+                ac_tests = get_ac_curriculum_reference_tests()
+                combined_tests = ref_tests + ac_tests
+
+                self.send_json_response({
+                    "success": True,
+                    "tests": combined_tests,
+                    "count": len(combined_tests),
+                    "gt_count": len(ref_tests),
+                    "ac_count": len(ac_tests)
+                })
             except Exception as e:
                 self.send_json_response({"success": False, "error": str(e)}, status=500)
             return

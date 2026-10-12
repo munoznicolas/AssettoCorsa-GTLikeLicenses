@@ -1,51 +1,51 @@
 {
   "test_id": "IB-1",
   "tier": "International B",
-  "title": "High-Speed Heavy Braking into Tamburello",
-  "description": "Hard initial brake hit from 250 km/h, bleed off pressure, and flick left-right across high curbs.",
-  "lesson_objective": "High-speed deceleration and curb compliance in a mid-engine supercar.",
-  "car_id": "ferrari_458",
-  "track_id": "imola",
+  "title": "High-Speed Braking & Chicane: Variante del Rettifilo (GT7 Master IB-1)",
+  "description": "Braking from 270+ km/h in the legendary 288 GTO homologation special into Monza's tight first chicane.",
+  "lesson_objective": "Managing classic turbo supercar high-speed deceleration without ABS.",
+  "car_id": "ks_ferrari_288_gto",
+  "track_id": "monza",
   "track_layout": "",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      301.723,
-      -85.361,
-      -388.707
+      -167.51,
+      -6.27,
+      15.403
     ],
     "forward_vector": [
-      -0.9998,
-      0.0043,
-      0.0187
+      0.1027,
+      0.0057,
+      -0.9947
     ],
-    "initial_speed_kmh": 66.7,
-    "gear": 2,
-    "rpm": 5269
+    "initial_speed_kmh": 85.0,
+    "gear": 3,
+    "rpm": 4500
   },
   "timing": {
     "start_gate": {
       "p1": [
-        249.005,
-        -85.148,
-        -397.188
+        -158.317,
+        -5.933,
+        -43.984
       ],
       "p2": [
-        248.89,
-        -85.148,
-        -382.358
+        -170.142,
+        -5.933,
+        -45.126
       ]
     },
     "finish_gate": {
       "p1": [
-        -324.296,
-        -82.643,
-        -412.405
+        -99.706,
+        -2.043,
+        -704.423
       ],
       "p2": [
-        -322.758,
-        -82.643,
-        -402.352
+        -109.674,
+        -2.043,
+        -704.191
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 32.9,
-    "silver_seconds": 35.3,
-    "bronze_seconds": 38.6
+    "gold_seconds": 22.02,
+    "silver_seconds": 22.7,
+    "bronze_seconds": 24.2
   }
 }

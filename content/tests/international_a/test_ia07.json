@@ -1,51 +1,51 @@
 {
   "test_id": "IA-7",
   "tier": "International A",
-  "title": "Rear-Engine GT3 Pivot & Curb Launch",
-  "description": "Trail-braking downhill into tight chicane, bouncing over left curb, and hammering exit curb.",
-  "lesson_objective": "Rotating a rear-engine GT3 chassis under heavy trail-braking.",
-  "car_id": "ks_porsche_911_gt3_r_2016",
-  "track_id": "ks_nurburgring",
-  "track_layout": "layout_gp_a",
+  "title": "Bus Stop Chicane: Braking from 270 km/h",
+  "description": "Maximum braking threshold at 150m board: shift 6-to-1, curb hop right, flick left onto straight.",
+  "lesson_objective": "Extreme high-speed threshold deceleration and chicane direction transition.",
+  "car_id": "ks_mclaren_650_gt3",
+  "track_id": "spa",
+  "track_layout": "",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      -5.242,
-      59.163,
-      -326.269
+      -76.694,
+      -2.212,
+      69.721
     ],
     "forward_vector": [
-      -0.0141,
-      -0.0219,
-      0.9997
+      -0.0383,
+      0.0256,
+      -0.9989
     ],
-    "initial_speed_kmh": 78.3,
-    "gear": 3,
-    "rpm": 3708
+    "initial_speed_kmh": 128.5,
+    "gear": 4,
+    "rpm": 5600
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -13.808,
-        57.713,
-        -257.66
+        -86.139,
+        0.055,
+        -27.52
       ],
       "p2": [
-        -1.826,
-        57.713,
-        -257.014
+        -102.785,
+        0.055,
+        -21.158
       ]
     },
     "finish_gate": {
       "p1": [
-        -93.504,
-        50.927,
-        -51.515
+        -352.097,
+        23.047,
+        -798.174
       ],
       "p2": [
-        -83.174,
-        50.927,
-        -58.211
+        -364.832,
+        23.047,
+        -789.732
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 48.7,
-    "silver_seconds": 52.2,
-    "bronze_seconds": 57.2
+    "gold_seconds": 22.0,
+    "silver_seconds": 23.5,
+    "bronze_seconds": 25.8
   }
 }

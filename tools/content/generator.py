@@ -35,8 +35,8 @@ from tools.extract_spline_coords import (
 
 
 def generate_tests(ac_root: str = DEFAULT_AC_ROOT) -> None:
-    """Generates all 58 test JSON definition files calibrated from track AI splines."""
-    print(f"[1/3] Generating all 58 License Test definitions from track splines...")
+    """Generates all test JSON definition files calibrated from track AI splines."""
+    print(f"[1/3] Generating all {len(TEST_CATALOG)} License Test definitions from track splines...")
     spline_parsers = {}
 
     for tdef in TEST_CATALOG:

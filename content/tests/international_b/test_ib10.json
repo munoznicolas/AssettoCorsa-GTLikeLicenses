@@ -1,51 +1,51 @@
 {
   "test_id": "IB-10",
   "tier": "International B",
-  "title": "High-Speed Parabolica Exit Momentum",
-  "description": "Trail-braking deep, hugging the inside line, and opening steering early to reach 260+ km/h.",
-  "lesson_objective": "Maximizing corner exit velocity onto Monza's main straight.",
-  "car_id": "ks_ferrari_488_gtb",
-  "track_id": "monza",
-  "track_layout": "",
+  "title": "The Carousel at the N\u00fcrburgring (GT5 IB-8)",
+  "description": "Drop into the banked concrete Karussell bowl in the raw twin-turbo F40, holding the inner slab before powering out onto the crest.",
+  "lesson_objective": "Banked cornering and turbo boost throttle control without driver aids.",
+  "car_id": "ferrari_f40",
+  "track_id": "ks_nordschleife",
+  "track_layout": "nordschleife",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      38.396,
-      -10.303,
-      722.508
+      2117.875,
+      74.706,
+      -1418.933
     ],
     "forward_vector": [
-      -0.099,
-      -0.0053,
-      0.9951
+      -0.836,
+      0.063,
+      0.545
     ],
-    "initial_speed_kmh": 52.9,
-    "gear": 2,
-    "rpm": 4094
+    "initial_speed_kmh": 85.0,
+    "gear": 3,
+    "rpm": 4400
   },
   "timing": {
     "start_gate": {
       "p1": [
-        31.857,
-        -10.484,
-        770.388
+        2069.886,
+        76.524,
+        -1376.21
       ],
       "p2": [
-        42.022,
-        -10.484,
-        771.439
+        2077.72,
+        76.524,
+        -1374.588
       ]
     },
     "finish_gate": {
       "p1": [
-        -209.439,
-        -9.327,
-        588.117
+        3138.682,
+        115.883,
+        -1710.444
       ],
       "p2": [
-        -221.199,
-        -9.327,
-        588.184
+        3143.203,
+        115.883,
+        -1717.842
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 32.6,
-    "silver_seconds": 35.0,
-    "bronze_seconds": 38.3
+    "gold_seconds": 17.2,
+    "silver_seconds": 17.6,
+    "bronze_seconds": 19.0
   }
 }

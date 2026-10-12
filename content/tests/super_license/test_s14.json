@@ -1,0 +1,61 @@
+{
+  "test_id": "S-14",
+  "tier": "Super License",
+  "title": "Touring Car Dunes Hot Lap: Zandvoort",
+  "description": "Classic DTM touring car flying lap across the natural flowing sand dunes of Circuit Zandvoort.",
+  "lesson_objective": "High-RPM naturally aspirated momentum driving on a classic undulating European circuit.",
+  "car_id": "ks_mercedes_190_evo2",
+  "track_id": "ks_zandvoort",
+  "track_layout": "",
+  "start_mode": "FLYING_LAP",
+  "spawn": {
+    "position": [
+      248.535,
+      2.551,
+      -91.4
+    ],
+    "forward_vector": [
+      -0.0073,
+      -0.001,
+      1.0
+    ],
+    "initial_speed_kmh": 140.0
+  },
+  "timing": {
+    "start_gate": {
+      "p1": [
+        244.62,
+        2.531,
+        -29.816
+      ],
+      "p2": [
+        255.229,
+        2.531,
+        -29.65
+      ]
+    },
+    "finish_gate": {
+      "p1": [
+        244.689,
+        2.533,
+        -35.643
+      ],
+      "p2": [
+        255.278,
+        2.533,
+        -35.489
+      ]
+    }
+  },
+  "fail_rules": {
+    "max_wheels_off": 2,
+    "wall_collision_threshold_n": 1500,
+    "max_yaw_angle_deg": 90,
+    "stop_box_overshoot_fail": false
+  },
+  "targets": {
+    "gold_seconds": 105.0,
+    "silver_seconds": 112.5,
+    "bronze_seconds": 122.0
+  }
+}

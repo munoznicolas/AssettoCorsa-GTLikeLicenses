@@ -1,49 +1,49 @@
 {
   "test_id": "S-7",
   "tier": "Super License",
-  "title": "Modern Hybrid Prototype Mastery: Spa-Francorchamps",
-  "description": "Electric AWD boost out of La Source, flat-out through Eau Rouge, and energy regeneration into Bus Stop.",
-  "lesson_objective": "8-Megajoule LMP1 hybrid prototype mastery across 7 km of Spa.",
-  "car_id": "ks_porsche_919_hybrid_2016",
-  "track_id": "spa",
+  "title": "High-Velocity Temple of Speed: Monza GP",
+  "description": "370+ km/h down Monza straights; braking with high turbo boost and vintage ground effects.",
+  "lesson_objective": "Group C twin-turbo V8 top speed and minimal downforce braking.",
+  "car_id": "ks_mercedes_c9",
+  "track_id": "monza",
   "track_layout": "",
   "start_mode": "FLYING_LAP",
   "spawn": {
     "position": [
-      -198.579,
-      17.569,
-      -558.129
+      -210.788,
+      -8.745,
+      485.44
     ],
     "forward_vector": [
-      -0.5669,
-      0.0208,
-      -0.8235
+      0.0289,
+      0.0046,
+      -0.9996
     ],
-    "initial_speed_kmh": 200.0
+    "initial_speed_kmh": 180.0
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -233.213,
-        19.053,
-        -627.212
+        -203.956,
+        -8.408,
+        414.207
       ],
       "p2": [
-        -245.721,
-        19.053,
-        -618.789
+        -215.768,
+        -8.408,
+        413.395
       ]
     },
     "finish_gate": {
       "p1": [
-        -228.171,
-        18.9,
-        -620.162
+        -204.292,
+        -8.442,
+        421.515
       ],
       "p2": [
-        -240.71,
-        18.9,
-        -611.803
+        -216.093,
+        -8.442,
+        420.688
       ]
     }
   },
@@ -54,8 +54,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 114.0,
-    "silver_seconds": 122.2,
-    "bronze_seconds": 133.8
+    "gold_seconds": 89.2,
+    "silver_seconds": 95.5,
+    "bronze_seconds": 104.5
   }
 }

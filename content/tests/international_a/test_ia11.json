@@ -1,51 +1,51 @@
 {
   "test_id": "IA-11",
   "tier": "International A",
-  "title": "Classic DTM Heel-and-Toe Dogfight",
-  "description": "Rev-matching downshifts into Semaforo hairpin and maximizing mechanical grip.",
-  "lesson_objective": "Heel-and-toe precision in an analog touring car chassis.",
-  "car_id": "ks_mercedes_190_evo2",
-  "track_id": "ks_vallelunga",
-  "track_layout": "extended_circuit",
+  "title": "Group C High-Speed Commitment: Galgenkopf to Straight (GT7 Master IA-10)",
+  "description": "Carry enormous ground-effect speed through Galgenkopf onto the D\u00f6ttinger H\u00f6he straight in the Porsche 962C.",
+  "lesson_objective": "High-downforce ground-effect cornering and top-speed aerodynamic transition.",
+  "car_id": "ks_porsche_962c_shorttail",
+  "track_id": "ks_nordschleife",
+  "track_layout": "nordschleife",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      -26.878,
-      191.914,
-      -147.825
+      2066.252,
+      77.439,
+      596.945
     ],
     "forward_vector": [
-      0.9632,
-      0.0217,
-      -0.2677
+      -0.2875,
+      -0.0981,
+      0.9528
     ],
-    "initial_speed_kmh": 75.1,
-    "gear": 3,
-    "rpm": 3633
+    "initial_speed_kmh": 120.0,
+    "gear": 4,
+    "rpm": 5200
   },
   "timing": {
     "start_gate": {
       "p1": [
-        38.61,
-        193.341,
-        -164.157
+        2014.614,
+        72.522,
+        666.834
       ],
       "p2": [
-        35.65,
-        193.341,
-        -175.062
+        2020.277,
+        72.522,
+        673.079
       ]
     },
     "finish_gate": {
       "p1": [
-        -156.345,
-        190.985,
-        63.533
+        216.233,
+        105.6,
+        1695.375
       ],
       "p2": [
-        -148.323,
-        190.985,
-        54.078
+        222.441,
+        105.6,
+        1705.574
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 47.4,
-    "silver_seconds": 50.8,
-    "bronze_seconds": 55.7
+    "gold_seconds": 59.7,
+    "silver_seconds": 61.5,
+    "bronze_seconds": 65.5
   }
 }
