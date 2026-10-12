@@ -1,489 +1,778 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Assetto Corsa GT License Test Designer</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,600;0,700;1,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-</head>
-<body>
-  <div id="app">
-    <!-- Top Header -->
-    <header class="navbar">
-      <div class="brand">
-        <span class="gt-logo">GT</span>
-        <div class="title-wrap">
-          <h1>LICENSE TEST DESIGNER</h1>
-          <span class="subtitle">Assetto Corsa GT-Like Driving School Editor</span>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Assetto Corsa GT License Test Designer</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,600;0,700;1,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <!-- Top Header -->
+      <header class="navbar">
+        <div class="brand">
+          <span class="gt-logo">GT</span>
+          <div class="title-wrap">
+            <h1>LICENSE TEST DESIGNER</h1>
+            <span class="subtitle"
+              >Assetto Corsa GT-Like Driving School Editor</span
+            >
+          </div>
         </div>
-      </div>
-      <div class="header-actions">
-        <button id="btn-rebuild" class="btn btn-primary" title="Rebuild test JSONs & Content Manager career">
-          <span class="icon">⚡</span> Rebuild & Validate
-        </button>
-        <button id="btn-sync" class="btn btn-secondary" title="Sync changes directly to Assetto Corsa install">
-          <span class="icon">🔄</span> Sync to AC
-        </button>
-      </div>
-    </header>
-
-    <!-- License Tabs & Reference Tab -->
-    <nav class="license-nav">
-      <div class="nav-tabs-wrapper">
-        <div id="license-tabs" class="tab-container">
-          <!-- Rendered dynamically from curriculum -->
-        </div>
-        <div class="nav-divider"></div>
-        <div class="extra-tabs-container">
-          <button id="tab-btn-reference" class="license-tab reference-tab" title="Gran Turismo Benchmark Data & Visualizations">
-            <span class="tab-icon">📊</span>
-            <span>GT Constant Values</span>
-            <span class="tab-count" id="ref-total-badge">406</span>
+        <div class="header-actions">
+          <button
+            id="btn-rebuild"
+            class="btn btn-primary"
+            title="Rebuild test JSONs & Content Manager career"
+          >
+            <span class="icon">⚡</span> Rebuild & Validate
+          </button>
+          <button
+            id="btn-sync"
+            class="btn btn-secondary"
+            title="Sync changes directly to Assetto Corsa install"
+          >
+            <span class="icon">🔄</span> Sync to AC
           </button>
         </div>
-      </div>
-    </nav>
+      </header>
 
-    <!-- Main Workspace -->
-    <div class="workspace">
-      <!-- Left Column: Test List for Selected License -->
-      <aside class="sidebar">
-        <div class="sidebar-header">
-          <div class="tier-info">
-            <h2 id="active-tier-title">National B</h2>
-            <span id="test-count-badge" class="badge">12 Tests</span>
+      <!-- License Tabs & Reference Tab -->
+      <nav class="license-nav">
+        <div class="nav-tabs-wrapper">
+          <div id="license-tabs" class="tab-container">
+            <!-- Rendered dynamically from curriculum -->
           </div>
-          <button id="btn-add-test" class="btn btn-sm btn-accent" title="Add new test to this license">
-            <span>+ Add Test</span>
-          </button>
-        </div>
-        <p id="active-tier-desc" class="tier-description"></p>
-
-        <div id="test-list" class="test-list">
-          <!-- Rendered dynamically -->
-        </div>
-      </aside>
-
-      <!-- Right Column: Test Editor & Interactive Spline Preview -->
-      <main class="editor-pane">
-        <div id="editor-empty" class="editor-empty" style="display: none;">
-          <div class="empty-state">
-            <span class="empty-icon">🏁</span>
-            <h3>No Test Selected</h3>
-            <p>Select a test from the left panel to inspect or edit, or click <strong>+ Add Test</strong>.</p>
+          <div class="nav-divider"></div>
+          <div class="extra-tabs-container">
+            <button
+              id="tab-btn-reference"
+              class="license-tab reference-tab"
+              title="Gran Turismo Benchmark Data & Visualizations"
+            >
+              <span class="tab-icon">📊</span>
+              <span>GT Constant Values</span>
+              <span class="tab-count" id="ref-total-badge">406</span>
+            </button>
           </div>
         </div>
+      </nav>
 
-        <form id="test-form" class="editor-form">
-          <div class="form-header">
-            <div class="form-title-group">
-              <span id="form-test-id-badge" class="badge badge-lg">B-1</span>
-              <input type="text" id="input-title" class="form-control title-input" placeholder="Test Title" required>
+      <!-- Main Workspace -->
+      <div class="workspace">
+        <!-- Left Column: Test List for Selected License -->
+        <aside class="sidebar">
+          <div class="sidebar-header">
+            <div class="tier-info">
+              <h2 id="active-tier-title">National B</h2>
+              <span id="test-count-badge" class="badge">12 Tests</span>
             </div>
-            <div class="form-actions">
-              <button type="button" id="btn-delete-test" class="btn btn-danger btn-sm">
-                <span>🗑️ Delete Test</span>
-              </button>
-              <button type="submit" id="btn-save-test" class="btn btn-success">
-                <span>💾 Save Test</span>
-              </button>
+            <button
+              id="btn-add-test"
+              class="btn btn-sm btn-accent"
+              title="Add new test to this license"
+            >
+              <span>+ Add Test</span>
+            </button>
+          </div>
+          <p id="active-tier-desc" class="tier-description"></p>
+
+          <div id="test-list" class="test-list">
+            <!-- Rendered dynamically -->
+          </div>
+        </aside>
+
+        <!-- Right Column: Test Editor & Interactive Spline Preview -->
+        <main class="editor-pane">
+          <div id="editor-empty" class="editor-empty" style="display: none">
+            <div class="empty-state">
+              <span class="empty-icon">🏁</span>
+              <h3>No Test Selected</h3>
+              <p>
+                Select a test from the left panel to inspect or edit, or click
+                <strong>+ Add Test</strong>.
+              </p>
             </div>
           </div>
 
-          <!-- Section 1: Objective & Description -->
-          <div class="card form-card">
-            <div class="card-title">Curriculum Lesson & Description</div>
-            <div class="form-grid cols-2">
-              <div class="form-group">
-                <label for="input-objective">Lesson Objective</label>
-                <input type="text" id="input-objective" class="form-control" placeholder="Key driving technique to teach..." required>
+          <form id="test-form" class="editor-form">
+            <div class="form-header">
+              <div class="form-title-group">
+                <span id="form-test-id-badge" class="badge badge-lg">B-1</span>
+                <input
+                  type="text"
+                  id="input-title"
+                  class="form-control title-input"
+                  placeholder="Test Title"
+                  required
+                />
               </div>
-              <div class="form-group">
-                <label for="input-test-id">Test Identifier</label>
-                <input type="text" id="input-test-id" class="form-control mono" placeholder="e.g. B-1, A-12" required>
+              <div class="form-actions">
+                <button
+                  type="button"
+                  id="btn-delete-test"
+                  class="btn btn-danger btn-sm"
+                >
+                  <span>🗑️ Delete Test</span>
+                </button>
+                <button
+                  type="submit"
+                  id="btn-save-test"
+                  class="btn btn-success"
+                >
+                  <span>💾 Save Test</span>
+                </button>
               </div>
             </div>
-            <div class="form-group">
-              <label for="input-description">Test Description / Instruction</label>
-              <textarea id="input-description" class="form-control" rows="2" placeholder="Driver instruction displayed during countdown..." required></textarea>
-            </div>
-          </div>
 
-          <!-- Section 2: Vehicle & Track Selection -->
-          <div class="card form-card">
-            <div class="card-title flex-between">
-              <span>Track & Vehicle Selection</span>
-              <span class="badge" title="Limited to official Kunos Simulazioni content">Kunos Official Only</span>
+            <!-- Section 1: Objective & Description -->
+            <div class="card form-card">
+              <div class="card-title">Curriculum Lesson & Description</div>
+              <div class="form-grid cols-2">
+                <div class="form-group">
+                  <label for="input-objective">Lesson Objective</label>
+                  <input
+                    type="text"
+                    id="input-objective"
+                    class="form-control"
+                    placeholder="Key driving technique to teach..."
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="input-test-id">Test Identifier</label>
+                  <input
+                    type="text"
+                    id="input-test-id"
+                    class="form-control mono"
+                    placeholder="e.g. B-1, A-12"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="input-description"
+                  >Test Description / Instruction</label
+                >
+                <textarea
+                  id="input-description"
+                  class="form-control"
+                  rows="2"
+                  placeholder="Driver instruction displayed during countdown..."
+                  required
+                ></textarea>
+              </div>
             </div>
-            <div class="form-grid cols-3">
-              <div class="form-group">
-                <label for="select-track">Track (Kunos)</label>
-                <select id="select-track" class="form-control" required>
-                  <option value="">Select Kunos Track...</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="select-layout">Layout</label>
-                <select id="select-layout" class="form-control">
-                  <option value="">Default Layout</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="select-car">Car Model (Kunos)</label>
-                <select id="select-car" class="form-control" required>
-                  <option value="">Select Kunos Car...</option>
-                </select>
-              </div>
-            </div>
-          </div>
 
-          <!-- Section 3: Lap Mode & Spatial Positions (Interactive Map) -->
-          <div class="card form-card">
-            <div class="card-title flex-between">
-              <span>Test Bounds & Track Positions</span>
-              <div class="toggle-group">
-                <label class="toggle-label">
-                  <input type="checkbox" id="toggle-full-lap">
-                  <span class="toggle-switch"></span>
-                  <span id="full-lap-text" class="toggle-text">Full Lap Test</span>
+            <!-- Section 2: Vehicle & Track Selection -->
+            <div class="card form-card">
+              <div class="card-title flex-between">
+                <span>Track & Vehicle Selection</span>
+                <span
+                  class="badge"
+                  title="Limited to official Kunos Simulazioni content"
+                  >Kunos Official Only</span
+                >
+              </div>
+              <div class="form-grid cols-3">
+                <div class="form-group">
+                  <div class="field-label-row">
+                    <label for="select-track">Track (Kunos)</label>
+                    <span
+                      id="track-filter-count"
+                      class="filter-count-badge"
+                      style="display: none"
+                    ></span>
+                  </div>
+                  <div class="filter-search-box">
+                    <span class="search-icon">🔍</span>
+                    <input
+                      type="text"
+                      id="input-search-track"
+                      class="form-control filter-input"
+                      placeholder="Search track name / ID..."
+                      autocomplete="off"
+                    />
+                    <button
+                      type="button"
+                      id="btn-clear-track-search"
+                      class="filter-clear-btn"
+                      title="Clear search"
+                      style="display: none"
+                    >
+                      &times;
+                    </button>
+                  </div>
+                  <select id="select-track" class="form-control" required>
+                    <option value="">Select Kunos Track...</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <div class="field-label-row">
+                    <label for="select-layout">Layout</label>
+                  </div>
+                  <div class="filter-search-box filter-search-box-placeholder">
+                    <span class="search-placeholder-text"
+                      >Track configuration</span
+                    >
+                  </div>
+                  <select id="select-layout" class="form-control">
+                    <option value="">Default Layout</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <div class="field-label-row">
+                    <label for="select-car">Car Model (Kunos)</label>
+                    <span
+                      id="car-filter-count"
+                      class="filter-count-badge"
+                      style="display: none"
+                    ></span>
+                  </div>
+                  <div class="filter-search-box">
+                    <span class="search-icon">🔍</span>
+                    <input
+                      type="text"
+                      id="input-search-car"
+                      class="form-control filter-input"
+                      placeholder="Search model, brand, drivetrain (FWD/RWD/AWD)..."
+                      autocomplete="off"
+                    />
+                    <button
+                      type="button"
+                      id="btn-clear-car-search"
+                      class="filter-clear-btn"
+                      title="Clear search"
+                      style="display: none"
+                    >
+                      &times;
+                    </button>
+                  </div>
+                  <select id="select-car" class="form-control" required>
+                    <option value="">Select Kunos Car...</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 3: Lap Mode & Spatial Positions (Interactive Map) -->
+            <div class="card form-card">
+              <div class="card-title flex-between">
+                <span>Test Bounds & Track Positions</span>
+                <div class="toggle-group">
+                  <label class="toggle-label">
+                    <input type="checkbox" id="toggle-full-lap" />
+                    <span class="toggle-switch"></span>
+                    <span id="full-lap-text" class="toggle-text"
+                      >Full Lap Test</span
+                    >
+                  </label>
+                </div>
+              </div>
+
+              <!-- Interactive Spline Canvas Map -->
+              <div class="map-container">
+                <div class="map-toolbar">
+                  <span id="map-track-info" class="map-info"
+                    >Track Length: 0 m</span
+                  >
+                  <div class="map-legend">
+                    <span class="legend-item"
+                      ><span class="dot dot-start"></span> Start Gate</span
+                    >
+                    <span class="legend-item"
+                      ><span class="dot dot-finish"></span> Finish Gate</span
+                    >
+                    <span class="legend-item"
+                      ><span class="bar bar-active"></span> Active Sector</span
+                    >
+                  </div>
+                </div>
+                <div class="canvas-wrapper">
+                  <canvas id="track-canvas" width="700" height="320"></canvas>
+                  <div
+                    id="canvas-loading"
+                    class="canvas-overlay"
+                    style="display: none"
+                  >
+                    Loading Spline...
+                  </div>
+                </div>
+              </div>
+
+              <!-- Starting and Ending Position Controls -->
+              <div class="form-grid cols-2 mt-3">
+                <div class="form-group">
+                  <div class="flex-between">
+                    <label for="slider-start-s"
+                      >Start Position (<span id="disp-start-s">0.00%</span> /
+                      <span id="disp-start-m">0 m</span>)</label
+                    >
+                    <input
+                      type="number"
+                      id="input-start-s"
+                      class="form-control num-input mono"
+                      min="0"
+                      max="1"
+                      step="0.0001"
+                      value="0.0"
+                    />
+                  </div>
+                  <input
+                    type="range"
+                    id="slider-start-s"
+                    class="range-slider range-start"
+                    min="0"
+                    max="1"
+                    step="0.0005"
+                    value="0.0"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <div class="flex-between">
+                    <label for="slider-finish-s"
+                      >Finish Position (<span id="disp-finish-s">100.00%</span>
+                      / <span id="disp-finish-m">0 m</span>)</label
+                    >
+                    <input
+                      type="number"
+                      id="input-finish-s"
+                      class="form-control num-input mono"
+                      min="0"
+                      max="1"
+                      step="0.0001"
+                      value="1.0"
+                    />
+                  </div>
+                  <input
+                    type="range"
+                    id="slider-finish-s"
+                    class="range-slider range-finish"
+                    min="0"
+                    max="1"
+                    step="0.0005"
+                    value="1.0"
+                  />
+                </div>
+              </div>
+              <div id="sector-stats" class="sector-badge-bar">
+                Sector Distance: <strong id="disp-sector-dist">0 m</strong>
+              </div>
+            </div>
+
+            <!-- Section 4: Start Mode (Rolling vs Standing) & Speed -->
+            <div class="card form-card">
+              <div class="card-title">Start Mode & Physics Initialization</div>
+              <div class="start-mode-selector">
+                <label class="mode-card" id="mode-card-standing">
+                  <input
+                    type="radio"
+                    name="start_mode"
+                    value="STANDING"
+                    id="radio-standing"
+                  />
+                  <div class="mode-body">
+                    <span class="mode-icon">🛑</span>
+                    <div class="mode-text">
+                      <strong>Standing Start</strong>
+                      <span>Chassis stationary at start line (0 km/h)</span>
+                    </div>
+                  </div>
+                </label>
+
+                <label class="mode-card" id="mode-card-rolling">
+                  <input
+                    type="radio"
+                    name="start_mode"
+                    value="ROLLING"
+                    id="radio-rolling"
+                  />
+                  <div class="mode-body">
+                    <span class="mode-icon">🏎️</span>
+                    <div class="mode-text">
+                      <strong>Rolling Start</strong>
+                      <span>AI autopilot drives through countdown to GO!</span>
+                    </div>
+                  </div>
+                </label>
+
+                <label class="mode-card" id="mode-card-flying">
+                  <input
+                    type="radio"
+                    name="start_mode"
+                    value="FLYING_LAP"
+                    id="radio-flying"
+                  />
+                  <div class="mode-body">
+                    <span class="mode-icon">✈️</span>
+                    <div class="mode-text">
+                      <strong>Flying Lap</strong>
+                      <span>Hot lap with high-speed rolling launch</span>
+                    </div>
+                  </div>
+                </label>
+              </div>
+
+              <div class="form-grid cols-4 mt-3" id="speed-settings-row">
+                <div class="form-group">
+                  <label for="input-speed">Initial Speed (km/h)</label>
+                  <input
+                    type="number"
+                    id="input-speed"
+                    class="form-control mono"
+                    min="0"
+                    max="400"
+                    step="5"
+                    value="0"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="input-spawn-offset">Spawn Offset (m)</label>
+                  <input
+                    type="number"
+                    id="input-spawn-offset"
+                    class="form-control mono"
+                    min="0"
+                    max="500"
+                    step="0.5"
+                    value="0"
+                    readonly
+                  />
+                  <small class="helper-text"
+                    >Auto-calibrated for 3s countdown</small
+                  >
+                </div>
+                <div class="form-group">
+                  <label for="input-gear">Engaged Gear</label>
+                  <input
+                    type="number"
+                    id="input-gear"
+                    class="form-control mono"
+                    min="1"
+                    max="8"
+                    placeholder="Auto"
+                    readonly
+                  />
+                  <small class="helper-text">Calculated by script</small>
+                </div>
+                <div class="form-group">
+                  <label for="input-rpm">Initial RPM</label>
+                  <input
+                    type="number"
+                    id="input-rpm"
+                    class="form-control mono"
+                    min="500"
+                    max="22000"
+                    step="50"
+                    placeholder="Auto"
+                    readonly
+                  />
+                  <small class="helper-text">Calculated by script</small>
+                </div>
+              </div>
+
+              <div class="mt-2" id="stop-box-row">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="check-stop-box" />
+                  <span
+                    >Require Stop Box (Acceleration & Threshold Braking
+                    Test)</span
+                  >
                 </label>
               </div>
             </div>
 
-            <!-- Interactive Spline Canvas Map -->
-            <div class="map-container">
-              <div class="map-toolbar">
-                <span id="map-track-info" class="map-info">Track Length: 0 m</span>
-                <div class="map-legend">
-                  <span class="legend-item"><span class="dot dot-start"></span> Start Gate</span>
-                  <span class="legend-item"><span class="dot dot-finish"></span> Finish Gate</span>
-                  <span class="legend-item"><span class="bar bar-active"></span> Active Sector</span>
+            <!-- Section 5: Target Times -->
+            <div class="card form-card">
+              <div class="card-title">Target Times (Medal Adjudication)</div>
+              <div class="form-grid cols-3">
+                <div class="form-group">
+                  <label for="target-gold" class="medal-label medal-gold"
+                    >🥇 Gold Target (seconds)</label
+                  >
+                  <input
+                    type="number"
+                    id="target-gold"
+                    class="form-control mono medal-input gold"
+                    step="0.001"
+                    min="1"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="target-silver" class="medal-label medal-silver"
+                    >🥈 Silver Target (seconds)</label
+                  >
+                  <input
+                    type="number"
+                    id="target-silver"
+                    class="form-control mono medal-input silver"
+                    step="0.001"
+                    min="1"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="target-bronze" class="medal-label medal-bronze"
+                    >🥉 Bronze Target (seconds)</label
+                  >
+                  <input
+                    type="number"
+                    id="target-bronze"
+                    class="form-control mono medal-input bronze"
+                    step="0.001"
+                    min="1"
+                    required
+                  />
                 </div>
               </div>
-              <div class="canvas-wrapper">
-                <canvas id="track-canvas" width="700" height="320"></canvas>
-                <div id="canvas-loading" class="canvas-overlay" style="display: none;">Loading Spline...</div>
+              <div
+                id="target-error"
+                class="target-validation-error"
+                style="display: none"
+              >
+                ⚠️ Logical error: Targets must satisfy Gold &lt; Silver &lt;
+                Bronze.
               </div>
             </div>
+          </form>
+        </main>
+      </div>
 
-            <!-- Starting and Ending Position Controls -->
-            <div class="form-grid cols-2 mt-3">
-              <div class="form-group">
-                <div class="flex-between">
-                  <label for="slider-start-s">Start Position (<span id="disp-start-s">0.00%</span> / <span id="disp-start-m">0 m</span>)</label>
-                  <input type="number" id="input-start-s" class="form-control num-input mono" min="0" max="1" step="0.0001" value="0.0">
-                </div>
-                <input type="range" id="slider-start-s" class="range-slider range-start" min="0" max="1" step="0.0005" value="0.0">
+      <!-- Gran Turismo Reference & Constant Values View -->
+      <div id="reference-view" class="reference-view" style="display: none">
+        <!-- Reference View Header -->
+        <div class="ref-header">
+          <div class="ref-title-group">
+            <h2>GRAN TURISMO DRIVING SCHOOL CONSTANT VALUES & BENCHMARKS</h2>
+            <p class="ref-subtitle">
+              Authoritative GT1–GT7 curriculum telemetry: horsepower
+              progression, power-to-weight calibration, medal durations, and
+              powertrain layouts.
+            </p>
+          </div>
+
+          <!-- Game Selector Controls -->
+          <div class="ref-controls">
+            <label class="ref-control-label">SELECT GAME:</label>
+            <div id="game-selector-pills" class="game-pills">
+              <button class="pill-btn active" data-game="ALL">All Games</button>
+              <button class="pill-btn" data-game="GT1">GT1</button>
+              <button class="pill-btn" data-game="GT2">GT2</button>
+              <button class="pill-btn" data-game="GT3">GT3</button>
+              <button class="pill-btn" data-game="GT4">GT4</button>
+              <button class="pill-btn" data-game="GT5">GT5</button>
+              <button class="pill-btn" data-game="GT6">GT6</button>
+              <button class="pill-btn" data-game="GT7">GT7</button>
+              <button
+                class="pill-btn pill-btn-ac"
+                data-game="AC Mod"
+                title="Assetto Corsa GT-Like Career Driving School"
+              >
+                AC Mod
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Metrics Summary Cards -->
+        <div class="ref-metrics-grid">
+          <div class="ref-card metric-card">
+            <div class="metric-icon">🏁</div>
+            <div class="metric-info">
+              <span class="metric-label">Total Tests</span>
+              <span id="metric-total-tests" class="metric-value">406</span>
+            </div>
+          </div>
+          <div class="ref-card metric-card">
+            <div class="metric-icon">🥇</div>
+            <div class="metric-info">
+              <span class="metric-label">Total Gold Time</span>
+              <span id="metric-total-gold" class="metric-value">292:17.2</span>
+            </div>
+          </div>
+          <div class="ref-card metric-card">
+            <div class="metric-icon">⏱️</div>
+            <div class="metric-info">
+              <span class="metric-label">Avg Gold Duration</span>
+              <span id="metric-avg-gold" class="metric-value">0:45.670</span>
+            </div>
+          </div>
+          <div class="ref-card metric-card">
+            <div class="metric-icon">🐎</div>
+            <div class="metric-info">
+              <span class="metric-label">Average Horsepower</span>
+              <span id="metric-avg-hp" class="metric-value">318 HP</span>
+            </div>
+          </div>
+          <div class="ref-card metric-card">
+            <div class="metric-icon">⚖️</div>
+            <div class="metric-info">
+              <span class="metric-label">Avg Power / Weight</span>
+              <span id="metric-avg-pw" class="metric-value">5.12 kg/hp</span>
+            </div>
+          </div>
+          <div class="ref-card metric-card">
+            <div class="metric-icon">⚙️</div>
+            <div class="metric-info">
+              <span class="metric-label">Drivetrain Distribution</span>
+              <span id="metric-drivetrain-breakdown" class="metric-value sm"
+                >FR: 157 | FF: 84</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 Visualizations Grid -->
+        <div class="ref-charts-grid">
+          <!-- Chart 1: Power & Power-to-Weight Ratio vs Test Progression (Dual Y-Axis) -->
+          <div class="ref-card chart-card">
+            <div class="chart-header">
+              <div class="chart-title">
+                <span class="chart-dot hp"></span>
+                <h3>Power & Power-to-Weight Ratio vs Test Progression</h3>
               </div>
-
-              <div class="form-group">
-                <div class="flex-between">
-                  <label for="slider-finish-s">Finish Position (<span id="disp-finish-s">100.00%</span> / <span id="disp-finish-m">0 m</span>)</label>
-                  <input type="number" id="input-finish-s" class="form-control num-input mono" min="0" max="1" step="0.0001" value="1.0">
-                </div>
-                <input type="range" id="slider-finish-s" class="range-slider range-finish" min="0" max="1" step="0.0005" value="1.0">
+              <div class="chart-legend-badges">
+                <span class="chart-badge text-red">● Left: HP</span>
+                <span class="chart-badge text-amber">● Right: kg/hp</span>
               </div>
             </div>
-            <div id="sector-stats" class="sector-badge-bar">
-              Sector Distance: <strong id="disp-sector-dist">0 m</strong>
+            <div class="chart-canvas-wrapper">
+              <canvas id="chart-power-pw"></canvas>
             </div>
           </div>
 
-          <!-- Section 4: Start Mode (Rolling vs Standing) & Speed -->
-          <div class="card form-card">
-            <div class="card-title">Start Mode & Physics Initialization</div>
-            <div class="start-mode-selector">
-              <label class="mode-card" id="mode-card-standing">
-                <input type="radio" name="start_mode" value="STANDING" id="radio-standing">
-                <div class="mode-body">
-                  <span class="mode-icon">🛑</span>
-                  <div class="mode-text">
-                    <strong>Standing Start</strong>
-                    <span>Chassis stationary at start line (0 km/h)</span>
-                  </div>
-                </div>
-              </label>
-
-              <label class="mode-card" id="mode-card-rolling">
-                <input type="radio" name="start_mode" value="ROLLING" id="radio-rolling">
-                <div class="mode-body">
-                  <span class="mode-icon">🏎️</span>
-                  <div class="mode-text">
-                    <strong>Rolling Start</strong>
-                    <span>AI autopilot drives through countdown to GO!</span>
-                  </div>
-                </div>
-              </label>
-
-              <label class="mode-card" id="mode-card-flying">
-                <input type="radio" name="start_mode" value="FLYING_LAP" id="radio-flying">
-                <div class="mode-body">
-                  <span class="mode-icon">✈️</span>
-                  <div class="mode-text">
-                    <strong>Flying Lap</strong>
-                    <span>Hot lap with high-speed rolling launch</span>
-                  </div>
-                </div>
-              </label>
+          <!-- Chart 2: Gold Medal Duration vs Test Progression -->
+          <div class="ref-card chart-card">
+            <div class="chart-header">
+              <div class="chart-title">
+                <span class="chart-dot gold"></span>
+                <h3>Gold Medal Duration vs Test Progression</h3>
+              </div>
+              <span class="chart-badge">Y: Duration (Seconds)</span>
             </div>
-
-            <div class="form-grid cols-4 mt-3" id="speed-settings-row">
-              <div class="form-group">
-                <label for="input-speed">Initial Speed (km/h)</label>
-                <input type="number" id="input-speed" class="form-control mono" min="0" max="400" step="5" value="0">
-              </div>
-              <div class="form-group">
-                <label for="input-spawn-offset">Spawn Offset (m)</label>
-                <input type="number" id="input-spawn-offset" class="form-control mono" min="0" max="500" step="0.5" value="0">
-                <small class="helper-text">Auto-calibrated for 3s countdown</small>
-              </div>
-              <div class="form-group">
-                <label for="input-gear">Engaged Gear</label>
-                <input type="number" id="input-gear" class="form-control mono" min="1" max="8" placeholder="Auto">
-              </div>
-              <div class="form-group">
-                <label for="input-rpm">Initial RPM</label>
-                <input type="number" id="input-rpm" class="form-control mono" min="500" max="22000" step="50" placeholder="Auto">
-              </div>
-            </div>
-
-            <div class="mt-2" id="stop-box-row">
-              <label class="checkbox-label">
-                <input type="checkbox" id="check-stop-box">
-                <span>Require Stop Box (Acceleration & Threshold Braking Test)</span>
-              </label>
+            <div class="chart-canvas-wrapper">
+              <canvas id="chart-gold"></canvas>
             </div>
           </div>
 
-          <!-- Section 5: Target Times -->
-          <div class="card form-card">
-            <div class="card-title">Target Times (Medal Adjudication)</div>
-            <div class="form-grid cols-3">
-              <div class="form-group">
-                <label for="target-gold" class="medal-label medal-gold">🥇 Gold Target (seconds)</label>
-                <input type="number" id="target-gold" class="form-control mono medal-input gold" step="0.001" min="1" required>
+          <!-- Chart 3: Distribution of Gold Times -->
+          <div class="ref-card chart-card">
+            <div class="chart-header">
+              <div class="chart-title">
+                <span class="chart-dot dist"></span>
+                <h3>Distribution of Gold Times</h3>
               </div>
-              <div class="form-group">
-                <label for="target-silver" class="medal-label medal-silver">🥈 Silver Target (seconds)</label>
-                <input type="number" id="target-silver" class="form-control mono medal-input silver" step="0.001" min="1" required>
-              </div>
-              <div class="form-group">
-                <label for="target-bronze" class="medal-label medal-bronze">🥉 Bronze Target (seconds)</label>
-                <input type="number" id="target-bronze" class="form-control mono medal-input bronze" step="0.001" min="1" required>
+              <div class="chart-legend-badges">
+                <span
+                  id="badge-p80"
+                  class="chart-badge text-amber"
+                  title="80th Percentile of Gold Target Durations"
+                  >P80: --</span
+                >
+                <span
+                  id="badge-p90"
+                  class="chart-badge text-rose"
+                  title="90th Percentile of Gold Target Durations"
+                  >P90: --</span
+                >
+                <span class="chart-badge">Density Curve</span>
               </div>
             </div>
-            <div id="target-error" class="target-validation-error" style="display: none;">
-              ⚠️ Logical error: Targets must satisfy Gold &lt; Silver &lt; Bronze.
+            <div class="chart-canvas-wrapper">
+              <canvas id="chart-gold-dist"></canvas>
             </div>
           </div>
-        </form>
-      </main>
+
+          <!-- Chart 4: Car Drivetrain Layout vs Test Progression -->
+          <div class="ref-card chart-card">
+            <div class="chart-header">
+              <div class="chart-title">
+                <span class="chart-dot drivetrain"></span>
+                <h3>Car Drivetrain Layout vs Test Progression</h3>
+              </div>
+              <span class="chart-badge">Y: Layout (FF, FR, MR, RR, FAWD)</span>
+            </div>
+            <div class="chart-canvas-wrapper">
+              <canvas id="chart-drivetrain"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reference Constant Values Documentation Table -->
+        <div class="ref-card table-card">
+          <div class="table-card-header">
+            <div class="table-title">
+              <h3>Constant Values Documentation Table</h3>
+              <span id="table-count-label" class="badge">406 Tests</span>
+            </div>
+            <div class="table-filters">
+              <input
+                type="text"
+                id="ref-search-input"
+                class="form-control table-search"
+                placeholder="Search test, car, track, drivetrain..."
+              />
+              <select id="ref-tier-select" class="form-control table-select">
+                <option value="ALL">All License Tiers</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="ref-data-table">
+              <thead>
+                <tr>
+                  <th>Test ID</th>
+                  <th>Game</th>
+                  <th>Tier</th>
+                  <th>Title</th>
+                  <th>Car Model</th>
+                  <th>HP</th>
+                  <th>P/W (kg/hp)</th>
+                  <th>Layout</th>
+                  <th>Track / Sector</th>
+                  <th>Gold Target</th>
+                  <th>Silver</th>
+                  <th>Bronze</th>
+                </tr>
+              </thead>
+              <tbody id="ref-table-body">
+                <!-- Dynamically rendered -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal for Generation / Validation Logs -->
+      <div id="log-modal" class="modal" style="display: none">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 id="modal-title">Rebuild & Curriculum Validation</h3>
+            <button id="modal-close" class="modal-close-btn">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div id="modal-status-badge" class="badge badge-lg">Running...</div>
+            <pre id="modal-log-text" class="log-viewer"></pre>
+          </div>
+          <div class="modal-footer">
+            <button id="modal-btn-ok" class="btn btn-primary">Done</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notification Toast -->
+      <div id="toast" class="toast" style="display: none"></div>
     </div>
 
-    <!-- Gran Turismo Reference & Constant Values View -->
-    <div id="reference-view" class="reference-view" style="display: none;">
-      <!-- Reference View Header -->
-      <div class="ref-header">
-        <div class="ref-title-group">
-          <h2>GRAN TURISMO DRIVING SCHOOL CONSTANT VALUES & BENCHMARKS</h2>
-          <p class="ref-subtitle">Authoritative GT1–GT7 curriculum telemetry: horsepower progression, power-to-weight calibration, medal durations, and powertrain layouts.</p>
-        </div>
-
-        <!-- Game Selector Controls -->
-        <div class="ref-controls">
-          <label class="ref-control-label">SELECT GAME:</label>
-          <div id="game-selector-pills" class="game-pills">
-            <button class="pill-btn active" data-game="ALL">All Games</button>
-            <button class="pill-btn" data-game="GT1">GT1</button>
-            <button class="pill-btn" data-game="GT2">GT2</button>
-            <button class="pill-btn" data-game="GT3">GT3</button>
-            <button class="pill-btn" data-game="GT4">GT4</button>
-            <button class="pill-btn" data-game="GT5">GT5</button>
-            <button class="pill-btn" data-game="GT6">GT6</button>
-            <button class="pill-btn" data-game="GT7">GT7</button>
-            <button class="pill-btn pill-btn-ac" data-game="AC Mod" title="Assetto Corsa GT-Like Career Driving School">AC Mod</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick Metrics Summary Cards -->
-      <div class="ref-metrics-grid">
-        <div class="ref-card metric-card">
-          <div class="metric-icon">🏁</div>
-          <div class="metric-info">
-            <span class="metric-label">Total Tests</span>
-            <span id="metric-total-tests" class="metric-value">406</span>
-          </div>
-        </div>
-        <div class="ref-card metric-card">
-          <div class="metric-icon">🥇</div>
-          <div class="metric-info">
-            <span class="metric-label">Total Gold Time</span>
-            <span id="metric-total-gold" class="metric-value">292:17.2</span>
-          </div>
-        </div>
-        <div class="ref-card metric-card">
-          <div class="metric-icon">⏱️</div>
-          <div class="metric-info">
-            <span class="metric-label">Avg Gold Duration</span>
-            <span id="metric-avg-gold" class="metric-value">0:45.670</span>
-          </div>
-        </div>
-        <div class="ref-card metric-card">
-          <div class="metric-icon">🐎</div>
-          <div class="metric-info">
-            <span class="metric-label">Average Horsepower</span>
-            <span id="metric-avg-hp" class="metric-value">318 HP</span>
-          </div>
-        </div>
-        <div class="ref-card metric-card">
-          <div class="metric-icon">⚖️</div>
-          <div class="metric-info">
-            <span class="metric-label">Avg Power / Weight</span>
-            <span id="metric-avg-pw" class="metric-value">5.12 kg/hp</span>
-          </div>
-        </div>
-        <div class="ref-card metric-card">
-          <div class="metric-icon">⚙️</div>
-          <div class="metric-info">
-            <span class="metric-label">Drivetrain Distribution</span>
-            <span id="metric-drivetrain-breakdown" class="metric-value sm">FR: 157 | FF: 84</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 4 Visualizations Grid -->
-      <div class="ref-charts-grid">
-        <!-- Chart 1: Power & Power-to-Weight Ratio vs Test Progression (Dual Y-Axis) -->
-        <div class="ref-card chart-card">
-          <div class="chart-header">
-            <div class="chart-title">
-              <span class="chart-dot hp"></span>
-              <h3>Power & Power-to-Weight Ratio vs Test Progression</h3>
-            </div>
-            <div class="chart-legend-badges">
-              <span class="chart-badge text-red">● Left: HP</span>
-              <span class="chart-badge text-amber">● Right: kg/hp</span>
-            </div>
-          </div>
-          <div class="chart-canvas-wrapper">
-            <canvas id="chart-power-pw"></canvas>
-          </div>
-        </div>
-
-        <!-- Chart 2: Gold Medal Duration vs Test Progression -->
-        <div class="ref-card chart-card">
-          <div class="chart-header">
-            <div class="chart-title">
-              <span class="chart-dot gold"></span>
-              <h3>Gold Medal Duration vs Test Progression</h3>
-            </div>
-            <span class="chart-badge">Y: Duration (Seconds)</span>
-          </div>
-          <div class="chart-canvas-wrapper">
-            <canvas id="chart-gold"></canvas>
-          </div>
-        </div>
-
-        <!-- Chart 3: Distribution of Gold Times -->
-        <div class="ref-card chart-card">
-          <div class="chart-header">
-            <div class="chart-title">
-              <span class="chart-dot dist"></span>
-              <h3>Distribution of Gold Times</h3>
-            </div>
-            <div class="chart-legend-badges">
-              <span id="badge-p80" class="chart-badge text-amber" title="80th Percentile of Gold Target Durations">P80: --</span>
-              <span id="badge-p90" class="chart-badge text-rose" title="90th Percentile of Gold Target Durations">P90: --</span>
-              <span class="chart-badge">Density Curve</span>
-            </div>
-          </div>
-          <div class="chart-canvas-wrapper">
-            <canvas id="chart-gold-dist"></canvas>
-          </div>
-        </div>
-
-        <!-- Chart 4: Car Drivetrain Layout vs Test Progression -->
-        <div class="ref-card chart-card">
-          <div class="chart-header">
-            <div class="chart-title">
-              <span class="chart-dot drivetrain"></span>
-              <h3>Car Drivetrain Layout vs Test Progression</h3>
-            </div>
-            <span class="chart-badge">Y: Layout (FF, FR, MR, RR, FAWD)</span>
-          </div>
-          <div class="chart-canvas-wrapper">
-            <canvas id="chart-drivetrain"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <!-- Reference Constant Values Documentation Table -->
-      <div class="ref-card table-card">
-        <div class="table-card-header">
-          <div class="table-title">
-            <h3>Constant Values Documentation Table</h3>
-            <span id="table-count-label" class="badge">406 Tests</span>
-          </div>
-          <div class="table-filters">
-            <input type="text" id="ref-search-input" class="form-control table-search" placeholder="Search test, car, track, drivetrain...">
-            <select id="ref-tier-select" class="form-control table-select">
-              <option value="ALL">All License Tiers</option>
-            </select>
-          </div>
-        </div>
-        <div class="table-responsive">
-          <table class="ref-data-table">
-            <thead>
-              <tr>
-                <th>Test ID</th>
-                <th>Game</th>
-                <th>Tier</th>
-                <th>Title</th>
-                <th>Car Model</th>
-                <th>HP</th>
-                <th>P/W (kg/hp)</th>
-                <th>Layout</th>
-                <th>Track / Sector</th>
-                <th>Gold Target</th>
-                <th>Silver</th>
-                <th>Bronze</th>
-              </tr>
-            </thead>
-            <tbody id="ref-table-body">
-              <!-- Dynamically rendered -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal for Generation / Validation Logs -->
-    <div id="log-modal" class="modal" style="display: none;">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3 id="modal-title">Rebuild & Curriculum Validation</h3>
-          <button id="modal-close" class="modal-close-btn">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div id="modal-status-badge" class="badge badge-lg">Running...</div>
-          <pre id="modal-log-text" class="log-viewer"></pre>
-        </div>
-        <div class="modal-footer">
-          <button id="modal-btn-ok" class="btn btn-primary">Done</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Notification Toast -->
-    <div id="toast" class="toast" style="display: none;"></div>
-  </div>
-
-  <script src="chart.umd.min.js"></script>
-  <script src="app.js"></script>
-</body>
+    <script src="chart.umd.min.js"></script>
+    <script src="app.js"></script>
+  </body>
 </html>
-

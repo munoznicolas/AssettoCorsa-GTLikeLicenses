@@ -48,6 +48,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const selectTrack = document.getElementById("select-track");
   const selectLayout = document.getElementById("select-layout");
   const selectCar = document.getElementById("select-car");
+  const inputSearchTrack = document.getElementById("input-search-track");
+  const btnClearTrackSearch = document.getElementById("btn-clear-track-search");
+  const trackFilterCount = document.getElementById("track-filter-count");
+  const inputSearchCar = document.getElementById("input-search-car");
+  const btnClearCarSearch = document.getElementById("btn-clear-car-search");
+  const carFilterCount = document.getElementById("car-filter-count");
 
   // Lap Bounds & Map Elements
   const toggleFullLap = document.getElementById("toggle-full-lap");
@@ -156,14 +162,51 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function populateTrackDropdown() {
-    selectTrack.innerHTML = '<option value="">Select Track...</option>';
-    state.tracks.forEach(t => {
+  function populateTrackDropdown(selectedTrackId = null) {
+    const query = inputSearchTrack ? inputSearchTrack.value.trim().toLowerCase() : "";
+    const activeTrackId = selectedTrackId !== null ? selectedTrackId : selectTrack.value;
+
+    selectTrack.innerHTML = '<option value="">Select Kunos Track...</option>';
+
+    let matches = state.tracks;
+    if (query) {
+      matches = state.tracks.filter(t => {
+        const idMatch = (t.track_id || "").toLowerCase().includes(query);
+        const nameMatch = (t.name || "").toLowerCase().includes(query);
+        const layoutMatch = (t.layouts || []).some(l =>
+          (l.name || "").toLowerCase().includes(query) || (l.layout_id || "").toLowerCase().includes(query)
+        );
+        return idMatch || nameMatch || layoutMatch;
+      });
+
+      if (trackFilterCount) {
+        trackFilterCount.style.display = "inline-block";
+        trackFilterCount.textContent = `${matches.length} / ${state.tracks.length}`;
+        trackFilterCount.classList.toggle("empty", matches.length === 0);
+      }
+      if (btnClearTrackSearch) {
+        btnClearTrackSearch.style.display = "block";
+      }
+    } else {
+      if (trackFilterCount) trackFilterCount.style.display = "none";
+      if (btnClearTrackSearch) btnClearTrackSearch.style.display = "none";
+    }
+
+    matches.forEach(t => {
       const opt = document.createElement("option");
       opt.value = t.track_id;
       opt.textContent = `${t.name} (${t.track_id})`;
+      if (t.track_id === activeTrackId) {
+        opt.selected = true;
+      }
       selectTrack.appendChild(opt);
     });
+
+    if (activeTrackId && matches.some(t => t.track_id === activeTrackId)) {
+      selectTrack.value = activeTrackId;
+    } else if (!query && activeTrackId) {
+      selectTrack.value = activeTrackId;
+    }
   }
 
   function populateLayoutDropdown(trackId, selectedLayout = "") {
@@ -188,14 +231,69 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function populateCarDropdown() {
-    selectCar.innerHTML = '<option value="">Select Car...</option>';
-    state.cars.forEach(c => {
+  function filterCars(query) {
+    if (!query) return state.cars;
+    const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
+    return state.cars.filter(c => {
+      const id = (c.car_id || "").toLowerCase();
+      const name = (c.name || "").toLowerCase();
+      const brand = (c.brand || "").toLowerCase();
+      const dt = (c.drivetrain || "").toLowerCase();
+      const tags = (c.tags || []).map(t => String(t).toLowerCase());
+
+      return tokens.every(tok => {
+        if (tok === "awd" || tok === "4wd") {
+          return dt === "awd" || tags.includes("awd") || tags.includes("4wd") || tags.includes("mawd") || tags.includes("fawd") || id.includes(tok) || name.includes(tok);
+        }
+        if (tok === "fwd") {
+          return dt === "fwd" || tags.includes("fwd") || id.includes(tok) || name.includes(tok);
+        }
+        if (tok === "rwd") {
+          return dt === "rwd" || tags.includes("rwd") || id.includes(tok) || name.includes(tok);
+        }
+        return id.includes(tok) || name.includes(tok) || brand.includes(tok) || dt.includes(tok) || tags.some(t => t.includes(tok));
+      });
+    });
+  }
+
+  function populateCarDropdown(selectedCarId = null) {
+    const query = inputSearchCar ? inputSearchCar.value.trim() : "";
+    const activeCarId = selectedCarId !== null ? selectedCarId : selectCar.value;
+
+    selectCar.innerHTML = '<option value="">Select Kunos Car...</option>';
+
+    let matches = filterCars(query);
+    if (query) {
+      if (carFilterCount) {
+        carFilterCount.style.display = "inline-block";
+        carFilterCount.textContent = `${matches.length} / ${state.cars.length}`;
+        carFilterCount.classList.toggle("empty", matches.length === 0);
+      }
+      if (btnClearCarSearch) {
+        btnClearCarSearch.style.display = "block";
+      }
+    } else {
+      if (carFilterCount) carFilterCount.style.display = "none";
+      if (btnClearCarSearch) btnClearCarSearch.style.display = "none";
+    }
+
+    matches.forEach(c => {
       const opt = document.createElement("option");
       opt.value = c.car_id;
-      opt.textContent = c.name + (c.brand ? ` (${c.brand})` : "");
+      const brandStr = c.brand ? ` (${c.brand})` : "";
+      const dtStr = c.drivetrain ? ` [${c.drivetrain}]` : "";
+      opt.textContent = `${c.name}${brandStr}${dtStr}`;
+      if (c.car_id === activeCarId) {
+        opt.selected = true;
+      }
       selectCar.appendChild(opt);
     });
+
+    if (activeCarId && matches.some(c => c.car_id === activeCarId)) {
+      selectCar.value = activeCarId;
+    } else if (!query && activeCarId) {
+      selectCar.value = activeCarId;
+    }
   }
 
   // License Tabs
@@ -300,9 +398,12 @@ document.addEventListener("DOMContentLoaded", () => {
     inputObjective.value = test.lesson_objective || "";
     inputDescription.value = test.description || "";
 
-    selectTrack.value = test.track_id || "";
+    // Reset search filters when loading a test
+    if (inputSearchTrack) inputSearchTrack.value = "";
+    if (inputSearchCar) inputSearchCar.value = "";
+    populateTrackDropdown(test.track_id || "");
     populateLayoutDropdown(test.track_id || "", test.track_layout || "");
-    selectCar.value = test.car_id || "";
+    populateCarDropdown(test.car_id || "");
 
     // Lap Mode & Positions
     const fullLap = isFullLapTest(test);
@@ -338,9 +439,11 @@ document.addEventListener("DOMContentLoaded", () => {
     inputTitle.value = "";
     inputObjective.value = "";
     inputDescription.value = "";
-    selectTrack.value = "";
+    if (inputSearchTrack) inputSearchTrack.value = "";
+    if (inputSearchCar) inputSearchCar.value = "";
+    populateTrackDropdown("");
     selectLayout.innerHTML = "";
-    selectCar.value = "";
+    populateCarDropdown("");
     setSpatialPositions(0, 1);
     setStartMode("STANDING");
     targetGold.value = "";
@@ -696,6 +799,80 @@ document.addEventListener("DOMContentLoaded", () => {
         showToast("Error saving after delete: " + err.message, "error");
       }
     });
+
+    // Track Search & Filter
+    if (inputSearchTrack) {
+      inputSearchTrack.addEventListener("input", () => {
+        populateTrackDropdown();
+      });
+
+      inputSearchTrack.addEventListener("keydown", async (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          const query = inputSearchTrack.value.trim().toLowerCase();
+          const matches = state.tracks.filter(t =>
+            (t.track_id || "").toLowerCase().includes(query) ||
+            (t.name || "").toLowerCase().includes(query)
+          );
+          if (matches.length > 0) {
+            selectTrack.value = matches[0].track_id;
+            populateLayoutDropdown(selectTrack.value, "");
+            await fetchAndRenderSpline(selectTrack.value, selectLayout.value);
+            selectTrack.focus();
+          }
+        } else if (e.key === "ArrowDown") {
+          e.preventDefault();
+          selectTrack.focus();
+        } else if (e.key === "Escape") {
+          const currentVal = selectTrack.value;
+          inputSearchTrack.value = "";
+          populateTrackDropdown(currentVal);
+        }
+      });
+    }
+
+    if (btnClearTrackSearch) {
+      btnClearTrackSearch.addEventListener("click", () => {
+        const currentVal = selectTrack.value;
+        inputSearchTrack.value = "";
+        populateTrackDropdown(currentVal);
+        inputSearchTrack.focus();
+      });
+    }
+
+    // Car Search & Filter
+    if (inputSearchCar) {
+      inputSearchCar.addEventListener("input", () => {
+        populateCarDropdown();
+      });
+
+      inputSearchCar.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          const matches = filterCars(inputSearchCar.value.trim());
+          if (matches.length > 0) {
+            selectCar.value = matches[0].car_id;
+            selectCar.focus();
+          }
+        } else if (e.key === "ArrowDown") {
+          e.preventDefault();
+          selectCar.focus();
+        } else if (e.key === "Escape") {
+          const currentVal = selectCar.value;
+          inputSearchCar.value = "";
+          populateCarDropdown(currentVal);
+        }
+      });
+    }
+
+    if (btnClearCarSearch) {
+      btnClearCarSearch.addEventListener("click", () => {
+        const currentVal = selectCar.value;
+        inputSearchCar.value = "";
+        populateCarDropdown(currentVal);
+        inputSearchCar.focus();
+      });
+    }
 
     // Track & Layout change
     selectTrack.addEventListener("change", async (e) => {

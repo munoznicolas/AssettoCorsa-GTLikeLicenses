@@ -304,8 +304,22 @@ def get_available_tracks(ac_root: str = DEFAULT_AC_ROOT, kunos_only: bool = True
     return tracks_list
 
 
-def get_available_cars(ac_root: str = DEFAULT_AC_ROOT, kunos_only: bool = True) -> List[Dict[str, str]]:
-    """Discovers all cars in AC with their display names, filtered to Kunos content."""
+CAR_LAYOUT_MAP: Dict[str, str] = {
+    "abarth500": "FF", "alfa_romeo_giulietta_qv": "FF", "ks_alfa_mito_qv": "FF",
+    "ks_audi_a1s1": "FAWD", "ks_audi_sport_quattro": "FAWD", "ks_toyota_celica_st185": "FAWD",
+    "ks_nissan_gtr": "FAWD", "ks_alfa_romeo_155_v6": "FAWD",
+    "ks_lamborghini_huracan_performante": "MAWD", "ks_porsche_919_hybrid_2016": "MAWD", "ks_toyota_ts040": "MAWD",
+    "ks_porsche_911_gt3_r_2016": "RR", "ks_porsche_911_gt3_rs": "RR", "ks_porsche_911_rsr_2017": "RR",
+    "ferrari_458": "MR", "ferrari_laferrari": "MR", "ks_alfa_romeo_4c": "MR", "ks_audi_r8_lms_2016": "MR",
+    "ks_ferrari_488_gt3": "MR", "ks_ferrari_488_gtb": "MR", "ks_ferrari_f2004": "MR", "ks_ford_gt40": "MR",
+    "ks_mazda_787b": "MR", "ks_mclaren_650_gt3": "MR", "ks_mclaren_p1": "MR", "ks_mercedes_c9": "MR",
+    "ks_porsche_718_cayman_s": "MR", "ks_porsche_962c_shorttail": "MR", "ks_porsche_cayman_gt4_clubsport": "MR",
+    "lotus_2_eleven": "MR", "lotus_elise_sc": "MR", "lotus_exige_240": "MR", "pagani_zonda_r": "MR",
+}
+
+
+def get_available_cars(ac_root: str = DEFAULT_AC_ROOT, kunos_only: bool = True) -> List[Dict[str, Any]]:
+    """Discovers all cars in AC with their display names, tags, and drivetrain, filtered to Kunos content."""
     cars_dir = os.path.join(ac_root, "content", "cars")
     if not os.path.isdir(cars_dir):
         return []
@@ -322,19 +336,42 @@ def get_available_cars(ac_root: str = DEFAULT_AC_ROOT, kunos_only: bool = True) 
         ui_file = os.path.join(c_path, "ui", "ui_car.json")
         car_name = c_id
         brand = ""
+        tags: List[str] = []
         if os.path.isfile(ui_file):
             try:
                 with open(ui_file, "r", encoding="utf-8", errors="ignore") as f:
                     u = json.loads(f.read(), strict=False)
                     car_name = u.get("name", c_id)
                     brand = u.get("brand", "")
+                    raw_tags = u.get("tags", [])
+                    if isinstance(raw_tags, list):
+                        tags = [str(t).strip() for t in raw_tags if str(t).strip()]
             except Exception:
                 pass
+
+        # Determine authoritative drivetrain (FWD, RWD, AWD)
+        lower_tags = {t.lower() for t in tags}
+        if any(t in lower_tags for t in ("awd", "4wd", "mawd", "fawd")):
+            drivetrain = "AWD"
+        elif "fwd" in lower_tags or "ff" in lower_tags:
+            drivetrain = "FWD"
+        elif "rwd" in lower_tags or any(t in lower_tags for t in ("fr", "mr", "rr")):
+            drivetrain = "RWD"
+        else:
+            layout = CAR_LAYOUT_MAP.get(c_id, "FR")
+            if layout in ("FAWD", "MAWD", "AWD"):
+                drivetrain = "AWD"
+            elif layout in ("FF", "FWD"):
+                drivetrain = "FWD"
+            else:
+                drivetrain = "RWD"
 
         cars_list.append({
             "car_id": c_id,
             "name": car_name,
             "brand": brand,
+            "tags": tags,
+            "drivetrain": drivetrain,
         })
     return cars_list
 
@@ -503,18 +540,7 @@ def get_ac_curriculum_reference_tests() -> List[Dict[str, Any]]:
         "ks_toyota_ts040": (1000, 870, 0.87, "MAWD"),
     }
 
-    layout_map: Dict[str, str] = {
-        "abarth500": "FF", "alfa_romeo_giulietta_qv": "FF", "ks_alfa_mito_qv": "FF",
-        "ks_audi_a1s1": "FAWD", "ks_audi_sport_quattro": "FAWD", "ks_toyota_celica_st185": "FAWD",
-        "ks_nissan_gtr": "FAWD", "ks_alfa_romeo_155_v6": "FAWD",
-        "ks_lamborghini_huracan_performante": "MAWD", "ks_porsche_919_hybrid_2016": "MAWD", "ks_toyota_ts040": "MAWD",
-        "ks_porsche_911_gt3_r_2016": "RR", "ks_porsche_911_gt3_rs": "RR", "ks_porsche_911_rsr_2017": "RR",
-        "ferrari_458": "MR", "ferrari_laferrari": "MR", "ks_alfa_romeo_4c": "MR", "ks_audi_r8_lms_2016": "MR",
-        "ks_ferrari_488_gt3": "MR", "ks_ferrari_488_gtb": "MR", "ks_ferrari_f2004": "MR", "ks_ford_gt40": "MR",
-        "ks_mazda_787b": "MR", "ks_mclaren_650_gt3": "MR", "ks_mclaren_p1": "MR", "ks_mercedes_c9": "MR",
-        "ks_porsche_718_cayman_s": "MR", "ks_porsche_962c_shorttail": "MR", "ks_porsche_cayman_gt4_clubsport": "MR",
-        "lotus_2_eleven": "MR", "lotus_elise_sc": "MR", "lotus_exige_240": "MR", "pagani_zonda_r": "MR",
-    }
+    layout_map = CAR_LAYOUT_MAP
 
     curriculum = load_curriculum()
     ac_tests: List[Dict[str, Any]] = []

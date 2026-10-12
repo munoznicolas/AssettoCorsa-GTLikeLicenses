@@ -446,6 +446,98 @@ body {
   font-size: 12px;
 }
 
+/* Filter search boxes in Section 2 Form */
+.field-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 18px;
+}
+
+.filter-count-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--accent-gold);
+  background-color: rgba(245, 158, 11, 0.12);
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  font-weight: 600;
+}
+
+.filter-count-badge.empty {
+  color: var(--accent-danger);
+  background-color: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.filter-search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.filter-search-box .search-icon {
+  position: absolute;
+  left: 9px;
+  font-size: 11px;
+  color: var(--text-dim);
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+}
+
+.filter-input {
+  padding-left: 26px !important;
+  padding-right: 26px !important;
+  height: 30px;
+  font-size: 12px;
+  background-color: rgba(16, 20, 26, 0.85);
+  border-color: rgba(38, 46, 59, 0.85);
+}
+
+.filter-input:focus {
+  border-color: var(--border-focus);
+  background-color: var(--bg-input);
+}
+
+.filter-clear-btn {
+  position: absolute;
+  right: 6px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 50%;
+  transition: all 0.15s ease;
+  z-index: 2;
+}
+
+.filter-clear-btn:hover {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.filter-search-box-placeholder {
+  height: 30px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  background-color: rgba(16, 20, 26, 0.35);
+  border: 1px dashed rgba(38, 46, 59, 0.5);
+  border-radius: var(--radius-sm);
+}
+
+.search-placeholder-text {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
 /* Buttons */
 .btn {
   display: inline-flex;
