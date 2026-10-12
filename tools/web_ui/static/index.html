@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assetto Corsa GT License Test Designer</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,600;0,700;1,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app">
+    <!-- Top Header -->
+    <header class="navbar">
+      <div class="brand">
+        <span class="gt-logo">GT</span>
+        <div class="title-wrap">
+          <h1>LICENSE TEST DESIGNER</h1>
+          <span class="subtitle">Assetto Corsa GT-Like Driving School Editor</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btn-rebuild" class="btn btn-primary" title="Rebuild test JSONs & Content Manager career">
+          <span class="icon">⚡</span> Rebuild & Validate
+        </button>
+        <button id="btn-sync" class="btn btn-secondary" title="Sync changes directly to Assetto Corsa install">
+          <span class="icon">🔄</span> Sync to AC
+        </button>
+      </div>
+    </header>
+
+    <!-- License Tabs (Fixed, per requirements: names and images cannot be changed) -->
+    <nav class="license-nav">
+      <div id="license-tabs" class="tab-container">
+        <!-- Rendered dynamically from curriculum -->
+      </div>
+    </nav>
+
+    <!-- Main Workspace -->
+    <div class="workspace">
+      <!-- Left Column: Test List for Selected License -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="tier-info">
+            <h2 id="active-tier-title">National B</h2>
+            <span id="test-count-badge" class="badge">12 Tests</span>
+          </div>
+          <button id="btn-add-test" class="btn btn-sm btn-accent" title="Add new test to this license">
+            <span>+ Add Test</span>
+          </button>
+        </div>
+        <p id="active-tier-desc" class="tier-description"></p>
+
+        <div id="test-list" class="test-list">
+          <!-- Rendered dynamically -->
+        </div>
+      </aside>
+
+      <!-- Right Column: Test Editor & Interactive Spline Preview -->
+      <main class="editor-pane">
+        <div id="editor-empty" class="editor-empty" style="display: none;">
+          <div class="empty-state">
+            <span class="empty-icon">🏁</span>
+            <h3>No Test Selected</h3>
+            <p>Select a test from the left panel to inspect or edit, or click <strong>+ Add Test</strong>.</p>
+          </div>
+        </div>
+
+        <form id="test-form" class="editor-form">
+          <div class="form-header">
+            <div class="form-title-group">
+              <span id="form-test-id-badge" class="badge badge-lg">B-1</span>
+              <input type="text" id="input-title" class="form-control title-input" placeholder="Test Title" required>
+            </div>
+            <div class="form-actions">
+              <button type="button" id="btn-delete-test" class="btn btn-danger btn-sm">
+                <span>🗑️ Delete Test</span>
+              </button>
+              <button type="submit" id="btn-save-test" class="btn btn-success">
+                <span>💾 Save Test</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Section 1: Objective & Description -->
+          <div class="card form-card">
+            <div class="card-title">Curriculum Lesson & Description</div>
+            <div class="form-grid cols-2">
+              <div class="form-group">
+                <label for="input-objective">Lesson Objective</label>
+                <input type="text" id="input-objective" class="form-control" placeholder="Key driving technique to teach..." required>
+              </div>
+              <div class="form-group">
+                <label for="input-test-id">Test Identifier</label>
+                <input type="text" id="input-test-id" class="form-control mono" placeholder="e.g. B-1, A-12" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="input-description">Test Description / Instruction</label>
+              <textarea id="input-description" class="form-control" rows="2" placeholder="Driver instruction displayed during countdown..." required></textarea>
+            </div>
+          </div>
+
+          <!-- Section 2: Vehicle & Track Selection -->
+          <div class="card form-card">
+            <div class="card-title flex-between">
+              <span>Track & Vehicle Selection</span>
+              <span class="badge" title="Limited to official Kunos Simulazioni content">Kunos Official Only</span>
+            </div>
+            <div class="form-grid cols-3">
+              <div class="form-group">
+                <label for="select-track">Track (Kunos)</label>
+                <select id="select-track" class="form-control" required>
+                  <option value="">Select Kunos Track...</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="select-layout">Layout</label>
+                <select id="select-layout" class="form-control">
+                  <option value="">Default Layout</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="select-car">Car Model (Kunos)</label>
+                <select id="select-car" class="form-control" required>
+                  <option value="">Select Kunos Car...</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: Lap Mode & Spatial Positions (Interactive Map) -->
+          <div class="card form-card">
+            <div class="card-title flex-between">
+              <span>Test Bounds & Track Positions</span>
+              <div class="toggle-group">
+                <label class="toggle-label">
+                  <input type="checkbox" id="toggle-full-lap">
+                  <span class="toggle-switch"></span>
+                  <span id="full-lap-text" class="toggle-text">Full Lap Test</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Interactive Spline Canvas Map -->
+            <div class="map-container">
+              <div class="map-toolbar">
+                <span id="map-track-info" class="map-info">Track Length: 0 m</span>
+                <div class="map-legend">
+                  <span class="legend-item"><span class="dot dot-start"></span> Start Gate</span>
+                  <span class="legend-item"><span class="dot dot-finish"></span> Finish Gate</span>
+                  <span class="legend-item"><span class="bar bar-active"></span> Active Sector</span>
+                </div>
+              </div>
+              <div class="canvas-wrapper">
+                <canvas id="track-canvas" width="700" height="320"></canvas>
+                <div id="canvas-loading" class="canvas-overlay" style="display: none;">Loading Spline...</div>
+              </div>
+            </div>
+
+            <!-- Starting and Ending Position Controls -->
+            <div class="form-grid cols-2 mt-3">
+              <div class="form-group">
+                <div class="flex-between">
+                  <label for="slider-start-s">Start Position (<span id="disp-start-s">0.00%</span> / <span id="disp-start-m">0 m</span>)</label>
+                  <input type="number" id="input-start-s" class="form-control num-input mono" min="0" max="1" step="0.0001" value="0.0">
+                </div>
+                <input type="range" id="slider-start-s" class="range-slider range-start" min="0" max="1" step="0.0005" value="0.0">
+              </div>
+
+              <div class="form-group">
+                <div class="flex-between">
+                  <label for="slider-finish-s">Finish Position (<span id="disp-finish-s">100.00%</span> / <span id="disp-finish-m">0 m</span>)</label>
+                  <input type="number" id="input-finish-s" class="form-control num-input mono" min="0" max="1" step="0.0001" value="1.0">
+                </div>
+                <input type="range" id="slider-finish-s" class="range-slider range-finish" min="0" max="1" step="0.0005" value="1.0">
+              </div>
+            </div>
+            <div id="sector-stats" class="sector-badge-bar">
+              Sector Distance: <strong id="disp-sector-dist">0 m</strong>
+            </div>
+          </div>
+
+          <!-- Section 4: Start Mode (Rolling vs Standing) & Speed -->
+          <div class="card form-card">
+            <div class="card-title">Start Mode & Physics Initialization</div>
+            <div class="start-mode-selector">
+              <label class="mode-card" id="mode-card-standing">
+                <input type="radio" name="start_mode" value="STANDING" id="radio-standing">
+                <div class="mode-body">
+                  <span class="mode-icon">🛑</span>
+                  <div class="mode-text">
+                    <strong>Standing Start</strong>
+                    <span>Chassis stationary at start line (0 km/h)</span>
+                  </div>
+                </div>
+              </label>
+
+              <label class="mode-card" id="mode-card-rolling">
+                <input type="radio" name="start_mode" value="ROLLING" id="radio-rolling">
+                <div class="mode-body">
+                  <span class="mode-icon">🏎️</span>
+                  <div class="mode-text">
+                    <strong>Rolling Start</strong>
+                    <span>AI autopilot drives through countdown to GO!</span>
+                  </div>
+                </div>
+              </label>
+
+              <label class="mode-card" id="mode-card-flying">
+                <input type="radio" name="start_mode" value="FLYING_LAP" id="radio-flying">
+                <div class="mode-body">
+                  <span class="mode-icon">✈️</span>
+                  <div class="mode-text">
+                    <strong>Flying Lap</strong>
+                    <span>Hot lap with high-speed rolling launch</span>
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <div class="form-grid cols-4 mt-3" id="speed-settings-row">
+              <div class="form-group">
+                <label for="input-speed">Initial Speed (km/h)</label>
+                <input type="number" id="input-speed" class="form-control mono" min="0" max="400" step="5" value="0">
+              </div>
+              <div class="form-group">
+                <label for="input-spawn-offset">Spawn Offset (m)</label>
+                <input type="number" id="input-spawn-offset" class="form-control mono" min="0" max="500" step="0.5" value="0">
+                <small class="helper-text">Auto-calibrated for 3s countdown</small>
+              </div>
+              <div class="form-group">
+                <label for="input-gear">Engaged Gear</label>
+                <input type="number" id="input-gear" class="form-control mono" min="1" max="8" placeholder="Auto">
+              </div>
+              <div class="form-group">
+                <label for="input-rpm">Initial RPM</label>
+                <input type="number" id="input-rpm" class="form-control mono" min="500" max="22000" step="50" placeholder="Auto">
+              </div>
+            </div>
+
+            <div class="mt-2" id="stop-box-row">
+              <label class="checkbox-label">
+                <input type="checkbox" id="check-stop-box">
+                <span>Require Stop Box (Acceleration & Threshold Braking Test)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Section 5: Target Times -->
+          <div class="card form-card">
+            <div class="card-title">Target Times (Medal Adjudication)</div>
+            <div class="form-grid cols-3">
+              <div class="form-group">
+                <label for="target-gold" class="medal-label medal-gold">🥇 Gold Target (seconds)</label>
+                <input type="number" id="target-gold" class="form-control mono medal-input gold" step="0.001" min="1" required>
+              </div>
+              <div class="form-group">
+                <label for="target-silver" class="medal-label medal-silver">🥈 Silver Target (seconds)</label>
+                <input type="number" id="target-silver" class="form-control mono medal-input silver" step="0.001" min="1" required>
+              </div>
+              <div class="form-group">
+                <label for="target-bronze" class="medal-label medal-bronze">🥉 Bronze Target (seconds)</label>
+                <input type="number" id="target-bronze" class="form-control mono medal-input bronze" step="0.001" min="1" required>
+              </div>
+            </div>
+            <div id="target-error" class="target-validation-error" style="display: none;">
+              ⚠️ Logical error: Targets must satisfy Gold &lt; Silver &lt; Bronze.
+            </div>
+          </div>
+        </form>
+      </main>
+    </div>
+
+    <!-- Modal for Generation / Validation Logs -->
+    <div id="log-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modal-title">Rebuild & Curriculum Validation</h3>
+          <button id="modal-close" class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div id="modal-status-badge" class="badge badge-lg">Running...</div>
+          <pre id="modal-log-text" class="log-viewer"></pre>
+        </div>
+        <div class="modal-footer">
+          <button id="modal-btn-ok" class="btn btn-primary">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast" style="display: none;"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+

@@ -63,5 +63,22 @@ python tools/simulate_all_tests.py
 
 # 5. Run full verification suite (all 7 stages)
 python tools/run_full_validation_suite.py
+
+# 6. License Test Designer Web UI
+python tools/designer.py
+```
+
+### License Test Designer Web UI (`tools/designer.py`)
+Launches a local, lightweight web application for test designers:
+- Browse all 5 licenses (National B, National A, International B, International A, Super License).
+- Add new tests or delete existing tests with one click.
+- Search and pick tracks and layouts from Assetto Corsa (`content/tracks`).
+- Interactive 2D track spline map canvas to inspect and configure sector Start Gate and Finish Gate positions.
+- Toggle between **Full Lap** and **Segment** test modes.
+- Toggle between **Standing Start**, **Rolling Start** (with automatic $v \times 3\text{s}$ spawn offset calculation), and **Flying Lap**.
+- Rebuild test definitions and Content Manager career structures with instant validation report.
+- One-click live sync to Assetto Corsa.
+```powershell
+python tools/designer.py
 ```
 
