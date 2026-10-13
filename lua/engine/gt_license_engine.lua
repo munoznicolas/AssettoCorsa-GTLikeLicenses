@@ -331,10 +331,16 @@ function GTLicenseEngine:startCountdown()
     if physics and physics.setAISplineAbsoluteOffset then
       physics.setAISplineAbsoluteOffset(0, 0.0, false)
     end
-    GTPhysicsHooks.unlockControls(0, nil)
+    if physics and physics.engageGear then
+      physics.engageGear(0, 1)
+    end
+    if physics and physics.setEngineRPM then
+      physics.setEngineRPM(0, 3000)
+    end
+    GTPhysicsHooks.unlockControls(0, 1)
 
     if ac and ac.log then
-      ac.log("[GTLicense] AI Telemetry Recorder: Bypassed countdown, native AI autopilot engaged at track spawn.")
+      ac.log("[GTLicense] AI Telemetry Recorder: Bypassed countdown, native AI autopilot engaged at track spawn in gear 1.")
     end
     dispatchEvent(self, "go")
     return
@@ -487,6 +493,24 @@ function GTLicenseEngine:update(dt)
   if not self.spawnInitialized and car then
     self.spawnInitialized = true
     if self.isTelemetryRecorder then
+      local inPit = (car.isInPitlane == true) or (car.isInPit == true)
+      local launchGear = 1
+
+      if not inPit and car.speedKmh < 15.0 then
+        -- Impart rolling start velocity along track heading if spawned on track
+        local fwd = car.look
+        launchGear = 2
+        GTPhysicsHooks.applyRollingVelocity(0, fwd, 70, 2, 4000)
+      else
+        -- If in pit lane or already moving, assert 1st gear engaged
+        if physics and physics.engageGear then
+          physics.engageGear(0, 1)
+        end
+        if physics and physics.setEngineRPM then
+          physics.setEngineRPM(0, 3000)
+        end
+      end
+
       if physics and physics.setCarAutopilot then
         physics.setCarAutopilot(true, false)
       end
@@ -502,9 +526,14 @@ function GTLicenseEngine:update(dt)
       if physics and physics.setAITopSpeed then
         physics.setAITopSpeed(0, 999999.0)
       end
-      GTPhysicsHooks.unlockControls(0, nil)
+      if physics and physics.setAISplineAbsoluteOffset then
+        physics.setAISplineAbsoluteOffset(0, 0.0, false)
+      end
+      GTPhysicsHooks.unlockControls(0, launchGear)
+
       if ac and ac.log then
-        ac.log(string.format("[GTLicense] First live frame telemetry recorder init: spd=%.2f km/h", car.speedKmh))
+        ac.log(string.format("[GTLicense] First live frame telemetry recorder init: spd=%.2f km/h, gear=%d, inPit=%s",
+          car.speedKmh, launchGear, tostring(inPit)))
       end
       return
     end
@@ -719,7 +748,15 @@ function GTLicenseEngine:update(dt)
       local gearCount = (car.gearCount and car.gearCount > 0) and car.gearCount or 6
       local now = (os and (os.preciseClock or os.clock) and (os.preciseClock or os.clock)()) or 0
 
-      if car.rpm >= (maxRpm * 0.93) and car.gear > 0 and car.gear < gearCount then
+      -- Anti-neutral guard: If car is in neutral (gear <= 0), engage 1st gear immediately
+      if car.gear <= 0 then
+        if physics and physics.engageGear then
+          physics.engageGear(0, 1)
+        end
+        if physics and physics.setEngineRPM then
+          physics.setEngineRPM(0, 3000)
+        end
+      elseif car.rpm >= (maxRpm * 0.93) and car.gear > 0 and car.gear < gearCount then
         if not self.lastAIShiftTime or (now - self.lastAIShiftTime >= 0.75) then
           self.lastAIShiftTime = now
           local nextGear = car.gear + 1
