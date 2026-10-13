@@ -151,7 +151,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (refData.success) {
           state.referenceTests = refData.tests;
           const refBadge = document.getElementById("ref-total-badge");
-          if (refBadge) refBadge.textContent = refData.count || refData.tests.length;
+          if (refBadge)
+            refBadge.textContent = refData.count || refData.tests.length;
           setupReferenceViewListeners();
         }
       } catch (err) {
@@ -164,18 +165,23 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function populateTrackDropdown(selectedTrackId = null) {
-    const query = inputSearchTrack ? inputSearchTrack.value.trim().toLowerCase() : "";
-    const activeTrackId = selectedTrackId !== null ? selectedTrackId : selectTrack.value;
+    const query = inputSearchTrack
+      ? inputSearchTrack.value.trim().toLowerCase()
+      : "";
+    const activeTrackId =
+      selectedTrackId !== null ? selectedTrackId : selectTrack.value;
 
     selectTrack.innerHTML = '<option value="">Select Kunos Track...</option>';
 
     let matches = state.tracks;
     if (query) {
-      matches = state.tracks.filter(t => {
+      matches = state.tracks.filter((t) => {
         const idMatch = (t.track_id || "").toLowerCase().includes(query);
         const nameMatch = (t.name || "").toLowerCase().includes(query);
-        const layoutMatch = (t.layouts || []).some(l =>
-          (l.name || "").toLowerCase().includes(query) || (l.layout_id || "").toLowerCase().includes(query)
+        const layoutMatch = (t.layouts || []).some(
+          (l) =>
+            (l.name || "").toLowerCase().includes(query) ||
+            (l.layout_id || "").toLowerCase().includes(query),
         );
         return idMatch || nameMatch || layoutMatch;
       });
@@ -193,7 +199,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (btnClearTrackSearch) btnClearTrackSearch.style.display = "none";
     }
 
-    matches.forEach(t => {
+    matches.forEach((t) => {
       const opt = document.createElement("option");
       opt.value = t.track_id;
       opt.textContent = `${t.name} (${t.track_id})`;
@@ -203,7 +209,7 @@ document.addEventListener("DOMContentLoaded", () => {
       selectTrack.appendChild(opt);
     });
 
-    if (activeTrackId && matches.some(t => t.track_id === activeTrackId)) {
+    if (activeTrackId && matches.some((t) => t.track_id === activeTrackId)) {
       selectTrack.value = activeTrackId;
     } else if (!query && activeTrackId) {
       selectTrack.value = activeTrackId;
@@ -212,7 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function populateLayoutDropdown(trackId, selectedLayout = "") {
     selectLayout.innerHTML = "";
-    const track = state.tracks.find(t => t.track_id === trackId);
+    const track = state.tracks.find((t) => t.track_id === trackId);
     if (!track || !track.layouts || track.layouts.length === 0) {
       const opt = document.createElement("option");
       opt.value = "";
@@ -221,10 +227,11 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    track.layouts.forEach(l => {
+    track.layouts.forEach((l) => {
       const opt = document.createElement("option");
       opt.value = l.layout_id;
-      opt.textContent = l.name || (l.layout_id ? l.layout_id : "Default Layout");
+      opt.textContent =
+        l.name || (l.layout_id ? l.layout_id : "Default Layout");
       if (l.layout_id === selectedLayout) {
         opt.selected = true;
       }
@@ -235,31 +242,56 @@ document.addEventListener("DOMContentLoaded", () => {
   function filterCars(query) {
     if (!query) return state.cars;
     const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
-    return state.cars.filter(c => {
+    return state.cars.filter((c) => {
       const id = (c.car_id || "").toLowerCase();
       const name = (c.name || "").toLowerCase();
       const brand = (c.brand || "").toLowerCase();
       const dt = (c.drivetrain || "").toLowerCase();
-      const tags = (c.tags || []).map(t => String(t).toLowerCase());
+      const tags = (c.tags || []).map((t) => String(t).toLowerCase());
 
-      return tokens.every(tok => {
+      return tokens.every((tok) => {
         if (tok === "awd" || tok === "4wd") {
-          return dt === "awd" || tags.includes("awd") || tags.includes("4wd") || tags.includes("mawd") || tags.includes("fawd") || id.includes(tok) || name.includes(tok);
+          return (
+            dt === "awd" ||
+            tags.includes("awd") ||
+            tags.includes("4wd") ||
+            tags.includes("mawd") ||
+            tags.includes("fawd") ||
+            id.includes(tok) ||
+            name.includes(tok)
+          );
         }
         if (tok === "fwd") {
-          return dt === "fwd" || tags.includes("fwd") || id.includes(tok) || name.includes(tok);
+          return (
+            dt === "fwd" ||
+            tags.includes("fwd") ||
+            id.includes(tok) ||
+            name.includes(tok)
+          );
         }
         if (tok === "rwd") {
-          return dt === "rwd" || tags.includes("rwd") || id.includes(tok) || name.includes(tok);
+          return (
+            dt === "rwd" ||
+            tags.includes("rwd") ||
+            id.includes(tok) ||
+            name.includes(tok)
+          );
         }
-        return id.includes(tok) || name.includes(tok) || brand.includes(tok) || dt.includes(tok) || tags.some(t => t.includes(tok));
+        return (
+          id.includes(tok) ||
+          name.includes(tok) ||
+          brand.includes(tok) ||
+          dt.includes(tok) ||
+          tags.some((t) => t.includes(tok))
+        );
       });
     });
   }
 
   function populateCarDropdown(selectedCarId = null) {
     const query = inputSearchCar ? inputSearchCar.value.trim() : "";
-    const activeCarId = selectedCarId !== null ? selectedCarId : selectCar.value;
+    const activeCarId =
+      selectedCarId !== null ? selectedCarId : selectCar.value;
 
     selectCar.innerHTML = '<option value="">Select Kunos Car...</option>';
 
@@ -278,7 +310,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (btnClearCarSearch) btnClearCarSearch.style.display = "none";
     }
 
-    matches.forEach(c => {
+    matches.forEach((c) => {
       const opt = document.createElement("option");
       opt.value = c.car_id;
       const brandStr = c.brand ? ` (${c.brand})` : "";
@@ -290,7 +322,7 @@ document.addEventListener("DOMContentLoaded", () => {
       selectCar.appendChild(opt);
     });
 
-    if (activeCarId && matches.some(c => c.car_id === activeCarId)) {
+    if (activeCarId && matches.some((c) => c.car_id === activeCarId)) {
       selectCar.value = activeCarId;
     } else if (!query && activeCarId) {
       selectCar.value = activeCarId;
@@ -324,9 +356,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (tabBtnReference) tabBtnReference.classList.remove("active");
 
     // Update active tab styling
-    document.querySelectorAll(".tab-container .license-tab").forEach((tab, idx) => {
-      tab.classList.toggle("active", idx === tierIdx);
-    });
+    document
+      .querySelectorAll(".tab-container .license-tab")
+      .forEach((tab, idx) => {
+        tab.classList.toggle("active", idx === tierIdx);
+      });
 
     const activeTier = state.curriculum[tierIdx];
     tierTitle.textContent = activeTier.tier_name;
@@ -354,7 +388,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const isFullLap = isFullLapTest(test);
       const lapTypeLabel = isFullLap ? "Full Lap" : "Sector";
 
-      const previewUrl = test.preview_image || (activeTier.folder ? `/content/career/${activeTier.folder}/event${idx + 1}/preview.png` : `/api/test_preview?test_id=${encodeURIComponent(test.test_id)}`);
+      const previewUrl =
+        test.preview_image ||
+        (activeTier.folder
+          ? `/content/career/${activeTier.folder}/event${idx + 1}/preview.png`
+          : `/api/test_preview?test_id=${encodeURIComponent(test.test_id)}`);
 
       item.innerHTML = `
         <div class="test-item-thumb">
@@ -389,7 +427,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const s1 = parseFloat(test.finish_s || 1);
     return (s0 <= 0.005 && s1 >= 0.99) || test.start_mode === "FLYING_LAP";
   }
-
 
   // Load Test Into Form
   async function loadTestIntoForm(testIdx) {
@@ -429,13 +466,18 @@ document.addEventListener("DOMContentLoaded", () => {
     // Start Mode
     setStartMode(test.start_mode || "STANDING");
     inputSpeed.value = test.speed !== undefined ? test.speed : 0;
-    inputSpawnOffset.value = test.spawn_offset !== undefined ? test.spawn_offset : 0;
+    inputSpawnOffset.value =
+      test.spawn_offset !== undefined ? test.spawn_offset : 0;
     inputGear.value = test.gear !== undefined ? test.gear : "";
     inputRpm.value = test.rpm !== undefined ? test.rpm : "";
     checkStopBox.checked = Boolean(test.with_stop_box);
 
     // Targets
-    const targets = test.targets || { gold_seconds: 10, silver_seconds: 12, bronze_seconds: 15 };
+    const targets = test.targets || {
+      gold_seconds: 10,
+      silver_seconds: 12,
+      bronze_seconds: 15,
+    };
     targetGold.value = targets.gold_seconds;
     targetSilver.value = targets.silver_seconds;
     targetBronze.value = targets.bronze_seconds;
@@ -477,7 +519,9 @@ document.addEventListener("DOMContentLoaded", () => {
     dispStartS.textContent = (startS * 100).toFixed(2) + "%";
     dispFinishS.textContent = (finishS * 100).toFixed(2) + "%";
 
-    const totalLen = state.currentSpline ? state.currentSpline.total_length_m : 0;
+    const totalLen = state.currentSpline
+      ? state.currentSpline.total_length_m
+      : 0;
     const startM = Math.round(startS * totalLen);
     const finishM = Math.round(finishS * totalLen);
     let sectorDist = 0;
@@ -501,14 +545,14 @@ document.addEventListener("DOMContentLoaded", () => {
     inputFinish.disabled = isFull;
 
     if (isFull) {
-      setSpatialPositions(0.000, 0.999);
+      setSpatialPositions(0.0, 0.999);
     }
   }
 
   function setStartMode(mode) {
-    radioStanding.checked = (mode === "STANDING");
-    radioRolling.checked = (mode === "ROLLING");
-    radioFlying.checked = (mode === "FLYING_LAP");
+    radioStanding.checked = mode === "STANDING";
+    radioRolling.checked = mode === "ROLLING";
+    radioFlying.checked = mode === "FLYING_LAP";
 
     cardStanding.classList.toggle("active", mode === "STANDING");
     cardRolling.classList.toggle("active", mode === "ROLLING");
@@ -548,12 +592,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     canvasLoading.style.display = "flex";
     try {
-      const res = await fetch(`/api/spline?track_id=${encodeURIComponent(trackId)}&layout=${encodeURIComponent(layout)}`);
+      const res = await fetch(
+        `/api/spline?track_id=${encodeURIComponent(trackId)}&layout=${encodeURIComponent(layout)}`,
+      );
       const data = await res.json();
       if (data.success && data.spline) {
         state.currentSpline = data.spline;
         mapTrackInfo.textContent = `Length: ${data.spline.total_length_m.toLocaleString()} m | Points: ${data.spline.point_count}`;
-        setSpatialPositions(parseFloat(inputStart.value || 0), parseFloat(inputFinish.value || 1));
+        setSpatialPositions(
+          parseFloat(inputStart.value || 0),
+          parseFloat(inputFinish.value || 1),
+        );
       } else {
         state.currentSpline = null;
         mapTrackInfo.textContent = "AI spline not found for this track layout";
@@ -577,11 +626,19 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.fillStyle = "#48566a";
     ctx.font = "14px Inter, sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("Select a track with an AI spline to view 2D map", trackCanvas.width / 2, trackCanvas.height / 2);
+    ctx.fillText(
+      "Select a track with an AI spline to view 2D map",
+      trackCanvas.width / 2,
+      trackCanvas.height / 2,
+    );
   }
 
   function renderCanvasTrack() {
-    if (!state.currentSpline || !state.currentSpline.points || state.currentSpline.points.length === 0) {
+    if (
+      !state.currentSpline ||
+      !state.currentSpline.points ||
+      state.currentSpline.points.length === 0
+    ) {
       drawEmptyCanvas();
       return;
     }
@@ -632,10 +689,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const s = pts[i].s;
       let inSector = false;
       if (finishS >= startS) {
-        inSector = (s >= startS && s <= finishS);
+        inSector = s >= startS && s <= finishS;
       } else {
         // Sector wraps around 1.0 -> 0.0
-        inSector = (s >= startS || s <= finishS);
+        inSector = s >= startS || s <= finishS;
       }
 
       if (inSector) {
@@ -712,7 +769,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const pad = 30;
     const bw = bounds.width || 1;
     const bh = bounds.height || 1;
-    const scale = Math.min((trackCanvas.width - pad * 2) / bw, (trackCanvas.height - pad * 2) / bh);
+    const scale = Math.min(
+      (trackCanvas.width - pad * 2) / bw,
+      (trackCanvas.height - pad * 2) / bh,
+    );
     const ox = (trackCanvas.width - bw * scale) / 2 - bounds.min_x * scale;
     const oy = (trackCanvas.height - bh * scale) / 2 - bounds.min_y * scale;
 
@@ -773,20 +833,25 @@ document.addEventListener("DOMContentLoaded", () => {
         test_id: `${prefix}${count}`,
         tier: activeTier.tier_name,
         title: `Test ${count}: New Sector Challenge`,
-        description: "Execute the prescribed driving line cleanly with zero track limit infractions.",
+        description:
+          "Execute the prescribed driving line cleanly with zero track limit infractions.",
         lesson_objective: "Mastering vehicle balance through the sector.",
         car_id: state.cars[0] ? state.cars[0].car_id : "ks_mazda_miata",
         track_id: state.tracks[0] ? state.tracks[0].track_id : "ks_vallelunga",
         track_layout: "",
         start_mode: "ROLLING",
-        start_s: 0.1000,
-        finish_s: 0.3000,
+        start_s: 0.1,
+        finish_s: 0.3,
         spawn_offset: 58.3,
         speed: 70.0,
         gear: 2,
         rpm: 4500,
         with_stop_box: false,
-        targets: { gold_seconds: 15.000, silver_seconds: 16.500, bronze_seconds: 18.500 },
+        targets: {
+          gold_seconds: 15.0,
+          silver_seconds: 16.5,
+          bronze_seconds: 18.5,
+        },
         preview_image: `/content/career/${activeTier.folder}/event${count}/preview.png`,
       };
 
@@ -807,7 +872,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const test = activeTier.tests[state.activeTestIndex];
-      if (!confirm(`Are you sure you want to remove test "${test.test_id}: ${test.title}"?`)) {
+      if (
+        !confirm(
+          `Are you sure you want to remove test "${test.test_id}: ${test.title}"?`,
+        )
+      ) {
         return;
       }
 
@@ -817,7 +886,10 @@ document.addEventListener("DOMContentLoaded", () => {
       // Automatically renumber subsequent tests
       renumberTierTests(activeTier);
 
-      const newIdx = Math.max(0, Math.min(state.activeTestIndex, activeTier.tests.length - 1));
+      const newIdx = Math.max(
+        0,
+        Math.min(state.activeTestIndex, activeTier.tests.length - 1),
+      );
       state.activeTestIndex = newIdx;
 
       // Save updated tier to server immediately
@@ -826,7 +898,9 @@ document.addEventListener("DOMContentLoaded", () => {
         renderLicenseTabs();
         renderTestList();
         loadTestIntoForm(newIdx);
-        showToast(`Removed test ${deletedId}. Subsequent tests renumbered successfully.`);
+        showToast(
+          `Removed test ${deletedId}. Subsequent tests renumbered successfully.`,
+        );
       } catch (err) {
         showToast("Error saving after delete: " + err.message, "error");
       }
@@ -842,9 +916,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.key === "Enter") {
           e.preventDefault();
           const query = inputSearchTrack.value.trim().toLowerCase();
-          const matches = state.tracks.filter(t =>
-            (t.track_id || "").toLowerCase().includes(query) ||
-            (t.name || "").toLowerCase().includes(query)
+          const matches = state.tracks.filter(
+            (t) =>
+              (t.track_id || "").toLowerCase().includes(query) ||
+              (t.name || "").toLowerCase().includes(query),
           );
           if (matches.length > 0) {
             selectTrack.value = matches[0].track_id;
@@ -924,19 +999,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Sliders & Inputs sync
     sliderStart.addEventListener("input", (e) => {
-      setSpatialPositions(parseFloat(e.target.value), parseFloat(sliderFinish.value));
+      setSpatialPositions(
+        parseFloat(e.target.value),
+        parseFloat(sliderFinish.value),
+      );
     });
 
     sliderFinish.addEventListener("input", (e) => {
-      setSpatialPositions(parseFloat(sliderStart.value), parseFloat(e.target.value));
+      setSpatialPositions(
+        parseFloat(sliderStart.value),
+        parseFloat(e.target.value),
+      );
     });
 
     inputStart.addEventListener("change", (e) => {
-      setSpatialPositions(parseFloat(e.target.value || 0), parseFloat(inputFinish.value || 1));
+      setSpatialPositions(
+        parseFloat(e.target.value || 0),
+        parseFloat(inputFinish.value || 1),
+      );
     });
 
     inputFinish.addEventListener("change", (e) => {
-      setSpatialPositions(parseFloat(inputStart.value || 0), parseFloat(e.target.value || 1));
+      setSpatialPositions(
+        parseFloat(inputStart.value || 0),
+        parseFloat(e.target.value || 1),
+      );
     });
 
     // Start Mode Switchers
@@ -978,7 +1065,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Targets Validation
-    [targetGold, targetSilver, targetBronze].forEach(el => {
+    [targetGold, targetSilver, targetBronze].forEach((el) => {
       el.addEventListener("input", validateTargets);
     });
 
@@ -1003,7 +1090,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Rebuild & Validate
     btnRebuild.addEventListener("click", async () => {
-      openModal("Rebuilding Content & Validating...", "Running Content Generator, Track Miniature Builder, and Curriculum Validator...");
+      openModal(
+        "Rebuilding Content & Validating...",
+        "Running Content Generator, Track Miniature Builder, and Curriculum Validator...",
+      );
       try {
         const res = await fetch("/api/generate", { method: "POST" });
         const report = await res.json();
@@ -1027,30 +1117,35 @@ document.addEventListener("DOMContentLoaded", () => {
         log += `Audited ${report.total_files} test files. Passed: ${report.passed}, Failed: ${report.failed}\n\n`;
         if (report.errors && report.errors.length > 0) {
           log += "--- ERRORS ---\n";
-          report.errors.forEach(e => {
+          report.errors.forEach((e) => {
             log += `[${e.severity}] [${e.test_id || "ALL"}] ${e.message}\n`;
           });
           log += "\n";
         }
         if (report.warnings && report.warnings.length > 0) {
           log += "--- WARNINGS ---\n";
-          report.warnings.forEach(w => {
+          report.warnings.forEach((w) => {
             log += `[${w.severity}] [${w.test_id || "ALL"}] ${w.message}\n`;
           });
         }
         if (!report.errors.length && !report.warnings.length) {
-          log += "All schema validations, 3D gate vectors, track miniatures, and career links PASSED perfectly!";
+          log +=
+            "All schema validations, 3D gate vectors, track miniatures, and career links PASSED perfectly!";
         }
         modalLogText.textContent = log;
       } catch (err) {
         modalStatusBadge.textContent = "SERVER ERROR";
-        modalLogText.textContent = "Error executing content generator: " + err.message;
+        modalLogText.textContent =
+          "Error executing content generator: " + err.message;
       }
     });
 
     // Sync to AC
     btnSync.addEventListener("click", async () => {
-      openModal("Sync to Assetto Corsa", "Synchronizing files to local Assetto Corsa directory...");
+      openModal(
+        "Sync to Assetto Corsa",
+        "Synchronizing files to local Assetto Corsa directory...",
+      );
       try {
         const res = await fetch("/api/sync", { method: "POST" });
         const data = await res.json();
@@ -1071,8 +1166,14 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    modalClose.addEventListener("click", () => logModal.style.display = "none");
-    modalBtnOk.addEventListener("click", () => logModal.style.display = "none");
+    modalClose.addEventListener(
+      "click",
+      () => (logModal.style.display = "none"),
+    );
+    modalBtnOk.addEventListener(
+      "click",
+      () => (logModal.style.display = "none"),
+    );
   }
 
   function saveFormIntoActiveTest() {
@@ -1149,7 +1250,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function escapeHtml(text) {
     if (!text) return "";
-    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
   }
 
   // =========================================================================
@@ -1164,9 +1268,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (gamePillsContainer) {
-      gamePillsContainer.querySelectorAll(".pill-btn").forEach(btn => {
+      gamePillsContainer.querySelectorAll(".pill-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
-          gamePillsContainer.querySelectorAll(".pill-btn").forEach(b => b.classList.remove("active"));
+          gamePillsContainer
+            .querySelectorAll(".pill-btn")
+            .forEach((b) => b.classList.remove("active"));
           btn.classList.add("active");
           state.activeRefGame = btn.getAttribute("data-game") || "ALL";
           populateRefTierDropdown();
@@ -1195,7 +1301,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (tabBtnReference) tabBtnReference.classList.add("active");
 
     // Remove active highlight from license tier tabs
-    document.querySelectorAll(".tab-container .license-tab").forEach(tab => {
+    document.querySelectorAll(".tab-container .license-tab").forEach((tab) => {
       tab.classList.remove("active");
     });
 
@@ -1210,11 +1316,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let tests = state.referenceTests;
     if (state.activeRefGame !== "ALL") {
-      tests = tests.filter(t => t.game === state.activeRefGame);
+      tests = tests.filter((t) => t.game === state.activeRefGame);
     }
 
-    const uniqueTiers = Array.from(new Set(tests.map(t => t.license))).filter(Boolean);
-    uniqueTiers.forEach(tier => {
+    const uniqueTiers = Array.from(new Set(tests.map((t) => t.license))).filter(
+      Boolean,
+    );
+    uniqueTiers.forEach((tier) => {
       const opt = document.createElement("option");
       opt.value = tier;
       opt.textContent = tier;
@@ -1224,7 +1332,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function formatTimeDisplay(totalSeconds) {
-    if (totalSeconds === null || totalSeconds === undefined || !isFinite(totalSeconds)) return "N/A";
+    if (
+      totalSeconds === null ||
+      totalSeconds === undefined ||
+      !isFinite(totalSeconds)
+    )
+      return "N/A";
     const mins = Math.floor(totalSeconds / 60);
     const secs = (totalSeconds % 60).toFixed(3);
     return `${mins}:${secs.padStart(6, "0")}`;
@@ -1233,7 +1346,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function getFilteredRefTests() {
     let list = state.referenceTests || [];
     if (state.activeRefGame !== "ALL") {
-      list = list.filter(t => t.game === state.activeRefGame);
+      list = list.filter((t) => t.game === state.activeRefGame);
     }
     return list;
   }
@@ -1261,8 +1374,12 @@ document.addEventListener("DOMContentLoaded", () => {
     let pwCount = 0;
     const layoutCounts = {};
 
-    list.forEach(t => {
-      if (t.gold_seconds !== null && t.gold_seconds !== undefined && isFinite(t.gold_seconds)) {
+    list.forEach((t) => {
+      if (
+        t.gold_seconds !== null &&
+        t.gold_seconds !== undefined &&
+        isFinite(t.gold_seconds)
+      ) {
         timedCount++;
         totalSec += t.gold_seconds;
       }
@@ -1311,7 +1428,9 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const labels = list.map(t => state.activeRefGame === "ALL" ? `${t.game} ${t.code}` : t.code);
+    const labels = list.map((t) =>
+      state.activeRefGame === "ALL" ? `${t.game} ${t.code}` : t.code,
+    );
     const progressionNumbers = list.map((t, idx) => idx + 1);
 
     const baseChartOptions = {
@@ -1329,7 +1448,7 @@ document.addEventListener("DOMContentLoaded", () => {
           padding: 10,
           titleFont: { family: "Chakra Petch", size: 12, weight: "bold" },
           bodyFont: { family: "Inter", size: 11 },
-        }
+        },
       },
       scales: {
         x: {
@@ -1343,26 +1462,29 @@ document.addEventListener("DOMContentLoaded", () => {
           },
           title: {
             display: true,
-            text: state.activeRefGame === "ALL" ? "Curriculum Progression (All GT Games)" : `${state.activeRefGame} Test Progression`,
+            text:
+              state.activeRefGame === "ALL"
+                ? "Curriculum Progression (All GT Games)"
+                : `${state.activeRefGame} Test Progression`,
             color: "#64748b",
             font: { family: "Chakra Petch", size: 11, weight: "bold" },
-          }
+          },
         },
         y: {
           grid: { color: "rgba(255, 255, 255, 0.05)" },
           ticks: {
             color: "#94a3b8",
             font: { family: "JetBrains Mono", size: 10 },
-          }
-        }
-      }
+          },
+        },
+      },
     };
 
     // -------------------------------------------------------------------------
     // Chart 1: Power & Power-to-Weight Ratio vs Test Progression (Dual Y-Axis)
     // -------------------------------------------------------------------------
-    const hpData = list.map(t => t.hp || 0);
-    const pwData = list.map(t => t.pw_kg_hp || null);
+    const hpData = list.map((t) => t.hp || 0);
+    const pwData = list.map((t) => t.pw_kg_hp || null);
 
     renderSingleChart("chart-power-pw", {
       type: "line",
@@ -1395,8 +1517,8 @@ document.addEventListener("DOMContentLoaded", () => {
             pointBackgroundColor: "#f59e0b",
             pointRadius: list.length > 50 ? 2 : 3,
             pointHoverRadius: 6,
-          }
-        ]
+          },
+        ],
       },
       options: {
         ...baseChartOptions,
@@ -1410,8 +1532,8 @@ document.addEventListener("DOMContentLoaded", () => {
               color: "#cbd5e1",
               font: { family: "Chakra Petch", size: 10, weight: "bold" },
               boxWidth: 12,
-              padding: 10
-            }
+              padding: 10,
+            },
           },
           tooltip: {
             ...baseChartOptions.plugins.tooltip,
@@ -1431,9 +1553,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else {
                   return `⚖️ Power/Weight: ${item.parsed.y} kg/hp`;
                 }
-              }
-            }
-          }
+              },
+            },
+          },
         },
         scales: {
           ...baseChartOptions.scales,
@@ -1445,13 +1567,13 @@ document.addEventListener("DOMContentLoaded", () => {
               display: true,
               text: "Horsepower (HP)",
               color: "#ef4444",
-              font: { family: "Chakra Petch", size: 11, weight: "bold" }
+              font: { family: "Chakra Petch", size: 11, weight: "bold" },
             },
             ticks: {
               color: "#f87171",
-              font: { family: "JetBrains Mono", size: 10 }
+              font: { family: "JetBrains Mono", size: 10 },
             },
-            grid: { color: "rgba(255, 255, 255, 0.05)" }
+            grid: { color: "rgba(255, 255, 255, 0.05)" },
           },
           yPW: {
             type: "linear",
@@ -1461,38 +1583,44 @@ document.addEventListener("DOMContentLoaded", () => {
               display: true,
               text: "P/W (kg/hp)",
               color: "#f59e0b",
-              font: { family: "Chakra Petch", size: 11, weight: "bold" }
+              font: { family: "Chakra Petch", size: 11, weight: "bold" },
             },
             ticks: {
               color: "#fbbf24",
-              font: { family: "JetBrains Mono", size: 10 }
+              font: { family: "JetBrains Mono", size: 10 },
             },
-            grid: { drawOnChartArea: false }
-          }
-        }
-      }
+            grid: { drawOnChartArea: false },
+          },
+        },
+      },
     });
 
     // -------------------------------------------------------------------------
     // Chart 2: Gold Medal Duration vs Test Progression
     // -------------------------------------------------------------------------
-    const goldData = list.map(t => t.gold_seconds !== null && t.gold_seconds !== undefined ? t.gold_seconds : null);
+    const goldData = list.map((t) =>
+      t.gold_seconds !== null && t.gold_seconds !== undefined
+        ? t.gold_seconds
+        : null,
+    );
     renderSingleChart("chart-gold", {
       type: "line",
       data: {
         labels: labels,
-        datasets: [{
-          label: "Gold Duration (sec)",
-          data: goldData,
-          borderColor: "#10b981",
-          backgroundColor: "rgba(16, 185, 129, 0.12)",
-          borderWidth: 2,
-          fill: true,
-          tension: 0.25,
-          pointBackgroundColor: "#10b981",
-          pointRadius: list.length > 50 ? 2 : 3,
-          pointHoverRadius: 6,
-        }]
+        datasets: [
+          {
+            label: "Gold Duration (sec)",
+            data: goldData,
+            borderColor: "#10b981",
+            backgroundColor: "rgba(16, 185, 129, 0.12)",
+            borderWidth: 2,
+            fill: true,
+            tension: 0.25,
+            pointBackgroundColor: "#10b981",
+            pointRadius: list.length > 50 ? 2 : 3,
+            pointHoverRadius: 6,
+          },
+        ],
       },
       options: {
         ...baseChartOptions,
@@ -1509,29 +1637,39 @@ document.addEventListener("DOMContentLoaded", () => {
               label: (item) => {
                 const t = list[item.dataIndex];
                 return `🥇 Gold Target: ${t.gold} (${item.parsed.y}s) | Track: ${t.track}`;
-              }
-            }
-          }
+              },
+            },
+          },
         },
         scales: {
           ...baseChartOptions.scales,
           y: {
             ...baseChartOptions.scales.y,
-            title: { display: true, text: "Gold Target Duration (Seconds)", color: "#10b981", font: { family: "Chakra Petch", size: 11 } },
+            title: {
+              display: true,
+              text: "Gold Target Duration (Seconds)",
+              color: "#10b981",
+              font: { family: "Chakra Petch", size: 11 },
+            },
             ticks: {
               ...baseChartOptions.scales.y.ticks,
-              callback: (val) => `${val}s`
-            }
-          }
-        }
-      }
+              callback: (val) => `${val}s`,
+            },
+          },
+        },
+      },
     });
 
     // -------------------------------------------------------------------------
     // Chart 3: Distribution of Gold Times (Continuous Density Curve with P80 & P90)
     // -------------------------------------------------------------------------
-    const timedTests = list.filter(t => t.gold_seconds !== null && t.gold_seconds !== undefined && isFinite(t.gold_seconds));
-    const times = timedTests.map(t => t.gold_seconds);
+    const timedTests = list.filter(
+      (t) =>
+        t.gold_seconds !== null &&
+        t.gold_seconds !== undefined &&
+        isFinite(t.gold_seconds),
+    );
+    const times = timedTests.map((t) => t.gold_seconds);
 
     // Calculate 80th and 90th percentiles
     const sortedTimes = [...times].sort((a, b) => a - b);
@@ -1544,17 +1682,19 @@ document.addEventListener("DOMContentLoaded", () => {
       return arr[lower] * (1 - weight) + arr[upper] * weight;
     };
 
-    const p80 = getPercentile(sortedTimes, 0.80);
-    const p90 = getPercentile(sortedTimes, 0.90);
+    const p80 = getPercentile(sortedTimes, 0.8);
+    const p90 = getPercentile(sortedTimes, 0.9);
 
     // Update header badges
     const badgeP80 = document.getElementById("badge-p80");
     const badgeP90 = document.getElementById("badge-p90");
     if (badgeP80) {
-      badgeP80.textContent = p80 !== null ? `80th %ile: ${formatTimeDisplay(p80)}` : "P80: N/A";
+      badgeP80.textContent =
+        p80 !== null ? `80th %ile: ${formatTimeDisplay(p80)}` : "P80: N/A";
     }
     if (badgeP90) {
-      badgeP90.textContent = p90 !== null ? `90th %ile: ${formatTimeDisplay(p90)}` : "P90: N/A";
+      badgeP90.textContent =
+        p90 !== null ? `90th %ile: ${formatTimeDisplay(p90)}` : "P90: N/A";
     }
 
     // Calculate time domain bounds for continuous curve
@@ -1576,7 +1716,7 @@ document.addEventListener("DOMContentLoaded", () => {
       times.forEach((t, i) => {
         const diff = (t - s) / sigma;
         density += Math.exp(-0.5 * diff * diff);
-        if (Math.abs(t - s) <= (step / 2)) {
+        if (Math.abs(t - s) <= step / 2) {
           nearby.push(timedTests[i]);
         }
       });
@@ -1589,73 +1729,82 @@ document.addEventListener("DOMContentLoaded", () => {
       type: "line",
       data: {
         labels: distLabels,
-        datasets: [{
-          label: "Test Concentration Density",
-          data: distDensity,
-          borderColor: "#06b6d4",
-          backgroundColor: "rgba(6, 182, 212, 0.16)",
-          borderWidth: 2.5,
-          fill: true,
-          tension: 0.4, // Smooth cubic spline for continuous curve
-          pointRadius: 0, // Clean continuous line
-          pointHoverRadius: 6,
-          pointBackgroundColor: "#22d3ee",
-          pointBorderColor: "#fff",
-          pointBorderWidth: 1.5,
-        }]
+        datasets: [
+          {
+            label: "Test Concentration Density",
+            data: distDensity,
+            borderColor: "#06b6d4",
+            backgroundColor: "rgba(6, 182, 212, 0.16)",
+            borderWidth: 2.5,
+            fill: true,
+            tension: 0.4, // Smooth cubic spline for continuous curve
+            pointRadius: 0, // Clean continuous line
+            pointHoverRadius: 6,
+            pointBackgroundColor: "#22d3ee",
+            pointBorderColor: "#fff",
+            pointBorderWidth: 1.5,
+          },
+        ],
       },
-      plugins: [{
-        id: "percentilesAnnotations",
-        afterDraw(chart) {
-          if (p80 === null && p90 === null) return;
-          const { ctx, chartArea, scales } = chart;
-          if (!chartArea || !scales || !scales.x) return;
-          const { top, bottom, left, right } = chartArea;
-          const xScale = scales.x;
+      plugins: [
+        {
+          id: "percentilesAnnotations",
+          afterDraw(chart) {
+            if (p80 === null && p90 === null) return;
+            const { ctx, chartArea, scales } = chart;
+            if (!chartArea || !scales || !scales.x) return;
+            const { top, bottom, left, right } = chartArea;
+            const xScale = scales.x;
 
-          const getPixelForSec = (sec) => {
-            const rawIdx = (sec - 5) / step;
-            if (rawIdx < 0 || rawIdx > distLabels.length - 1) return null;
-            return xScale.getPixelForValue(rawIdx);
-          };
+            const getPixelForSec = (sec) => {
+              const rawIdx = (sec - 5) / step;
+              if (rawIdx < 0 || rawIdx > distLabels.length - 1) return null;
+              return xScale.getPixelForValue(rawIdx);
+            };
 
-          const drawPercentileLine = (sec, label, color) => {
-            if (sec === null || sec > maxSec) return;
-            const px = getPixelForSec(sec);
-            if (px === null || px < left || px > right) return;
+            const drawPercentileLine = (sec, label, color) => {
+              if (sec === null || sec > maxSec) return;
+              const px = getPixelForSec(sec);
+              if (px === null || px < left || px > right) return;
 
-            ctx.save();
-            ctx.setLineDash([5, 4]);
-            ctx.lineWidth = 1.5;
-            ctx.strokeStyle = color;
+              ctx.save();
+              ctx.setLineDash([5, 4]);
+              ctx.lineWidth = 1.5;
+              ctx.strokeStyle = color;
 
-            ctx.beginPath();
-            ctx.moveTo(px, top + 22);
-            ctx.lineTo(px, bottom);
-            ctx.stroke();
+              ctx.beginPath();
+              ctx.moveTo(px, top + 22);
+              ctx.lineTo(px, bottom);
+              ctx.stroke();
 
-            // Label badge at the top
-            ctx.setLineDash([]);
-            const text = `${label} (${formatTimeDisplay(sec)})`;
-            ctx.font = "bold 10px 'JetBrains Mono', monospace";
-            const textWidth = ctx.measureText(text).width;
+              // Label badge at the top
+              ctx.setLineDash([]);
+              const text = `${label} (${formatTimeDisplay(sec)})`;
+              ctx.font = "bold 10px 'JetBrains Mono', monospace";
+              const textWidth = ctx.measureText(text).width;
 
-            ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
-            ctx.fillRect(px - textWidth / 2 - 5, top + 4, textWidth + 10, 16);
-            ctx.strokeStyle = color;
-            ctx.strokeRect(px - textWidth / 2 - 5, top + 4, textWidth + 10, 16);
+              ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
+              ctx.fillRect(px - textWidth / 2 - 5, top + 4, textWidth + 10, 16);
+              ctx.strokeStyle = color;
+              ctx.strokeRect(
+                px - textWidth / 2 - 5,
+                top + 4,
+                textWidth + 10,
+                16,
+              );
 
-            ctx.fillStyle = color;
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText(text, px, top + 12);
-            ctx.restore();
-          };
+              ctx.fillStyle = color;
+              ctx.textAlign = "center";
+              ctx.textBaseline = "middle";
+              ctx.fillText(text, px, top + 12);
+              ctx.restore();
+            };
 
-          drawPercentileLine(p80, "P80", "#fbbf24");
-          drawPercentileLine(p90, "P90", "#f43f5e");
-        }
-      }],
+            drawPercentileLine(p80, "P80", "#fbbf24");
+            drawPercentileLine(p90, "P90", "#f43f5e");
+          },
+        },
+      ],
       options: {
         ...baseChartOptions,
         plugins: {
@@ -1663,7 +1812,8 @@ document.addEventListener("DOMContentLoaded", () => {
           tooltip: {
             ...baseChartOptions.plugins.tooltip,
             callbacks: {
-              title: (items) => `Target Duration: ~${distLabels[items[0].dataIndex]}`,
+              title: (items) =>
+                `Target Duration: ~${distLabels[items[0].dataIndex]}`,
               label: (item) => {
                 const nearby = distNearbyTests[item.dataIndex];
                 const count = nearby ? nearby.length : 0;
@@ -1672,12 +1822,16 @@ document.addEventListener("DOMContentLoaded", () => {
               afterLabel: (item) => {
                 const nearby = distNearbyTests[item.dataIndex];
                 if (!nearby || nearby.length === 0) return "";
-                const sample = nearby.slice(0, 5).map(t => `${t.code} (${t.gold})`).join(", ");
-                const more = nearby.length > 5 ? ` +${nearby.length - 5} more` : "";
+                const sample = nearby
+                  .slice(0, 5)
+                  .map((t) => `${t.code} (${t.gold})`)
+                  .join(", ");
+                const more =
+                  nearby.length > 5 ? ` +${nearby.length - 5} more` : "";
                 return `Examples: ${sample}${more}`;
-              }
-            }
-          }
+              },
+            },
+          },
         },
         scales: {
           ...baseChartOptions.scales,
@@ -1687,8 +1841,8 @@ document.addEventListener("DOMContentLoaded", () => {
               display: true,
               text: "Gold Target Duration",
               color: "#06b6d4",
-              font: { family: "Chakra Petch", size: 11, weight: "bold" }
-            }
+              font: { family: "Chakra Petch", size: 11, weight: "bold" },
+            },
           },
           y: {
             ...baseChartOptions.scales.y,
@@ -1696,18 +1850,18 @@ document.addEventListener("DOMContentLoaded", () => {
               display: true,
               text: "Relative Test Frequency / Density",
               color: "#64748b",
-              font: { family: "Chakra Petch", size: 11, weight: "bold" }
-            }
-          }
-        }
-      }
+              font: { family: "Chakra Petch", size: 11, weight: "bold" },
+            },
+          },
+        },
+      },
     });
 
     // -------------------------------------------------------------------------
     // Chart 4: Car Drivetrain Layout vs Test Progression
     // -------------------------------------------------------------------------
     const LAYOUT_CATEGORIES = ["FF", "FR", "MR", "RR", "FAWD", "MAWD", "RAWD"];
-    const layoutData = list.map(t => {
+    const layoutData = list.map((t) => {
       const idx = LAYOUT_CATEGORIES.indexOf(t.drivetrain_layout);
       return idx >= 0 ? idx : 1; // Default to FR if missing
     });
@@ -1716,18 +1870,20 @@ document.addEventListener("DOMContentLoaded", () => {
       type: "line",
       data: {
         labels: labels,
-        datasets: [{
-          label: "Drivetrain Layout",
-          data: layoutData,
-          borderColor: "#8b5cf6",
-          backgroundColor: "rgba(139, 92, 246, 0.12)",
-          borderWidth: 2,
-          stepped: "middle",
-          fill: false,
-          pointBackgroundColor: "#8b5cf6",
-          pointRadius: list.length > 50 ? 3 : 4,
-          pointHoverRadius: 7,
-        }]
+        datasets: [
+          {
+            label: "Drivetrain Layout",
+            data: layoutData,
+            borderColor: "#8b5cf6",
+            backgroundColor: "rgba(139, 92, 246, 0.12)",
+            borderWidth: 2,
+            stepped: "middle",
+            fill: false,
+            pointBackgroundColor: "#8b5cf6",
+            pointRadius: list.length > 50 ? 3 : 4,
+            pointHoverRadius: 7,
+          },
+        ],
       },
       options: {
         ...baseChartOptions,
@@ -1745,9 +1901,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 const t = list[item.dataIndex];
                 const cat = LAYOUT_CATEGORIES[item.parsed.y] || "Unknown";
                 return `⚙️ Layout: ${cat} (Engine: ${t.engine}, Drivetrain: ${t.drivetrain}) | Car: ${t.car}`;
-              }
-            }
-          }
+              },
+            },
+          },
         },
         scales: {
           ...baseChartOptions.scales,
@@ -1755,15 +1911,20 @@ document.addEventListener("DOMContentLoaded", () => {
             ...baseChartOptions.scales.y,
             min: 0,
             max: LAYOUT_CATEGORIES.length - 1,
-            title: { display: true, text: "Powertrain Layout Category", color: "#8b5cf6", font: { family: "Chakra Petch", size: 11 } },
+            title: {
+              display: true,
+              text: "Powertrain Layout Category",
+              color: "#8b5cf6",
+              font: { family: "Chakra Petch", size: 11 },
+            },
             ticks: {
               ...baseChartOptions.scales.y.ticks,
               stepSize: 1,
-              callback: (val) => LAYOUT_CATEGORIES[val] || ""
-            }
-          }
-        }
-      }
+              callback: (val) => LAYOUT_CATEGORIES[val] || "",
+            },
+          },
+        },
+      },
     });
   }
 
@@ -1787,19 +1948,22 @@ document.addEventListener("DOMContentLoaded", () => {
     // Apply Tier filter
     const selectedTier = refTierSelect ? refTierSelect.value : "ALL";
     if (selectedTier && selectedTier !== "ALL") {
-      list = list.filter(t => t.license === selectedTier);
+      list = list.filter((t) => t.license === selectedTier);
     }
 
     // Apply Search filter
-    const searchVal = refSearchInput ? refSearchInput.value.trim().toLowerCase() : "";
+    const searchVal = refSearchInput
+      ? refSearchInput.value.trim().toLowerCase()
+      : "";
     if (searchVal) {
-      list = list.filter(t => {
+      list = list.filter((t) => {
         return (
           (t.code && t.code.toLowerCase().includes(searchVal)) ||
           (t.title && t.title.toLowerCase().includes(searchVal)) ||
           (t.car && t.car.toLowerCase().includes(searchVal)) ||
           (t.track && t.track.toLowerCase().includes(searchVal)) ||
-          (t.drivetrain_layout && t.drivetrain_layout.toLowerCase().includes(searchVal)) ||
+          (t.drivetrain_layout &&
+            t.drivetrain_layout.toLowerCase().includes(searchVal)) ||
           (t.game && t.game.toLowerCase().includes(searchVal)) ||
           (t.license && t.license.toLowerCase().includes(searchVal))
         );
@@ -1814,19 +1978,20 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    list.forEach(t => {
+    list.forEach((t) => {
       const row = document.createElement("tr");
       const layoutClass = `layout-${t.drivetrain_layout || "FR"}`;
-      const gameClass = t.game === "AC Mod" ? "tag-game tag-game-ac" : "tag-game";
+      const gameClass =
+        t.game === "AC Mod" ? "tag-game tag-game-ac" : "tag-game";
       row.innerHTML = `
         <td><span class="tag-code">${escapeHtml(t.code)}</span></td>
         <td><span class="${gameClass}">${escapeHtml(t.game)}</span></td>
         <td>${escapeHtml(t.license)}</td>
         <td><strong>${escapeHtml(t.title || t.test)}</strong></td>
         <td>${escapeHtml(t.car)}</td>
-        <td><span class="tag-hp">${t.hp ? t.hp + ' HP' : 'N/A'}</span></td>
-        <td><span class="tag-pw">${t.pw_kg_hp ? t.pw_kg_hp : 'N/A'}</span></td>
-        <td><span class="tag-layout ${layoutClass}">${escapeHtml(t.drivetrain_layout || 'FR')}</span></td>
+        <td><span class="tag-hp">${t.hp ? t.hp + " HP" : "N/A"}</span></td>
+        <td><span class="tag-pw">${t.pw_kg_hp ? t.pw_kg_hp : "N/A"}</span></td>
+        <td><span class="tag-layout ${layoutClass}">${escapeHtml(t.drivetrain_layout || "FR")}</span></td>
         <td>${escapeHtml(t.track)}</td>
         <td style="color: #fbbf24; font-family: var(--font-mono); font-weight: 600;">${escapeHtml(t.gold)}</td>
         <td style="color: #cbd5e1; font-family: var(--font-mono);">${escapeHtml(t.silver)}</td>
@@ -1836,4 +2001,3 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
-
