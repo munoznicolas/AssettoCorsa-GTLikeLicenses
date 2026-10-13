@@ -688,15 +688,17 @@ def calculate_test_initial_speed(
     start_s: float = 0.0,
     start_mode: str = "ROLLING",
     countdown_sec: float = 3.0,
-    allow_live_engine: bool = False,
+    allow_live_engine: bool = True,
 ) -> Dict[str, Any]:
     """
-    Calculates initial speed, spawn offset, gear, and RPM for a rolling start or flying lap test
-    based on ground-truth AI telemetry.
+    Calculates initial speed, spawn offset, gear, and RPM for a rolling start or flying lap test.
+    If cached telemetry profile exists, returns authentic physics immediately.
+    If not cached, enqueues an authentic full-lap recording in Assetto Corsa into the job runner.
     """
     if start_mode == "STANDING":
         return {
             "success": True,
+            "status": "cached",
             "speed_kmh": 0.0,
             "spawn_offset_m": 0.0,
             "gear": 1,
@@ -704,31 +706,61 @@ def calculate_test_initial_speed(
             "source": "standing_start",
         }
 
-    from tools.telemetry.recorder import get_or_calculate_initial_physics
+    from tools.telemetry.recorder import load_telemetry_profile
+    from tools.web_ui.runner import queue_mgr
 
-    try:
-        res = get_or_calculate_initial_physics(
-            track_id=track_id,
-            layout=track_layout,
-            car_id=car_id,
-            start_s=start_s,
-            countdown_sec=countdown_sec,
-            ai_level=95,
-            allow_live_engine=allow_live_engine,
-        )
-        res["success"] = True
-        return res
-    except Exception as e:
-        # Fallback if track spline or profile not found
-        return {
-            "success": False,
-            "error": str(e),
-            "speed_kmh": 75.0 if start_mode == "ROLLING" else 140.0,
-            "spawn_offset_m": (75.0 / 3.6 * countdown_sec) if start_mode == "ROLLING" else (140.0 / 3.6 * countdown_sec),
-            "gear": 2 if start_mode == "ROLLING" else 4,
-            "rpm": 4500,
-            "source": "error_fallback",
-        }
+    # 1. Check if an authentic telemetry profile is already cached
+    cached_profile = load_telemetry_profile(track_id, track_layout, car_id, ai_level=95)
+    if cached_profile:
+        physics = cached_profile.calculate_gate_physics(start_s, countdown_sec)
+        physics["success"] = True
+        physics["status"] = "cached"
+        return physics
+
+    # 2. Check if a recording job for this track and car is already active or queued
+    queue_status = queue_mgr.get_status()
+    active_job = queue_status.get("active_job")
+    if active_job and active_job.get("type") == "record_telemetry":
+        p = active_job.get("params", {})
+        if p.get("track_id") == track_id and p.get("car_id") == car_id:
+            return {
+                "success": True,
+                "status": "queued",
+                "job_id": active_job["id"],
+                "message": f"Assetto Corsa is currently recording AI telemetry for {car_id} at {track_id}...",
+            }
+
+    for qj in queue_status.get("queue", []):
+        if qj.get("type") == "record_telemetry":
+            p = qj.get("params", {})
+            if p.get("track_id") == track_id and p.get("car_id") == car_id:
+                return {
+                    "success": True,
+                    "status": "queued",
+                    "job_id": qj["id"],
+                    "message": f"Telemetry recording for {car_id} at {track_id} is already in queue...",
+                }
+
+    # 3. Automatically queue a full lap recording in Assetto Corsa
+    job = queue_mgr.enqueue_job(
+        job_type="record_telemetry",
+        test_id="TELEMETRY_REC",
+        title=f"Record 95% AI Telemetry: {car_id} @ {track_id}",
+        params={
+            "track_id": track_id,
+            "track_layout": track_layout,
+            "car_id": car_id,
+            "start_s": start_s,
+            "countdown_sec": countdown_sec,
+        },
+    )
+
+    return {
+        "success": True,
+        "status": "queued",
+        "job_id": job.id,
+        "message": f"No pre-recorded profile found for {car_id} at {track_id}. Enqueued authentic Assetto Corsa recording...",
+    }
 
 
 def run_live_test(
@@ -740,111 +772,32 @@ def run_live_test(
     ac_root: str = DEFAULT_AC_ROOT,
 ) -> Dict[str, Any]:
     """
-    Launches a license test live in Assetto Corsa.
+    Enqueues a license test for execution in Assetto Corsa via the FIFO queue manager.
     Modes:
-      - 'play': Interactive simulation session with player driver controls.
+      - 'play': Interactive session with timing gates and driver control.
       - 'ai': Simulation session with 95% AI autopilot.
-      - 'eval': Headless / timeout in-engine evaluation loop with audit report.
+      - 'eval': Headless in-engine evaluation loop (8s audit).
     """
-    import shutil
-    import subprocess
-    from tools.testing.ac_launcher import (
-        generate_race_ini,
-        RACE_INI_PATH,
-        ALT_USER_DOCS_AC,
-        LOG_TXT_PATH,
-    )
+    from tools.web_ui.runner import queue_mgr
 
-    if sync_first:
-        try:
-            from tools.deployment.sync import build_sync_mappings
-            mappings = build_sync_mappings(REPO_ROOT, ac_root)
-            for src, dst in mappings:
-                if os.path.isfile(src):
-                    os.makedirs(os.path.dirname(dst), exist_ok=True)
-                    shutil.copy2(src, dst)
-        except Exception as e:
-            print(f"[!] Sync note prior to launch: {e}")
-
-    # If test_data not provided, find it from content/tests or catalog
-    if not test_data:
-        from tools.testing.eval_loop import find_test_file_by_id
-        t_path = find_test_file_by_id(test_id, REPO_ROOT)
-        if t_path and os.path.isfile(t_path):
-            with open(t_path, "r", encoding="utf-8") as f:
-                test_data = json.load(f)
-        else:
-            from tools.content.catalog import TESTS_BY_ID
-            test_data = TESTS_BY_ID.get(test_id)
-
-    if not test_data:
-        return {
-            "success": False,
-            "error": f"Test definition for {test_id} not found."
-        }
-
-    # Evaluation Mode
-    if mode == "eval":
-        eval_script = os.path.join(REPO_ROOT, "tools", "test_and_eval_loop.py")
-        cmd = [sys.executable, eval_script, "--test-id", test_id, "--timeout", str(timeout)]
-        res = subprocess.run(cmd, capture_output=True, text=True)
-        return {
-            "success": res.returncode == 0,
-            "mode": "eval",
-            "test_id": test_id,
-            "status": "PASSED" if res.returncode == 0 else "FAILED",
-            "log": res.stdout + ("\n" + res.stderr if res.stderr else ""),
-        }
-
-    # Interactive ('play') or AI Demo ('ai') Mode
-    is_ai = (mode == "ai")
-    race_ini_str = generate_race_ini(
-        test_data,
-        ac_root=ac_root,
-        ai_level=95,
-        ai_test_mode=is_ai,
-    )
-
-    target_race_paths = [
-        RACE_INI_PATH,
-        os.path.join(ALT_USER_DOCS_AC, "cfg", "race.ini"),
-        os.path.join(ac_root, "cfg", "race.ini"),
-    ]
-    for rp in target_race_paths:
-        try:
-            os.makedirs(os.path.dirname(rp), exist_ok=True)
-            with open(rp, "w", encoding="utf-8") as f:
-                f.write(race_ini_str)
-        except Exception:
-            pass
-
-    # Clear old log.txt
-    for lp in [LOG_TXT_PATH, os.path.join(ALT_USER_DOCS_AC, "logs", "log.txt")]:
-        if os.path.isfile(lp):
-            try:
-                os.remove(lp)
-            except Exception:
-                pass
-
-    acs_exe_path = os.path.join(ac_root, "acs.exe")
-    if not os.path.isfile(acs_exe_path):
-        return {
-            "success": False,
-            "error": f"Assetto Corsa executable not found at {acs_exe_path}"
-        }
-
-    try:
-        proc = subprocess.Popen([acs_exe_path], cwd=ac_root)
-        mode_label = "AI Autopilot Demo" if is_ai else "Interactive Player Control"
-        return {
-            "success": True,
+    mode_label = "AI Demo" if mode == "ai" else ("Audit Eval" if mode == "eval" else "Driver Play")
+    job = queue_mgr.enqueue_job(
+        job_type=mode,
+        test_id=test_id,
+        title=f"Test [{test_id}] ({mode_label})",
+        params={
             "mode": mode,
-            "test_id": test_id,
-            "message": f"Assetto Corsa launched! Test [{test_id}] is now running in {mode_label} mode.",
-            "pid": proc.pid,
-        }
-    except Exception as e:
-        return {
-            "success": False,
-            "error": f"Failed to spawn acs.exe: {e}"
-        }
+            "sync_first": sync_first,
+            "test_data": test_data,
+            "timeout": timeout,
+        },
+    )
+
+    return {
+        "success": True,
+        "status": "queued",
+        "job_id": job.id,
+        "mode": mode,
+        "test_id": test_id,
+        "message": f"Test [{test_id}] ({mode_label}) enqueued for execution in Assetto Corsa.",
+    }

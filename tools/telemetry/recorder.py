@@ -23,6 +23,7 @@ import struct
 import subprocess
 import sys
 import time
+from datetime import datetime, timezone
 from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -34,7 +35,12 @@ from extract_spline_coords import (
     SplineParser,
     find_spline_file,
 )
-from test_ac_launch import generate_race_ini, RACE_INI_PATH
+from tools.testing.ac_launcher import (
+    generate_race_ini,
+    RACE_INI_PATH,
+    ALT_USER_DOCS_AC,
+    LOG_TXT_PATH,
+)
 
 PROFILES_DIR = os.path.join(REPO_ROOT, "data", "telemetry_profiles")
 
@@ -63,6 +69,11 @@ class TelemetryProfile:
     lap_time_s: float
     sample_count: int
     samples: List[TelemetrySample]
+    recorded_at: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        if not self.recorded_at:
+            self.recorded_at = datetime.now(timezone.utc).isoformat()
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -70,6 +81,7 @@ class TelemetryProfile:
             "track_layout": self.track_layout,
             "car_id": self.car_id,
             "ai_level": self.ai_level,
+            "recorded_at": self.recorded_at,
             "source": self.source,
             "total_track_length_m": round(self.total_track_length_m, 2),
             "lap_time_s": round(self.lap_time_s, 2),
@@ -178,6 +190,7 @@ class TelemetryProfile:
             "countdown_sec": countdown_sec,
             "total_track_length_m": round(self.total_track_length_m, 2),
             "source": self.source,
+            "recorded_at": self.recorded_at,
         }
 
 
@@ -198,6 +211,9 @@ def load_telemetry_profile(track_id: str, layout: str, car_id: str, ai_level: in
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
         samples = [TelemetrySample(**s) for s in data["samples"]]
+        recorded_at = data.get("recorded_at")
+        if not recorded_at:
+            recorded_at = datetime.fromtimestamp(os.path.getmtime(path), tz=timezone.utc).isoformat()
         return TelemetryProfile(
             track_id=data["track_id"],
             track_layout=data["track_layout"],
@@ -208,6 +224,7 @@ def load_telemetry_profile(track_id: str, layout: str, car_id: str, ai_level: in
             lap_time_s=data.get("lap_time_s", 0.0),
             sample_count=len(samples),
             samples=samples,
+            recorded_at=recorded_at,
         )
     except Exception:
         return None
@@ -298,13 +315,26 @@ def record_live_in_engine_telemetry(
     car_id: str = "ks_mazda_miata",
     ai_level: int = 95,
     ac_root: str = DEFAULT_AC_ROOT,
-    timeout_sec: int = 120,
+    timeout_sec: int = 140,
+    stop_event: Optional[Any] = None,
+    proc_callback: Optional[Any] = None,
 ) -> TelemetryProfile:
     """
     Launches acs.exe with AI_LEVEL=95 and logs live 60Hz telemetry via Assetto Corsa Shared Memory.
-    Falls back to calibrated spline profile if shared memory is inaccessible.
+    Falls back to calibrated spline profile if shared memory is inaccessible or run is cancelled.
     """
     print(f"[*] Initializing live in-engine 95% AI recording session for {car_id} at {track_id}...")
+
+    # Determine track length from AI spline if available
+    track_total_len = 1000.0
+    try:
+        spline_file = find_spline_file(track_id, layout, ac_root)
+        if spline_file:
+            parser = SplineParser(spline_file)
+            if parser.total_length > 10.0:
+                track_total_len = parser.total_length
+    except Exception as e:
+        print(f"[*] Spline length pre-check note: {e}")
 
     test_data = {
         "car_id": car_id,
@@ -319,9 +349,25 @@ def record_live_in_engine_telemetry(
         ai_test_mode=True,
     )
 
-    os.makedirs(os.path.dirname(RACE_INI_PATH), exist_ok=True)
-    with open(RACE_INI_PATH, "w", encoding="utf-8") as f:
-        f.write(race_ini_str)
+    target_race_paths = [
+        RACE_INI_PATH,
+        os.path.join(ALT_USER_DOCS_AC, "cfg", "race.ini"),
+        os.path.join(ac_root, "cfg", "race.ini"),
+    ]
+    for rp in target_race_paths:
+        try:
+            os.makedirs(os.path.dirname(rp), exist_ok=True)
+            with open(rp, "w", encoding="utf-8") as f:
+                f.write(race_ini_str)
+        except Exception:
+            pass
+
+    for lp in [LOG_TXT_PATH, os.path.join(ALT_USER_DOCS_AC, "logs", "log.txt")]:
+        if os.path.isfile(lp):
+            try:
+                os.remove(lp)
+            except Exception:
+                pass
 
     acs_exe = os.path.join(ac_root, "acs.exe")
     if not os.path.isfile(acs_exe):
@@ -330,29 +376,50 @@ def record_live_in_engine_telemetry(
 
     print(f"[*] Launching {acs_exe} child process...")
     proc = subprocess.Popen([acs_exe], cwd=ac_root)
-    time.sleep(4.0)
+    if proc_callback:
+        proc_callback(proc)
 
     samples: List[TelemetrySample] = []
     shm_physics = None
     shm_graphics = None
 
     try:
-        shm_physics = mmap.mmap(0, 712, "Local\\acpmf_physics")
-        shm_graphics = mmap.mmap(0, 1588, "Local\\acpmf_graphics")
-        print("[+] Connected to Assetto Corsa 60Hz Shared Memory!")
+        # Wait up to 35 seconds for Assetto Corsa to load and initialize shared memory
+        connected = False
+        connect_start = time.time()
+        while time.time() - connect_start < 35.0:
+            if stop_event and getattr(stop_event, "is_set", lambda: False)():
+                print("[*] Recording cancelled before shared memory connection.")
+                break
+            if proc.poll() is not None:
+                print(f"[!] acs.exe terminated unexpectedly (code {proc.returncode})")
+                break
+            try:
+                shm_physics = mmap.mmap(0, 712, "Local\\acpmf_physics")
+                shm_graphics = mmap.mmap(0, 1588, "Local\\acpmf_graphics")
+                connected = True
+                print("[+] Connected to Assetto Corsa Shared Memory!")
+                break
+            except OSError:
+                time.sleep(0.5)
+
+        if not connected:
+            print("[!] Could not connect to Assetto Corsa Shared Memory in time.")
+            return calibrate_from_spline(track_id, layout, car_id, ai_level, ac_root)
 
         start_time = time.time()
         prev_progress = -1.0
         lap_started = False
-        track_len = 0.0
 
-        # Sample at 20-30Hz
+        # Sample at 25-30Hz
         while time.time() - start_time < timeout_sec:
+            if stop_event and getattr(stop_event, "is_set", lambda: False)():
+                print("[*] Recording session received cancellation signal.")
+                break
             if proc.poll() is not None:
                 break
 
             shm_physics.seek(0)
-            # speedKmh is at offset 28 in physics structure
             shm_physics.seek(28)
             spd_raw = struct.unpack("<f", shm_physics.read(4))[0]
 
@@ -361,7 +428,6 @@ def record_live_in_engine_telemetry(
             rpm_raw = struct.unpack("<i", shm_physics.read(4))[0]
 
             shm_graphics.seek(0)
-            # normalizedCarPosition is at offset 136 in graphics structure
             shm_graphics.seek(136)
             progress = struct.unpack("<f", shm_graphics.read(4))[0]
 
@@ -370,11 +436,11 @@ def record_live_in_engine_telemetry(
 
             if lap_started:
                 # Detect full lap wrap
-                if prev_progress > 0.95 and progress < 0.05:
+                if prev_progress > 0.85 and progress < 0.15 and len(samples) > 200:
                     print("[+] Completed flying lap telemetry capture!")
                     break
 
-                dist_m = progress * 1000.0  # Normalized fallback
+                dist_m = progress * track_total_len
                 samples.append(TelemetrySample(
                     progress=round(progress, 4),
                     distance_m=round(dist_m, 2),
@@ -384,15 +450,21 @@ def record_live_in_engine_telemetry(
                 ))
                 prev_progress = progress
 
-            time.sleep(0.04)
+            time.sleep(0.035)
 
     except Exception as e:
         print(f"[!] Shared memory reading note: {e}")
     finally:
         if shm_physics:
-            shm_physics.close()
+            try:
+                shm_physics.close()
+            except Exception:
+                pass
         if shm_graphics:
-            shm_graphics.close()
+            try:
+                shm_graphics.close()
+            except Exception:
+                pass
         if proc.poll() is None:
             proc.terminate()
             try:
@@ -408,7 +480,7 @@ def record_live_in_engine_telemetry(
             car_id=car_id,
             ai_level=ai_level,
             source="in_engine_live_telemetry",
-            total_track_length_m=round(samples[-1].distance_m, 2),
+            total_track_length_m=round(track_total_len, 2),
             lap_time_s=round(time.time() - start_time, 2),
             sample_count=len(samples),
             samples=samples,

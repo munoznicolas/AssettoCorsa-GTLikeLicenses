@@ -143,6 +143,27 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
                 self.send_json_response({"success": False, "error": str(e)}, status=500)
             return
 
+        if path == "/api/queue/status":
+            try:
+                from tools.web_ui.runner import queue_mgr
+                self.send_json_response(queue_mgr.get_status())
+            except Exception as e:
+                self.send_json_response({"success": False, "error": str(e)}, status=500)
+            return
+
+        if path.startswith("/api/job/"):
+            job_id = path[len("/api/job/"):]
+            try:
+                from tools.web_ui.runner import queue_mgr
+                job = queue_mgr.get_job(job_id)
+                if job:
+                    self.send_json_response({"success": True, "job": job.to_dict()})
+                else:
+                    self.send_json_response({"success": False, "error": f"Job {job_id} not found"}, status=404)
+            except Exception as e:
+                self.send_json_response({"success": False, "error": str(e)}, status=500)
+            return
+
         if path == "/api/test_preview":
             test_id = query.get("test_id", [""])[0]
             if not test_id:
@@ -306,6 +327,21 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
                     "error": str(e),
                     "traceback": traceback.format_exc(),
                 }, status=500)
+            return
+
+        if path == "/api/queue/cancel":
+            job_id = payload.get("job_id")
+            cancel_all = bool(payload.get("cancel_all", False))
+            try:
+                from tools.web_ui.runner import queue_mgr
+                if cancel_all or not job_id:
+                    queue_mgr.cancel_active()
+                    self.send_json_response({"success": True, "message": "Cancelled active Assetto Corsa session"})
+                else:
+                    ok = queue_mgr.cancel_job(job_id)
+                    self.send_json_response({"success": ok, "message": f"Job {job_id} cancellation processed."})
+            except Exception as e:
+                self.send_json_response({"success": False, "error": str(e)}, status=500)
             return
 
         if path == "/api/save_tier":

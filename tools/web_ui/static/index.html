@@ -31,7 +31,16 @@
             class="btn btn-accent"
             title="Launch current test live in Assetto Corsa"
           >
-            <span class="icon">🏎️</span> Live Run Test
+            <span class="icon">🏎️</span> <span>Live Run</span>
+            <span id="run-queue-badge" class="badge" style="display: none; margin-left: 6px; padding: 2px 6px; font-size: 10px; background: rgba(56, 189, 248, 0.25); border: 1px solid #38bdf8; color: #38bdf8;">0 queued</span>
+          </button>
+          <button
+            id="btn-stop-ac"
+            class="btn"
+            style="display: none; background: #dc2626; color: #fff; border: 1px solid #ef4444;"
+            title="Stop / Terminate active Assetto Corsa session"
+          >
+            <span class="icon">⏹️</span> <span>Stop AC</span>
           </button>
           <button
             id="btn-rebuild"
@@ -807,6 +816,18 @@
             <button id="run-modal-close" class="modal-close-btn">&times;</button>
           </div>
           <div class="modal-body">
+            <div id="run-modal-active-banner" style="display: none; margin-bottom: 1rem; padding: 10px 12px; border-radius: 6px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35);">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <strong style="color: #ef4444; font-size: 13px;">⚠️ Assetto Corsa is Running</strong>
+                  <div id="run-modal-active-desc" style="font-size: 11px; color: #fca5a5; margin-top: 2px;">Active session in progress</div>
+                </div>
+                <button type="button" id="btn-modal-stop-ac" class="btn btn-sm" style="background: #dc2626; color: white; border: none; padding: 5px 12px; font-size: 11px; border-radius: 4px; cursor: pointer;">
+                  ⏹️ Terminate AC
+                </button>
+              </div>
+            </div>
+
             <div id="run-modal-desc" style="margin-bottom: 1.25rem; color: #cbd5e1; font-size: 13px;">
               Launch this test directly into Assetto Corsa (<code style="color: #38bdf8;">acs.exe</code>).
             </div>
@@ -839,6 +860,13 @@
                 <input type="checkbox" id="check-run-sync" checked />
                 <span>Auto-sync latest files to Assetto Corsa before launch</span>
               </label>
+            </div>
+
+            <div id="run-modal-queue-section" style="display: none; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 12px; font-weight: 600; color: #94a3b8;">Queued Runs (<span id="queue-count-num">0</span>)</span>
+              </div>
+              <div id="run-modal-queue-list" style="display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto;"></div>
             </div>
           </div>
           <div class="modal-footer">
