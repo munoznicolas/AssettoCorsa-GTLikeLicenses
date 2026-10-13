@@ -217,7 +217,7 @@ INTERNATIONAL_B_TESTS = [
         "targets": {"gold_seconds": 21.000, "silver_seconds": 22.500, "bronze_seconds": 24.600},
     },
     {
-        "test_id": 'IB-13',
+        "test_id": 'IB-12',
         "tier": TIER_NAME,
         "title": 'High-Speed Parabolica Exit Momentum',
         "description": 'Brake progressively into Curva Alboreto (Parabolica), hug early apex, let car drift to exit curb.',
@@ -236,7 +236,7 @@ INTERNATIONAL_B_TESTS = [
         "targets": {"gold_seconds": 18.200, "silver_seconds": 19.500, "bronze_seconds": 21.300},
     },
     {
-        "test_id": 'IB-14',
+        "test_id": 'IB-13',
         "tier": TIER_NAME,
         "title": 'Historic High-Speed Drifting: Stowe & Club',
         "description": 'Bias-ply tires and big-block 7.0L V8: use throttle steer through Stowe and Club corners.',
@@ -255,7 +255,7 @@ INTERNATIONAL_B_TESTS = [
         "targets": {"gold_seconds": 43.100, "silver_seconds": 46.100, "bronze_seconds": 50.500},
     },
     {
-        "test_id": 'IB-15',
+        "test_id": 'IB-14',
         "tier": TIER_NAME,
         "title": 'Graduation: Red Bull Ring GP Full Lap',
         "description": 'Full flying lap around Spielberg combining elevation braking, fast sweepers, and curb discipline.',

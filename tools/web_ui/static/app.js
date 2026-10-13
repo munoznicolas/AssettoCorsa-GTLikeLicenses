@@ -70,8 +70,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const trackCanvas = document.getElementById("track-canvas");
   const canvasLoading = document.getElementById("canvas-loading");
   const mapTrackInfo = document.getElementById("map-track-info");
-  const testMiniatureImg = document.getElementById("test-miniature-img");
-  const miniaturePreviewBox = document.getElementById("miniature-preview-box");
 
   // Start Mode Elements
   const radioStanding = document.getElementById("radio-standing");
@@ -392,28 +390,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return (s0 <= 0.005 && s1 >= 0.99) || test.start_mode === "FLYING_LAP";
   }
 
-  // Track Miniature Preview
-  function updateTrackMiniaturePreview(testId) {
-    if (!testMiniatureImg || !miniaturePreviewBox) return;
-    if (!testId) {
-      miniaturePreviewBox.classList.add("no-preview");
-      return;
-    }
-    const activeTier = state.curriculum[state.activeTierIndex];
-    const test = activeTier ? activeTier.tests[state.activeTestIndex] : null;
-    const previewUrl = (test && test.preview_image) 
-      ? test.preview_image 
-      : (activeTier && activeTier.folder ? `/content/career/${activeTier.folder}/event${state.activeTestIndex + 1}/preview.png` : `/api/test_preview?test_id=${encodeURIComponent(testId)}`);
-
-    miniaturePreviewBox.classList.remove("no-preview");
-    testMiniatureImg.src = `${previewUrl}?t=${state.cacheBuster}`;
-    testMiniatureImg.onerror = () => {
-      miniaturePreviewBox.classList.add("no-preview");
-    };
-    testMiniatureImg.onload = () => {
-      miniaturePreviewBox.classList.remove("no-preview");
-    };
-  }
 
   // Load Test Into Form
   async function loadTestIntoForm(testIdx) {
@@ -464,9 +440,6 @@ document.addEventListener("DOMContentLoaded", () => {
     targetSilver.value = targets.silver_seconds;
     targetBronze.value = targets.bronze_seconds;
     validateTargets();
-
-    // Update Track Miniature Preview
-    updateTrackMiniaturePreview(test.test_id);
 
     // Fetch spline & render map
     await fetchAndRenderSpline(test.track_id, test.track_layout || "");
@@ -776,6 +749,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  function renumberTierTests(tier) {
+    if (!tier || !tier.tests) return;
+    const prefix = tier.test_prefix || "T-";
+    tier.tests.forEach((t, i) => {
+      const num = i + 1;
+      t.test_id = `${prefix}${num}`;
+      if (tier.folder) {
+        t.preview_image = `/content/career/${tier.folder}/event${num}/preview.png`;
+      }
+    });
+  }
+
   // Event Listeners
   function setupEventListeners() {
     // Add Test
@@ -802,9 +787,11 @@ document.addEventListener("DOMContentLoaded", () => {
         rpm: 4500,
         with_stop_box: false,
         targets: { gold_seconds: 15.000, silver_seconds: 16.500, bronze_seconds: 18.500 },
+        preview_image: `/content/career/${activeTier.folder}/event${count}/preview.png`,
       };
 
       activeTier.tests.push(newTest);
+      renumberTierTests(activeTier);
       renderLicenseTabs();
       renderTestList();
       loadTestIntoForm(activeTier.tests.length - 1);
@@ -824,8 +811,14 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
+      const deletedId = test.test_id;
       activeTier.tests.splice(state.activeTestIndex, 1);
-      const newIdx = Math.max(0, state.activeTestIndex - 1);
+
+      // Automatically renumber subsequent tests
+      renumberTierTests(activeTier);
+
+      const newIdx = Math.max(0, Math.min(state.activeTestIndex, activeTier.tests.length - 1));
+      state.activeTestIndex = newIdx;
 
       // Save updated tier to server immediately
       try {
@@ -833,7 +826,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderLicenseTabs();
         renderTestList();
         loadTestIntoForm(newIdx);
-        showToast(`Test ${test.test_id} removed and tier saved.`);
+        showToast(`Removed test ${deletedId}. Subsequent tests renumbered successfully.`);
       } catch (err) {
         showToast("Error saving after delete: " + err.message, "error");
       }
@@ -1019,13 +1012,8 @@ document.addEventListener("DOMContentLoaded", () => {
           modalStatusBadge.className = "badge badge-lg";
           modalStatusBadge.style.color = "#10b981";
 
-          // Update cacheBuster so miniature images reload fresh across the UI
           state.cacheBuster = Date.now();
           renderTestList();
-          const activeTier = state.curriculum[state.activeTierIndex];
-          if (activeTier && activeTier.tests[state.activeTestIndex]) {
-            updateTrackMiniaturePreview(activeTier.tests[state.activeTestIndex].test_id);
-          }
         } else {
           modalStatusBadge.textContent = `FAILED (${report.failed} files with errors)`;
           modalStatusBadge.className = "badge badge-lg";

@@ -103,7 +103,7 @@
               </div>
               <div class="form-group">
                 <label for="input-test-id">Test Identifier</label>
-                <input type="text" id="input-test-id" class="form-control mono" placeholder="e.g. B-1, A-12" required>
+                <input type="text" id="input-test-id" class="form-control mono" placeholder="e.g. B-1, A-12" required readonly title="Automatically assigned sequentially based on position in this license tier">
               </div>
             </div>
             <div class="form-group">
@@ -212,20 +212,6 @@
               Sector Distance: <strong id="disp-sector-dist">0 m</strong>
             </div>
 
-            <!-- Track Miniature Preview (Generated Event Thumbnail) -->
-            <div class="miniature-preview-card">
-              <div class="miniature-preview-header">
-                <div class="miniature-header-left">
-                  <span class="miniature-icon">🖼️</span>
-                  <span class="miniature-label">Track Miniature (Test Preview Image)</span>
-                </div>
-                <span class="badge badge-sm" id="miniature-status-badge">Auto-updated on Rebuild</span>
-              </div>
-              <div class="miniature-preview-body" id="miniature-preview-box">
-                <img id="test-miniature-img" class="miniature-preview-img" alt="Track Miniature Preview" src="">
-                <div class="miniature-fallback" id="miniature-fallback-text">No track miniature generated yet. Click &quot;Rebuild &amp; Validate&quot; to generate.</div>
-              </div>
-            </div>
           </div>
 
           <!-- Section 4: Start Mode (Rolling vs Standing) & Speed -->

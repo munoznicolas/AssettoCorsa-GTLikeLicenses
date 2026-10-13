@@ -1,51 +1,51 @@
 {
   "test_id": "A-12",
   "tier": "National A",
-  "title": "High-Speed Blind Crest Commitment",
-  "description": "Carrying 160+ km/h through the downhill Scheivlak crest without backing off.",
-  "lesson_objective": "Trusting aerodynamic and mechanical grip on blind corner exit.",
-  "car_id": "lotus_exige_240",
-  "track_id": "ks_zandvoort",
-  "track_layout": "",
+  "title": "High-Speed Esses Precision",
+  "description": "Precision rhythm: lift for Maggotts, dab brakes into Becketts, wide exit into Chapel.",
+  "lesson_objective": "Linking high-speed S-curves at 180+ km/h.",
+  "car_id": "bmw_m3_e30_s1",
+  "track_id": "ks_silverstone",
+  "track_layout": "gp",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      183.075,
-      2.109,
-      -39.138
+      93.114,
+      3.223,
+      -444.268
     ],
     "forward_vector": [
-      -0.995,
-      0.0616,
-      -0.0787
+      -0.757,
+      -0.0011,
+      -0.6534
     ],
-    "initial_speed_kmh": 75.0,
+    "initial_speed_kmh": 85.0,
     "gear": 3,
-    "rpm": 3500
+    "rpm": 4150
   },
   "timing": {
     "start_gate": {
       "p1": [
-        123.262,
-        5.327,
-        -18.971
+        47.184,
+        3.234,
+        -499.439
       ],
       "p2": [
-        129.765,
-        5.327,
-        -11.414
+        37.563,
+        3.234,
+        -488.233
       ]
     },
     "finish_gate": {
       "p1": [
-        -540.339,
-        6.223,
-        60.235
+        -30.628,
+        -0.083,
+        -836.908
       ],
       "p2": [
-        -550.958,
-        6.223,
-        59.747
+        -32.369,
+        -0.083,
+        -851.303
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 28.0,
-    "silver_seconds": 30.0,
-    "bronze_seconds": 32.9
+    "gold_seconds": 33.0,
+    "silver_seconds": 35.3,
+    "bronze_seconds": 38.7
   }
 }

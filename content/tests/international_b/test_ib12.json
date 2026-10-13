@@ -1,51 +1,51 @@
 {
   "test_id": "IB-12",
   "tier": "International B",
-  "title": "Slipstream Drafting & Clean Overtake",
-  "description": "Tuck behind lead car on long straight, pull out into braking zone, and execute clean inside pass.",
-  "lesson_objective": "Slipstream timing and contested corner braking dynamics.",
-  "car_id": "ks_mazda_mx5_cup",
-  "track_id": "ks_red_bull_ring",
-  "track_layout": "layout_gp",
+  "title": "High-Speed Parabolica Exit Momentum",
+  "description": "Brake progressively into Curva Alboreto (Parabolica), hug early apex, let car drift to exit curb.",
+  "lesson_objective": "Maximizing corner exit speed onto a 1-kilometer main straightaway.",
+  "car_id": "ks_ferrari_488_gtb",
+  "track_id": "monza",
+  "track_layout": "",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      -106.634,
-      6.087,
-      357.711
+      73.661,
+      -8.307,
+      358.418
     ],
     "forward_vector": [
-      -0.561,
-      0.0301,
-      -0.8273
+      -0.0919,
+      -0.0054,
+      0.9957
     ],
-    "initial_speed_kmh": 98.6,
-    "gear": 4,
-    "rpm": 4496
+    "initial_speed_kmh": 110.0,
+    "gear": 3,
+    "rpm": 4768
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -147.7,
-        6.949,
-        294.561
+        62.159,
+        -8.823,
+        449.423
       ],
       "p2": [
-        -157.388,
-        6.949,
-        301.35
+        72.279,
+        -8.823,
+        450.429
       ]
     },
     "finish_gate": {
       "p1": [
-        -578.459,
-        43.078,
-        -316.026
+        -169.972,
+        -6.548,
+        64.798
       ],
       "p2": [
-        -586.618,
-        43.078,
-        -307.501
+        -181.738,
+        -6.548,
+        63.571
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 26.2,
-    "silver_seconds": 28.0,
-    "bronze_seconds": 30.7
+    "gold_seconds": 18.2,
+    "silver_seconds": 19.5,
+    "bronze_seconds": 21.3
   }
 }

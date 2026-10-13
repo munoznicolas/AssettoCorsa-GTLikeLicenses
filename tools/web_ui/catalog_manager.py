@@ -136,6 +136,13 @@ def save_tier_catalog(tier_name: str, tests: List[Dict[str, Any]]) -> str:
     if tier_name not in TIER_FILE_MAP:
         raise ValueError(f"Unknown tier: {tier_name}")
 
+    meta = next((s for s in SERIES_METADATA if s["tier_name"] == tier_name), None)
+    prefix = meta["test_prefix"] if meta else "T-"
+
+    # Automatically ensure sequential test_id numbering matching curriculum structure
+    for idx, t in enumerate(tests, start=1):
+        t["test_id"] = f"{prefix}{idx}"
+
     file_path = get_catalog_module_path(tier_name)
     var_name = TIER_VAR_MAP[tier_name]
     doc = TIER_DOCS.get(tier_name, f"{tier_name} Test Catalog")
@@ -454,6 +461,19 @@ def clean_stale_tests() -> None:
         prefix, num_str = t_id.split("-")
         filename = f"test_{prefix.lower()}{int(num_str):02d}.json"
         valid_files.add(os.path.normpath(os.path.join(tier_dir, filename)))
+        ghost_filename = f"ghost_test_{prefix.lower()}{int(num_str):02d}.json"
+        valid_files.add(os.path.normpath(os.path.join(tier_dir, ghost_filename)))
+
+    tests_root = os.path.join(REPO_ROOT, "content", "tests")
+    for t_folder in TIER_FOLDER_MAP.values():
+        dir_path = os.path.join(tests_root, t_folder)
+        if os.path.isdir(dir_path):
+            for f in glob.glob(os.path.join(dir_path, "*.json")):
+                if os.path.normpath(f) not in valid_files:
+                    try:
+                        os.remove(f)
+                    except OSError:
+                        pass
 
     # Clean stale career event folders if test counts shrunk
     import shutil

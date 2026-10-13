@@ -177,7 +177,7 @@ NATIONAL_A_TESTS = [
         "targets": {"gold_seconds": 29.400, "silver_seconds": 31.400, "bronze_seconds": 34.400},
     },
     {
-        "test_id": 'A-11',
+        "test_id": 'A-10',
         "tier": TIER_NAME,
         "title": 'Downhill Hairpin Trail-Braking',
         "description": 'Steep uphill braking followed by a sharp downhill drop into Remus Hairpin.',
@@ -196,7 +196,7 @@ NATIONAL_A_TESTS = [
         "targets": {"gold_seconds": 20.000, "silver_seconds": 21.400, "bronze_seconds": 23.500},
     },
     {
-        "test_id": 'A-12',
+        "test_id": 'A-11',
         "tier": TIER_NAME,
         "title": 'High-Speed Blind Crest Commitment',
         "description": 'Carrying 160+ km/h through the downhill Scheivlak crest without backing off.',
@@ -215,7 +215,7 @@ NATIONAL_A_TESTS = [
         "targets": {"gold_seconds": 28.000, "silver_seconds": 30.000, "bronze_seconds": 32.900},
     },
     {
-        "test_id": 'A-13',
+        "test_id": 'A-12',
         "tier": TIER_NAME,
         "title": 'High-Speed Esses Precision',
         "description": 'Precision rhythm: lift for Maggotts, dab brakes into Becketts, wide exit into Chapel.',
@@ -234,7 +234,7 @@ NATIONAL_A_TESTS = [
         "targets": {"gold_seconds": 33.000, "silver_seconds": 35.300, "bronze_seconds": 38.700},
     },
     {
-        "test_id": 'A-14',
+        "test_id": 'A-13',
         "tier": TIER_NAME,
         "title": 'Rotary Engine High-RPM Throttle Feathering',
         "description": 'Maintaining the twin-rotary in its peak powerband while feathering throttle through Campagnano.',
@@ -253,7 +253,7 @@ NATIONAL_A_TESTS = [
         "targets": {"gold_seconds": 19.100, "silver_seconds": 20.400, "bronze_seconds": 22.400},
     },
     {
-        "test_id": 'A-16',
+        "test_id": 'A-14',
         "tier": TIER_NAME,
         "title": 'Green Hell Sector Trial: Hohe Acht to Brünnchen (GT4 A-16)',
         "description": 'Tackle the technical mid-section of the Nürburgring Nordschleife in the twin-turbo RX-7 Spirit R, mastering Wippermann, Eschbach, and Brünnchen.',
@@ -272,7 +272,7 @@ NATIONAL_A_TESTS = [
         "targets": {"gold_seconds": 54.150, "silver_seconds": 56.000, "bronze_seconds": 62.700},
     },
     {
-        "test_id": 'A-17',
+        "test_id": 'A-15',
         "tier": TIER_NAME,
         "title": 'Graduation: Brands Hatch Indy Full Lap',
         "description": 'Synthesizes blind drops, hairpin patience, and exit momentum across a complete sub-minute lap.',

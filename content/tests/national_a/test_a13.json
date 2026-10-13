@@ -1,51 +1,51 @@
 {
   "test_id": "A-13",
   "tier": "National A",
-  "title": "High-Speed Esses Precision",
-  "description": "Precision rhythm: lift for Maggotts, dab brakes into Becketts, wide exit into Chapel.",
-  "lesson_objective": "Linking high-speed S-curves at 180+ km/h.",
-  "car_id": "bmw_m3_e30_s1",
-  "track_id": "ks_silverstone",
-  "track_layout": "gp",
+  "title": "Rotary Engine High-RPM Throttle Feathering",
+  "description": "Maintaining the twin-rotary in its peak powerband while feathering throttle through Campagnano.",
+  "lesson_objective": "High-RPM power delivery control in a lightweight sports car.",
+  "car_id": "ks_mazda_rx7_spirit_r",
+  "track_id": "ks_vallelunga",
+  "track_layout": "classic_circuit",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      93.114,
-      3.223,
-      -444.268
+      -237.884,
+      187.987,
+      13.625
     ],
     "forward_vector": [
-      -0.757,
-      -0.0011,
-      -0.6534
+      0.9728,
+      0.0334,
+      0.2291
     ],
-    "initial_speed_kmh": 85.0,
-    "gear": 3,
-    "rpm": 4150
+    "initial_speed_kmh": 115.0,
+    "gear": 4,
+    "rpm": 4200
   },
   "timing": {
     "start_gate": {
       "p1": [
-        47.184,
-        3.234,
-        -499.439
+        -157.077,
+        190.905,
+        61.534
       ],
       "p2": [
-        37.563,
-        3.234,
-        -488.233
+        -150.328,
+        190.905,
+        51.673
       ]
     },
     "finish_gate": {
       "p1": [
-        -30.628,
-        -0.083,
-        -836.908
+        401.58,
+        192.737,
+        81.226
       ],
       "p2": [
-        -32.369,
-        -0.083,
-        -851.303
+        401.375,
+        192.737,
+        69.468
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 33.0,
-    "silver_seconds": 35.3,
-    "bronze_seconds": 38.7
+    "gold_seconds": 19.1,
+    "silver_seconds": 20.4,
+    "bronze_seconds": 22.4
   }
 }

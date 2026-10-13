@@ -1,51 +1,49 @@
 {
   "test_id": "IB-14",
   "tier": "International B",
-  "title": "Historic High-Speed Drifting: Stowe & Club",
-  "description": "Bias-ply tires and big-block 7.0L V8: use throttle steer through Stowe and Club corners.",
-  "lesson_objective": "Managing high slip angles and mechanical chassis balance on historic layouts.",
-  "car_id": "shelby_cobra_427sc",
-  "track_id": "ks_silverstone1967",
-  "track_layout": "",
-  "start_mode": "ROLLING",
+  "title": "Graduation: Red Bull Ring GP Full Lap",
+  "description": "Full flying lap around Spielberg combining elevation braking, fast sweepers, and curb discipline.",
+  "lesson_objective": "Putting all high-performance vehicle dynamics lessons together in a GT3 RS.",
+  "car_id": "ks_porsche_911_gt3_rs",
+  "track_id": "ks_red_bull_ring",
+  "track_layout": "layout_gp",
+  "start_mode": "FLYING_LAP",
   "spawn": {
     "position": [
-      200.116,
-      -2.218,
-      503.477
+      292.192,
+      -11.878,
+      304.574
     ],
     "forward_vector": [
-      -0.449,
-      -0.0038,
-      0.8935
+      -0.9607,
+      0.0016,
+      0.2775
     ],
-    "initial_speed_kmh": 120.0,
-    "gear": 3,
-    "rpm": 3816
+    "initial_speed_kmh": 160.0
   },
   "timing": {
     "start_gate": {
       "p1": [
-        152.077,
-        -3.028,
-        591.28
+        232.166,
+        -11.851,
+        318.397
       ],
       "p2": [
-        164.856,
-        -3.028,
-        597.517
+        235.649,
+        -11.851,
+        330.88
       ]
     },
     "finish_gate": {
       "p1": [
-        -433.497,
-        -6.664,
-        305.438
+        237.789,
+        -11.863,
+        316.885
       ],
       "p2": [
-        -444.486,
-        -6.664,
-        296.412
+        241.304,
+        -11.863,
+        329.359
       ]
     }
   },
@@ -56,8 +54,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 43.1,
-    "silver_seconds": 46.1,
-    "bronze_seconds": 50.5
+    "gold_seconds": 96.5,
+    "silver_seconds": 103.3,
+    "bronze_seconds": 113.2
   }
 }

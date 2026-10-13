@@ -1,23 +1,23 @@
 {
   "test_id": "A-11",
   "tier": "National A",
-  "title": "Downhill Hairpin Trail-Braking",
-  "description": "Steep uphill braking followed by a sharp downhill drop into Remus Hairpin.",
-  "lesson_objective": "Trailing brake pressure past turn-in to keep load on front tires.",
-  "car_id": "ks_nissan_370z",
-  "track_id": "ks_red_bull_ring",
-  "track_layout": "layout_gp",
+  "title": "High-Speed Blind Crest Commitment",
+  "description": "Carrying 160+ km/h through the downhill Scheivlak crest without backing off.",
+  "lesson_objective": "Trusting aerodynamic and mechanical grip on blind corner exit.",
+  "car_id": "lotus_exige_240",
+  "track_id": "ks_zandvoort",
+  "track_layout": "",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      -326.261,
-      10.463,
-      5.309
+      183.075,
+      2.109,
+      -39.138
     ],
     "forward_vector": [
-      -0.4388,
-      0.0244,
-      -0.8983
+      -0.995,
+      0.0616,
+      -0.0787
     ],
     "initial_speed_kmh": 75.0,
     "gear": 3,
@@ -26,26 +26,26 @@
   "timing": {
     "start_gate": {
       "p1": [
-        -347.836,
-        12.179,
-        -53.889
+        123.262,
+        5.327,
+        -18.971
       ],
       "p2": [
-        -358.363,
-        12.179,
-        -48.382
+        129.765,
+        5.327,
+        -11.414
       ]
     },
     "finish_gate": {
       "p1": [
-        -486.446,
-        50.98,
-        -377.41
+        -540.339,
+        6.223,
+        60.235
       ],
       "p2": [
-        -486.543,
-        50.98,
-        -389.18
+        -550.958,
+        6.223,
+        59.747
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 20.0,
-    "silver_seconds": 21.4,
-    "bronze_seconds": 23.5
+    "gold_seconds": 28.0,
+    "silver_seconds": 30.0,
+    "bronze_seconds": 32.9
   }
 }
