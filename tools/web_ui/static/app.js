@@ -1079,276 +1079,20 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    let pendingTelemetryJobId = null;
-    let pendingTelemetryTestId = null;
-    let queuePollTimer = null;
-
     if (btnCalcSpeed) {
       btnCalcSpeed.addEventListener("click", () => {
         fetchAndApplyAISpeed(true);
       });
     }
 
-    async function fetchAndApplyAISpeed(isManualClick = true) {
-      const trackId = selectTrack.value;
-      const trackLayout = selectLayout.value;
-      const carId = selectCar.value;
-      const startS = parseFloat(inputStart.value || 0);
-      const startMode = radioStanding.checked
-        ? "STANDING"
-        : radioRolling.checked
-        ? "ROLLING"
-        : "FLYING_LAP";
-
-      if (startMode === "STANDING") {
-        inputSpeed.value = 0;
-        inputSpawnOffset.value = 0;
-        inputGear.value = 1;
-        inputRpm.value = 1000;
-        hideAISpeedStatus();
-        return;
-      }
-
-      if (!trackId || !carId) {
-        if (isManualClick) showToast("Please select a track and car first.", "warning");
-        return;
-      }
-
-      if (btnCalcSpeed) {
-        btnCalcSpeed.disabled = true;
-        btnCalcSpeed.innerText = "⏳ Checking Cache...";
-      }
-
-      try {
-        const res = await fetch("/api/calculate_initial_speed", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            track_id: trackId,
-            track_layout: trackLayout,
-            car_id: carId,
-            start_s: startS,
-            start_mode: startMode,
-            countdown_sec: 3.0,
-          }),
-        });
-
-        const data = await res.json();
-        if (data.success) {
-          if (data.status === "cached") {
-            inputSpeed.value = data.speed_kmh;
-            inputSpawnOffset.value = data.spawn_offset_m;
-            inputGear.value = data.gear !== undefined ? data.gear : "";
-            inputRpm.value = data.rpm !== undefined ? data.rpm : "";
-
-            const activeTier = state.curriculum[state.activeTierIndex];
-            if (activeTier && activeTier.tests && activeTier.tests[state.activeTestIndex]) {
-              const test = activeTier.tests[state.activeTestIndex];
-              test.spawn = test.spawn || {};
-              test.spawn.initial_speed_kmh = data.speed_kmh;
-              test.spawn.spawn_offset_m = data.spawn_offset_m;
-              test.spawn.initial_gear = data.gear;
-              test.spawn.initial_rpm = data.rpm;
-            }
-
-            const sourceLabel = data.source ? ` (${data.source})` : "";
-            const dateStr = data.recorded_at ? ` • 📅 ${new Date(data.recorded_at).toISOString().replace("T", " ").substring(0, 16)} UTC` : "";
-            showAISpeedStatus(
-              `AI Telemetry Handover${sourceLabel}${dateStr}: ${data.speed_kmh} km/h | Gear ${data.gear || "Auto"} @ ${data.rpm || "Auto"} RPM | Run-up: ${data.spawn_offset_m}m`
-            );
-            if (isManualClick) {
-              showToast(
-                `Applied authentic ${data.speed_kmh} km/h from cached AI Telemetry!`,
-                "success"
-              );
-            }
-          } else if (data.status === "queued") {
-            pendingTelemetryJobId = data.job_id;
-            const activeTier = state.curriculum[state.activeTierIndex];
-            pendingTelemetryTestId = (activeTier && activeTier.tests && activeTier.tests[state.activeTestIndex])
-              ? activeTier.tests[state.activeTestIndex].test_id
-              : null;
-
-            showAISpeedStatus(`⏳ Recording full lap in Assetto Corsa in background... (Queue Job #${data.job_id})`);
-            showToast(
-              `No cached profile found. Recording full lap in Assetto Corsa in background (Job #${data.job_id}). Form will auto-fill on completion.`,
-              "info"
-            );
-            pollQueueStatus();
-          }
-        } else {
-          if (isManualClick) showToast(data.error || "Failed to calculate AI speed", "error");
-        }
-      } catch (err) {
-        if (isManualClick) showToast(`Calculation error: ${err.message}`, "error");
-      } finally {
-        if (btnCalcSpeed) {
-          btnCalcSpeed.disabled = false;
-          btnCalcSpeed.innerText = "⚡ Auto-Calculate from Game Engine";
-        }
-      }
-    }
-
-    async function pollQueueStatus() {
-      try {
-        const res = await fetch("/api/queue/status");
-        if (!res.ok) return;
-        const data = await res.json();
-        if (!data.success) return;
-
-        updateQueueUI(data);
-
-        // Check pending telemetry recording job
-        if (pendingTelemetryJobId) {
-          const jobRes = await fetch(`/api/job/${pendingTelemetryJobId}`);
-          if (jobRes.ok) {
-            const jData = await jobRes.json();
-            if (jData.success && jData.job) {
-              const job = jData.job;
-              if (job.status === "completed") {
-                const activeTier = state.curriculum[state.activeTierIndex];
-                const curTest = (activeTier && activeTier.tests && activeTier.tests[state.activeTestIndex])
-                  ? activeTier.tests[state.activeTestIndex]
-                  : null;
-
-                if (curTest && curTest.test_id === pendingTelemetryTestId && job.result) {
-                  inputSpeed.value = job.result.speed_kmh;
-                  inputSpawnOffset.value = job.result.spawn_offset_m;
-                  inputGear.value = job.result.gear !== undefined ? job.result.gear : "";
-                  inputRpm.value = job.result.rpm !== undefined ? job.result.rpm : "";
-
-                  curTest.spawn = curTest.spawn || {};
-                  curTest.spawn.initial_speed_kmh = job.result.speed_kmh;
-                  curTest.spawn.spawn_offset_m = job.result.spawn_offset_m;
-                  curTest.spawn.initial_gear = job.result.gear;
-                  curTest.spawn.initial_rpm = job.result.rpm;
-
-                  const dateStr = job.result.recorded_at ? ` • 📅 ${new Date(job.result.recorded_at).toISOString().replace("T", " ").substring(0, 16)} UTC` : "";
-                  showAISpeedStatus(
-                    `AI Telemetry Handover (live in-engine)${dateStr}: ${job.result.speed_kmh} km/h | Gear ${job.result.gear || "Auto"} @ ${job.result.rpm || "Auto"} RPM | Run-up: ${job.result.spawn_offset_m}m`
-                  );
-                  showToast(
-                    `✨ 95% AI Telemetry recorded & applied to ${curTest.test_id}: ${job.result.speed_kmh} km/h (Gear ${job.result.gear})!`,
-                    "success"
-                  );
-                }
-                pendingTelemetryJobId = null;
-                pendingTelemetryTestId = null;
-              } else if (job.status === "failed" || job.status === "cancelled") {
-                showToast(`Telemetry recording ${job.status}: ${job.error || 'Aborted'}`, "warning");
-                hideAISpeedStatus();
-                pendingTelemetryJobId = null;
-                pendingTelemetryTestId = null;
-              }
-            }
-          }
-        }
-      } catch (err) {
-        console.debug("Queue poll error:", err);
-      } finally {
-        clearTimeout(queuePollTimer);
-        queuePollTimer = setTimeout(pollQueueStatus, 2500);
-      }
-    }
-
-    function updateQueueUI(data) {
-      // 1. Is AC Process Running?
-      if (data.is_ac_running) {
-        if (btnStopAc) btnStopAc.style.display = "inline-flex";
-        if (runModalActiveBanner) {
-          runModalActiveBanner.style.display = "block";
-          const title = data.active_job ? data.active_job.title : "Simulation Running";
-          const pid = (data.active_job && data.active_job.pid) ? ` (PID: ${data.active_job.pid})` : "";
-          if (runModalActiveDesc) runModalActiveDesc.textContent = `${title}${pid}`;
-        }
-      } else {
-        if (btnStopAc) btnStopAc.style.display = "none";
-        if (runModalActiveBanner) runModalActiveBanner.style.display = "none";
-      }
-
-      // 2. Queued runs count & listing
-      const qLen = data.queue_length || 0;
-      if (qLen > 0) {
-        if (runQueueBadge) {
-          runQueueBadge.textContent = `${qLen} queued`;
-          runQueueBadge.style.display = "inline-block";
-        }
-        if (runModalQueueSection) runModalQueueSection.style.display = "block";
-        if (queueCountNum) queueCountNum.textContent = qLen;
-        if (runModalQueueList) {
-          runModalQueueList.innerHTML = (data.queue || []).map((j, idx) => `
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: rgba(255, 255, 255, 0.05); border-radius: 4px; font-size: 11px;">
-              <div>
-                <strong style="color: #38bdf8;">#${idx + 1}</strong> <span style="color: #cbd5e1;">${escapeHtml(j.title)}</span>
-              </div>
-              <button type="button" class="btn btn-sm btn-cancel-job" data-id="${j.id}" style="padding: 2px 6px; font-size: 10px; background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 3px; cursor: pointer;">Cancel</button>
-            </div>
-          `).join("");
-
-          runModalQueueList.querySelectorAll(".btn-cancel-job").forEach(btn => {
-            btn.addEventListener("click", async (e) => {
-              const jid = e.target.getAttribute("data-id");
-              if (jid) {
-                await fetch("/api/queue/cancel", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ job_id: jid }),
-                });
-                showToast(`Cancelled job #${jid}`, "info");
-                pollQueueStatus();
-              }
-            });
-          });
-        }
-      } else {
-        if (runQueueBadge) runQueueBadge.style.display = "none";
-        if (runModalQueueSection) runModalQueueSection.style.display = "none";
-      }
-    }
-
-    async function cancelActiveACSession() {
-      try {
-        const res = await fetch("/api/queue/cancel", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cancel_all: true }),
-        });
-        const data = await res.json();
-        showToast(data.message || "Termination signal sent to Assetto Corsa", "info");
-        pollQueueStatus();
-      } catch (err) {
-        showToast("Error stopping AC: " + err.message, "error");
-      }
-    }
-
     if (btnStopAc) btnStopAc.addEventListener("click", cancelActiveACSession);
     if (btnModalStopAc) btnModalStopAc.addEventListener("click", cancelActiveACSession);
-
-    function showAISpeedStatus(text) {
-      if (aiSpeedBadge && aiSpeedText) {
-        aiSpeedText.innerText = text;
-        aiSpeedBadge.style.display = "block";
-      }
-    }
-
-    function hideAISpeedStatus() {
-      if (aiSpeedBadge) {
-        aiSpeedBadge.style.display = "none";
-      }
-    }
 
     inputSpeed.addEventListener("input", () => {
       if (radioRolling.checked || radioFlying.checked) {
         autoCalculateSpawnOffset();
       }
     });
-
-    function autoCalculateSpawnOffset() {
-      const spdKmh = parseFloat(inputSpeed.value) || 0;
-      // Formula: spawn_offset = v_mps * 3.0 seconds
-      const offset = (spdKmh / 3.6) * 3.0;
-      inputSpawnOffset.value = offset.toFixed(1);
-    }
 
     // Targets Validation
     [targetGold, targetSilver, targetBronze].forEach((el) => {
@@ -1481,6 +1225,265 @@ document.addEventListener("DOMContentLoaded", () => {
       if (e.target === runModal) closeRunModal();
       if (e.target === logModal) logModal.style.display = "none";
     });
+  }
+
+  // ============================================================================
+  // Process Queue, Live Telemetry Calculation, & AC Session Helpers
+  // ============================================================================
+  let pendingTelemetryJobId = null;
+  let pendingTelemetryTestId = null;
+  let queuePollTimer = null;
+
+  async function fetchAndApplyAISpeed(isManualClick = true) {
+    const trackId = selectTrack.value;
+    const trackLayout = selectLayout.value;
+    const carId = selectCar.value;
+    const startS = parseFloat(inputStart.value || 0);
+    const startMode = radioStanding.checked
+      ? "STANDING"
+      : radioRolling.checked
+      ? "ROLLING"
+      : "FLYING_LAP";
+
+    if (startMode === "STANDING") {
+      inputSpeed.value = 0;
+      inputSpawnOffset.value = 0;
+      inputGear.value = 1;
+      inputRpm.value = 1000;
+      hideAISpeedStatus();
+      return;
+    }
+
+    if (!trackId || !carId) {
+      if (isManualClick) showToast("Please select a track and car first.", "warning");
+      return;
+    }
+
+    if (btnCalcSpeed) {
+      btnCalcSpeed.disabled = true;
+      btnCalcSpeed.innerText = "⏳ Checking Cache...";
+    }
+
+    try {
+      const res = await fetch("/api/calculate_initial_speed", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          track_id: trackId,
+          track_layout: trackLayout,
+          car_id: carId,
+          start_s: startS,
+          start_mode: startMode,
+          countdown_sec: 3.0,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        if (data.status === "cached") {
+          inputSpeed.value = data.speed_kmh;
+          inputSpawnOffset.value = data.spawn_offset_m;
+          inputGear.value = data.gear !== undefined ? data.gear : "";
+          inputRpm.value = data.rpm !== undefined ? data.rpm : "";
+
+          const activeTier = state.curriculum[state.activeTierIndex];
+          if (activeTier && activeTier.tests && activeTier.tests[state.activeTestIndex]) {
+            const test = activeTier.tests[state.activeTestIndex];
+            test.spawn = test.spawn || {};
+            test.spawn.initial_speed_kmh = data.speed_kmh;
+            test.spawn.spawn_offset_m = data.spawn_offset_m;
+            test.spawn.initial_gear = data.gear;
+            test.spawn.initial_rpm = data.rpm;
+          }
+
+          const sourceLabel = data.source ? ` (${data.source})` : "";
+          const dateStr = data.recorded_at ? ` • 📅 ${new Date(data.recorded_at).toISOString().replace("T", " ").substring(0, 16)} UTC` : "";
+          showAISpeedStatus(
+            `AI Telemetry Handover${sourceLabel}${dateStr}: ${data.speed_kmh} km/h | Gear ${data.gear || "Auto"} @ ${data.rpm || "Auto"} RPM | Run-up: ${data.spawn_offset_m}m`
+          );
+          if (isManualClick) {
+            showToast(
+              `Applied authentic ${data.speed_kmh} km/h from cached AI Telemetry!`,
+              "success"
+            );
+          }
+        } else if (data.status === "queued") {
+          pendingTelemetryJobId = data.job_id;
+          const activeTier = state.curriculum[state.activeTierIndex];
+          pendingTelemetryTestId = (activeTier && activeTier.tests && activeTier.tests[state.activeTestIndex])
+            ? activeTier.tests[state.activeTestIndex].test_id
+            : null;
+
+          showAISpeedStatus(`⏳ Recording full lap in Assetto Corsa in background... (Queue Job #${data.job_id})`);
+          showToast(
+            `No cached profile found. Recording full lap in Assetto Corsa in background (Job #${data.job_id}). Form will auto-fill on completion.`,
+            "info"
+          );
+          pollQueueStatus();
+        }
+      } else {
+        if (isManualClick) showToast(data.error || "Failed to calculate AI speed", "error");
+      }
+    } catch (err) {
+      if (isManualClick) showToast(`Calculation error: ${err.message}`, "error");
+    } finally {
+      if (btnCalcSpeed) {
+        btnCalcSpeed.disabled = false;
+        btnCalcSpeed.innerText = "⚡ Auto-Calculate from Game Engine";
+      }
+    }
+  }
+
+  async function pollQueueStatus() {
+    try {
+      const res = await fetch("/api/queue/status");
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data.success) return;
+
+      updateQueueUI(data);
+
+      // Check pending telemetry recording job
+      if (pendingTelemetryJobId) {
+        const jobRes = await fetch(`/api/job/${pendingTelemetryJobId}`);
+        if (jobRes.ok) {
+          const jData = await jobRes.json();
+          if (jData.success && jData.job) {
+            const job = jData.job;
+            if (job.status === "completed") {
+              const activeTier = state.curriculum[state.activeTierIndex];
+              const curTest = (activeTier && activeTier.tests && activeTier.tests[state.activeTestIndex])
+                ? activeTier.tests[state.activeTestIndex]
+                : null;
+
+              if (curTest && curTest.test_id === pendingTelemetryTestId && job.result) {
+                inputSpeed.value = job.result.speed_kmh;
+                inputSpawnOffset.value = job.result.spawn_offset_m;
+                inputGear.value = job.result.gear !== undefined ? job.result.gear : "";
+                inputRpm.value = job.result.rpm !== undefined ? job.result.rpm : "";
+
+                curTest.spawn = curTest.spawn || {};
+                curTest.spawn.initial_speed_kmh = job.result.speed_kmh;
+                curTest.spawn.spawn_offset_m = job.result.spawn_offset_m;
+                curTest.spawn.initial_gear = job.result.gear;
+                curTest.spawn.initial_rpm = job.result.rpm;
+
+                const dateStr = job.result.recorded_at ? ` • 📅 ${new Date(job.result.recorded_at).toISOString().replace("T", " ").substring(0, 16)} UTC` : "";
+                showAISpeedStatus(
+                  `AI Telemetry Handover (live in-engine)${dateStr}: ${job.result.speed_kmh} km/h | Gear ${job.result.gear || "Auto"} @ ${job.result.rpm || "Auto"} RPM | Run-up: ${job.result.spawn_offset_m}m`
+                );
+                showToast(
+                  `✨ 95% AI Telemetry recorded & applied to ${curTest.test_id}: ${job.result.speed_kmh} km/h (Gear ${job.result.gear})!`,
+                  "success"
+                );
+              }
+              pendingTelemetryJobId = null;
+              pendingTelemetryTestId = null;
+            } else if (job.status === "failed" || job.status === "cancelled") {
+              showToast(`Telemetry recording ${job.status}: ${job.error || 'Aborted'}`, "warning");
+              hideAISpeedStatus();
+              pendingTelemetryJobId = null;
+              pendingTelemetryTestId = null;
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.debug("Queue poll error:", err);
+    } finally {
+      clearTimeout(queuePollTimer);
+      queuePollTimer = setTimeout(pollQueueStatus, 2500);
+    }
+  }
+
+  function updateQueueUI(data) {
+    // 1. Is AC Process Running?
+    if (data.is_ac_running) {
+      if (btnStopAc) btnStopAc.style.display = "inline-flex";
+      if (runModalActiveBanner) {
+        runModalActiveBanner.style.display = "block";
+        const title = data.active_job ? data.active_job.title : "Simulation Running";
+        const pid = (data.active_job && data.active_job.pid) ? ` (PID: ${data.active_job.pid})` : "";
+        if (runModalActiveDesc) runModalActiveDesc.textContent = `${title}${pid}`;
+      }
+    } else {
+      if (btnStopAc) btnStopAc.style.display = "none";
+      if (runModalActiveBanner) runModalActiveBanner.style.display = "none";
+    }
+
+    // 2. Queued runs count & listing
+    const qLen = data.queue_length || 0;
+    if (qLen > 0) {
+      if (runQueueBadge) {
+        runQueueBadge.textContent = `${qLen} queued`;
+        runQueueBadge.style.display = "inline-block";
+      }
+      if (runModalQueueSection) runModalQueueSection.style.display = "block";
+      if (queueCountNum) queueCountNum.textContent = qLen;
+      if (runModalQueueList) {
+        runModalQueueList.innerHTML = (data.queue || []).map((j, idx) => `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: rgba(255, 255, 255, 0.05); border-radius: 4px; font-size: 11px;">
+            <div>
+              <strong style="color: #38bdf8;">#${idx + 1}</strong> <span style="color: #cbd5e1;">${escapeHtml(j.title)}</span>
+            </div>
+            <button type="button" class="btn btn-sm btn-cancel-job" data-id="${j.id}" style="padding: 2px 6px; font-size: 10px; background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 3px; cursor: pointer;">Cancel</button>
+          </div>
+        `).join("");
+
+        runModalQueueList.querySelectorAll(".btn-cancel-job").forEach(btn => {
+          btn.addEventListener("click", async (e) => {
+            const jid = e.target.getAttribute("data-id");
+            if (jid) {
+              await fetch("/api/queue/cancel", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ job_id: jid }),
+              });
+              showToast(`Cancelled job #${jid}`, "info");
+              pollQueueStatus();
+            }
+          });
+        });
+      }
+    } else {
+      if (runQueueBadge) runQueueBadge.style.display = "none";
+      if (runModalQueueSection) runModalQueueSection.style.display = "none";
+    }
+  }
+
+  async function cancelActiveACSession() {
+    try {
+      const res = await fetch("/api/queue/cancel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cancel_all: true }),
+      });
+      const data = await res.json();
+      showToast(data.message || "Termination signal sent to Assetto Corsa", "info");
+      pollQueueStatus();
+    } catch (err) {
+      showToast("Error stopping AC: " + err.message, "error");
+    }
+  }
+
+  function showAISpeedStatus(text) {
+    if (aiSpeedBadge && aiSpeedText) {
+      aiSpeedText.innerText = text;
+      aiSpeedBadge.style.display = "block";
+    }
+  }
+
+  function hideAISpeedStatus() {
+    if (aiSpeedBadge) {
+      aiSpeedBadge.style.display = "none";
+    }
+  }
+
+  function autoCalculateSpawnOffset() {
+    const spdKmh = parseFloat(inputSpeed.value) || 0;
+    // Formula: spawn_offset = v_mps * 3.0 seconds
+    const offset = (spdKmh / 3.6) * 3.0;
+    inputSpawnOffset.value = offset.toFixed(1);
   }
 
   function openRunModal() {
