@@ -82,6 +82,12 @@ def generate_race_ini(
 
     restart_line = f"RESTART_AT_TIME={restart_at_time:.2f}\n" if restart_at_time else ""
 
+    is_telemetry = (test_id == "AI_TELEMETRY_RECORDER")
+    session_name = test_data.get("session_name", "Hotlap" if is_telemetry else f"GT License Trial: {test_id}")
+    session_type = test_data.get("session_type", 4 if is_telemetry else 1)
+    duration_min = test_data.get("duration_minutes", 0 if is_telemetry else 5)
+    spawn_set = test_data.get("spawn_set", "HOTLAP_START" if is_telemetry else "PIT")
+
     ini_content = f"""[RACE]
 TRACK={track_id}
 CONFIG_TRACK={track_layout}
@@ -104,10 +110,10 @@ DRIVER_NAME=GT_AI_Tester
 NATIONALITY=ITA
 
 [SESSION_0]
-NAME=GT License Trial: {test_id}
-TYPE=1
-DURATION_MINUTES=5
-SPAWN_SET=PIT
+NAME={session_name}
+TYPE={session_type}
+DURATION_MINUTES={duration_min}
+SPAWN_SET={spawn_set}
 
 [LIGHTING]
 SUN_ANGLE=48

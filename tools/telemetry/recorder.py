@@ -15,6 +15,8 @@ Profiles are saved to:
 """
 
 import argparse
+import ctypes
+from ctypes import c_int32, c_float, c_wchar
 import json
 import math
 import mmap
@@ -43,6 +45,52 @@ from tools.testing.ac_launcher import (
 )
 
 PROFILES_DIR = os.path.join(REPO_ROOT, "data", "telemetry_profiles")
+
+
+class SPageFilePhysics(ctypes.Structure):
+    _pack_ = 4
+    _fields_ = [
+        ("packetId", c_int32),
+        ("gas", c_float),
+        ("brake", c_float),
+        ("fuel", c_float),
+        ("gear", c_int32),
+        ("rpms", c_int32),
+        ("steerAngle", c_float),
+        ("speedKmh", c_float),
+    ]
+
+
+class SPageFileGraphic(ctypes.Structure):
+    _pack_ = 4
+    _fields_ = [
+        ("packetId", c_int32),
+        ("status", c_int32),
+        ("session", c_int32),
+        ("currentTime", c_wchar * 15),
+        ("lastTime", c_wchar * 15),
+        ("bestTime", c_wchar * 15),
+        ("split", c_wchar * 15),
+        ("completedLaps", c_int32),
+        ("position", c_int32),
+        ("iCurrentTime", c_int32),
+        ("iLastTime", c_int32),
+        ("iBestTime", c_int32),
+        ("sessionTimeLeft", c_float),
+        ("distanceTraveled", c_float),
+        ("isInPit", c_int32),
+        ("currentSectorIndex", c_int32),
+        ("lastSectorTime", c_int32),
+        ("numberOfLaps", c_int32),
+        ("tyreCompound", c_wchar * 33),
+        ("replayTimeMultiplier", c_float),
+        ("normalizedCarPosition", c_float),
+        ("carCoordinates", c_float * 3),
+        ("penaltyTime", c_float),
+        ("flag", c_int32),
+        ("idealLineOn", c_int32),
+        ("isInPitLine", c_int32),
+    ]
 
 
 @dataclass
@@ -315,12 +363,14 @@ def record_live_in_engine_telemetry(
     car_id: str = "ks_mazda_miata",
     ai_level: int = 95,
     ac_root: str = DEFAULT_AC_ROOT,
-    timeout_sec: int = 140,
+    timeout_sec: Optional[int] = None,
     stop_event: Optional[Any] = None,
     proc_callback: Optional[Any] = None,
 ) -> TelemetryProfile:
     """
-    Launches acs.exe with AI_LEVEL=95 and logs live 60Hz telemetry via Assetto Corsa Shared Memory.
+    Launches acs.exe with AI_LEVEL=95 in Hotlap mode (HOTLAP_START flying lap)
+    and logs live 60Hz telemetry via Assetto Corsa Shared Memory.
+    Arms on start/finish line crossing and records exactly one full flying lap.
     Falls back to calibrated spline profile if shared memory is inaccessible or run is cancelled.
     """
     print(f"[*] Initializing live in-engine 95% AI recording session for {car_id} at {track_id}...")
@@ -336,11 +386,18 @@ def record_live_in_engine_telemetry(
     except Exception as e:
         print(f"[*] Spline length pre-check note: {e}")
 
+    if timeout_sec is None:
+        timeout_sec = max(240, int((track_total_len / 25.0) * 2.5) + 60)
+
     test_data = {
         "car_id": car_id,
         "track_id": track_id,
         "track_layout": layout,
         "test_id": "AI_TELEMETRY_RECORDER",
+        "session_name": "Hotlap",
+        "session_type": 4,
+        "spawn_set": "HOTLAP_START",
+        "duration_minutes": 0,
     }
     race_ini_str = generate_race_ini(
         test_data,
@@ -362,6 +419,32 @@ def record_live_in_engine_telemetry(
         except Exception:
             pass
 
+    active_test_payload = {
+        "test_id": "AI_TELEMETRY_RECORDER",
+        "is_telemetry_recording": True,
+        "title": "95% AI Telemetry Lap Profiler",
+        "start_mode": "FLYING_LAP",
+        "car_id": car_id,
+        "track_id": track_id,
+        "track_layout": layout,
+    }
+    active_test_json_str = json.dumps(active_test_payload, indent=2)
+
+    active_test_targets = [
+        os.path.join(REPO_ROOT, "active_test.json"),
+        os.path.join(REPO_ROOT, "lua", "active_test.json"),
+        os.path.join(REPO_ROOT, "lua", "data", "active_test.json"),
+        os.path.join(ac_root, "extension", "lua", "new-modes", "gt-license", "active_test.json"),
+        os.path.join(ac_root, "extension", "lua", "new-modes", "gt-license", "data", "active_test.json"),
+    ]
+    for atp in active_test_targets:
+        try:
+            os.makedirs(os.path.dirname(atp), exist_ok=True)
+            with open(atp, "w", encoding="utf-8") as f:
+                f.write(active_test_json_str)
+        except Exception:
+            pass
+
     for lp in [LOG_TXT_PATH, os.path.join(ALT_USER_DOCS_AC, "logs", "log.txt")]:
         if os.path.isfile(lp):
             try:
@@ -374,7 +457,7 @@ def record_live_in_engine_telemetry(
         print(f"[!] acs.exe not found at {acs_exe}. Falling back to calibrated spline profile.")
         return calibrate_from_spline(track_id, layout, car_id, ai_level, ac_root)
 
-    print(f"[*] Launching {acs_exe} child process...")
+    print(f"[*] Launching {acs_exe} child process (Hotlap mode with HOTLAP_START)...")
     proc = subprocess.Popen([acs_exe], cwd=ac_root)
     if proc_callback:
         proc_callback(proc)
@@ -382,6 +465,7 @@ def record_live_in_engine_telemetry(
     samples: List[TelemetrySample] = []
     shm_physics = None
     shm_graphics = None
+    lap_duration = 0.0
 
     try:
         # Wait up to 35 seconds for Assetto Corsa to load and initialize shared memory
@@ -395,8 +479,8 @@ def record_live_in_engine_telemetry(
                 print(f"[!] acs.exe terminated unexpectedly (code {proc.returncode})")
                 break
             try:
-                shm_physics = mmap.mmap(0, 712, "Local\\acpmf_physics")
-                shm_graphics = mmap.mmap(0, 1588, "Local\\acpmf_graphics")
+                shm_physics = mmap.mmap(0, ctypes.sizeof(SPageFilePhysics), "Local\\acpmf_physics")
+                shm_graphics = mmap.mmap(0, ctypes.sizeof(SPageFileGraphic), "Local\\acpmf_graphics")
                 connected = True
                 print("[+] Connected to Assetto Corsa Shared Memory!")
                 break
@@ -407,11 +491,18 @@ def record_live_in_engine_telemetry(
             print("[!] Could not connect to Assetto Corsa Shared Memory in time.")
             return calibrate_from_spline(track_id, layout, car_id, ai_level, ac_root)
 
-        start_time = time.time()
-        prev_progress = -1.0
-        lap_started = False
+        phys = SPageFilePhysics.from_buffer(shm_physics)
+        graph = SPageFileGraphic.from_buffer(shm_graphics)
 
-        # Sample at 25-30Hz
+        start_time = time.time()
+        recording_state = "WAITING"
+        initial_completed_laps = None
+        has_passed_midpoint = False
+        lap_start_time = None
+        prev_progress = -1.0
+        start_wait_time = time.time()
+
+        # Sample at ~25-30Hz
         while time.time() - start_time < timeout_sec:
             if stop_event and getattr(stop_event, "is_set", lambda: False)():
                 print("[*] Recording session received cancellation signal.")
@@ -419,37 +510,86 @@ def record_live_in_engine_telemetry(
             if proc.poll() is not None:
                 break
 
-            shm_physics.seek(0)
-            shm_physics.seek(28)
-            spd_raw = struct.unpack("<f", shm_physics.read(4))[0]
+            spd_raw = float(phys.speedKmh)
+            gear_raw = int(phys.gear)
+            rpm_raw = int(phys.rpms)
+            steer_angle = float(phys.steerAngle)
 
-            shm_physics.seek(16)
-            gear_raw = struct.unpack("<i", shm_physics.read(4))[0]
-            rpm_raw = struct.unpack("<i", shm_physics.read(4))[0]
+            progress = float(graph.normalizedCarPosition)
+            completed_laps = int(graph.completedLaps)
+            is_in_pit = int(graph.isInPit) or int(graph.isInPitLine)
+            i_last_time = int(graph.iLastTime)
 
-            shm_graphics.seek(0)
-            shm_graphics.seek(136)
-            progress = struct.unpack("<f", shm_graphics.read(4))[0]
+            # Map Assetto Corsa gear (0=R, 1=N, 2=1st, 3=2nd...) to 1-based gear
+            if gear_raw <= 1:
+                gear = 1 if spd_raw > 15.0 else 0
+            else:
+                gear = gear_raw - 1
 
-            if progress > 0.001 and not lap_started:
-                lap_started = True
+            if recording_state == "WAITING":
+                # Detect start of flying lap:
+                # 1. Car must be on-track (not in pit) and moving at speed (> 30 km/h)
+                # 2. Car crosses the start/finish line (wrap from > 0.75 to < 0.25)
+                #    OR car spawned directly at progress < 0.10 at road speed (> 50 km/h) within the first 5s
+                line_crossed = (prev_progress > 0.75 and progress < 0.25)
+                spawned_on_flying_lap = (
+                    prev_progress < 0 and progress < 0.10 and spd_raw > 50.0 and (time.time() - start_wait_time < 5.0)
+                )
 
-            if lap_started:
-                # Detect full lap wrap
-                if prev_progress > 0.85 and progress < 0.15 and len(samples) > 200:
-                    print("[+] Completed flying lap telemetry capture!")
-                    break
+                if (line_crossed or spawned_on_flying_lap) and is_in_pit == 0 and spd_raw > 30.0:
+                    recording_state = "RECORDING"
+                    initial_completed_laps = completed_laps
+                    lap_start_time = time.time()
+                    samples.clear()
+                    has_passed_midpoint = False
+                    print(
+                        f"[+] Flying lap STARTED at progress={progress:.3f}, speed={spd_raw:.1f} km/h (laps={completed_laps})! Capturing telemetry..."
+                    )
+
+            elif recording_state == "RECORDING":
+                # Track midpoint crossing (must drive through middle of the track before lap can finish)
+                if progress > 0.35 and progress < 0.75:
+                    has_passed_midpoint = True
 
                 dist_m = progress * track_total_len
-                samples.append(TelemetrySample(
-                    progress=round(progress, 4),
-                    distance_m=round(dist_m, 2),
-                    speed_kmh=round(spd_raw, 1),
-                    gear=gear_raw,
-                    rpm=rpm_raw,
-                ))
-                prev_progress = progress
+                samples.append(
+                    TelemetrySample(
+                        progress=round(progress, 4),
+                        distance_m=round(dist_m, 2),
+                        speed_kmh=round(spd_raw, 1),
+                        gear=gear,
+                        rpm=rpm_raw,
+                        steer_norm=round(steer_angle, 3),
+                    )
+                )
 
+                # Periodic progress logging
+                if len(samples) % 150 == 0:
+                    print(
+                        f"    [Lap Telemetry] Progress: {progress*100:.1f}% | Speed: {spd_raw:.1f} km/h | Gear: {gear} | RPM: {rpm_raw} | Samples: {len(samples)}"
+                    )
+
+                # Detect flying lap completion:
+                # Must have passed midpoint, recorded at least 300 samples (~10s),
+                # and either crossed finish line (wrap from > 0.80 to < 0.20) or completedLaps incremented
+                line_finished = (prev_progress > 0.80 and progress < 0.20)
+                laps_incremented = (
+                    initial_completed_laps is not None and completed_laps > initial_completed_laps
+                )
+
+                if has_passed_midpoint and len(samples) >= 300 and (line_finished or laps_incremented):
+                    recording_state = "COMPLETED"
+                    lap_duration = (
+                        round(i_last_time / 1000.0, 3)
+                        if i_last_time > 0
+                        else round(time.time() - (lap_start_time or start_time), 2)
+                    )
+                    print(
+                        f"[+] Completed flying lap telemetry capture! ({len(samples)} samples, lap time: {lap_duration:.2f}s)"
+                    )
+                    break
+
+            prev_progress = progress
             time.sleep(0.035)
 
     except Exception as e:
@@ -471,9 +611,16 @@ def record_live_in_engine_telemetry(
                 proc.wait(timeout=3)
             except Exception:
                 proc.kill()
+        for atp in active_test_targets:
+            if os.path.isfile(atp):
+                try:
+                    os.remove(atp)
+                except Exception:
+                    pass
 
     if len(samples) > 100:
-        print(f"[+] Captured {len(samples)} live telemetry samples.")
+        samples.sort(key=lambda s: s.progress)
+        print(f"[+] Successfully captured {len(samples)} live telemetry samples across full circuit.")
         profile = TelemetryProfile(
             track_id=track_id,
             track_layout=layout,
@@ -481,7 +628,7 @@ def record_live_in_engine_telemetry(
             ai_level=ai_level,
             source="in_engine_live_telemetry",
             total_track_length_m=round(track_total_len, 2),
-            lap_time_s=round(time.time() - start_time, 2),
+            lap_time_s=lap_duration if lap_duration > 0 else round(time.time() - start_time, 2),
             sample_count=len(samples),
             samples=samples,
         )

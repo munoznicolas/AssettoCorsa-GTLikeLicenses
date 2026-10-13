@@ -136,6 +136,15 @@ function GTConfigLoader.loadTestConfig(filepath)
       ac.log(string.format("[GTLicense] loadTestConfig: detected testId='%s'", tostring(testId)))
     end
 
+    if testId == "AI_TELEMETRY_RECORDER" then
+      return {
+        test_id = "AI_TELEMETRY_RECORDER",
+        is_telemetry_recording = true,
+        title = "95% AI Telemetry Lap Profiler",
+        start_mode = "FLYING_LAP",
+      }
+    end
+
     local candidates = {}
     local relFile = (testId and #testId > 0) and GTUtils.getTestFilePath(testId) or nil
 

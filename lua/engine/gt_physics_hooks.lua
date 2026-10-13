@@ -73,6 +73,14 @@ function GTPhysicsHooks.teleportCar(carIndex, position, forwardVector, verticalO
   verticalOffset = verticalOffset or 0.5
 
   local rawPos = GTPhysicsHooks.toVec3(position)
+  -- Safety guard: if rawPos is dummy default (0, 0.5, 0) and track is not magione, do not drop car into void
+  if math.abs(rawPos.x) < 0.01 and math.abs(rawPos.z) < 0.01 and ac and ac.getTrackID and ac.getTrackID() ~= "magione" then
+    if ac and ac.log then
+      ac.log("[GTPhysicsHooks] Guard: detected dummy (0, 0.5, 0) spawn on non-magione track. Preserving native spawn point.")
+    end
+    return true
+  end
+
   local fwd = safeNormalize(GTPhysicsHooks.toVec3(forwardVector))
   local targetPos = vec3(rawPos.x, rawPos.y + verticalOffset, rawPos.z)
 
@@ -554,7 +562,18 @@ end
 ---@param carIndex integer? @0-based car index (default: 0)
 ---@return boolean success, string? errorMessage
 function GTPhysicsHooks.setupSpawn(testConfig, carIndex)
-  if not testConfig or not testConfig.spawn then
+  if not testConfig then
+    return false, "Invalid test configuration: nil"
+  end
+
+  if testConfig.test_id == "AI_TELEMETRY_RECORDER" or testConfig.is_telemetry_recording then
+    if ac and ac.log then
+      ac.log("[GTPhysicsHooks] Telemetry recording mode: preserving native track spawn point")
+    end
+    return true
+  end
+
+  if not testConfig.spawn or not testConfig.spawn.position then
     return false, "Invalid test configuration: missing spawn definition"
   end
 

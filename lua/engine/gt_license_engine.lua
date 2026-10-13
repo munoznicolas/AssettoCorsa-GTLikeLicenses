@@ -130,14 +130,25 @@ function GTLicenseEngine.new(testDefinition)
   -- Initialize Adjudicator
   self.adjudicator = GTAdjudicator.new(self.testConfig)
 
+  -- Telemetry recording check
+  self.isTelemetryRecorder = (self.testConfig and (self.testConfig.test_id == "AI_TELEMETRY_RECORDER" or self.testConfig.is_telemetry_recording == true or self.testConfig.isTelemetryRecording == true)) or false
+
   -- Autonomous AI Demo / Test Mode check from race.ini
   self.isAITestMode = false
   self.aiLevel = 0.95
+  if self.isTelemetryRecorder then
+    self.isAITestMode = true
+  end
   if ac and ac.INIConfig and ac.INIConfig.raceConfig then
     local ok, race = pcall(ac.INIConfig.raceConfig)
     if ok and race then
       local val = race:get("GTLICENSE", "AI_TEST_MODE", "")
       if val == "1" or val == "true" or val == "TRUE" then
+        self.isAITestMode = true
+      end
+      local tId = race:get("GTLICENSE", "TEST_ID", "")
+      if tId == "AI_TELEMETRY_RECORDER" then
+        self.isTelemetryRecorder = true
         self.isAITestMode = true
       end
       local rstVal = race:get("GTLICENSE", "RESTART_AT_TIME", "")
@@ -290,6 +301,45 @@ end
 ---Starts or restarts the 3-2-1 countdown sequence.
 function GTLicenseEngine:startCountdown()
   GTPhysicsHooks.releaseFailureBraking(0)
+
+  if self.isTelemetryRecorder then
+    self:setState(GTLicenseEngine.STATE.RUNNING)
+    self.sessionTime = 0
+    self.spawnInitialized = false
+    self.countdownTimer = 0
+    self.countdownLastStep = 0
+    self.failReason = nil
+    self.achievedMedal = nil
+    self.results = {}
+    self.sessionReset:cancelAutoReset()
+
+    if physics and physics.setCarAutopilot then
+      physics.setCarAutopilot(true, false)
+    end
+    if physics and physics.setAILevel then
+      physics.setAILevel(0, self.aiLevel or 0.95)
+    end
+    if physics and physics.setAIAggression then
+      physics.setAIAggression(0, 1.0)
+    end
+    if physics and physics.setAICaution then
+      physics.setAICaution(0, 0.0)
+    end
+    if physics and physics.setAITopSpeed then
+      physics.setAITopSpeed(0, 999999.0)
+    end
+    if physics and physics.setAISplineAbsoluteOffset then
+      physics.setAISplineAbsoluteOffset(0, 0.0, false)
+    end
+    GTPhysicsHooks.unlockControls(0, nil)
+
+    if ac and ac.log then
+      ac.log("[GTLicense] AI Telemetry Recorder: Bypassed countdown, native AI autopilot engaged at track spawn.")
+    end
+    dispatchEvent(self, "go")
+    return
+  end
+
   self:setState(GTLicenseEngine.STATE.COUNTDOWN)
   self.sessionTime = 0
   self.spawnInitialized = false
@@ -436,6 +486,29 @@ function GTLicenseEngine:update(dt)
   -- Ensure car is properly spawned and oriented on the first live simulation frame
   if not self.spawnInitialized and car then
     self.spawnInitialized = true
+    if self.isTelemetryRecorder then
+      if physics and physics.setCarAutopilot then
+        physics.setCarAutopilot(true, false)
+      end
+      if physics and physics.setAILevel then
+        physics.setAILevel(0, self.aiLevel or 0.95)
+      end
+      if physics and physics.setAIAggression then
+        physics.setAIAggression(0, 1.0)
+      end
+      if physics and physics.setAICaution then
+        physics.setAICaution(0, 0.0)
+      end
+      if physics and physics.setAITopSpeed then
+        physics.setAITopSpeed(0, 999999.0)
+      end
+      GTPhysicsHooks.unlockControls(0, nil)
+      if ac and ac.log then
+        ac.log(string.format("[GTLicense] First live frame telemetry recorder init: spd=%.2f km/h", car.speedKmh))
+      end
+      return
+    end
+
     GTPhysicsHooks.setupSpawn(self.testConfig, 0)
     local isStanding = (self.testConfig.start_mode == "STANDING")
     GTPhysicsHooks.lockControls(3.0, isStanding, self.targetStartingGear, self.targetStartingRPM)
@@ -690,21 +763,23 @@ function GTLicenseEngine:update(dt)
     end
 
     -- Adjudicate failure conditions and finish gate/stop box completion
-    local adjResult = self.adjudicator:adjudicate(dt, self.sessionTime, car)
+    if not self.isTelemetryRecorder then
+      local adjResult = self.adjudicator:adjudicate(dt, self.sessionTime, car)
 
-    if adjResult.status == "FAILED" then
-      self.failReason = adjResult.reason or "Disqualified"
-      self:setState(GTLicenseEngine.STATE.FAILED)
-      dispatchEvent(self, "testFailed", self.failReason)
-      -- Do NOT auto restart on timer; wait for user input (hotkey, gamepad, or UI retry)
-      self.sessionReset:cancelAutoReset()
+      if adjResult.status == "FAILED" then
+        self.failReason = adjResult.reason or "Disqualified"
+        self:setState(GTLicenseEngine.STATE.FAILED)
+        dispatchEvent(self, "testFailed", self.failReason)
+        -- Do NOT auto restart on timer; wait for user input (hotkey, gamepad, or UI retry)
+        self.sessionReset:cancelAutoReset()
 
-    elseif adjResult.status == "PASSED" then
-      self.achievedMedal = self:evaluateMedal(self.sessionTime)
-      self.results = self:compileResults()
-      self:setState(GTLicenseEngine.STATE.PASSED)
-      dispatchEvent(self, "testPassed", self.results)
-      self.resultsTimer = 1.2
+      elseif adjResult.status == "PASSED" then
+        self.achievedMedal = self:evaluateMedal(self.sessionTime)
+        self.results = self:compileResults()
+        self:setState(GTLicenseEngine.STATE.PASSED)
+        dispatchEvent(self, "testPassed", self.results)
+        self.resultsTimer = 1.2
+      end
     end
 
   elseif GTLicenseEngine.isBrakingState(self.state) then
