@@ -36,8 +36,21 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnAddTest = document.getElementById("btn-add-test");
   const btnDeleteTest = document.getElementById("btn-delete-test");
   const btnSaveTest = document.getElementById("btn-save-test");
+  const btnRunLive = document.getElementById("btn-run-live");
+  const btnRunTop = document.getElementById("btn-run-top");
   const btnRebuild = document.getElementById("btn-rebuild");
   const btnSync = document.getElementById("btn-sync");
+
+  // Run Modal Elements
+  const runModal = document.getElementById("run-modal");
+  const runModalTitle = document.getElementById("run-modal-title");
+  const runModalDesc = document.getElementById("run-modal-desc");
+  const runModalClose = document.getElementById("run-modal-close");
+  const runModalCancel = document.getElementById("run-modal-cancel");
+  const btnRunModePlay = document.getElementById("btn-run-mode-play");
+  const btnRunModeAi = document.getElementById("btn-run-mode-ai");
+  const btnRunModeEval = document.getElementById("btn-run-mode-eval");
+  const checkRunSync = document.getElementById("check-run-sync");
 
   // Form Elements
   const form = document.getElementById("test-form");
@@ -82,6 +95,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const inputSpawnOffset = document.getElementById("input-spawn-offset");
   const inputGear = document.getElementById("input-gear");
   const inputRpm = document.getElementById("input-rpm");
+  const btnCalcSpeed = document.getElementById("btn-calc-ai-speed");
+  const aiSpeedBadge = document.getElementById("ai-speed-status-badge");
+  const aiSpeedText = document.getElementById("ai-speed-status-text");
   const checkStopBox = document.getElementById("check-stop-box");
   const stopBoxRow = document.getElementById("stop-box-row");
 
@@ -1031,35 +1047,131 @@ document.addEventListener("DOMContentLoaded", () => {
       setStartMode("STANDING");
       inputSpeed.value = 0;
       inputSpawnOffset.value = 0;
+      inputGear.value = 1;
+      inputRpm.value = 1000;
+      hideAISpeedStatus();
     });
 
     cardRolling.addEventListener("click", () => {
       setStartMode("ROLLING");
       if (parseFloat(inputSpeed.value) <= 0) {
-        inputSpeed.value = 75;
+        fetchAndApplyAISpeed(false);
+      } else {
+        autoCalculateSpawnOffset();
       }
-      autoCalculateSpawnOffset();
     });
 
     cardFlying.addEventListener("click", () => {
       setStartMode("FLYING_LAP");
       if (parseFloat(inputSpeed.value) <= 0) {
-        inputSpeed.value = 140;
-      }
-      if (parseFloat(inputSpawnOffset.value) <= 0) {
-        inputSpawnOffset.value = 60;
+        fetchAndApplyAISpeed(false);
+      } else {
+        autoCalculateSpawnOffset();
       }
     });
 
+    if (btnCalcSpeed) {
+      btnCalcSpeed.addEventListener("click", () => {
+        fetchAndApplyAISpeed(true);
+      });
+    }
+
+    async function fetchAndApplyAISpeed(isManualClick = true) {
+      const trackId = selectTrack.value;
+      const trackLayout = selectLayout.value;
+      const carId = selectCar.value;
+      const startS = parseFloat(inputStart.value || 0);
+      const startMode = radioStanding.checked
+        ? "STANDING"
+        : radioRolling.checked
+        ? "ROLLING"
+        : "FLYING_LAP";
+
+      if (startMode === "STANDING") {
+        inputSpeed.value = 0;
+        inputSpawnOffset.value = 0;
+        inputGear.value = 1;
+        inputRpm.value = 1000;
+        hideAISpeedStatus();
+        return;
+      }
+
+      if (!trackId || !carId) {
+        if (isManualClick) showToast("Please select a track and car first.", "warning");
+        return;
+      }
+
+      if (btnCalcSpeed) {
+        btnCalcSpeed.disabled = true;
+        btnCalcSpeed.innerText = "⏳ Querying Game Engine...";
+      }
+
+      try {
+        const res = await fetch("/api/calculate_initial_speed", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            track_id: trackId,
+            track_layout: trackLayout,
+            car_id: carId,
+            start_s: startS,
+            start_mode: startMode,
+            countdown_sec: 3.0,
+          }),
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          inputSpeed.value = data.speed_kmh;
+          inputSpawnOffset.value = data.spawn_offset_m;
+          inputGear.value = data.gear !== undefined ? data.gear : "";
+          inputRpm.value = data.rpm !== undefined ? data.rpm : "";
+
+          const sourceLabel = data.source ? ` (${data.source})` : "";
+          showAISpeedStatus(
+            `AI Telemetry Handover${sourceLabel}: ${data.speed_kmh} km/h | Gear ${data.gear || "Auto"} @ ${data.rpm || "Auto"} RPM | Run-up: ${data.spawn_offset_m}m`
+          );
+          if (isManualClick) {
+            showToast(
+              `Calculated ${data.speed_kmh} km/h from AI Telemetry!`,
+              "success"
+            );
+          }
+        } else {
+          if (isManualClick) showToast(data.error || "Failed to calculate AI speed", "error");
+        }
+      } catch (err) {
+        if (isManualClick) showToast(`Calculation error: ${err.message}`, "error");
+      } finally {
+        if (btnCalcSpeed) {
+          btnCalcSpeed.disabled = false;
+          btnCalcSpeed.innerText = "⚡ Auto-Calculate from Game Engine";
+        }
+      }
+    }
+
+    function showAISpeedStatus(text) {
+      if (aiSpeedBadge && aiSpeedText) {
+        aiSpeedText.innerText = text;
+        aiSpeedBadge.style.display = "block";
+      }
+    }
+
+    function hideAISpeedStatus() {
+      if (aiSpeedBadge) {
+        aiSpeedBadge.style.display = "none";
+      }
+    }
+
     inputSpeed.addEventListener("input", () => {
-      if (radioRolling.checked) {
+      if (radioRolling.checked || radioFlying.checked) {
         autoCalculateSpawnOffset();
       }
     });
 
     function autoCalculateSpawnOffset() {
       const spdKmh = parseFloat(inputSpeed.value) || 0;
-      // Formula from GEMINI.md: spawn_offset = v_mps * 3.0 seconds
+      // Formula: spawn_offset = v_mps * 3.0 seconds
       const offset = (spdKmh / 3.6) * 3.0;
       inputSpawnOffset.value = offset.toFixed(1);
     }
@@ -1174,6 +1286,113 @@ document.addEventListener("DOMContentLoaded", () => {
       "click",
       () => (logModal.style.display = "none"),
     );
+
+    // Live Run Test Handlers
+    if (btnRunLive) btnRunLive.addEventListener("click", openRunModal);
+    if (btnRunTop) btnRunTop.addEventListener("click", openRunModal);
+    if (runModalClose) runModalClose.addEventListener("click", closeRunModal);
+    if (runModalCancel) runModalCancel.addEventListener("click", closeRunModal);
+
+    if (btnRunModePlay) {
+      btnRunModePlay.addEventListener("click", () => executeRunLiveTest("play"));
+    }
+    if (btnRunModeAi) {
+      btnRunModeAi.addEventListener("click", () => executeRunLiveTest("ai"));
+    }
+    if (btnRunModeEval) {
+      btnRunModeEval.addEventListener("click", () => executeRunLiveTest("eval"));
+    }
+
+    window.addEventListener("click", (e) => {
+      if (e.target === runModal) closeRunModal();
+      if (e.target === logModal) logModal.style.display = "none";
+    });
+  }
+
+  function openRunModal() {
+    const activeTier = state.curriculum[state.activeTierIndex];
+    if (!activeTier || !activeTier.tests || !activeTier.tests[state.activeTestIndex]) {
+      showToast("No active test selected.", "warning");
+      return;
+    }
+    const test = activeTier.tests[state.activeTestIndex];
+    if (runModalTitle) {
+      runModalTitle.textContent = `🏎️ Live Run: [${test.test_id}] ${test.title}`;
+    }
+    if (runModalDesc) {
+      runModalDesc.innerHTML = `Launch <strong>${test.test_id}: ${escapeHtml(test.title)}</strong> (${test.car_id} at ${test.track_id}) directly into Assetto Corsa (<code style="color: #38bdf8;">acs.exe</code>).`;
+    }
+    if (runModal) runModal.style.display = "flex";
+  }
+
+  function closeRunModal() {
+    if (runModal) runModal.style.display = "none";
+  }
+
+  async function executeRunLiveTest(mode) {
+    const activeTier = state.curriculum[state.activeTierIndex];
+    if (!activeTier || !activeTier.tests || !activeTier.tests[state.activeTestIndex]) {
+      showToast("No active test selected.", "warning");
+      return;
+    }
+    const test = activeTier.tests[state.activeTestIndex];
+    const syncFirst = checkRunSync ? checkRunSync.checked : true;
+
+    // Save current form inputs into the in-memory test object
+    saveFormIntoActiveTest();
+
+    closeRunModal();
+
+    if (mode === "eval") {
+      openModal(
+        `Automated In-Engine Evaluation: ${test.test_id}`,
+        `Executing in-engine launch test for ${test.test_id} with 8s evaluation loop...\nMonitoring acs.exe process and checking physics/telemetry logs.`
+      );
+    } else {
+      const modeLabel = mode === "ai" ? "AI Autopilot Demo" : "Driver Control";
+      showToast(`Launching ${test.test_id} in Assetto Corsa (${modeLabel})...`, "info");
+    }
+
+    try {
+      const res = await fetch("/api/run_test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          test_id: test.test_id,
+          mode: mode,
+          sync_first: syncFirst,
+          test_data: test,
+          timeout: 8,
+        }),
+      });
+
+      const data = await res.json();
+      if (mode === "eval") {
+        if (data.success) {
+          modalStatusBadge.textContent = "EVAL PASSED";
+          modalStatusBadge.className = "badge badge-lg";
+          modalStatusBadge.style.color = "#10b981";
+        } else {
+          modalStatusBadge.textContent = "EVAL FAILED";
+          modalStatusBadge.className = "badge badge-lg";
+          modalStatusBadge.style.color = "#ef4444";
+        }
+        modalLogText.textContent = data.log || data.error || "No log output received.";
+      } else {
+        if (data.success) {
+          showToast(data.message || `Test ${test.test_id} launched in Assetto Corsa!`, "success");
+        } else {
+          showToast(data.error || "Failed to launch Assetto Corsa", "error");
+        }
+      }
+    } catch (err) {
+      if (mode === "eval") {
+        modalStatusBadge.textContent = "NETWORK ERROR";
+        modalLogText.textContent = err.message;
+      } else {
+        showToast(`Launch error: ${err.message}`, "error");
+      }
+    }
   }
 
   function saveFormIntoActiveTest() {

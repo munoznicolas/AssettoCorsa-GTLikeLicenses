@@ -27,6 +27,13 @@
         </div>
         <div class="header-actions">
           <button
+            id="btn-run-top"
+            class="btn btn-accent"
+            title="Launch current test live in Assetto Corsa"
+          >
+            <span class="icon">🏎️</span> Live Run Test
+          </button>
+          <button
             id="btn-rebuild"
             class="btn btn-primary"
             title="Rebuild test JSONs & Content Manager career"
@@ -120,6 +127,14 @@
                   class="btn btn-danger btn-sm"
                 >
                   <span>🗑️ Delete Test</span>
+                </button>
+                <button
+                  type="button"
+                  id="btn-run-live"
+                  class="btn btn-primary"
+                  title="Launch this test live in Assetto Corsa"
+                >
+                  <span>🏎️ Live Run Test</span>
                 </button>
                 <button
                   type="submit"
@@ -371,7 +386,17 @@
 
             <!-- Section 4: Start Mode (Rolling vs Standing) & Speed -->
             <div class="card form-card">
-              <div class="card-title">Start Mode & Physics Initialization</div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <div class="card-title" style="margin-bottom: 0;">Start Mode & Physics Initialization</div>
+                <button
+                  type="button"
+                  id="btn-calc-ai-speed"
+                  class="btn btn-sm btn-accent"
+                  title="Query Assetto Corsa game engine AI telemetry for authentic gate speed, run-up offset, gear, and RPM"
+                >
+                  ⚡ Auto-Calculate from Game Engine
+                </button>
+              </div>
               <div class="start-mode-selector">
                 <label class="mode-card" id="mode-card-standing">
                   <input
@@ -478,6 +503,10 @@
                   />
                   <small class="helper-text">Calculated by script</small>
                 </div>
+              </div>
+
+              <div id="ai-speed-status-badge" class="mt-2" style="display: none; font-size: 11px; padding: 4px 8px; border-radius: 4px; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: #fbbf24;">
+                <span id="ai-speed-status-text">Calculated from AI Telemetry</span>
               </div>
 
               <div class="mt-2" id="stop-box-row">
@@ -766,6 +795,54 @@
           </div>
           <div class="modal-footer">
             <button id="modal-btn-ok" class="btn btn-primary">Done</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal for Live Run Test in Assetto Corsa -->
+      <div id="run-modal" class="modal" style="display: none">
+        <div class="modal-content" style="max-width: 520px;">
+          <div class="modal-header">
+            <h3 id="run-modal-title">🏎️ Live Run Test</h3>
+            <button id="run-modal-close" class="modal-close-btn">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div id="run-modal-desc" style="margin-bottom: 1.25rem; color: #cbd5e1; font-size: 13px;">
+              Launch this test directly into Assetto Corsa (<code style="color: #38bdf8;">acs.exe</code>).
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <button type="button" id="btn-run-mode-play" class="btn btn-primary" style="justify-content: flex-start; padding: 12px 16px; border-radius: 6px;">
+                <div style="text-align: left;">
+                  <strong style="display: block; font-size: 14px;">🎮 Play in Assetto Corsa (Driver Control)</strong>
+                  <span style="font-size: 11px; opacity: 0.85;">Interactive session with countdown sequence, 3D timing gates, and player inputs.</span>
+                </div>
+              </button>
+
+              <button type="button" id="btn-run-mode-ai" class="btn btn-accent" style="justify-content: flex-start; padding: 12px 16px; border-radius: 6px;">
+                <div style="text-align: left;">
+                  <strong style="display: block; font-size: 14px;">🤖 Watch AI Autopilot Demo</strong>
+                  <span style="font-size: 11px; opacity: 0.85;">Spawns the test with 95% AI autopilot tracking the optimal racing line.</span>
+                </div>
+              </button>
+
+              <button type="button" id="btn-run-mode-eval" class="btn btn-secondary" style="justify-content: flex-start; padding: 12px 16px; border-radius: 6px;">
+                <div style="text-align: left;">
+                  <strong style="display: block; font-size: 14px;">📊 Run Automated Evaluation Loop (8s Audit)</strong>
+                  <span style="font-size: 11px; opacity: 0.85;">Audits physics initialization, spawn kinematics, zero-crash signatures, and logs report.</span>
+                </div>
+              </button>
+            </div>
+
+            <div style="margin-top: 14px; font-size: 12px; color: #94a3b8;">
+              <label class="checkbox-label" style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" id="check-run-sync" checked />
+                <span>Auto-sync latest files to Assetto Corsa before launch</span>
+              </label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="run-modal-cancel" class="btn btn-secondary">Cancel</button>
           </div>
         </div>
       </div>

@@ -149,6 +149,37 @@ class TelemetryProfile:
 
         return curr_dist
 
+    def calculate_gate_physics(self, gate_progress: float, countdown_sec: float = 3.0) -> Dict[str, Any]:
+        """
+        Calculates ground-truth AI handover speed, engaged gear, RPM, and
+        the exact backward-integrated countdown run-up distance (spawn_offset).
+        """
+        gate_prog_norm = (gate_progress % 1.0 + 1.0) % 1.0
+        gate_dist = (gate_prog_norm * self.total_track_length_m) % self.total_track_length_m
+        gate_spd, gate_gear, gate_rpm = self.query_sample(gate_dist)
+
+        spawn_dist = self.integrate_distance_backward(gate_dist, countdown_sec)
+        spawn_offset = (gate_dist - spawn_dist + self.total_track_length_m) % self.total_track_length_m
+        spawn_spd, spawn_gear, spawn_rpm = self.query_sample(spawn_dist)
+        spawn_prog = (spawn_dist / self.total_track_length_m) if self.total_track_length_m > 0 else 0.0
+
+        return {
+            "gate_progress": round(gate_prog_norm, 4),
+            "gate_distance_m": round(gate_dist, 2),
+            "speed_kmh": round(gate_spd, 1),
+            "gear": gate_gear,
+            "rpm": gate_rpm,
+            "spawn_offset_m": round(spawn_offset, 1),
+            "spawn_progress": round(spawn_prog, 4),
+            "spawn_distance_m": round(spawn_dist, 2),
+            "spawn_speed_kmh": round(spawn_spd, 1),
+            "spawn_gear": spawn_gear,
+            "spawn_rpm": spawn_rpm,
+            "countdown_sec": countdown_sec,
+            "total_track_length_m": round(self.total_track_length_m, 2),
+            "source": self.source,
+        }
+
 
 def profile_filename(track_id: str, layout: str, car_id: str, ai_level: int = 95) -> str:
     """Standardized profile cache filename."""
@@ -281,9 +312,12 @@ def record_live_in_engine_telemetry(
         "track_layout": layout,
         "test_id": "AI_TELEMETRY_RECORDER",
     }
-    race_ini_str = generate_race_ini(test_data, ac_root)
-    # Inject 95% AI level into race.ini
-    race_ini_str = race_ini_str.replace("AI_LEVEL=100", f"AI_LEVEL={ai_level}")
+    race_ini_str = generate_race_ini(
+        test_data,
+        ac_root=ac_root,
+        ai_level=ai_level,
+        ai_test_mode=True,
+    )
 
     os.makedirs(os.path.dirname(RACE_INI_PATH), exist_ok=True)
     with open(RACE_INI_PATH, "w", encoding="utf-8") as f:
@@ -383,6 +417,37 @@ def record_live_in_engine_telemetry(
 
     print("[*] Insufficient live samples collected. Generating high-fidelity calibrated spline profile...")
     return calibrate_from_spline(track_id, layout, car_id, ai_level, ac_root)
+
+
+def get_or_calculate_initial_physics(
+    track_id: str,
+    layout: str = "",
+    car_id: str = "ks_mazda_miata",
+    start_s: float = 0.0,
+    countdown_sec: float = 3.0,
+    ai_level: int = 95,
+    allow_live_engine: bool = False,
+    ac_root: str = DEFAULT_AC_ROOT,
+) -> Dict[str, Any]:
+    """
+    Retrieves or generates an authentic AI telemetry profile and calculates
+    the exact gate speed, spawn offset, gear, and RPM for a rolling start or flying lap.
+    """
+    profile = load_telemetry_profile(track_id, layout, car_id, ai_level)
+    if profile is None:
+        if allow_live_engine:
+            try:
+                profile = record_live_in_engine_telemetry(track_id, layout, car_id, ai_level, ac_root)
+                save_telemetry_profile(profile)
+            except Exception as e:
+                print(f"[!] Live in-engine recording encountered an issue: {e}. Falling back to spline.")
+                profile = None
+
+        if profile is None:
+            profile = calibrate_from_spline(track_id, layout, car_id, ai_level, ac_root)
+            save_telemetry_profile(profile)
+
+    return profile.calculate_gate_physics(start_s, countdown_sec)
 
 
 def main() -> int:

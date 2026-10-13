@@ -679,3 +679,172 @@ def get_ac_curriculum_reference_tests() -> List[Dict[str, Any]]:
             progression += 1
 
     return ac_tests
+
+
+def calculate_test_initial_speed(
+    track_id: str,
+    track_layout: str = "",
+    car_id: str = "ks_mazda_miata",
+    start_s: float = 0.0,
+    start_mode: str = "ROLLING",
+    countdown_sec: float = 3.0,
+    allow_live_engine: bool = False,
+) -> Dict[str, Any]:
+    """
+    Calculates initial speed, spawn offset, gear, and RPM for a rolling start or flying lap test
+    based on ground-truth AI telemetry.
+    """
+    if start_mode == "STANDING":
+        return {
+            "success": True,
+            "speed_kmh": 0.0,
+            "spawn_offset_m": 0.0,
+            "gear": 1,
+            "rpm": 1000,
+            "source": "standing_start",
+        }
+
+    from tools.telemetry.recorder import get_or_calculate_initial_physics
+
+    try:
+        res = get_or_calculate_initial_physics(
+            track_id=track_id,
+            layout=track_layout,
+            car_id=car_id,
+            start_s=start_s,
+            countdown_sec=countdown_sec,
+            ai_level=95,
+            allow_live_engine=allow_live_engine,
+        )
+        res["success"] = True
+        return res
+    except Exception as e:
+        # Fallback if track spline or profile not found
+        return {
+            "success": False,
+            "error": str(e),
+            "speed_kmh": 75.0 if start_mode == "ROLLING" else 140.0,
+            "spawn_offset_m": (75.0 / 3.6 * countdown_sec) if start_mode == "ROLLING" else (140.0 / 3.6 * countdown_sec),
+            "gear": 2 if start_mode == "ROLLING" else 4,
+            "rpm": 4500,
+            "source": "error_fallback",
+        }
+
+
+def run_live_test(
+    test_id: str,
+    mode: str = "play",
+    sync_first: bool = True,
+    test_data: Optional[Dict[str, Any]] = None,
+    timeout: int = 8,
+    ac_root: str = DEFAULT_AC_ROOT,
+) -> Dict[str, Any]:
+    """
+    Launches a license test live in Assetto Corsa.
+    Modes:
+      - 'play': Interactive simulation session with player driver controls.
+      - 'ai': Simulation session with 95% AI autopilot.
+      - 'eval': Headless / timeout in-engine evaluation loop with audit report.
+    """
+    import shutil
+    import subprocess
+    from tools.testing.ac_launcher import (
+        generate_race_ini,
+        RACE_INI_PATH,
+        ALT_USER_DOCS_AC,
+        LOG_TXT_PATH,
+    )
+
+    if sync_first:
+        try:
+            from tools.deployment.sync import build_sync_mappings
+            mappings = build_sync_mappings(REPO_ROOT, ac_root)
+            for src, dst in mappings:
+                if os.path.isfile(src):
+                    os.makedirs(os.path.dirname(dst), exist_ok=True)
+                    shutil.copy2(src, dst)
+        except Exception as e:
+            print(f"[!] Sync note prior to launch: {e}")
+
+    # If test_data not provided, find it from content/tests or catalog
+    if not test_data:
+        from tools.testing.eval_loop import find_test_file_by_id
+        t_path = find_test_file_by_id(test_id, REPO_ROOT)
+        if t_path and os.path.isfile(t_path):
+            with open(t_path, "r", encoding="utf-8") as f:
+                test_data = json.load(f)
+        else:
+            from tools.content.catalog import TESTS_BY_ID
+            test_data = TESTS_BY_ID.get(test_id)
+
+    if not test_data:
+        return {
+            "success": False,
+            "error": f"Test definition for {test_id} not found."
+        }
+
+    # Evaluation Mode
+    if mode == "eval":
+        eval_script = os.path.join(REPO_ROOT, "tools", "test_and_eval_loop.py")
+        cmd = [sys.executable, eval_script, "--test-id", test_id, "--timeout", str(timeout)]
+        res = subprocess.run(cmd, capture_output=True, text=True)
+        return {
+            "success": res.returncode == 0,
+            "mode": "eval",
+            "test_id": test_id,
+            "status": "PASSED" if res.returncode == 0 else "FAILED",
+            "log": res.stdout + ("\n" + res.stderr if res.stderr else ""),
+        }
+
+    # Interactive ('play') or AI Demo ('ai') Mode
+    is_ai = (mode == "ai")
+    race_ini_str = generate_race_ini(
+        test_data,
+        ac_root=ac_root,
+        ai_level=95,
+        ai_test_mode=is_ai,
+    )
+
+    target_race_paths = [
+        RACE_INI_PATH,
+        os.path.join(ALT_USER_DOCS_AC, "cfg", "race.ini"),
+        os.path.join(ac_root, "cfg", "race.ini"),
+    ]
+    for rp in target_race_paths:
+        try:
+            os.makedirs(os.path.dirname(rp), exist_ok=True)
+            with open(rp, "w", encoding="utf-8") as f:
+                f.write(race_ini_str)
+        except Exception:
+            pass
+
+    # Clear old log.txt
+    for lp in [LOG_TXT_PATH, os.path.join(ALT_USER_DOCS_AC, "logs", "log.txt")]:
+        if os.path.isfile(lp):
+            try:
+                os.remove(lp)
+            except Exception:
+                pass
+
+    acs_exe_path = os.path.join(ac_root, "acs.exe")
+    if not os.path.isfile(acs_exe_path):
+        return {
+            "success": False,
+            "error": f"Assetto Corsa executable not found at {acs_exe_path}"
+        }
+
+    try:
+        proc = subprocess.Popen([acs_exe_path], cwd=ac_root)
+        mode_label = "AI Autopilot Demo" if is_ai else "Interactive Player Control"
+        return {
+            "success": True,
+            "mode": mode,
+            "test_id": test_id,
+            "message": f"Assetto Corsa launched! Test [{test_id}] is now running in {mode_label} mode.",
+            "pid": proc.pid,
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": f"Failed to spawn acs.exe: {e}"
+        }

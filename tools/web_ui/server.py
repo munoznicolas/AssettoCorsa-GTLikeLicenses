@@ -26,12 +26,14 @@ if os.path.join(REPO_ROOT, "tools") not in sys.path:
     sys.path.insert(0, os.path.join(REPO_ROOT, "tools"))
 
 from tools.web_ui.catalog_manager import (
+    calculate_test_initial_speed,
     generate_and_validate,
     get_ac_curriculum_reference_tests,
     get_available_cars,
     get_available_tracks,
     get_track_spline_data,
     load_curriculum,
+    run_live_test,
     save_tier_catalog,
 )
 
@@ -248,6 +250,63 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
             except Exception as e:
                 self.send_json_response({"success": False, "error": f"Invalid JSON payload: {e}"}, status=400)
                 return
+
+        if path == "/api/calculate_initial_speed":
+            track_id = payload.get("track_id", "")
+            track_layout = payload.get("track_layout", "")
+            car_id = payload.get("car_id", "")
+            start_s = float(payload.get("start_s", 0.0))
+            start_mode = payload.get("start_mode", "ROLLING")
+            countdown_sec = float(payload.get("countdown_sec", 3.0))
+            allow_live_engine = bool(payload.get("allow_live_engine", False))
+
+            if not track_id or not car_id:
+                self.send_json_response({"success": False, "error": "Missing track_id or car_id"}, status=400)
+                return
+
+            try:
+                res = calculate_test_initial_speed(
+                    track_id=track_id,
+                    track_layout=track_layout,
+                    car_id=car_id,
+                    start_s=start_s,
+                    start_mode=start_mode,
+                    countdown_sec=countdown_sec,
+                    allow_live_engine=allow_live_engine,
+                )
+                self.send_json_response(res)
+            except Exception as e:
+                self.send_json_response({"success": False, "error": str(e)}, status=500)
+            return
+
+        if path == "/api/run_test":
+            test_id = payload.get("test_id", "")
+            mode = payload.get("mode", "play")
+            sync_first = bool(payload.get("sync_first", True))
+            test_data = payload.get("test_data")
+            timeout = int(payload.get("timeout", 8))
+
+            if not test_id:
+                self.send_json_response({"success": False, "error": "Missing test_id"}, status=400)
+                return
+
+            try:
+                res = run_live_test(
+                    test_id=test_id,
+                    mode=mode,
+                    sync_first=sync_first,
+                    test_data=test_data,
+                    timeout=timeout,
+                )
+                self.send_json_response(res)
+            except Exception as e:
+                import traceback
+                self.send_json_response({
+                    "success": False,
+                    "error": str(e),
+                    "traceback": traceback.format_exc(),
+                }, status=500)
+            return
 
         if path == "/api/save_tier":
             tier_name = payload.get("tier_name")

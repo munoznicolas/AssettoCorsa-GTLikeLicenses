@@ -20,6 +20,7 @@ from tools.telemetry.recorder import (
     TelemetrySample,
     calibrate_from_spline,
     estimate_gear_and_rpm,
+    get_or_calculate_initial_physics,
     load_telemetry_profile,
     main,
     profile_filename,
@@ -42,6 +43,7 @@ __all__ = [
     "get_profile_path",
     "record_live_in_engine_telemetry",
     "record_live_telemetry",
+    "get_or_calculate_initial_physics",
     "main",
 ]
 
