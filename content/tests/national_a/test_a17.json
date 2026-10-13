@@ -6,44 +6,44 @@
   "lesson_objective": "Mastering the undulating Brands Hatch Indy layout in a mid-engine coupe.",
   "car_id": "ks_porsche_718_cayman_s",
   "track_id": "ks_brands_hatch",
-  "track_layout": "indy",
+  "track_layout": "gp",
   "start_mode": "FLYING_LAP",
   "spawn": {
     "position": [
-      -183.556,
-      -7.876,
-      -367.606
+      -185.032,
+      -7.702,
+      -369.059
     ],
     "forward_vector": [
-      0.9054,
-      -0.0314,
-      -0.4234
+      0.9123,
+      -0.0333,
+      -0.4082
     ],
     "initial_speed_kmh": 130.0
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -135.09,
-        -7.74,
-        -385.243
+        -136.651,
+        -7.661,
+        -387.201
       ],
       "p2": [
-        -139.579,
-        -7.74,
-        -395.918
+        -141.115,
+        -7.661,
+        -397.875
       ]
     },
     "finish_gate": {
       "p1": [
-        -138.27,
-        -7.8,
-        -383.922
+        -141.759,
+        -7.755,
+        -385.078
       ],
       "p2": [
-        -142.819,
-        -7.8,
-        -394.571
+        -146.27,
+        -7.755,
+        -395.754
       ]
     }
   },

@@ -266,10 +266,13 @@ body {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  padding: 12px 14px;
+  padding: 10px 12px;
   cursor: pointer;
   transition: all 0.15s ease;
   position: relative;
+  display: flex;
+  gap: 12px;
+  align-items: center;
 }
 
 .test-item:hover {
@@ -281,6 +284,31 @@ body {
   border-color: var(--gt-red);
   background-color: #202733;
   box-shadow: 0 0 10px rgba(225, 29, 72, 0.15);
+}
+
+.test-item-thumb {
+  width: 76px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.test-item-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.test-item-body {
+  flex: 1;
+  min-width: 0;
 }
 
 .test-item-top {
@@ -794,6 +822,80 @@ body {
   font-size: 12px;
   color: var(--text-muted);
   text-align: right;
+}
+
+/* Track Miniature Preview Card */
+.miniature-preview-card {
+  margin-top: 14px;
+  background-color: #171c24;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+}
+
+.miniature-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.miniature-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.miniature-icon {
+  font-size: 14px;
+}
+
+.miniature-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.miniature-preview-body {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background-color: #1b1b1b;
+  border: 1px solid var(--border-color);
+}
+
+.miniature-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  background-color: #1b1b1b;
+}
+
+.miniature-fallback {
+  display: none;
+  position: absolute;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 16px;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.miniature-preview-body.no-preview .miniature-preview-img {
+  display: none;
+}
+
+.miniature-preview-body.no-preview .miniature-fallback {
+  display: flex;
 }
 
 .sector-badge-bar strong {

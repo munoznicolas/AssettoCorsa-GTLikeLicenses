@@ -141,7 +141,44 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
                 self.send_json_response({"success": False, "error": str(e)}, status=500)
             return
 
-        # Asset previews (e.g. badge icons, test previews)
+        if path == "/api/test_preview":
+            test_id = query.get("test_id", [""])[0]
+            if not test_id:
+                self.send_json_response({"success": False, "error": "Missing test_id"}, status=400)
+                return
+            from tools.generate_test_previews import build_test_to_event_path_map
+            preview_map = build_test_to_event_path_map()
+            preview_file = preview_map.get(test_id)
+            if preview_file and os.path.isfile(preview_file):
+                with open(preview_file, "rb") as f:
+                    content = f.read()
+                self.send_response(200)
+                self.send_header("Content-Type", "image/png")
+                self.send_header("Content-Length", str(len(content)))
+                self.end_headers()
+                self.wfile.write(content)
+                return
+            else:
+                self.send_error(404, f"Preview not found for test {test_id}")
+                return
+
+        # Backward compatibility for legacy /assets/previews/ paths
+        if path.startswith("/assets/previews/tests/"):
+            test_id = os.path.splitext(os.path.basename(path))[0]
+            from tools.generate_test_previews import build_test_to_event_path_map
+            preview_map = build_test_to_event_path_map()
+            preview_file = preview_map.get(test_id)
+            if preview_file and os.path.isfile(preview_file):
+                with open(preview_file, "rb") as f:
+                    content = f.read()
+                self.send_response(200)
+                self.send_header("Content-Type", "image/png")
+                self.send_header("Content-Length", str(len(content)))
+                self.end_headers()
+                self.wfile.write(content)
+                return
+
+        # Asset files (e.g. badge icons, fonts, textures)
         if path.startswith("/assets/"):
             rel_asset_path = path[len("/assets/"):]
             full_asset_path = os.path.join(ASSETS_DIR, rel_asset_path)
@@ -157,6 +194,42 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
                 return
             else:
                 self.send_error(404, "Asset Not Found")
+                return
+
+        # Content files (e.g. career event previews: /content/career/.../preview.png)
+        if path.startswith("/content/"):
+            rel_content_path = path[len("/content/"):]
+            full_content_path = os.path.join(REPO_ROOT, "content", rel_content_path)
+            if os.path.isfile(full_content_path):
+                mime, _ = mimetypes.guess_type(full_content_path)
+                with open(full_content_path, "rb") as f:
+                    content = f.read()
+                self.send_response(200)
+                self.send_header("Content-Type", mime or "application/octet-stream")
+                self.send_header("Content-Length", str(len(content)))
+                self.end_headers()
+                self.wfile.write(content)
+                return
+            else:
+                self.send_error(404, "Content Not Found")
+                return
+
+        # Document assets (e.g. SVG test maps)
+        if path.startswith("/docs/"):
+            rel_doc_path = path[len("/docs/"):]
+            full_doc_path = os.path.join(REPO_ROOT, "docs", rel_doc_path)
+            if os.path.isfile(full_doc_path):
+                mime, _ = mimetypes.guess_type(full_doc_path)
+                with open(full_doc_path, "rb") as f:
+                    content = f.read()
+                self.send_response(200)
+                self.send_header("Content-Type", mime or "image/svg+xml")
+                self.send_header("Content-Length", str(len(content)))
+                self.end_headers()
+                self.wfile.write(content)
+                return
+            else:
+                self.send_error(404, "Doc Not Found")
                 return
 
         # Default static file handler (index.html, style.css, app.js)

@@ -4,7 +4,7 @@
   "title": "500m Acceleration & High-Speed Stop",
   "description": "High-speed braking from 170+ km/h managing curb weight into the marked stop box.",
   "lesson_objective": "Managing heavier curb weight braking without triggering front wheel lockup.",
-  "car_id": "alfa_romeo_giulietta_qv",
+  "car_id": "ks_audi_a1s1",
   "track_id": "ks_drag",
   "track_layout": "drag500",
   "start_mode": "STANDING",

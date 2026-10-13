@@ -93,20 +93,46 @@ def build(test, wps):
                               gate(True, "#2ecc71"), gate(False, "#ff3b30"), spawn))
 
 
-def main():
-    os.makedirs(OUT_DIR, exist_ok=True)
+def generate_maps(
+    ac_root: str = None,
+    out_dir: str = OUT_DIR,
+    tests_dir: str = None,
+) -> int:
+    """Generates vector SVG track maps with highlighted test sector for all tests."""
+    from tools.spline.parser import DEFAULT_AC_ROOT
+    if ac_root is None:
+        ac_root = DEFAULT_AC_ROOT
+    if tests_dir is None:
+        tests_dir = os.path.join(REPO_ROOT, "content", "tests")
+
+    os.makedirs(out_dir, exist_ok=True)
     cache = {}
-    for f in sorted(glob.glob(os.path.join(REPO_ROOT, "content", "tests", "*", "test_*.json"))):
-        t = json.load(open(f, encoding="utf-8"))
+    count = 0
+    test_files = sorted(glob.glob(os.path.join(tests_dir, "*", "test_*.json")))
+    for f in test_files:
+        try:
+            with open(f, "r", encoding="utf-8") as fh:
+                t = json.load(fh)
+        except Exception:
+            continue
         key = (t["track_id"], t.get("track_layout", ""))
         if key not in cache:
-            p = find_spline_file(*key)
+            p = find_spline_file(key[0], key[1], ac_root=ac_root)
             cache[key] = SplineParser(p).waypoints if p else None
         if not cache[key]:
-            print("SKIP", t["test_id"], key); continue
-        with open(os.path.join(OUT_DIR, t["test_id"] + ".svg"), "w", encoding="utf-8") as fh:
+            print("SKIP", t.get("test_id"), key)
+            continue
+        dest_file = os.path.join(out_dir, t["test_id"] + ".svg")
+        with open(dest_file, "w", encoding="utf-8") as fh:
             fh.write(build(t, cache[key]))
+        count += 1
         print("OK", t["test_id"])
+    return count
+
+
+def main():
+    count = generate_maps()
+    print(f"Generated {count} test track map SVGs in {OUT_DIR}")
 
 
 if __name__ == "__main__":

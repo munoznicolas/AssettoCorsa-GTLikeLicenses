@@ -68,6 +68,12 @@ def load_curriculum() -> List[Dict[str, Any]]:
         importlib.reload(mod)
         tests = getattr(mod, var_name, [])
 
+        tests_data = []
+        for idx, t in enumerate(tests, start=1):
+            td = dict(t)
+            td["preview_image"] = f"/content/career/{s_meta['folder']}/event{idx}/preview.png"
+            tests_data.append(td)
+
         # Copy tests to avoid mutating loaded modules directly
         curriculum.append({
             "code": s_meta["code"],
@@ -77,7 +83,7 @@ def load_curriculum() -> List[Dict[str, Any]]:
             "description": s_meta["description"],
             "badge_asset": s_meta["badge_asset"],
             "test_prefix": s_meta["test_prefix"],
-            "tests": [dict(t) for t in tests],
+            "tests": tests_data,
         })
     return curriculum
 
@@ -449,18 +455,38 @@ def clean_stale_tests() -> None:
         filename = f"test_{prefix.lower()}{int(num_str):02d}.json"
         valid_files.add(os.path.normpath(os.path.join(tier_dir, filename)))
 
-    for json_file in glob.glob(os.path.join(REPO_ROOT, "content", "tests", "*", "test_*.json")):
-        norm = os.path.normpath(json_file)
-        if norm not in valid_files and "ghost_" not in os.path.basename(norm):
-            try:
-                os.remove(norm)
-            except OSError:
-                pass
+    # Clean stale career event folders if test counts shrunk
+    import shutil
+    career_root = os.path.join(REPO_ROOT, "content", "career")
+    for s_meta in SERIES_METADATA:
+        series_dir = os.path.join(career_root, s_meta["folder"])
+        if os.path.isdir(series_dir):
+            tier_tests = [t for t in TEST_CATALOG if t["tier"] == s_meta["tier_name"]]
+            max_events = len(tier_tests)
+            for event_dir in glob.glob(os.path.join(series_dir, "event*")):
+                m = re.match(r"event(\d+)$", os.path.basename(event_dir))
+                if m and int(m.group(1)) > max_events:
+                    try:
+                        shutil.rmtree(event_dir)
+                    except OSError:
+                        pass
+
+    # Clean stale SVG maps
+    valid_test_ids = {tdef["test_id"] for tdef in TEST_CATALOG}
+    maps_dir = os.path.join(REPO_ROOT, "docs", "test_maps")
+    if os.path.isdir(maps_dir):
+        for svg_file in glob.glob(os.path.join(maps_dir, "*.svg")):
+            tid = os.path.splitext(os.path.basename(svg_file))[0]
+            if tid not in valid_test_ids:
+                try:
+                    os.remove(svg_file)
+                except OSError:
+                    pass
 
 
 def generate_and_validate(ac_root: str = DEFAULT_AC_ROOT) -> Dict[str, Any]:
     """Runs generation and validation, returning status and reports."""
-    from tools.content.generator import generate_career, generate_tests
+    from tools.content.generator import generate_career, generate_miniatures, generate_tests
     from tools.content.validator import (
         CurriculumValidator,
         DEFAULT_CAREER_DIR,
@@ -473,11 +499,16 @@ def generate_and_validate(ac_root: str = DEFAULT_AC_ROOT) -> Dict[str, Any]:
     # 1. Clean stale files
     clean_stale_tests()
 
-    # 2. Generate tests & career
+    # 2. Generate tests
     generate_tests(ac_root)
+
+    # 3. Generate career structures
     generate_career()
 
-    # 3. Validate
+    # 4. Generate track miniatures directly into career event folders and docs/test_maps
+    miniatures_count = generate_miniatures(ac_root)
+
+    # 5. Validate
     validator = CurriculumValidator(
         schema_path=DEFAULT_SCHEMA_PATH,
         ac_root=ac_root,
@@ -503,6 +534,7 @@ def generate_and_validate(ac_root: str = DEFAULT_AC_ROOT) -> Dict[str, Any]:
     return {
         "success": not report.has_errors,
         "total_files": report.total_files_checked,
+        "miniatures_updated": miniatures_count,
         "passed": report.passed_files,
         "failed": report.failed_files,
         "errors": [

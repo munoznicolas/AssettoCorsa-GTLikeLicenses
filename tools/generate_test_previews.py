@@ -9,6 +9,7 @@ import glob
 import json
 import os
 import sys
+from typing import Dict, Optional
 
 from PIL import Image, ImageDraw
 
@@ -17,10 +18,25 @@ sys.path.insert(0, REPO_ROOT)
 from tools.spline.parser import SplineParser, find_spline_file  # noqa: E402
 from tools.generate_test_maps import sector_indices  # noqa: E402
 
-OUT_DIR = os.path.join(REPO_ROOT, "assets", "previews", "tests")
+CAREER_ROOT = os.path.join(REPO_ROOT, "content", "career")
 W, H, SS = 1024, 576, 2          # output size, supersampling factor
 MARGIN = 0.12                    # empty border around the stretch (fraction)
 MIN_SPAN_M = 120.0               # never zoom closer than this (metres)
+
+
+def build_test_to_event_path_map() -> Dict[str, str]:
+    """
+    Builds a map from test_id (e.g. 'A-2', 'B-1') to its direct career event preview path:
+    e.g. content/career/series_gt_license_a/event2/preview.png
+    """
+    from tools.content.catalog import SERIES_METADATA, TEST_CATALOG
+    mapping = {}
+    for s_meta in SERIES_METADATA:
+        tier_tests = [t for t in TEST_CATALOG if t["tier"] == s_meta["tier_name"]]
+        for idx, tdef in enumerate(tier_tests, start=1):
+            event_preview = os.path.join(CAREER_ROOT, s_meta["folder"], f"event{idx}", "preview.png")
+            mapping[tdef["test_id"]] = event_preview
+    return mapping
 
 
 def render(test, wps):
@@ -69,19 +85,50 @@ def render(test, wps):
     return img.resize((W, H), Image.LANCZOS)
 
 
-def main():
-    os.makedirs(OUT_DIR, exist_ok=True)
+def generate_previews(
+    ac_root: str = None,
+    tests_dir: str = None,
+) -> int:
+    """Generates 1024x576 zoomed track miniature previews directly in career event folders."""
+    from tools.spline.parser import DEFAULT_AC_ROOT
+    if ac_root is None:
+        ac_root = DEFAULT_AC_ROOT
+    if tests_dir is None:
+        tests_dir = os.path.join(REPO_ROOT, "content", "tests")
+
+    test_to_event = build_test_to_event_path_map()
     cache = {}
-    for f in sorted(glob.glob(os.path.join(REPO_ROOT, "content", "tests", "*", "test_*.json"))):
-        t = json.load(open(f, encoding="utf-8"))
+    count = 0
+    test_files = sorted(glob.glob(os.path.join(tests_dir, "*", "test_*.json")))
+    for f in test_files:
+        try:
+            with open(f, "r", encoding="utf-8") as fh:
+                t = json.load(fh)
+        except Exception:
+            continue
+        test_id = t.get("test_id")
+        dest_file = test_to_event.get(test_id)
+        if not dest_file:
+            print("SKIP (no career event mapping)", test_id)
+            continue
+
         key = (t["track_id"], t.get("track_layout", ""))
         if key not in cache:
-            p = find_spline_file(*key)
+            p = find_spline_file(key[0], key[1], ac_root=ac_root)
             cache[key] = SplineParser(p).waypoints if p else None
         if not cache[key]:
-            print("SKIP", t["test_id"], key); continue
-        render(t, cache[key]).save(os.path.join(OUT_DIR, t["test_id"] + ".png"))
-        print("OK", t["test_id"])
+            print("SKIP", test_id, key)
+            continue
+        os.makedirs(os.path.dirname(dest_file), exist_ok=True)
+        render(t, cache[key]).save(dest_file)
+        count += 1
+        print(f"OK {test_id} -> {os.path.relpath(dest_file, REPO_ROOT)}")
+    return count
+
+
+def main():
+    count = generate_previews()
+    print(f"Generated {count} test track preview miniatures in career event folders")
 
 
 if __name__ == "__main__":

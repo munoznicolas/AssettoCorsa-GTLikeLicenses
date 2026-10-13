@@ -26,7 +26,7 @@ from tools.content.catalog import (
     TESTS_BY_TIER,
     TIER_FOLDER_MAP,
 )
-from tools.content.generator import generate_career, generate_tests, main
+from tools.content.generator import generate_career, generate_miniatures, generate_tests, main
 from tools.extract_spline_coords import DEFAULT_AC_ROOT
 
 __all__ = [
@@ -41,6 +41,7 @@ __all__ = [
     "TESTS_BY_ID",
     "TESTS_BY_TIER",
     "generate_tests",
+    "generate_miniatures",
     "generate_career",
     "main",
     "DEFAULT_AC_ROOT",

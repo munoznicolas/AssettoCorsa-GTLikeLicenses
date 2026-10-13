@@ -5,45 +5,45 @@
   "description": "Comprehensive graduation trial connecting all corners cleanly with zero track limit violations.",
   "lesson_objective": "Synthesizing all National B fundamentals across a complete 1,746m lap.",
   "car_id": "ks_toyota_gt86",
-  "track_id": "ks_vallelunga",
-  "track_layout": "club_circuit",
+  "track_id": "magione",
+  "track_layout": "",
   "start_mode": "FLYING_LAP",
   "spawn": {
     "position": [
-      330.346,
-      191.271,
-      215.717
+      -41.375,
+      5.312,
+      -59.372
     ],
     "forward_vector": [
-      -0.9999,
-      -0.0057,
-      0.01
+      -0.5144,
+      -0.0001,
+      -0.8576
     ],
     "initial_speed_kmh": 110.0
   },
   "timing": {
     "start_gate": {
       "p1": [
-        278.614,
-        191.005,
-        214.451
+        -63.294,
+        5.298,
+        -105.267
       ],
       "p2": [
-        278.674,
-        191.005,
-        227.511
+        -72.783,
+        5.298,
+        -99.721
       ]
     },
     "finish_gate": {
       "p1": [
-        282.064,
-        191.024,
-        214.426
+        -61.722,
+        5.296,
+        -102.561
       ],
       "p2": [
-        282.123,
-        191.024,
-        227.486
+        -71.196,
+        5.296,
+        -96.991
       ]
     }
   },

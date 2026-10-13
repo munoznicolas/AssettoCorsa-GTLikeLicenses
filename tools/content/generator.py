@@ -205,22 +205,27 @@ def generate_career() -> None:
             with open(event_ini_path, "w", encoding="utf-8") as f:
                 ecp.write(f, space_around_delimiters=False)
 
-            # Copy event preview image
-            preview_src = os.path.join(REPO_ROOT, "assets", "previews", "tests", f"{tdef['test_id']}.png")
-            if not os.path.isfile(preview_src):
-                preview_src = os.path.join(REPO_ROOT, "assets", "previews", "numbers", f"{idx}.png")
-            preview_dest = os.path.join(event_dir, "preview.png")
-            if os.path.isfile(preview_src):
-                shutil.copyfile(preview_src, preview_dest)
-
         print(f"  + Generated Series: {s_meta['folder']} ({len(tier_tests)} events)")
+
+
+def generate_miniatures(ac_root: str = DEFAULT_AC_ROOT) -> int:
+    """Generates track miniature previews directly in career events and vector maps (SVG)."""
+    print(f"\n[3/4] Generating track miniature previews (PNG) in career folders and vector maps (SVG)...")
+    from tools.generate_test_previews import generate_previews
+    from tools.generate_test_maps import generate_maps
+
+    preview_count = generate_previews(ac_root=ac_root)
+    generate_maps(ac_root=ac_root)
+    print(f"  + Generated {preview_count} track miniatures and maps")
+    return preview_count
 
 
 def main() -> int:
     try:
         generate_tests()
         generate_career()
-        print("\n[3/3] Content generation complete!")
+        generate_miniatures()
+        print("\n[4/4] Content generation complete!")
         return 0
     except Exception as e:
         print(f"\n[ERROR] Generation failed: {e}", file=sys.stderr)
