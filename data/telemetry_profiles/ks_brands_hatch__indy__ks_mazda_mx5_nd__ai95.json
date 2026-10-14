@@ -1,9 +1,9 @@
 {
   "track_id": "ks_brands_hatch",
   "track_layout": "indy",
-  "car_id": "ks_alfa_romeo_4c",
+  "car_id": "ks_mazda_mx5_nd",
   "ai_level": 95,
-  "recorded_at": "2026-10-13T16:52:59.139237+00:00",
+  "recorded_at": "2026-10-14T00:14:15.592119+00:00",
   "source": "spline_calibrated_ai95",
   "total_track_length_m": 1914.2,
   "lap_time_s": 53.04,
