@@ -56,9 +56,9 @@ class TestUIModules(unittest.TestCase):
                 self.assertTrue(w >= 128 and h >= 64, f"{png_name}: dimensions too small ({w}x{h})")
 
     def test_lua_module_contracts(self):
-        # 1. gt_license_hud.lua
-        hud_path = REPO_ROOT / "lua" / "ui" / "gt_license_hud.lua"
-        self.assertTrue(hud_path.is_file(), "Missing gt_license_hud.lua")
+        # 1. license_hud.lua
+        hud_path = REPO_ROOT / "lua" / "ui" / "license_hud.lua"
+        self.assertTrue(hud_path.is_file(), "Missing license_hud.lua")
         hud_code = hud_path.read_text(encoding="utf-8")
         for req in [
             "GTLicenseHUD.STATE",
@@ -77,11 +77,11 @@ class TestUIModules(unittest.TestCase):
             "DISQUALIFIED",
             "START!",
         ]:
-            self.assertIn(req, hud_code, f"gt_license_hud.lua missing requirement: {req}")
+            self.assertIn(req, hud_code, f"license_hud.lua missing requirement: {req}")
 
-        # 2. gt_render_gates.lua
-        render_path = REPO_ROOT / "lua" / "ui" / "gt_render_gates.lua"
-        self.assertTrue(render_path.is_file(), "Missing gt_render_gates.lua")
+        # 2. render_gates.lua
+        render_path = REPO_ROOT / "lua" / "ui" / "render_gates.lua"
+        self.assertTrue(render_path.is_file(), "Missing render_gates.lua")
         render_code = render_path.read_text(encoding="utf-8")
         for req in [
             "render.drawRibbon",
@@ -94,11 +94,11 @@ class TestUIModules(unittest.TestCase):
             "GTRenderGates.drawGuideLine",
             "computeStopBoxCorners",
         ]:
-            self.assertIn(req, render_code, f"gt_render_gates.lua missing requirement: {req}")
+            self.assertIn(req, render_code, f"render_gates.lua missing requirement: {req}")
 
-        # 3. gt_audio_manager.lua
-        audio_path = REPO_ROOT / "lua" / "ui" / "gt_audio_manager.lua"
-        self.assertTrue(audio_path.is_file(), "Missing gt_audio_manager.lua")
+        # 3. audio_manager.lua
+        audio_path = REPO_ROOT / "lua" / "ui" / "audio_manager.lua"
+        self.assertTrue(audio_path.is_file(), "Missing audio_manager.lua")
         audio_code = audio_path.read_text(encoding="utf-8")
         for req in [
             "GTAudioManager.SOUNDS",
@@ -117,23 +117,23 @@ class TestUIModules(unittest.TestCase):
             "pass_fanfare.wav",
             "gold_fanfare.wav",
         ]:
-            self.assertIn(req, audio_code, f"gt_audio_manager.lua missing requirement: {req}")
+            self.assertIn(req, audio_code, f"audio_manager.lua missing requirement: {req}")
 
     def test_ui_screens_modular_contracts(self):
         """Verifies modular widget contracts in lua/ui/screens and common."""
         screens_dir = REPO_ROOT / "lua" / "ui" / "screens"
-        self.assertTrue((screens_dir / "gt_timer_widget.lua").is_file())
+        self.assertTrue((screens_dir / "timer_widget.lua").is_file())
         self.assertFalse((screens_dir / "gt_banner_widget.lua").exists())
         self.assertFalse((screens_dir / "gt_ghost_widget.lua").exists())
-        self.assertTrue((screens_dir / "gt_modal_overlays.lua").is_file())
+        self.assertTrue((screens_dir / "modal_overlays.lua").is_file())
 
-        overlay_file = screens_dir / "gt_modal_overlays.lua"
+        overlay_file = screens_dir / "modal_overlays.lua"
         overlay_code = overlay_file.read_text(encoding="utf-8")
         self.assertIn("RESTART (R)", overlay_code)
         self.assertIn("EXIT (ESC)", overlay_code)
         self.assertNotIn("NEXT EVENT", overlay_code)
 
-        theme_file = REPO_ROOT / "lua" / "ui" / "common" / "gt_ui_theme.lua"
+        theme_file = REPO_ROOT / "lua" / "ui" / "common" / "ui_theme.lua"
         self.assertTrue(theme_file.is_file())
         theme_code = theme_file.read_text(encoding="utf-8")
         for req in ["GTTheme.COLORS", "GTTheme.formatTime", "GTTheme.formatDelta", "GTTheme.evaluateMedal"]:

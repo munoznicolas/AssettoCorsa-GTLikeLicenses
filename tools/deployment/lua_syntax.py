@@ -56,6 +56,6 @@ def check_file(path):
     return True
 
 if __name__ == '__main__':
-    target = sys.argv[1] if len(sys.argv) > 1 else 'lua/ui/gt_license_hud.lua'
+    target = sys.argv[1] if len(sys.argv) > 1 else 'lua/ui/license_hud.lua'
     success = check_file(target)
     sys.exit(0 if success else 1)

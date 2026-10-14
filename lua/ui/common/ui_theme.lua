@@ -6,29 +6,34 @@
 
 local GTTheme = {}
 
+-- Clean color constructor helper
+local function color(r, g, b, a)
+    return (rgbm and rgbm(r, g, b, a)) or nil
+end
+
 -- Color Palette (Gran Turismo aesthetic: White typography with black edges, neutral backdrop)
 GTTheme.COLORS = {
-    BG_DARK       = (rgbm and rgbm(0.04, 0.04, 0.04, 0.85)) or nil,
-    BG_CARD       = (rgbm and rgbm(0.06, 0.06, 0.06, 0.94)) or nil,
-    WHITE         = (rgbm and rgbm(1.00, 1.00, 1.00, 1.00)) or nil,
-    BLACK         = (rgbm and rgbm(0.00, 0.00, 0.00, 1.00)) or nil,
-    OFF_WHITE     = (rgbm and rgbm(0.92, 0.92, 0.92, 0.95)) or nil,
-    GREY_TEXT     = (rgbm and rgbm(0.70, 0.70, 0.70, 0.85)) or nil,
-    BORDER_GREY   = (rgbm and rgbm(0.25, 0.25, 0.25, 0.60)) or nil,
+    BG_DARK       = color(0.04, 0.04, 0.04, 0.85),
+    BG_CARD       = color(0.06, 0.06, 0.06, 0.94),
+    WHITE         = color(1.00, 1.00, 1.00, 1.00),
+    BLACK         = color(0.00, 0.00, 0.00, 1.00),
+    OFF_WHITE     = color(0.92, 0.92, 0.92, 0.95),
+    GREY_TEXT     = color(0.70, 0.70, 0.70, 0.85),
+    BORDER_GREY   = color(0.25, 0.25, 0.25, 0.60),
 
     -- Medal Colors (Accents for icons / indicators)
-    GOLD          = (rgbm and rgbm(1.00, 0.84, 0.00, 1.00)) or nil,
-    GOLD_BG       = (rgbm and rgbm(0.35, 0.28, 0.02, 0.85)) or nil,
-    SILVER        = (rgbm and rgbm(0.85, 0.88, 0.92, 1.00)) or nil,
-    SILVER_BG     = (rgbm and rgbm(0.25, 0.27, 0.30, 0.85)) or nil,
-    BRONZE        = (rgbm and rgbm(0.80, 0.50, 0.20, 1.00)) or nil,
-    BRONZE_BG     = (rgbm and rgbm(0.30, 0.18, 0.08, 0.85)) or nil,
+    GOLD          = color(1.00, 0.84, 0.00, 1.00),
+    GOLD_BG       = color(0.35, 0.28, 0.02, 0.85),
+    SILVER        = color(0.85, 0.88, 0.92, 1.00),
+    SILVER_BG     = color(0.25, 0.27, 0.30, 0.85),
+    BRONZE        = color(0.80, 0.50, 0.20, 1.00),
+    BRONZE_BG     = color(0.30, 0.18, 0.08, 0.85),
 
     -- Status & Alerts
-    FAIL_RED      = (rgbm and rgbm(0.90, 0.12, 0.12, 0.96)) or nil,
-    FAIL_BG       = (rgbm and rgbm(0.50, 0.05, 0.05, 0.92)) or nil,
-    SUCCESS_GREEN = (rgbm and rgbm(0.15, 0.90, 0.35, 1.00)) or nil,
-    WARN_AMBER    = (rgbm and rgbm(1.00, 0.70, 0.10, 1.00)) or nil,
+    FAIL_RED      = color(0.90, 0.12, 0.12, 0.96),
+    FAIL_BG       = color(0.50, 0.05, 0.05, 0.92),
+    SUCCESS_GREEN = color(0.15, 0.90, 0.35, 1.00),
+    WARN_AMBER    = color(1.00, 0.70, 0.10, 1.00),
 }
 
 -- Check if CSP DirectWrite font subsystem is available
@@ -70,7 +75,7 @@ function GTTheme.evaluateMedal(time, targets)
     return nil
 end
 
---- Fallback: 8-directional ImGui outline
+--- Fallback: 4-cardinal ImGui outline (optimized from 8-directional to cut draw calls by 50%)
 function GTTheme.drawTextOutlinedFallback(text, pos, textColor, outlineColor, thickness)
     if not text or text == "" or not ui then return end
     local col = textColor or GTTheme.COLORS.WHITE
@@ -81,14 +86,10 @@ function GTTheme.drawTextOutlinedFallback(text, pos, textColor, outlineColor, th
     ui.drawText(text, vec2(pos.x + t, pos.y), oCol)
     ui.drawText(text, vec2(pos.x, pos.y - t), oCol)
     ui.drawText(text, vec2(pos.x, pos.y + t), oCol)
-    ui.drawText(text, vec2(pos.x - t, pos.y - t), oCol)
-    ui.drawText(text, vec2(pos.x + t, pos.y - t), oCol)
-    ui.drawText(text, vec2(pos.x - t, pos.y + t), oCol)
-    ui.drawText(text, vec2(pos.x + t, pos.y + t), oCol)
     ui.drawText(text, pos, col)
 end
 
---- Fallback: 8-directional ImGui clipped outline
+--- Fallback: 4-cardinal ImGui clipped outline (optimized from 8-directional)
 function GTTheme.drawTextClippedOutlinedFallback(text, posMin, posMax, textColor, alignment, outlineColor, thickness)
     if not text or text == "" or not ui then return end
     local col = textColor or GTTheme.COLORS.WHITE
@@ -100,10 +101,6 @@ function GTTheme.drawTextClippedOutlinedFallback(text, posMin, posMax, textColor
     ui.drawTextClipped(text, posMin + vec2(t, 0), posMax + vec2(t, 0), oCol, align)
     ui.drawTextClipped(text, posMin + vec2(0, -t), posMax + vec2(0, -t), oCol, align)
     ui.drawTextClipped(text, posMin + vec2(0, t), posMax + vec2(0, t), oCol, align)
-    ui.drawTextClipped(text, posMin + vec2(-t, -t), posMax + vec2(-t, -t), oCol, align)
-    ui.drawTextClipped(text, posMin + vec2(t, -t), posMax + vec2(t, -t), oCol, align)
-    ui.drawTextClipped(text, posMin + vec2(-t, t), posMax + vec2(-t, t), oCol, align)
-    ui.drawTextClipped(text, posMin + vec2(t, t), posMax + vec2(t, t), oCol, align)
     ui.drawTextClipped(text, posMin, posMax, col, align)
 end
 

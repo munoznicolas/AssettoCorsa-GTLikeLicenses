@@ -18,6 +18,7 @@ GTAudioManager.SOUNDS = {
 local masterVolume = 1.0
 local audioBasePath = ""
 local soundCache = {}
+local audioEventCache = {}
 
 -- Debounce tracking to prevent repeated audio spamming
 local lastState = nil
@@ -25,19 +26,32 @@ local lastPlayedBeep = nil
 local hasPlayedPass = false
 local hasPlayedFail = false
 
+--- Play or trigger an AudioEvent from file with event caching
+local function playAudioEvent(path, volume, pitch)
+    local ev = audioEventCache[path]
+    if not ev and ac and ac.AudioEvent and ac.AudioEvent.fromFile then
+        local ok, res = pcall(function()
+            return ac.AudioEvent.fromFile({ filename = path, use3D = false, loop = false })
+        end)
+        if ok and res then
+            ev = res
+            audioEventCache[path] = ev
+        end
+    end
+
+    if ev then
+        if ev.setVolume then ev:setVolume(volume) end
+        if ev.setPitch then ev:setPitch(pitch) end
+        ev:start()
+        return true
+    end
+    return false
+end
+
 -- Polyfill ui.playSound if not natively exposed by current CSP build
 if ui and ui.playSound == nil then
     ui.playSound = function(filepath, volume, pitch)
-        if ac and ac.AudioEvent and ac.AudioEvent.fromFile then
-            pcall(function()
-                local ev = ac.AudioEvent.fromFile({ filename = filepath, use3D = false, loop = false })
-                if ev then
-                    if volume and ev.setVolume then ev:setVolume(volume) end
-                    if pitch and ev.setPitch then ev:setPitch(pitch) end
-                    ev:start()
-                end
-            end)
-        end
+        playAudioEvent(filepath, volume or 1.0, pitch or 1.0)
     end
 end
 
@@ -53,10 +67,17 @@ local function resolveSoundPath(filename)
         "assets/audio/" .. filename,
     }
 
-    if ac and ac.getFolder and ac.FolderID and ac.FolderID.ExtScript then
-        local scriptDir = ac.getFolder(ac.FolderID.ExtScript)
-        table.insert(candidates, scriptDir .. "/assets/audio/" .. filename)
-        table.insert(candidates, scriptDir .. "/audio/" .. filename)
+    if ac and ac.getFolder and ac.FolderID then
+        if ac.FolderID.ScriptOrigin then
+            local scriptOrigin = ac.getFolder(ac.FolderID.ScriptOrigin)
+            table.insert(candidates, scriptOrigin .. "/assets/audio/" .. filename)
+            table.insert(candidates, scriptOrigin .. "/audio/" .. filename)
+        end
+        if ac.FolderID.Root then
+            local acRoot = ac.getFolder(ac.FolderID.Root)
+            table.insert(candidates, acRoot .. "/extension/lua/new-modes/gt-license/assets/audio/" .. filename)
+            table.insert(candidates, acRoot .. "/content/tracks/common/audio/" .. filename)
+        end
     end
 
     -- Default fallback is the configured base path or relative asset path
@@ -74,7 +95,7 @@ local function resolveSoundPath(filename)
     return resolved
 end
 
---- Internal playback wrapper invoking ui.playSound()
+--- Internal playback wrapper invoking ui.playSound() or AudioEvent cache
 local function play(soundName, volume, pitch)
     local path = resolveSoundPath(soundName)
     local finalVol = (volume or 1.0) * masterVolume
@@ -86,14 +107,7 @@ local function play(soundName, volume, pitch)
             ac.log("GTAudioManager ui.playSound failed: " .. tostring(err))
         end
     elseif ac and ac.AudioEvent and ac.AudioEvent.fromFile then
-        pcall(function()
-            local ev = ac.AudioEvent.fromFile({ filename = path, use3D = false, loop = false })
-            if ev then
-                if ev.setVolume then ev:setVolume(finalVol) end
-                if ev.setPitch then ev:setPitch(finalPitch) end
-                ev:start()
-            end
-        end)
+        playAudioEvent(path, finalVol, finalPitch)
     end
 end
 
@@ -102,8 +116,8 @@ end
 function GTAudioManager.init(customBasePath)
     if customBasePath and customBasePath ~= "" then
         audioBasePath = customBasePath
-    elseif ac and ac.getFolder and ac.FolderID and ac.FolderID.ExtScript then
-        audioBasePath = ac.getFolder(ac.FolderID.ExtScript)
+    elseif ac and ac.getFolder and ac.FolderID and ac.FolderID.ScriptOrigin then
+        audioBasePath = ac.getFolder(ac.FolderID.ScriptOrigin)
     else
         audioBasePath = "."
     end

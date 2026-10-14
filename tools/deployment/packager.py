@@ -19,9 +19,9 @@ Archive Topology:
             gt_adjudicator.lua
             gt_session_reset.lua
           ui/
-            gt_license_hud.lua
-            gt_render_gates.lua
-            gt_audio_manager.lua
+            license_hud.lua
+            render_gates.lua
+            audio_manager.lua
           data/
             tests/
               national_b/
@@ -77,9 +77,9 @@ DEFAULT_SCENARIO_LUA = """-- ===================================================
 -- ==============================================================================
 
 local engine = require("engine/license_engine")
-require("ui/gt_license_hud")
-require("ui/gt_render_gates")
-require("ui/gt_audio_manager")
+require("ui/license_hud")
+require("ui/render_gates")
+require("ui/audio_manager")
 
 return engine
 """

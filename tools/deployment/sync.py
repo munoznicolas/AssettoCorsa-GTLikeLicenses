@@ -43,9 +43,9 @@ DEFAULT_SCENARIO_LUA = """-- ===================================================
 -- ==============================================================================
 
 local engine = require("engine/license_engine")
-require("ui/gt_license_hud")
-require("ui/gt_render_gates")
-require("ui/gt_audio_manager")
+require("ui/license_hud")
+require("ui/render_gates")
+require("ui/audio_manager")
 
 return engine
 """

@@ -6,9 +6,43 @@
     3. Celebratory Results Screen with medal awards card and action buttons
 ]]
 
-local Theme = require("ui/common/gt_ui_theme")
+local ok, Theme = pcall(require, "ui/common/ui_theme")
+if not ok or not Theme then
+    Theme = require("ui/common/gt_ui_theme")
+end
 
 local GTModalOverlays = {}
+
+--- Reusable Gran Turismo styled interactive button
+local function drawGTButton(label, p1, p2, style, onClick, uiState)
+    local isHovered = false
+    if uiState and uiState.mousePos then
+        local mPos = uiState.mousePos
+        if mPos.x >= p1.x and mPos.x <= p2.x and mPos.y >= p1.y and mPos.y <= p2.y then
+            isHovered = true
+            if uiState.isMouseLeftKeyClicked and onClick then
+                onClick()
+            end
+        end
+    end
+
+    if ui and ui.drawRectFilled then
+        local bg = isHovered and (style.bgHover or rgbm(0.28, 0.28, 0.28, 0.95)) or (style.bg or rgbm(0.18, 0.18, 0.18, 0.8))
+        local border = isHovered and (style.borderHover or rgbm(0.9, 0.9, 0.9, 1.0)) or (style.border or Theme.COLORS.BORDER_GREY)
+        ui.drawRectFilled(p1, p2, bg, 4)
+        if ui.drawRect and ui.CornerFlags then
+            ui.drawRect(p1, p2, border, 4, ui.CornerFlags.All, 1.2)
+        end
+    end
+
+    local hAlign = (ui and ui.Alignment and ui.Alignment.Center) or 0
+    local vAlign = (ui and ui.Alignment and ui.Alignment.Center) or 0
+    local fontSize = style.fontSize or 14
+    local textColor = isHovered and (style.textHover or Theme.COLORS.WHITE) or (style.text or Theme.COLORS.WHITE)
+    Theme.drawGTTextClipped(label, fontSize, p1, p2, hAlign, vAlign, textColor, "Regular")
+
+    return isHovered
+end
 
 --------------------------------------------------------------------------------
 -- 1. CENTER COUNTDOWN (3 - 2 - 1 - START!)
@@ -83,30 +117,16 @@ function GTModalOverlays.drawDisqualifiedBanner(screenW, screenH, failReason, ca
     local btnY = p1.y + 110
     local btnP1 = vec2(btnX, btnY)
     local btnP2 = btnP1 + vec2(btnW, btnH)
-
-    -- Click Detection for interactive mouse control
     local uiState = ac and ac.getUI and ac.getUI()
-    local isHovered = false
-    if uiState and uiState.mousePos then
-        local mPos = uiState.mousePos
-        if mPos.x >= btnP1.x and mPos.x <= btnP2.x and mPos.y >= btnP1.y and mPos.y <= btnP2.y then
-            isHovered = true
-            if uiState.isMouseLeftKeyClicked and callbacks and callbacks.onRestart then
-                callbacks.onRestart()
-            end
-        end
-    end
 
-    if ui and ui.drawRectFilled then
-        local btnBg = isHovered and rgbm(0.35, 0.10, 0.10, 0.95) or rgbm(0.20, 0.06, 0.06, 0.85)
-        local btnBorder = isHovered and rgbm(1.0, 0.4, 0.4, 1.0) or Theme.COLORS.BORDER_GREY
-        ui.drawRectFilled(btnP1, btnP2, btnBg, 4)
-        if ui.drawRect and ui.CornerFlags then
-            ui.drawRect(btnP1, btnP2, btnBorder, 4, ui.CornerFlags.All, 1.2)
-        end
-    end
-
-    Theme.drawGTTextClipped("RETRY  (R)", 15, btnP1, btnP2, hAlign, vAlign, Theme.COLORS.WHITE, "Regular")
+    local failBtnStyle = {
+        bg = rgbm(0.20, 0.06, 0.06, 0.85),
+        bgHover = rgbm(0.35, 0.10, 0.10, 0.95),
+        border = Theme.COLORS.BORDER_GREY,
+        borderHover = rgbm(1.0, 0.4, 0.4, 1.0),
+        fontSize = 15,
+    }
+    drawGTButton("RETRY  (R)", btnP1, btnP2, failBtnStyle, callbacks and callbacks.onRestart, uiState)
 
     -- Prompt to Retry via Hotkey / Gamepad
     Theme.drawGTTextClipped("PRESS  [ R ],  [ ENTER ],  [ SPACE ]  OR  CLICK  TO  RETRY", 13, p1 + vec2(0, 152), vec2(screenW, p1.y + 174), hAlign, vAlign, Theme.COLORS.OFF_WHITE, "Regular")
@@ -222,35 +242,26 @@ function GTModalOverlays.drawResultsScreen(screenW, screenH, finalTime, targets,
     local b2P1 = vec2(startBtnX + btnW + btnSpacing, btnY)
     local b2P2 = b2P1 + vec2(btnW, btnH)
 
-    -- Mouse Hover Detection
+    -- Mouse Hover & Interaction
     local uiState = ac and ac.getUI and ac.getUI()
-    local mPos = uiState and uiState.mousePos
-    local isB1Hovered = mPos and (mPos.x >= b1P1.x and mPos.x <= b1P2.x and mPos.y >= b1P1.y and mPos.y <= b1P2.y)
-    local isB2Hovered = mPos and (mPos.x >= b2P1.x and mPos.x <= b2P2.x and mPos.y >= b2P1.y and mPos.y <= b2P2.y)
 
-    if ui and ui.drawRectFilled and ui.CornerFlags then
-        local b1Bg = isB1Hovered and rgbm(0.28, 0.28, 0.28, 0.95) or rgbm(0.18, 0.18, 0.18, 0.8)
-        local b1Border = isB1Hovered and rgbm(0.9, 0.9, 0.9, 1.0) or Theme.COLORS.BORDER_GREY
-        ui.drawRectFilled(b1P1, b1P2, b1Bg, 4)
-        ui.drawRect(b1P1, b1P2, b1Border, 4, ui.CornerFlags.All, 1)
+    local btnStyle1 = {
+        bg = rgbm(0.18, 0.18, 0.18, 0.80),
+        bgHover = rgbm(0.28, 0.28, 0.28, 0.95),
+        border = Theme.COLORS.BORDER_GREY,
+        borderHover = rgbm(0.90, 0.90, 0.90, 1.00),
+        fontSize = 14,
+    }
+    local btnStyle2 = {
+        bg = rgbm(0.15, 0.15, 0.15, 0.80),
+        bgHover = rgbm(0.25, 0.25, 0.25, 0.95),
+        border = Theme.COLORS.BORDER_GREY,
+        borderHover = rgbm(0.90, 0.90, 0.90, 1.00),
+        fontSize = 14,
+    }
 
-        local b2Bg = isB2Hovered and rgbm(0.25, 0.25, 0.25, 0.95) or rgbm(0.15, 0.15, 0.15, 0.8)
-        local b2Border = isB2Hovered and rgbm(0.9, 0.9, 0.9, 1.0) or Theme.COLORS.BORDER_GREY
-        ui.drawRectFilled(b2P1, b2P2, b2Bg, 4)
-        ui.drawRect(b2P1, b2P2, b2Border, 4, ui.CornerFlags.All, 1)
-    end
-
-    Theme.drawGTTextClipped("RESTART (R)", 14, b1P1, b1P2, hCenter, vCenter, Theme.COLORS.WHITE, "Regular")
-    Theme.drawGTTextClipped("EXIT (ESC)", 14, b2P1, b2P2, hCenter, vCenter, Theme.COLORS.WHITE, "Regular")
-
-    -- Click Detection for interactive mouse control
-    if uiState and uiState.isMouseLeftKeyClicked and callbacks then
-        if isB1Hovered and callbacks.onRestart then
-            callbacks.onRestart()
-        elseif isB2Hovered and callbacks.onExit then
-            callbacks.onExit()
-        end
-    end
+    drawGTButton("RESTART (R)", b1P1, b1P2, btnStyle1, callbacks and callbacks.onRestart, uiState)
+    drawGTButton("EXIT (ESC)", b2P1, b2P2, btnStyle2, callbacks and callbacks.onExit, uiState)
 end
 
 return GTModalOverlays

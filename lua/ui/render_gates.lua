@@ -87,7 +87,16 @@ local currentConfig = nil
 local animTimer = 0
 local cachedStartPoints = nil
 local cachedFinishPoints = nil
+local cachedFinishSegments = nil
+local cachedFinishOuter1 = nil
+local cachedFinishOuter2 = nil
+local cachedFinishPylons = nil
+local cachedFinishOverhead = nil
 local cachedStopBoxCorners = nil
+local cachedStopBoxPerimeter = nil
+local cachedStopBoxPylons = nil
+local cachedStopBoxHatch1 = nil
+local cachedStopBoxHatch2 = nil
 local cachedGuideLine = nil
 
 local function safeRequire(name)
@@ -141,13 +150,55 @@ local function computeStopBoxCorners(center, size, rotationDeg)
     return corners
 end
 
+--- Accurate 2D Rotated Oriented Bounding Box containment test (matching Adjudicator.isInsideStopBox)
+local function isCarInsideBox(carPos, center, size, rotDeg)
+    if not carPos or not center or not size then return false end
+    local px = carPos.x or carPos[1]
+    local py = carPos.y or carPos[2]
+    local pz = carPos.z or carPos[3]
+    local cx = center.x or center[1]
+    local cy = center.y or center[2]
+    local cz = center.z or center[3]
+    local sx = size.x or size[1] or 4.5
+    local sy = size.y or size[2] or 2.0
+    local sz = size.z or size[3] or size.y or size[2] or 14.0
+
+    -- Height containment check (+- 4.0m vertical window)
+    if math.abs(py - cy) > (sy * 0.5 + 4.0) then
+        return false
+    end
+
+    -- Translation relative to box center
+    local dx = px - cx
+    local dz = pz - cz
+
+    -- 2D rotation around Y axis
+    local rad = math.rad(-(rotDeg or 0))
+    local cosR = math.cos(rad)
+    local sinR = math.sin(rad)
+
+    local localX = dx * cosR - dz * sinR
+    local localZ = dx * sinR + dz * cosR
+
+    return (math.abs(localX) <= sx * 0.5) and (math.abs(localZ) <= sz * 0.5)
+end
+
 --- Initialize or update gate geometries from active test configuration
 --- @param testConfig table Test JSON definition adhering to schema
 function GTRenderGates.init(testConfig)
     currentConfig = testConfig
     cachedStartPoints = nil
     cachedFinishPoints = nil
+    cachedFinishSegments = nil
+    cachedFinishOuter1 = nil
+    cachedFinishOuter2 = nil
+    cachedFinishPylons = nil
+    cachedFinishOverhead = nil
     cachedStopBoxCorners = nil
+    cachedStopBoxPerimeter = nil
+    cachedStopBoxPylons = nil
+    cachedStopBoxHatch1 = nil
+    cachedStopBoxHatch2 = nil
     cachedGuideLine = nil
     animTimer = 0
 
@@ -164,17 +215,85 @@ function GTRenderGates.init(testConfig)
     end
 
     if timing.finish_gate then
-        cachedFinishPoints = {
-            p1 = toVec3(timing.finish_gate.p1),
-            p2 = toVec3(timing.finish_gate.p2),
-        }
+        local p1 = toVec3(timing.finish_gate.p1)
+        local p2 = toVec3(timing.finish_gate.p2)
+        cachedFinishPoints = { p1 = p1, p2 = p2 }
+
+        local gateWidth = (p2 - p1):length()
+        if gateWidth >= 0.1 then
+            local gateDir = (p2 - p1):normalize()
+            local gateNormal = gateDir:cross(vec3(0, 1, 0)):normalize()
+
+            -- Pre-cache chequered ribbon segments to avoid per-frame table allocations
+            cachedFinishSegments = {}
+            local numSegments = math.max(6, math.floor(gateWidth / 1.0))
+            local step = (p2 - p1) / numSegments
+
+            for seg = 0, numSegments - 1 do
+                local segA = p1 + step * seg
+                local segB = p1 + step * (seg + 1)
+                local isWhite = (seg % 2 == 0)
+                local segCol = isWhite and rgbm(1.0, 1.0, 1.0, 0.9) or rgbm(0.1, 0.1, 0.1, 0.9)
+                table.insert(cachedFinishSegments, {
+                    pts = {
+                        segA + vec3(0, 0.05, 0),
+                        segB + vec3(0, 0.05, 0),
+                    },
+                    color = segCol,
+                })
+            end
+
+            -- Pre-cache outer glowing polylines
+            cachedFinishOuter1 = {
+                p1 - gateNormal * 0.5 + vec3(0, 0.06, 0),
+                p2 - gateNormal * 0.5 + vec3(0, 0.06, 0),
+            }
+            cachedFinishOuter2 = {
+                p1 + gateNormal * 0.5 + vec3(0, 0.06, 0),
+                p2 + gateNormal * 0.5 + vec3(0, 0.06, 0),
+            }
+
+            -- Pre-cache vertical beam pillars & overhead banner
+            local pylonHeight = vec3(0, 3.8, 0)
+            cachedFinishPylons = {
+                p1 = p1,
+                top1 = p1 + pylonHeight,
+                p2 = p2,
+                top2 = p2 + pylonHeight,
+            }
+            cachedFinishOverhead = {
+                p1 + pylonHeight,
+                p2 + pylonHeight,
+            }
+        end
     end
 
     if timing.stop_box and timing.stop_box.center then
         local center = toVec3(timing.stop_box.center)
         local size = timing.stop_box.size or { 4.5, 14.0, 1.0 }
         local rot = timing.stop_box.rotation_deg or 0
-        cachedStopBoxCorners = computeStopBoxCorners(center, size, rot)
+        local corners = computeStopBoxCorners(center, size, rot)
+        cachedStopBoxCorners = corners
+
+        cachedStopBoxPerimeter = {
+            corners[1],
+            corners[2],
+            corners[3],
+            corners[4],
+            corners[1],
+        }
+
+        local cornerHeight = vec3(0, 1.2, 0)
+        cachedStopBoxPylons = {}
+        for i = 1, 4 do
+            cachedStopBoxPylons[i] = {
+                base = corners[i],
+                top = corners[i] + cornerHeight,
+            }
+        end
+
+        cachedStopBoxHatch1 = { corners[1], corners[3] }
+        cachedStopBoxHatch2 = { corners[2], corners[4] }
     end
 
     -- Precompute guide line points only if explicit guide spline waypoints exist
@@ -186,72 +305,49 @@ function GTRenderGates.init(testConfig)
     end
 end
 
---- Draw Glowing Start Line Ribbon and Laser Pylons (Disabled: wireframe removed, finish gate only)
+--- Draw Glowing Start Line Ribbon (Retained for API contract; start line visuals are handled via spawn & countdown HUD)
 function GTRenderGates.drawStartGate(pulse)
-    -- Start gate visual wireframe removed per user preference; only finish gate is rendered at the end
+    -- Start gate visual wireframe intentionally omitted per Gran Turismo presentation standards;
+    -- vehicle spawn orientation and the countdown sequence define the start.
     return
 end
 
 --- Draw Chequered Finish Line Ribbon and Finish Banner
 function GTRenderGates.drawFinishGate(pulse)
-    if not cachedFinishPoints then return end
-    local p1 = cachedFinishPoints.p1
-    local p2 = cachedFinishPoints.p2
-    local gateWidth = (p2 - p1):length()
-    if gateWidth < 0.1 then return end
+    if not cachedFinishSegments or not cachedFinishPylons then return end
 
-    local gateDir = (p2 - p1):normalize()
-    local gateNormal = gateDir:cross(vec3(0, 1, 0)):normalize()
-
-    -- Chequered finish ribbon on road surface
-    local numSegments = math.max(6, math.floor(gateWidth / 1.0))
-    local step = (p2 - p1) / numSegments
-
-    for seg = 0, numSegments - 1 do
-        local segA = p1 + step * seg
-        local segB = p1 + step * (seg + 1)
-        local isWhite = (seg % 2 == 0)
-        local segCol = isWhite and rgbm(1.0, 1.0, 1.0, 0.9) or rgbm(0.1, 0.1, 0.1, 0.9)
-        local segPts = {
-            segA + vec3(0, 0.05, 0),
-            segB + vec3(0, 0.05, 0),
-        }
-        render.drawRibbon(segPts, 1.0, segCol)
+    -- Pre-cached chequered finish ribbon on road surface (zero allocations per frame)
+    for _, seg in ipairs(cachedFinishSegments) do
+        render.drawRibbon(seg.pts, 1.0, seg.color)
     end
 
     -- Bright neon red/gold finish line outer boundary
     local finishGlow = rgbm(1.0, 0.2, 0.2, 0.7 + 0.25 * pulse)
-    render.polyline({
-        p1 - gateNormal * 0.5 + vec3(0, 0.06, 0),
-        p2 - gateNormal * 0.5 + vec3(0, 0.06, 0),
-    }, finishGlow, 0.06)
-    render.polyline({
-        p1 + gateNormal * 0.5 + vec3(0, 0.06, 0),
-        p2 + gateNormal * 0.5 + vec3(0, 0.06, 0),
-    }, finishGlow, 0.06)
+    if cachedFinishOuter1 and cachedFinishOuter2 then
+        render.polyline(cachedFinishOuter1, finishGlow, 0.06)
+        render.polyline(cachedFinishOuter2, finishGlow, 0.06)
+    end
 
     -- Vertical finish beam pillars
-    local pylonHeight = vec3(0, 3.8, 0)
-    render.debugLine(p1, p1 + pylonHeight, rgbm(1, 0.3, 0.3, 1), rgbm(1, 1, 1, 1))
-    render.debugLine(p2, p2 + pylonHeight, rgbm(1, 0.3, 0.3, 1), rgbm(1, 1, 1, 1))
-    render.debugSphere(p1 + pylonHeight, 0.25, finishGlow)
-    render.debugSphere(p2 + pylonHeight, 0.25, finishGlow)
+    local pylons = cachedFinishPylons
+    render.debugLine(pylons.p1, pylons.top1, rgbm(1, 0.3, 0.3, 1), rgbm(1, 1, 1, 1))
+    render.debugLine(pylons.p2, pylons.top2, rgbm(1, 0.3, 0.3, 1), rgbm(1, 1, 1, 1))
+    render.debugSphere(pylons.top1, 0.25, finishGlow)
+    render.debugSphere(pylons.top2, 0.25, finishGlow)
 
     -- Overhead ribbon connecting finish pylons
-    local overheadPts = {
-        p1 + pylonHeight,
-        p2 + pylonHeight,
-    }
-    render.drawRibbon(overheadPts, 0.5, rgbm(1.0, 0.15, 0.15, 0.85))
+    if cachedFinishOverhead then
+        render.drawRibbon(cachedFinishOverhead, 0.5, rgbm(1.0, 0.15, 0.15, 0.85))
+    end
 end
 
 --- Draw Stop-Box Perimeter Boundary with Dynamic State Feedback
+--- @param pulse number Oscillating pulse factor
 --- @param carPos vec3? Player car position
 --- @param carSpeedKmh number? Player car speed in km/h
 --- @param isDisqualified boolean?
 function GTRenderGates.drawStopBox(pulse, carPos, carSpeedKmh, isDisqualified)
-    if not cachedStopBoxCorners or #cachedStopBoxCorners < 4 then return end
-    local corners = cachedStopBoxCorners
+    if not cachedStopBoxCorners or not cachedStopBoxPerimeter then return end
 
     -- Dynamic feedback colors:
     -- Default/Approaching: Amber / High-contrast caution yellow
@@ -263,9 +359,11 @@ function GTRenderGates.drawStopBox(pulse, carPos, carSpeedKmh, isDisqualified)
     if carPos and currentConfig and currentConfig.timing and currentConfig.timing.stop_box then
         local sb = currentConfig.timing.stop_box
         local center = toVec3(sb.center)
-        local dist = (vec3(carPos.x, center.y, carPos.z) - center):length()
-        local maxRadius = ((sb.size and (sb.size[1] or sb.size.x)) or 6.0) + ((sb.size and (sb.size[2] or sb.size.y)) or 14.0) * 0.5
-        if dist < maxRadius then
+        local size = sb.size or { 4.5, 14.0, 1.0 }
+        local rot = sb.rotation_deg or 0
+
+        -- Authoritative 2D rotated OBB containment check matching physics adjudication
+        if isCarInsideBox(carPos, center, size, rot) then
             isInside = true
             if (carSpeedKmh or 0) < 0.5 then
                 boxColor = rgbm(0.1, 1.0, 0.3, 0.95) -- Success green!
@@ -280,29 +378,23 @@ function GTRenderGates.drawStopBox(pulse, carPos, carSpeedKmh, isDisqualified)
     end
 
     -- Draw perimeter boundary using render.polyline
-    local perimeter = {
-        corners[1],
-        corners[2],
-        corners[3],
-        corners[4],
-        corners[1], -- Close the loop
-    }
-    render.polyline(perimeter, boxColor, 0.1)
+    render.polyline(cachedStopBoxPerimeter, boxColor, 0.1)
 
     -- Draw corner markers (neon vertical pylons)
-    local cornerHeight = vec3(0, 1.2, 0)
-    for i = 1, 4 do
-        local c = corners[i]
-        render.debugLine(c, c + cornerHeight, boxColor, boxColor)
-        render.debugSphere(c + cornerHeight, 0.12, boxColor)
+    if cachedStopBoxPylons then
+        for i = 1, 4 do
+            local p = cachedStopBoxPylons[i]
+            render.debugLine(p.base, p.top, boxColor, boxColor)
+            render.debugSphere(p.top, 0.12, boxColor)
+        end
     end
 
     -- Diagonal caution warning stripes inside the stop box
-    local hatchPts1 = { corners[1], corners[3] }
-    local hatchPts2 = { corners[2], corners[4] }
-    local hatchCol = rgbm(boxColor.r, boxColor.g, boxColor.b, 0.35)
-    render.polyline(hatchPts1, hatchCol, 0.05)
-    render.polyline(hatchPts2, hatchCol, 0.05)
+    if cachedStopBoxHatch1 and cachedStopBoxHatch2 then
+        local hatchCol = rgbm(boxColor.r, boxColor.g, boxColor.b, 0.35)
+        render.polyline(cachedStopBoxHatch1, hatchCol, 0.05)
+        render.polyline(cachedStopBoxHatch2, hatchCol, 0.05)
+    end
 end
 
 --- Draw Ideal Racing Guide Line Ribbon on Track Surface

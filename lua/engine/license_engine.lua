@@ -47,9 +47,9 @@ local function tryRequireUI(name)
   return nil
 end
 
-local GTLicenseHUD   = tryRequireUI("gt_license_hud")
-local GTRenderGates  = tryRequireUI("gt_render_gates")
-local GTAudioManager = tryRequireUI("gt_audio_manager")
+local GTLicenseHUD   = tryRequireUI("license_hud") or tryRequireUI("gt_license_hud")
+local GTRenderGates  = tryRequireUI("render_gates") or tryRequireUI("gt_render_gates")
+local GTAudioManager = tryRequireUI("audio_manager") or tryRequireUI("gt_audio_manager")
 
 local LicenseShared = nil
 pcall(function() LicenseShared = require("engine/shared_state") end)

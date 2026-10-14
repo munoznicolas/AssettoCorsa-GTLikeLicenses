@@ -6,5 +6,5 @@ Shared theme palettes, typography helpers, and formatting utilities across the G
 ## Module Catalog
 | Script | Module | Description |
 | :--- | :--- | :--- |
-| [`gt_ui_theme.lua`](file:///d:/Repositories/AssettoCorsa-GTLikeLicenses/lua/ui/common/gt_ui_theme.lua) | `GTTheme` | Gran Turismo 7 DirectWrite paired outline typography (`MyTimingFontOutline` / `MyTimingFont`), color constants (`COLORS`), and lap time formatting (`formatTime`, `formatDelta`, `evaluateMedal`). |
+| [`ui_theme.lua`](file:///d:/Repositories/AssettoCorsa-GTLikeLicenses/lua/ui/common/ui_theme.lua) | `GTTheme` | Gran Turismo 7 DirectWrite paired outline typography (`MyTimingFontOutline` / `MyTimingFont`), color constants (`COLORS`), and lap time formatting (`formatTime`, `formatDelta`, `evaluateMedal`). |
 

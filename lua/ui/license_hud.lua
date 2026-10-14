@@ -5,9 +5,19 @@
     Modal Overlays: 3-2-1-START! countdown, DISQUALIFIED banner, and results screen.
 ]]
 
-local Theme           = require("ui/common/gt_ui_theme")
-local GTTimerWidget   = require("ui/screens/gt_timer_widget")
-local GTModalOverlays = require("ui/screens/gt_modal_overlays")
+local function safeRequireUI(primary, fallback)
+    local ok, mod = pcall(require, primary)
+    if ok then return mod end
+    if fallback then
+        ok, mod = pcall(require, fallback)
+        if ok then return mod end
+    end
+    error("Failed to load required UI module: " .. primary)
+end
+
+local Theme           = safeRequireUI("ui/common/ui_theme", "ui/common/gt_ui_theme")
+local GTTimerWidget   = safeRequireUI("ui/screens/timer_widget", "ui/screens/gt_timer_widget")
+local GTModalOverlays = safeRequireUI("ui/screens/modal_overlays", "ui/screens/gt_modal_overlays")
 local SharedState = nil
 pcall(function() SharedState = require("engine/shared_state") end)
 if not SharedState then
