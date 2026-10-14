@@ -163,6 +163,56 @@ def save_tier_catalog(tier_name: str, tests: List[Dict[str, Any]]) -> str:
     for idx, t in enumerate(tests, start=1):
         t["test_id"] = f"{prefix}{idx}"
 
+        start_mode = str(t.get("start_mode", "STANDING")).upper()
+        if start_mode == "STANDING":
+            t["speed"] = 0.0
+            t["spawn_offset"] = 0.0
+            t.pop("gear", None)
+            t.pop("rpm", None)
+            if "spawn" in t and isinstance(t["spawn"], dict):
+                t["spawn"]["initial_speed_kmh"] = 0.0
+                t["spawn"]["spawn_offset_m"] = 0.0
+                t["spawn"].pop("initial_gear", None)
+                t["spawn"].pop("initial_rpm", None)
+        else:
+            speed = float(t.get("speed") or 0.0)
+            if speed <= 0.0 or not t.get("gear"):
+                try:
+                    from tools.telemetry.recorder import get_or_calculate_initial_physics
+                    phys = get_or_calculate_initial_physics(
+                        track_id=t.get("track_id", ""),
+                        track_layout=t.get("track_layout", ""),
+                        car_id=t.get("car_id", ""),
+                        start_s=float(t.get("start_s", 0.0)),
+                        countdown_sec=3.0,
+                        allow_live_engine=False,
+                    )
+                    if phys:
+                        if speed <= 0.0:
+                            t["speed"] = round(float(phys.get("speed_kmh", 75.0)), 1)
+                            t["spawn_offset"] = round(float(phys.get("spawn_offset_m", 62.5)), 1)
+                        if not t.get("gear") and phys.get("gear"):
+                            t["gear"] = int(phys["gear"])
+                        if not t.get("rpm") and phys.get("rpm"):
+                            t["rpm"] = int(phys["rpm"])
+                except Exception:
+                    pass
+
+            if float(t.get("speed") or 0.0) <= 0.0:
+                t["speed"] = 140.0 if start_mode == "FLYING_LAP" else 75.0
+
+            spd = float(t.get("speed", 75.0))
+            if not t.get("spawn_offset") or float(t.get("spawn_offset", 0.0)) <= 0.0:
+                t["spawn_offset"] = round((spd / 3.6) * 3.0, 1)
+
+            if "spawn" in t and isinstance(t["spawn"], dict):
+                t["spawn"]["initial_speed_kmh"] = t["speed"]
+                t["spawn"]["spawn_offset_m"] = t["spawn_offset"]
+                if t.get("gear"):
+                    t["spawn"]["initial_gear"] = t["gear"]
+                if t.get("rpm"):
+                    t["spawn"]["initial_rpm"] = t["rpm"]
+
     file_path = get_catalog_module_path(tier_name)
     var_name = TIER_VAR_MAP[tier_name]
     doc = TIER_DOCS.get(tier_name, f"{tier_name} Test Catalog")

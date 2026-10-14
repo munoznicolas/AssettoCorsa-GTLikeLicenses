@@ -89,10 +89,6 @@ export function initDom() {
   dom.cardStanding = document.getElementById("mode-card-standing");
   dom.cardRolling = document.getElementById("mode-card-rolling");
   dom.cardFlying = document.getElementById("mode-card-flying");
-  dom.inputSpeed = document.getElementById("input-speed");
-  dom.inputSpawnOffset = document.getElementById("input-spawn-offset");
-  dom.inputGear = document.getElementById("input-gear");
-  dom.inputRpm = document.getElementById("input-rpm");
   dom.btnCalcSpeed = document.getElementById("btn-calc-ai-speed");
   dom.aiSpeedBadge = document.getElementById("ai-speed-status-badge");
   dom.aiSpeedText = document.getElementById("ai-speed-status-text");

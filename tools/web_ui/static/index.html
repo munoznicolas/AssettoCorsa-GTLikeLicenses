@@ -456,64 +456,6 @@
                 </label>
               </div>
 
-              <div class="form-grid cols-4 mt-3" id="speed-settings-row">
-                <div class="form-group">
-                  <label for="input-speed">Initial Speed (km/h)</label>
-                  <input
-                    type="number"
-                    id="input-speed"
-                    class="form-control mono"
-                    min="0"
-                    max="400"
-                    step="5"
-                    value="0"
-                  />
-                </div>
-                <div class="form-group">
-                  <label for="input-spawn-offset">Spawn Offset (m)</label>
-                  <input
-                    type="number"
-                    id="input-spawn-offset"
-                    class="form-control mono"
-                    min="0"
-                    max="500"
-                    step="0.5"
-                    value="0"
-                    readonly
-                  />
-                  <small class="helper-text"
-                    >Auto-calibrated for 3s countdown</small
-                  >
-                </div>
-                <div class="form-group">
-                  <label for="input-gear">Engaged Gear</label>
-                  <input
-                    type="number"
-                    id="input-gear"
-                    class="form-control mono"
-                    min="1"
-                    max="8"
-                    placeholder="Auto"
-                    readonly
-                  />
-                  <small class="helper-text">Calculated by script</small>
-                </div>
-                <div class="form-group">
-                  <label for="input-rpm">Initial RPM</label>
-                  <input
-                    type="number"
-                    id="input-rpm"
-                    class="form-control mono"
-                    min="500"
-                    max="22000"
-                    step="50"
-                    placeholder="Auto"
-                    readonly
-                  />
-                  <small class="helper-text">Calculated by script</small>
-                </div>
-              </div>
-
               <div id="ai-speed-status-badge" class="mt-2" style="display: none; font-size: 11px; padding: 4px 8px; border-radius: 4px; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: #fbbf24;">
                 <span id="ai-speed-status-text">Calculated from AI Telemetry</span>
               </div>

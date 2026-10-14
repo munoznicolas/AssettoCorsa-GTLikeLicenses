@@ -16,6 +16,7 @@ import {
 import {
   fetchAndApplyAISpeed,
   cancelActiveACSession,
+  showAISpeedStatus,
   hideAISpeedStatus,
 } from "./queue-runner.js";
 
@@ -390,10 +391,15 @@ export async function loadTestIntoForm(testIdx) {
 
   // Start Mode
   setStartMode(test.start_mode || "STANDING");
-  if (dom.inputSpeed) dom.inputSpeed.value = test.speed !== undefined ? test.speed : (test.spawn ? test.spawn.initial_speed_kmh : 0);
-  if (dom.inputSpawnOffset) dom.inputSpawnOffset.value = test.spawn_offset !== undefined ? test.spawn_offset : (test.spawn ? test.spawn.spawn_offset_m : 0);
-  if (dom.inputGear) dom.inputGear.value = test.gear !== undefined ? test.gear : (test.spawn && test.spawn.initial_gear !== undefined ? test.spawn.initial_gear : "");
-  if (dom.inputRpm) dom.inputRpm.value = test.rpm !== undefined ? test.rpm : (test.spawn && test.spawn.initial_rpm !== undefined ? test.spawn.initial_rpm : "");
+  if (test.start_mode && test.start_mode !== "STANDING" && (test.speed || (test.spawn && test.spawn.initial_speed_kmh))) {
+    const spd = test.speed !== undefined ? test.speed : test.spawn.initial_speed_kmh;
+    const gear = test.gear !== undefined ? test.gear : (test.spawn && test.spawn.initial_gear !== undefined ? test.spawn.initial_gear : "Auto");
+    const rpm = test.rpm !== undefined ? test.rpm : (test.spawn && test.spawn.initial_rpm !== undefined ? test.spawn.initial_rpm : "Auto");
+    const offset = test.spawn_offset !== undefined ? test.spawn_offset : (test.spawn && test.spawn.spawn_offset_m !== undefined ? test.spawn.spawn_offset_m : ((spd / 3.6) * 3).toFixed(1));
+    showAISpeedStatus(`AI Telemetry: ${spd} km/h | Gear ${gear} @ ${rpm} RPM | Run-up: ${offset}m`);
+  } else {
+    hideAISpeedStatus();
+  }
   if (dom.checkStopBox) dom.checkStopBox.checked = Boolean(test.with_stop_box);
 
   // Targets
@@ -537,12 +543,19 @@ export function renumberTierTests(tier) {
 /**
  * Auto-calculate spawn run-up distance based on speed and 3-second countdown.
  */
-export function autoCalculateSpawnOffset() {
-  if (!dom.inputSpeed || !dom.inputSpawnOffset) return;
-  const spdKmh = parseFloat(dom.inputSpeed.value) || 0;
+export function autoCalculateSpawnOffset(test = null) {
+  if (!test) {
+    const activeTier = state.curriculum[state.activeTierIndex];
+    test = activeTier && activeTier.tests ? activeTier.tests[state.activeTestIndex] : null;
+  }
+  if (!test) return;
+  const spdKmh = parseFloat(test.speed) || 0;
   // Formula: spawn_offset = v_mps * 3.0 seconds
   const offset = (spdKmh / 3.6) * 3.0;
-  dom.inputSpawnOffset.value = offset.toFixed(1);
+  test.spawn_offset = parseFloat(offset.toFixed(1));
+  if (test.spawn) {
+    test.spawn.spawn_offset_m = test.spawn_offset;
+  }
 }
 
 /**
@@ -570,15 +583,27 @@ export function saveFormIntoActiveTest() {
     test.speed = 0.0;
     test.spawn_offset = 0.0;
     test.with_stop_box = dom.checkStopBox ? dom.checkStopBox.checked : false;
+    delete test.gear;
+    delete test.rpm;
+    if (test.spawn) {
+      test.spawn.initial_speed_kmh = 0.0;
+      test.spawn.spawn_offset_m = 0.0;
+      delete test.spawn.initial_gear;
+      delete test.spawn.initial_rpm;
+    }
   } else if (dom.radioRolling && dom.radioRolling.checked) {
     test.start_mode = "ROLLING";
-    test.speed = parseFloat(dom.inputSpeed ? dom.inputSpeed.value : 75) || 75.0;
-    test.spawn_offset = parseFloat(dom.inputSpawnOffset ? dom.inputSpawnOffset.value : 62.5) || 62.5;
+    test.speed = test.speed !== undefined && test.speed > 0 ? test.speed : 75.0;
+    test.spawn_offset = test.spawn_offset !== undefined && test.spawn_offset > 0
+      ? test.spawn_offset
+      : parseFloat(((test.speed / 3.6) * 3.0).toFixed(1));
     test.with_stop_box = false;
   } else {
     test.start_mode = "FLYING_LAP";
-    test.speed = parseFloat(dom.inputSpeed ? dom.inputSpeed.value : 140) || 140.0;
-    test.spawn_offset = parseFloat(dom.inputSpawnOffset ? dom.inputSpawnOffset.value : 60) || 60.0;
+    test.speed = test.speed !== undefined && test.speed > 0 ? test.speed : 140.0;
+    test.spawn_offset = test.spawn_offset !== undefined && test.spawn_offset > 0
+      ? test.spawn_offset
+      : parseFloat(((test.speed / 3.6) * 3.0).toFixed(1));
     test.with_stop_box = false;
   }
 
@@ -586,17 +611,17 @@ export function saveFormIntoActiveTest() {
   test.spawn.initial_speed_kmh = test.speed;
   test.spawn.spawn_offset_m = test.spawn_offset;
 
-  if (dom.inputGear && dom.inputGear.value) {
-    test.gear = parseInt(dom.inputGear.value);
-    test.spawn.initial_gear = parseInt(dom.inputGear.value);
+  if (test.gear !== undefined && test.gear !== null && String(test.gear).trim() !== "") {
+    test.gear = parseInt(test.gear);
+    test.spawn.initial_gear = test.gear;
   } else {
     delete test.gear;
     if (test.spawn) delete test.spawn.initial_gear;
   }
 
-  if (dom.inputRpm && dom.inputRpm.value) {
-    test.rpm = parseInt(dom.inputRpm.value);
-    test.spawn.initial_rpm = parseInt(dom.inputRpm.value);
+  if (test.rpm !== undefined && test.rpm !== null && String(test.rpm).trim() !== "") {
+    test.rpm = parseInt(test.rpm);
+    test.spawn.initial_rpm = test.rpm;
   } else {
     delete test.rpm;
     if (test.spawn) delete test.spawn.initial_rpm;
@@ -836,10 +861,21 @@ export function setupEditorEventListeners() {
   if (dom.cardStanding) {
     dom.cardStanding.addEventListener("click", () => {
       setStartMode("STANDING");
-      if (dom.inputSpeed) dom.inputSpeed.value = 0;
-      if (dom.inputSpawnOffset) dom.inputSpawnOffset.value = 0;
-      if (dom.inputGear) dom.inputGear.value = 1;
-      if (dom.inputRpm) dom.inputRpm.value = 1000;
+      const activeTier = state.curriculum[state.activeTierIndex];
+      const test = activeTier && activeTier.tests ? activeTier.tests[state.activeTestIndex] : null;
+      if (test) {
+        test.start_mode = "STANDING";
+        test.speed = 0.0;
+        test.spawn_offset = 0.0;
+        delete test.gear;
+        delete test.rpm;
+        if (test.spawn) {
+          test.spawn.initial_speed_kmh = 0.0;
+          test.spawn.spawn_offset_m = 0.0;
+          delete test.spawn.initial_gear;
+          delete test.spawn.initial_rpm;
+        }
+      }
       hideAISpeedStatus();
     });
   }
@@ -847,10 +883,15 @@ export function setupEditorEventListeners() {
   if (dom.cardRolling) {
     dom.cardRolling.addEventListener("click", () => {
       setStartMode("ROLLING");
-      if (parseFloat(dom.inputSpeed ? dom.inputSpeed.value : 0) <= 0) {
-        fetchAndApplyAISpeed(false);
-      } else {
-        autoCalculateSpawnOffset();
+      const activeTier = state.curriculum[state.activeTierIndex];
+      const test = activeTier && activeTier.tests ? activeTier.tests[state.activeTestIndex] : null;
+      if (test) {
+        test.start_mode = "ROLLING";
+        if (!test.speed || test.speed <= 0) {
+          fetchAndApplyAISpeed(false);
+        } else {
+          autoCalculateSpawnOffset(test);
+        }
       }
     });
   }
@@ -858,10 +899,15 @@ export function setupEditorEventListeners() {
   if (dom.cardFlying) {
     dom.cardFlying.addEventListener("click", () => {
       setStartMode("FLYING_LAP");
-      if (parseFloat(dom.inputSpeed ? dom.inputSpeed.value : 0) <= 0) {
-        fetchAndApplyAISpeed(false);
-      } else {
-        autoCalculateSpawnOffset();
+      const activeTier = state.curriculum[state.activeTierIndex];
+      const test = activeTier && activeTier.tests ? activeTier.tests[state.activeTestIndex] : null;
+      if (test) {
+        test.start_mode = "FLYING_LAP";
+        if (!test.speed || test.speed <= 0) {
+          fetchAndApplyAISpeed(false);
+        } else {
+          autoCalculateSpawnOffset(test);
+        }
       }
     });
   }
@@ -874,14 +920,6 @@ export function setupEditorEventListeners() {
 
   if (dom.btnStopAc) dom.btnStopAc.addEventListener("click", cancelActiveACSession);
   if (dom.btnModalStopAc) dom.btnModalStopAc.addEventListener("click", cancelActiveACSession);
-
-  if (dom.inputSpeed) {
-    dom.inputSpeed.addEventListener("input", () => {
-      if ((dom.radioRolling && dom.radioRolling.checked) || (dom.radioFlying && dom.radioFlying.checked)) {
-        autoCalculateSpawnOffset();
-      }
-    });
-  }
 
   // Targets Validation
   [dom.targetGold, dom.targetSilver, dom.targetBronze].forEach((el) => {

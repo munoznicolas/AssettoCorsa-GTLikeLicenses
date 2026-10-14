@@ -29,10 +29,20 @@ export async function fetchAndApplyAISpeed(isManualClick = true) {
     : "FLYING_LAP";
 
   if (startMode === "STANDING") {
-    if (dom.inputSpeed) dom.inputSpeed.value = 0;
-    if (dom.inputSpawnOffset) dom.inputSpawnOffset.value = 0;
-    if (dom.inputGear) dom.inputGear.value = 1;
-    if (dom.inputRpm) dom.inputRpm.value = 1000;
+    const activeTier = state.curriculum[state.activeTierIndex];
+    if (activeTier && activeTier.tests && activeTier.tests[state.activeTestIndex]) {
+      const test = activeTier.tests[state.activeTestIndex];
+      test.speed = 0.0;
+      test.spawn_offset = 0.0;
+      delete test.gear;
+      delete test.rpm;
+      if (test.spawn) {
+        test.spawn.initial_speed_kmh = 0.0;
+        test.spawn.spawn_offset_m = 0.0;
+        delete test.spawn.initial_gear;
+        delete test.spawn.initial_rpm;
+      }
+    }
     hideAISpeedStatus();
     return;
   }
@@ -59,19 +69,18 @@ export async function fetchAndApplyAISpeed(isManualClick = true) {
 
     if (data.success) {
       if (data.status === "cached") {
-        if (dom.inputSpeed) dom.inputSpeed.value = data.speed_kmh;
-        if (dom.inputSpawnOffset) dom.inputSpawnOffset.value = data.spawn_offset_m;
-        if (dom.inputGear) dom.inputGear.value = data.gear !== undefined ? data.gear : "";
-        if (dom.inputRpm) dom.inputRpm.value = data.rpm !== undefined ? data.rpm : "";
-
         const activeTier = state.curriculum[state.activeTierIndex];
         if (activeTier && activeTier.tests && activeTier.tests[state.activeTestIndex]) {
           const test = activeTier.tests[state.activeTestIndex];
+          test.speed = data.speed_kmh;
+          test.spawn_offset = data.spawn_offset_m;
+          if (data.gear !== undefined) test.gear = data.gear;
+          if (data.rpm !== undefined) test.rpm = data.rpm;
           test.spawn = test.spawn || {};
           test.spawn.initial_speed_kmh = data.speed_kmh;
           test.spawn.spawn_offset_m = data.spawn_offset_m;
-          test.spawn.initial_gear = data.gear;
-          test.spawn.initial_rpm = data.rpm;
+          if (data.gear !== undefined) test.spawn.initial_gear = data.gear;
+          if (data.rpm !== undefined) test.spawn.initial_rpm = data.rpm;
         }
 
         const sourceLabel = data.source ? ` (${data.source})` : "";
@@ -133,16 +142,16 @@ export async function pollQueueStatus() {
             : null;
 
           if (curTest && curTest.test_id === pendingTelemetryTestId && job.result) {
-            if (dom.inputSpeed) dom.inputSpeed.value = job.result.speed_kmh;
-            if (dom.inputSpawnOffset) dom.inputSpawnOffset.value = job.result.spawn_offset_m;
-            if (dom.inputGear) dom.inputGear.value = job.result.gear !== undefined ? job.result.gear : "";
-            if (dom.inputRpm) dom.inputRpm.value = job.result.rpm !== undefined ? job.result.rpm : "";
+            curTest.speed = job.result.speed_kmh;
+            curTest.spawn_offset = job.result.spawn_offset_m;
+            if (job.result.gear !== undefined) curTest.gear = job.result.gear;
+            if (job.result.rpm !== undefined) curTest.rpm = job.result.rpm;
 
             curTest.spawn = curTest.spawn || {};
             curTest.spawn.initial_speed_kmh = job.result.speed_kmh;
             curTest.spawn.spawn_offset_m = job.result.spawn_offset_m;
-            curTest.spawn.initial_gear = job.result.gear;
-            curTest.spawn.initial_rpm = job.result.rpm;
+            if (job.result.gear !== undefined) curTest.spawn.initial_gear = job.result.gear;
+            if (job.result.rpm !== undefined) curTest.spawn.initial_rpm = job.result.rpm;
 
             const dateStr = job.result.recorded_at
               ? ` • 📅 ${new Date(job.result.recorded_at).toISOString().replace("T", " ").substring(0, 16)} UTC`

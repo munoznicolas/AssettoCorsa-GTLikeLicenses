@@ -319,7 +319,7 @@ def estimate_gear_and_rpm(speed_kmh: float) -> Tuple[int, int]:
 def calibrate_from_spline(
     track_id: str,
     layout: str = "",
-    car_id: str = "ks_mazda_miata",
+    car_id: Optional[str] = None,
     ai_level: int = 100,
     ac_root: str = DEFAULT_AC_ROOT,
 ) -> TelemetryProfile:
@@ -327,6 +327,11 @@ def calibrate_from_spline(
     Synthesizes an authentic 100% AI speed profile from the track's binary fast_lane.ai.
     Scales recorded reference speed by (ai_level / 100.0) and derives transmission states.
     """
+    if not track_id:
+        raise ValueError("Missing required parameter: track_id")
+    if not car_id:
+        raise ValueError("Missing required parameter: car_id")
+
     spline_path = find_spline_file(track_id, layout, ac_root)
     if not spline_path:
         raise FileNotFoundError(f"AI spline not found for track {track_id} [{layout}]")
@@ -372,7 +377,7 @@ def calibrate_from_spline(
 def record_live_in_engine_telemetry(
     track_id: str,
     layout: str = "",
-    car_id: str = "ks_mazda_miata",
+    car_id: Optional[str] = None,
     ai_level: int = 100,
     ac_root: str = DEFAULT_AC_ROOT,
     timeout_sec: Optional[int] = None,
@@ -385,6 +390,11 @@ def record_live_in_engine_telemetry(
     Arms on start/finish line crossing and records exactly one full flying lap.
     Falls back to calibrated spline profile if shared memory is inaccessible or run is cancelled.
     """
+    if not track_id:
+        raise ValueError("Missing required parameter: track_id")
+    if not car_id:
+        raise ValueError("Missing required parameter: car_id")
+
     print(f"[*] Initializing live in-engine {ai_level}% AI recording session for {car_id} at {track_id}...")
 
     # Determine track length from AI spline if available
@@ -653,7 +663,7 @@ def record_live_in_engine_telemetry(
 def get_or_calculate_initial_physics(
     track_id: str,
     layout: str = "",
-    car_id: str = "ks_mazda_miata",
+    car_id: Optional[str] = None,
     start_s: float = 0.0,
     countdown_sec: float = 3.0,
     ai_level: int = 100,
@@ -664,6 +674,11 @@ def get_or_calculate_initial_physics(
     Retrieves or generates an authentic AI telemetry profile and calculates
     the exact gate speed, spawn offset, gear, and RPM for a rolling start or flying lap.
     """
+    if not track_id:
+        raise ValueError("Missing required parameter: track_id")
+    if not car_id:
+        raise ValueError("Missing required parameter: car_id")
+
     profile = load_telemetry_profile(track_id, layout, car_id, ai_level)
     if profile is None:
         if allow_live_engine:
@@ -683,15 +698,24 @@ def get_or_calculate_initial_physics(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Assetto Corsa 100% AI Telemetry Recorder & Profiler")
-    parser.add_argument("--track", type=str, default="ks_vallelunga", help="Track ID (default: ks_vallelunga)")
-    parser.add_argument("--layout", type=str, default="club_circuit", help="Track layout (default: club_circuit)")
-    parser.add_argument("--car", type=str, default="ks_mazda_miata", help="Car ID (default: ks_mazda_miata)")
+    parser.add_argument("--track", type=str, help="Track ID")
+    parser.add_argument("--layout", type=str, default="", help="Track layout (default: empty for base layout)")
+    parser.add_argument("--car", type=str, help="Car ID")
     parser.add_argument("--ai-level", type=int, default=100, help="AI proficiency level (default: 100)")
     parser.add_argument("--live", action="store_true", help="Launch acs.exe to record live in-engine telemetry")
     parser.add_argument("--all-curriculum", action="store_true", help="Pre-generate telemetry profiles for all curriculum track/car pairings")
     parser.add_argument("--ac-root", type=str, default=DEFAULT_AC_ROOT, help="Assetto Corsa installation root")
 
     args = parser.parse_args()
+
+    if not args.all_curriculum:
+        missing = []
+        if not args.track:
+            missing.append("--track")
+        if not args.car:
+            missing.append("--car")
+        if missing:
+            parser.error(f"missing required parameter: {', '.join(missing)}")
 
     if args.all_curriculum:
         from generate_all_content import TEST_CATALOG
