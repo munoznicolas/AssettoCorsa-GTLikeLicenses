@@ -47,7 +47,6 @@ export function initDom() {
   dom.queueCountNum = document.getElementById("queue-count-num");
   dom.btnRunModePlay = document.getElementById("btn-run-mode-play");
   dom.btnRunModeAi = document.getElementById("btn-run-mode-ai");
-  dom.btnRunModeEval = document.getElementById("btn-run-mode-eval");
   dom.checkRunSync = document.getElementById("check-run-sync");
 
   // Form Elements
