@@ -109,6 +109,19 @@ export function initDom() {
   dom.modalBtnOk = document.getElementById("modal-btn-ok");
   dom.toast = document.getElementById("toast");
 
+  // Missing Telemetry Batch Modal & Buttons
+  dom.btnRunMissingTelemetry = document.getElementById("btn-run-missing-telemetry");
+  dom.btnBatchAiSpeed = document.getElementById("btn-batch-ai-speed");
+  dom.telemetryBatchModal = document.getElementById("telemetry-batch-modal");
+  dom.telemetryModalClose = document.getElementById("telemetry-modal-close");
+  dom.selectTelemetryTier = document.getElementById("select-telemetry-tier");
+  dom.checkIncludeFlying = document.getElementById("check-include-flying");
+  dom.telemetrySummaryText = document.getElementById("telemetry-summary-text");
+  dom.telemetryCombosTableBody = document.getElementById("telemetry-combos-table-body");
+  dom.telemetryQueueInfo = document.getElementById("telemetry-queue-info");
+  dom.btnTelemetryCancel = document.getElementById("btn-telemetry-cancel");
+  dom.btnTelemetryEnqueue = document.getElementById("btn-telemetry-enqueue");
+
   return dom;
 }
 

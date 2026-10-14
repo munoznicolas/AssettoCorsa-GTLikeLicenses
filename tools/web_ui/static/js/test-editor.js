@@ -21,6 +21,59 @@ import {
 } from "./queue-runner.js";
 
 /**
+ * Filter tracks by search query across id, name, and layout names.
+ */
+function filterTracks(query) {
+  if (!query) return state.tracks;
+  return state.tracks.filter((t) => {
+    const idMatch = (t.track_id || "").toLowerCase().includes(query);
+    const nameMatch = (t.name || "").toLowerCase().includes(query);
+    const layoutMatch = (t.layouts || []).some(
+      (l) =>
+        (l.name || "").toLowerCase().includes(query) ||
+        (l.layout_id || "").toLowerCase().includes(query)
+    );
+    return idMatch || nameMatch || layoutMatch;
+  });
+}
+
+/**
+ * Update filter count badge and clear button visibility.
+ */
+function updateFilterIndicator(countEl, clearBtn, query, matchCount, totalCount) {
+  if (countEl) {
+    countEl.style.display = query ? "inline-block" : "none";
+    if (query) {
+      countEl.textContent = `${matchCount} / ${totalCount}`;
+      countEl.classList.toggle("empty", matchCount === 0);
+    }
+  }
+  if (clearBtn) {
+    clearBtn.style.display = query ? "block" : "none";
+  }
+}
+
+/**
+ * Format and update AI Speed Telemetry display banner.
+ */
+function updateTestAISpeedDisplay(test) {
+  const isRollingOrFlying = test.start_mode && test.start_mode !== "STANDING";
+  const hasSpeed = test.speed || test.spawn?.initial_speed_kmh;
+  if (!isRollingOrFlying || !hasSpeed) {
+    hideAISpeedStatus();
+    return;
+  }
+
+  const spd = test.speed ?? test.spawn?.initial_speed_kmh ?? 0;
+  const gear = test.gear ?? test.spawn?.initial_gear ?? "Auto";
+  const rpm = test.rpm ?? test.spawn?.initial_rpm ?? "Auto";
+  const defaultOffset = ((Number.parseFloat(spd) / 3.6) * 3).toFixed(1);
+  const offset = test.spawn_offset ?? test.spawn?.spawn_offset_m ?? defaultOffset;
+
+  showAISpeedStatus(`AI Telemetry: ${spd} km/h | Gear ${gear} @ ${rpm} RPM | Run-up: ${offset}m`);
+}
+
+/**
  * Initial load of curriculum, tracks, cars, and benchmark reference tests.
  */
 export async function loadInitialData() {
@@ -53,7 +106,9 @@ export async function loadInitialData() {
       if (refData.success) {
         state.referenceTests = refData.tests;
         const refBadge = document.getElementById("ref-total-badge");
-        if (refBadge) refBadge.textContent = refData.count || refData.tests.length;
+        if (refBadge) {
+          refBadge.textContent = refData.count ?? refData.tests?.length ?? "";
+        }
       }
     } catch (err) {
       console.warn("Could not load reference benchmark tests:", err);
@@ -69,38 +124,15 @@ export async function loadInitialData() {
  */
 export function populateTrackDropdown(selectedTrackId = null) {
   if (!dom.selectTrack) return;
-  const query = dom.inputSearchTrack ? dom.inputSearchTrack.value.trim().toLowerCase() : "";
-  const activeTrackId = selectedTrackId !== null ? selectedTrackId : dom.selectTrack.value;
+  const query = dom.inputSearchTrack?.value.trim().toLowerCase() ?? "";
+  const activeTrackId = selectedTrackId ?? dom.selectTrack.value;
 
   dom.selectTrack.innerHTML = '<option value="">Select Kunos Track...</option>';
 
-  let matches = state.tracks;
-  if (query) {
-    matches = state.tracks.filter((t) => {
-      const idMatch = (t.track_id || "").toLowerCase().includes(query);
-      const nameMatch = (t.name || "").toLowerCase().includes(query);
-      const layoutMatch = (t.layouts || []).some(
-        (l) =>
-          (l.name || "").toLowerCase().includes(query) ||
-          (l.layout_id || "").toLowerCase().includes(query)
-      );
-      return idMatch || nameMatch || layoutMatch;
-    });
+  const matches = filterTracks(query);
+  updateFilterIndicator(dom.trackFilterCount, dom.btnClearTrackSearch, query, matches.length, state.tracks.length);
 
-    if (dom.trackFilterCount) {
-      dom.trackFilterCount.style.display = "inline-block";
-      dom.trackFilterCount.textContent = `${matches.length} / ${state.tracks.length}`;
-      dom.trackFilterCount.classList.toggle("empty", matches.length === 0);
-    }
-    if (dom.btnClearTrackSearch) {
-      dom.btnClearTrackSearch.style.display = "block";
-    }
-  } else {
-    if (dom.trackFilterCount) dom.trackFilterCount.style.display = "none";
-    if (dom.btnClearTrackSearch) dom.btnClearTrackSearch.style.display = "none";
-  }
-
-  matches.forEach((t) => {
+  for (const t of matches) {
     const opt = document.createElement("option");
     opt.value = t.track_id;
     opt.textContent = `${t.name} (${t.track_id})`;
@@ -108,11 +140,9 @@ export function populateTrackDropdown(selectedTrackId = null) {
       opt.selected = true;
     }
     dom.selectTrack.appendChild(opt);
-  });
+  }
 
-  if (activeTrackId && matches.some((t) => t.track_id === activeTrackId)) {
-    dom.selectTrack.value = activeTrackId;
-  } else if (!query && activeTrackId) {
+  if (activeTrackId && (!query || matches.some((t) => t.track_id === activeTrackId))) {
     dom.selectTrack.value = activeTrackId;
   }
 }
@@ -124,7 +154,7 @@ export function populateLayoutDropdown(trackId, selectedLayout = "") {
   if (!dom.selectLayout) return;
   dom.selectLayout.innerHTML = "";
   const track = state.tracks.find((t) => t.track_id === trackId);
-  if (!track || !track.layouts || track.layouts.length === 0) {
+  if (!track?.layouts?.length) {
     const opt = document.createElement("option");
     opt.value = "";
     opt.textContent = "Default Layout";
@@ -132,15 +162,16 @@ export function populateLayoutDropdown(trackId, selectedLayout = "") {
     return;
   }
 
-  track.layouts.forEach((l) => {
+  for (const l of track.layouts) {
     const opt = document.createElement("option");
     opt.value = l.layout_id;
-    opt.textContent = l.name || (l.layout_id ? l.layout_id : "Default Layout");
+    const layoutText = l.name || (l.layout_id ? l.layout_id : "Default Layout");
+    opt.textContent = layoutText;
     if (l.layout_id === selectedLayout) {
       opt.selected = true;
     }
     dom.selectLayout.appendChild(opt);
-  });
+  }
 }
 
 /**
@@ -200,27 +231,15 @@ export function filterCars(query) {
  */
 export function populateCarDropdown(selectedCarId = null) {
   if (!dom.selectCar) return;
-  const query = dom.inputSearchCar ? dom.inputSearchCar.value.trim() : "";
-  const activeCarId = selectedCarId !== null ? selectedCarId : dom.selectCar.value;
+  const query = dom.inputSearchCar?.value.trim() ?? "";
+  const activeCarId = selectedCarId ?? dom.selectCar.value;
 
   dom.selectCar.innerHTML = '<option value="">Select Kunos Car...</option>';
 
-  let matches = filterCars(query);
-  if (query) {
-    if (dom.carFilterCount) {
-      dom.carFilterCount.style.display = "inline-block";
-      dom.carFilterCount.textContent = `${matches.length} / ${state.cars.length}`;
-      dom.carFilterCount.classList.toggle("empty", matches.length === 0);
-    }
-    if (dom.btnClearCarSearch) {
-      dom.btnClearCarSearch.style.display = "block";
-    }
-  } else {
-    if (dom.carFilterCount) dom.carFilterCount.style.display = "none";
-    if (dom.btnClearCarSearch) dom.btnClearCarSearch.style.display = "none";
-  }
+  const matches = filterCars(query);
+  updateFilterIndicator(dom.carFilterCount, dom.btnClearCarSearch, query, matches.length, state.cars.length);
 
-  matches.forEach((c) => {
+  for (const c of matches) {
     const opt = document.createElement("option");
     opt.value = c.car_id;
     const brandStr = c.brand ? ` (${c.brand})` : "";
@@ -230,11 +249,9 @@ export function populateCarDropdown(selectedCarId = null) {
       opt.selected = true;
     }
     dom.selectCar.appendChild(opt);
-  });
+  }
 
-  if (activeCarId && matches.some((c) => c.car_id === activeCarId)) {
-    dom.selectCar.value = activeCarId;
-  } else if (!query && activeCarId) {
+  if (activeCarId && (!query || matches.some((c) => c.car_id === activeCarId))) {
     dom.selectCar.value = activeCarId;
   }
 }
@@ -285,7 +302,7 @@ export function selectTier(tierIdx) {
 
   renderTestList();
   if (activeTier.tests.length > 0) {
-    loadTestIntoForm(0);
+    void loadTestIntoForm(0);
   } else {
     clearForm();
   }
@@ -336,7 +353,7 @@ export function renderTestList() {
     `;
 
     item.addEventListener("click", () => {
-      loadTestIntoForm(idx);
+      void loadTestIntoForm(idx);
     });
     dom.testList.appendChild(item);
   });
@@ -346,8 +363,8 @@ export function renderTestList() {
  * Determine if test is a full lap session.
  */
 export function isFullLapTest(test) {
-  const s0 = parseFloat(test.start_s || 0);
-  const s1 = parseFloat(test.finish_s || 1);
+  const s0 = Number.parseFloat(test.start_s || 0);
+  const s1 = Number.parseFloat(test.finish_s || 1);
   return (s0 <= 0.005 && s1 >= 0.99) || test.start_mode === "FLYING_LAP";
 }
 
@@ -357,7 +374,7 @@ export function isFullLapTest(test) {
 export async function loadTestIntoForm(testIdx) {
   state.activeTestIndex = testIdx;
   const activeTier = state.curriculum[state.activeTierIndex];
-  if (!activeTier || !activeTier.tests) return;
+  if (!activeTier?.tests) return;
   const test = activeTier.tests[testIdx];
   if (!test) return;
 
@@ -385,21 +402,13 @@ export async function loadTestIntoForm(testIdx) {
   if (dom.toggleFullLap) dom.toggleFullLap.checked = fullLap;
   updateFullLapState(fullLap);
 
-  const startS = parseFloat(test.start_s || 0.0);
-  const finishS = parseFloat(test.finish_s || 1.0);
+  const startS = Number.parseFloat(test.start_s || 0.0);
+  const finishS = Number.parseFloat(test.finish_s || 1.0);
   setSpatialPositions(startS, finishS);
 
-  // Start Mode
+  // Start Mode & Telemetry Status
   setStartMode(test.start_mode || "STANDING");
-  if (test.start_mode && test.start_mode !== "STANDING" && (test.speed || (test.spawn && test.spawn.initial_speed_kmh))) {
-    const spd = test.speed !== undefined ? test.speed : test.spawn.initial_speed_kmh;
-    const gear = test.gear !== undefined ? test.gear : (test.spawn && test.spawn.initial_gear !== undefined ? test.spawn.initial_gear : "Auto");
-    const rpm = test.rpm !== undefined ? test.rpm : (test.spawn && test.spawn.initial_rpm !== undefined ? test.spawn.initial_rpm : "Auto");
-    const offset = test.spawn_offset !== undefined ? test.spawn_offset : (test.spawn && test.spawn.spawn_offset_m !== undefined ? test.spawn.spawn_offset_m : ((spd / 3.6) * 3).toFixed(1));
-    showAISpeedStatus(`AI Telemetry: ${spd} km/h | Gear ${gear} @ ${rpm} RPM | Run-up: ${offset}m`);
-  } else {
-    hideAISpeedStatus();
-  }
+  updateTestAISpeedDisplay(test);
   if (dom.checkStopBox) dom.checkStopBox.checked = Boolean(test.with_stop_box);
 
   // Targets
@@ -455,7 +464,7 @@ export function setSpatialPositions(startS, finishS) {
   if (dom.dispStartS) dom.dispStartS.textContent = (startS * 100).toFixed(2) + "%";
   if (dom.dispFinishS) dom.dispFinishS.textContent = (finishS * 100).toFixed(2) + "%";
 
-  const totalLen = state.currentSpline ? state.currentSpline.total_length_m : 0;
+  const totalLen = state.currentSpline?.total_length_m ?? 0;
   const startM = Math.round(startS * totalLen);
   const finishM = Math.round(finishS * totalLen);
   let sectorDist = 0;
@@ -470,6 +479,100 @@ export function setSpatialPositions(startS, finishS) {
   if (dom.dispSectorDist) dom.dispSectorDist.textContent = sectorDist + " m";
 
   renderCanvasTrack();
+  triggerAutoCalculateTargets(100, startS, finishS);
+}
+
+let autoCalculateTargetsTimer = null;
+
+/**
+ * Debounced trigger to recalculate Gold, Silver, Bronze targets and launch physics from telemetry points.
+ */
+export function triggerAutoCalculateTargets(delay = 100, overrideStartS = null, overrideFinishS = null) {
+  if (autoCalculateTargetsTimer) {
+    clearTimeout(autoCalculateTargetsTimer);
+  }
+  autoCalculateTargetsTimer = setTimeout(async () => {
+    await autoCalculateTargetsFromTelemetry(overrideStartS, overrideFinishS);
+  }, delay);
+}
+
+/**
+ * Performs step-by-step telemetry integration for the current test definition.
+ */
+export async function autoCalculateTargetsFromTelemetry(overrideStartS = null, overrideFinishS = null) {
+  const activeTier = state.curriculum[state.activeTierIndex];
+  const test = activeTier?.tests ? activeTier.tests[state.activeTestIndex] : null;
+  if (!test) return;
+
+  const trackId = dom.selectTrack ? dom.selectTrack.value : test.track_id;
+  const layout = dom.selectLayout ? dom.selectLayout.value : test.track_layout || "";
+  const carId = dom.selectCar ? dom.selectCar.value : test.car_id;
+  const rawStart = dom.inputStart ? dom.inputStart.value : test.start_s || 0;
+  const rawFinish = dom.inputFinish ? dom.inputFinish.value : test.finish_s || 1;
+  const startS = overrideStartS !== null ? overrideStartS : Number.parseFloat(rawStart);
+  const finishS = overrideFinishS !== null ? overrideFinishS : Number.parseFloat(rawFinish);
+
+  let startMode = "FLYING_LAP";
+  if (dom.radioStanding?.checked) {
+    startMode = "STANDING";
+  } else if (dom.radioRolling?.checked) {
+    startMode = "ROLLING";
+  }
+  const withStopBox = dom.checkStopBox ? dom.checkStopBox.checked : Boolean(test.with_stop_box);
+
+  test.start_s = startS;
+  test.finish_s = finishS;
+
+  if (!trackId || !carId) return;
+
+  try {
+    const res = await api.calculateTargets({
+      track_id: trackId,
+      track_layout: layout,
+      car_id: carId,
+      start_s: startS,
+      finish_s: finishS,
+      start_mode: startMode,
+      with_stop_box: withStopBox,
+    });
+
+    if (res?.success && res.targets) {
+      const tg = res.targets;
+      if (dom.targetGold) dom.targetGold.value = tg.gold_seconds.toFixed(1);
+      if (dom.targetSilver) dom.targetSilver.value = tg.silver_seconds.toFixed(1);
+      if (dom.targetBronze) dom.targetBronze.value = tg.bronze_seconds.toFixed(1);
+
+      test.targets = {
+        gold_seconds: tg.gold_seconds,
+        silver_seconds: tg.silver_seconds,
+        bronze_seconds: tg.bronze_seconds,
+      };
+
+      if (startMode !== "STANDING" && res.physics) {
+        test.speed = res.physics.speed_kmh;
+        test.spawn_offset = res.physics.spawn_offset_m;
+        test.gear = res.physics.gear;
+        test.rpm = res.physics.rpm;
+        if (test.spawn) {
+          test.spawn.initial_speed_kmh = res.physics.speed_kmh;
+          test.spawn.spawn_offset_m = res.physics.spawn_offset_m;
+          test.spawn.initial_gear = res.physics.gear;
+          test.spawn.initial_rpm = res.physics.rpm;
+        }
+      }
+
+      validateTargets();
+
+      const speedVal = res.physics?.speed_kmh ?? test.speed;
+      const modeLabel = startMode === "STANDING" ? "Standing Launch" : `${speedVal} km/h Handover`;
+      const sourceLabel = res.source ? ` (${res.source.replaceAll("_", " ")})` : "";
+      showAISpeedStatus(
+        `⚡ Telemetry Targets${sourceLabel}: Gold ${tg.gold_seconds}s | Silver ${tg.silver_seconds}s | Bronze ${tg.bronze_seconds}s • ${modeLabel} • Sector: ${res.sector_time_s}s (${res.sector_length_m}m)`
+      );
+    }
+  } catch (err) {
+    console.warn("Auto-calculate targets error:", err);
+  }
 }
 
 /**
@@ -504,6 +607,7 @@ export function setStartMode(mode) {
     if (dom.stopBoxRow) dom.stopBoxRow.style.display = "none";
     if (dom.checkStopBox) dom.checkStopBox.checked = false;
   }
+  triggerAutoCalculateTargets(50);
 }
 
 /**
@@ -511,11 +615,11 @@ export function setStartMode(mode) {
  */
 export function validateTargets() {
   if (!dom.targetGold || !dom.targetSilver || !dom.targetBronze) return true;
-  const gold = parseFloat(dom.targetGold.value);
-  const silver = parseFloat(dom.targetSilver.value);
-  const bronze = parseFloat(dom.targetBronze.value);
+  const gold = Number.parseFloat(dom.targetGold.value);
+  const silver = Number.parseFloat(dom.targetSilver.value);
+  const bronze = Number.parseFloat(dom.targetBronze.value);
 
-  if (!isNaN(gold) && !isNaN(silver) && !isNaN(bronze)) {
+  if (!Number.isNaN(gold) && !Number.isNaN(silver) && !Number.isNaN(bronze)) {
     if (gold >= silver || silver >= bronze) {
       if (dom.targetError) dom.targetError.style.display = "block";
       return false;
@@ -529,7 +633,7 @@ export function validateTargets() {
  * Renumber test IDs and preview image paths sequentially within a tier.
  */
 export function renumberTierTests(tier) {
-  if (!tier || !tier.tests) return;
+  if (!tier?.tests) return;
   const prefix = tier.test_prefix || "T-";
   tier.tests.forEach((t, i) => {
     const num = i + 1;
@@ -544,18 +648,86 @@ export function renumberTierTests(tier) {
  * Auto-calculate spawn run-up distance based on speed and 3-second countdown.
  */
 export function autoCalculateSpawnOffset(test = null) {
-  if (!test) {
+  let targetTest = test;
+  if (!targetTest) {
     const activeTier = state.curriculum[state.activeTierIndex];
-    test = activeTier && activeTier.tests ? activeTier.tests[state.activeTestIndex] : null;
+    targetTest = activeTier?.tests ? activeTier.tests[state.activeTestIndex] : null;
   }
-  if (!test) return;
-  const spdKmh = parseFloat(test.speed) || 0;
+  if (!targetTest) return;
+  const spdKmh = Number.parseFloat(targetTest.speed) || 0;
   // Formula: spawn_offset = v_mps * 3.0 seconds
   const offset = (spdKmh / 3.6) * 3.0;
-  test.spawn_offset = parseFloat(offset.toFixed(1));
-  if (test.spawn) {
-    test.spawn.spawn_offset_m = test.spawn_offset;
+  targetTest.spawn_offset = Number.parseFloat(offset.toFixed(1));
+  if (targetTest.spawn) {
+    targetTest.spawn.spawn_offset_m = targetTest.spawn_offset;
   }
+}
+
+/**
+ * Configure standing start parameters for test.
+ */
+function applyStandingMode(test) {
+  test.start_mode = "STANDING";
+  test.speed = 0.0;
+  test.spawn_offset = 0.0;
+  test.with_stop_box = Boolean(dom.checkStopBox?.checked);
+  delete test.gear;
+  delete test.rpm;
+  if (test.spawn) {
+    test.spawn.initial_speed_kmh = 0.0;
+    test.spawn.spawn_offset_m = 0.0;
+    delete test.spawn.initial_gear;
+    delete test.spawn.initial_rpm;
+  }
+}
+
+/**
+ * Configure rolling / flying lap parameters for test.
+ */
+function applyDynamicMode(test, mode, defaultSpeed) {
+  test.start_mode = mode;
+  const currentSpeed = test.speed ?? 0;
+  test.speed = currentSpeed > 0 ? currentSpeed : defaultSpeed;
+  const currentOffset = test.spawn_offset ?? 0;
+  const calculatedOffset = Number.parseFloat(((test.speed / 3.6) * 3.0).toFixed(1));
+  test.spawn_offset = currentOffset > 0 ? currentOffset : calculatedOffset;
+  test.with_stop_box = false;
+}
+
+/**
+ * Synchronize gear or rpm integer value between test object and spawn dictionary.
+ */
+function syncNumericField(test, fieldName) {
+  const spawnProp = fieldName === "gear" ? "initial_gear" : "initial_rpm";
+  const val = test[fieldName];
+  if (val !== undefined && val !== null && String(val).trim() !== "") {
+    const num = Number.parseInt(val, 10);
+    test[fieldName] = num;
+    test.spawn[spawnProp] = num;
+  } else {
+    delete test[fieldName];
+    if (test.spawn) delete test.spawn[spawnProp];
+  }
+}
+
+/**
+ * Update test physics and start conditions from form selections.
+ */
+function applyStartModeSettings(test) {
+  if (dom.radioStanding?.checked) {
+    applyStandingMode(test);
+  } else if (dom.radioRolling?.checked) {
+    applyDynamicMode(test, "ROLLING", 75.0);
+  } else {
+    applyDynamicMode(test, "FLYING_LAP", 140.0);
+  }
+
+  test.spawn = test.spawn || {};
+  test.spawn.initial_speed_kmh = test.speed;
+  test.spawn.spawn_offset_m = test.spawn_offset;
+
+  syncNumericField(test, "gear");
+  syncNumericField(test, "rpm");
 }
 
 /**
@@ -563,7 +735,7 @@ export function autoCalculateSpawnOffset(test = null) {
  */
 export function saveFormIntoActiveTest() {
   const activeTier = state.curriculum[state.activeTierIndex];
-  if (!activeTier || !activeTier.tests) return;
+  if (!activeTier?.tests) return;
   const test = activeTier.tests[state.activeTestIndex];
   if (!test) return;
 
@@ -575,62 +747,20 @@ export function saveFormIntoActiveTest() {
   test.track_id = dom.selectTrack ? dom.selectTrack.value : test.track_id;
   test.track_layout = dom.selectLayout ? dom.selectLayout.value : "";
 
-  test.start_s = parseFloat(dom.inputStart ? dom.inputStart.value : 0) || 0;
-  test.finish_s = parseFloat(dom.inputFinish ? dom.inputFinish.value : 1) || 1;
+  const rawStart = dom.inputStart?.value ?? 0;
+  const rawFinish = dom.inputFinish?.value ?? 1;
+  test.start_s = Number.parseFloat(rawStart) || 0;
+  test.finish_s = Number.parseFloat(rawFinish) || 1;
 
-  if (dom.radioStanding && dom.radioStanding.checked) {
-    test.start_mode = "STANDING";
-    test.speed = 0.0;
-    test.spawn_offset = 0.0;
-    test.with_stop_box = dom.checkStopBox ? dom.checkStopBox.checked : false;
-    delete test.gear;
-    delete test.rpm;
-    if (test.spawn) {
-      test.spawn.initial_speed_kmh = 0.0;
-      test.spawn.spawn_offset_m = 0.0;
-      delete test.spawn.initial_gear;
-      delete test.spawn.initial_rpm;
-    }
-  } else if (dom.radioRolling && dom.radioRolling.checked) {
-    test.start_mode = "ROLLING";
-    test.speed = test.speed !== undefined && test.speed > 0 ? test.speed : 75.0;
-    test.spawn_offset = test.spawn_offset !== undefined && test.spawn_offset > 0
-      ? test.spawn_offset
-      : parseFloat(((test.speed / 3.6) * 3.0).toFixed(1));
-    test.with_stop_box = false;
-  } else {
-    test.start_mode = "FLYING_LAP";
-    test.speed = test.speed !== undefined && test.speed > 0 ? test.speed : 140.0;
-    test.spawn_offset = test.spawn_offset !== undefined && test.spawn_offset > 0
-      ? test.spawn_offset
-      : parseFloat(((test.speed / 3.6) * 3.0).toFixed(1));
-    test.with_stop_box = false;
-  }
+  applyStartModeSettings(test);
 
-  test.spawn = test.spawn || {};
-  test.spawn.initial_speed_kmh = test.speed;
-  test.spawn.spawn_offset_m = test.spawn_offset;
-
-  if (test.gear !== undefined && test.gear !== null && String(test.gear).trim() !== "") {
-    test.gear = parseInt(test.gear);
-    test.spawn.initial_gear = test.gear;
-  } else {
-    delete test.gear;
-    if (test.spawn) delete test.spawn.initial_gear;
-  }
-
-  if (test.rpm !== undefined && test.rpm !== null && String(test.rpm).trim() !== "") {
-    test.rpm = parseInt(test.rpm);
-    test.spawn.initial_rpm = test.rpm;
-  } else {
-    delete test.rpm;
-    if (test.spawn) delete test.spawn.initial_rpm;
-  }
-
+  const goldVal = dom.targetGold?.value ?? 10;
+  const silverVal = dom.targetSilver?.value ?? 12;
+  const bronzeVal = dom.targetBronze?.value ?? 15;
   test.targets = {
-    gold_seconds: parseFloat(dom.targetGold ? dom.targetGold.value : 10) || 10,
-    silver_seconds: parseFloat(dom.targetSilver ? dom.targetSilver.value : 12) || 12,
-    bronze_seconds: parseFloat(dom.targetBronze ? dom.targetBronze.value : 15) || 15,
+    gold_seconds: Number.parseFloat(goldVal) || 10,
+    silver_seconds: Number.parseFloat(silverVal) || 12,
+    bronze_seconds: Number.parseFloat(bronzeVal) || 15,
   };
 }
 
@@ -648,124 +778,218 @@ export async function saveCurrentTier() {
 }
 
 /**
- * Attach DOM listeners for all test editor controls.
+ * Action handler for adding a new test.
  */
-export function setupEditorEventListeners() {
-  // Wire canvas click position updates directly into setSpatialPositions
-  setTrackCanvasPositionCallback((startS, finishS) => {
-    setSpatialPositions(startS, finishS);
-  });
+function handleAddTest() {
+  const activeTier = state.curriculum[state.activeTierIndex];
+  if (!activeTier) return;
+  const count = activeTier.tests.length + 1;
+  const prefix = activeTier.test_prefix || "T-";
 
-  // Add Test
-  if (dom.btnAddTest) {
-    dom.btnAddTest.addEventListener("click", () => {
-      const activeTier = state.curriculum[state.activeTierIndex];
-      if (!activeTier) return;
-      const count = activeTier.tests.length + 1;
-      const prefix = activeTier.test_prefix || "T-";
+  const newTest = {
+    test_id: `${prefix}${count}`,
+    tier: activeTier.tier_name,
+    title: `Test ${count}: New Sector Challenge`,
+    description: "Execute the prescribed driving line cleanly with zero track limit infractions.",
+    lesson_objective: "Mastering vehicle balance through the sector.",
+    car_id: state.cars[0] ? state.cars[0].car_id : "ks_mazda_miata",
+    track_id: state.tracks[0] ? state.tracks[0].track_id : "ks_vallelunga",
+    track_layout: "",
+    start_mode: "ROLLING",
+    start_s: 0.1,
+    finish_s: 0.3,
+    spawn_offset: 58.3,
+    speed: 70.0,
+    gear: 2,
+    rpm: 4500,
+    with_stop_box: false,
+    targets: {
+      gold_seconds: 15.0,
+      silver_seconds: 16.5,
+      bronze_seconds: 18.5,
+    },
+    preview_image: `/content/career/${activeTier.folder}/event${count}/preview.png`,
+  };
 
-      const newTest = {
-        test_id: `${prefix}${count}`,
-        tier: activeTier.tier_name,
-        title: `Test ${count}: New Sector Challenge`,
-        description: "Execute the prescribed driving line cleanly with zero track limit infractions.",
-        lesson_objective: "Mastering vehicle balance through the sector.",
-        car_id: state.cars[0] ? state.cars[0].car_id : "ks_mazda_miata",
-        track_id: state.tracks[0] ? state.tracks[0].track_id : "ks_vallelunga",
-        track_layout: "",
-        start_mode: "ROLLING",
-        start_s: 0.1,
-        finish_s: 0.3,
-        spawn_offset: 58.3,
-        speed: 70.0,
-        gear: 2,
-        rpm: 4500,
-        with_stop_box: false,
-        targets: {
-          gold_seconds: 15.0,
-          silver_seconds: 16.5,
-          bronze_seconds: 18.5,
-        },
-        preview_image: `/content/career/${activeTier.folder}/event${count}/preview.png`,
-      };
+  activeTier.tests.push(newTest);
+  renumberTierTests(activeTier);
+  renderLicenseTabs();
+  renderTestList();
+  void loadTestIntoForm(activeTier.tests.length - 1);
+  showToast(`Added new test ${newTest.test_id}`);
+}
 
-      activeTier.tests.push(newTest);
-      renumberTierTests(activeTier);
-      renderLicenseTabs();
-      renderTestList();
-      loadTestIntoForm(activeTier.tests.length - 1);
-      showToast(`Added new test ${newTest.test_id}`);
-    });
+/**
+ * Action handler for deleting the active test.
+ */
+async function handleDeleteTest() {
+  const activeTier = state.curriculum[state.activeTierIndex];
+  if (!activeTier || activeTier.tests.length <= 1) {
+    showToast("Cannot delete the only test in this license.", "error");
+    return;
   }
 
-  // Delete Test
-  if (dom.btnDeleteTest) {
-    dom.btnDeleteTest.addEventListener("click", async () => {
-      const activeTier = state.curriculum[state.activeTierIndex];
-      if (!activeTier || activeTier.tests.length <= 1) {
-        showToast("Cannot delete the only test in this license.", "error");
-        return;
-      }
-
-      const test = activeTier.tests[state.activeTestIndex];
-      if (!confirm(`Are you sure you want to remove test "${test.test_id}: ${test.title}"?`)) {
-        return;
-      }
-
-      const deletedId = test.test_id;
-      activeTier.tests.splice(state.activeTestIndex, 1);
-      renumberTierTests(activeTier);
-
-      const newIdx = Math.max(0, Math.min(state.activeTestIndex, activeTier.tests.length - 1));
-      state.activeTestIndex = newIdx;
-
-      try {
-        await saveCurrentTier();
-        renderLicenseTabs();
-        renderTestList();
-        loadTestIntoForm(newIdx);
-        showToast(`Removed test ${deletedId}. Subsequent tests renumbered successfully.`);
-      } catch (err) {
-        showToast("Error saving after delete: " + err.message, "error");
-      }
-    });
+  const test = activeTier.tests[state.activeTestIndex];
+  if (!confirm(`Are you sure you want to remove test "${test.test_id}: ${test.title}"?`)) {
+    return;
   }
 
-  // Track Search & Filter
+  const deletedId = test.test_id;
+  activeTier.tests.splice(state.activeTestIndex, 1);
+  renumberTierTests(activeTier);
+
+  const newIdx = Math.max(0, Math.min(state.activeTestIndex, activeTier.tests.length - 1));
+  state.activeTestIndex = newIdx;
+
+  try {
+    await saveCurrentTier();
+    renderLicenseTabs();
+    renderTestList();
+    await loadTestIntoForm(newIdx);
+    showToast(`Removed test ${deletedId}. Subsequent tests renumbered successfully.`);
+  } catch (err) {
+    showToast("Error saving after delete: " + err.message, "error");
+  }
+}
+
+/**
+ * Keydown handler for track search input.
+ */
+async function handleTrackSearchKeydown(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    const query = dom.inputSearchTrack?.value.trim().toLowerCase() ?? "";
+    const matches = filterTracks(query);
+    if (matches.length > 0 && dom.selectTrack) {
+      dom.selectTrack.value = matches[0].track_id;
+      populateLayoutDropdown(dom.selectTrack.value, "");
+      await fetchAndRenderSpline(dom.selectTrack.value, dom.selectLayout?.value ?? "");
+      dom.selectTrack.focus();
+    }
+  } else if (e.key === "ArrowDown") {
+    e.preventDefault();
+    dom.selectTrack?.focus();
+  } else if (e.key === "Escape") {
+    const currentVal = dom.selectTrack?.value ?? "";
+    if (dom.inputSearchTrack) dom.inputSearchTrack.value = "";
+    populateTrackDropdown(currentVal);
+  }
+}
+
+/**
+ * Keydown handler for car search input.
+ */
+function handleCarSearchKeydown(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    const query = dom.inputSearchCar?.value.trim() ?? "";
+    const matches = filterCars(query);
+    if (matches.length > 0 && dom.selectCar) {
+      dom.selectCar.value = matches[0].car_id;
+      dom.selectCar.focus();
+    }
+  } else if (e.key === "ArrowDown") {
+    e.preventDefault();
+    dom.selectCar?.focus();
+  } else if (e.key === "Escape") {
+    const currentVal = dom.selectCar?.value ?? "";
+    if (dom.inputSearchCar) dom.inputSearchCar.value = "";
+    populateCarDropdown(currentVal);
+  }
+}
+
+/**
+ * Click handler for standing start card.
+ */
+function handleCardStandingClick() {
+  setStartMode("STANDING");
+  const activeTier = state.curriculum[state.activeTierIndex];
+  const test = activeTier?.tests ? activeTier.tests[state.activeTestIndex] : null;
+  if (test) {
+    test.start_mode = "STANDING";
+    test.speed = 0.0;
+    test.spawn_offset = 0.0;
+    delete test.gear;
+    delete test.rpm;
+    if (test.spawn) {
+      test.spawn.initial_speed_kmh = 0.0;
+      test.spawn.spawn_offset_m = 0.0;
+      delete test.spawn.initial_gear;
+      delete test.spawn.initial_rpm;
+    }
+  }
+  hideAISpeedStatus();
+}
+
+/**
+ * Click handler for rolling start card.
+ */
+function handleCardRollingClick() {
+  setStartMode("ROLLING");
+  const activeTier = state.curriculum[state.activeTierIndex];
+  const test = activeTier?.tests ? activeTier.tests[state.activeTestIndex] : null;
+  if (test) {
+    test.start_mode = "ROLLING";
+    if (!test.speed || test.speed <= 0) {
+      void fetchAndApplyAISpeed(false);
+    } else {
+      autoCalculateSpawnOffset(test);
+    }
+  }
+}
+
+/**
+ * Click handler for flying lap card.
+ */
+function handleCardFlyingClick() {
+  setStartMode("FLYING_LAP");
+  const activeTier = state.curriculum[state.activeTierIndex];
+  const test = activeTier?.tests ? activeTier.tests[state.activeTestIndex] : null;
+  if (test) {
+    test.start_mode = "FLYING_LAP";
+    if (!test.speed || test.speed <= 0) {
+      void fetchAndApplyAISpeed(false);
+    } else {
+      autoCalculateSpawnOffset(test);
+    }
+  }
+}
+
+/**
+ * Form submission handler.
+ */
+async function handleFormSubmit(e) {
+  e.preventDefault();
+  if (!validateTargets()) {
+    showToast("Please ensure Gold < Silver < Bronze targets.", "error");
+    return;
+  }
+
+  saveFormIntoActiveTest();
+  try {
+    await saveCurrentTier();
+    renderLicenseTabs();
+    renderTestList();
+    showToast(`Saved test ${dom.inputTestId?.value ?? ""}!`);
+  } catch (err) {
+    showToast("Save failed: " + err.message, "error");
+  }
+}
+
+/**
+ * Attach track & car search/filter DOM listeners.
+ */
+function setupSearchFilterListeners() {
   if (dom.inputSearchTrack) {
     dom.inputSearchTrack.addEventListener("input", () => {
       populateTrackDropdown();
     });
-
-    dom.inputSearchTrack.addEventListener("keydown", async (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        const query = dom.inputSearchTrack.value.trim().toLowerCase();
-        const matches = state.tracks.filter(
-          (t) =>
-            (t.track_id || "").toLowerCase().includes(query) ||
-            (t.name || "").toLowerCase().includes(query)
-        );
-        if (matches.length > 0 && dom.selectTrack) {
-          dom.selectTrack.value = matches[0].track_id;
-          populateLayoutDropdown(dom.selectTrack.value, "");
-          await fetchAndRenderSpline(dom.selectTrack.value, dom.selectLayout ? dom.selectLayout.value : "");
-          dom.selectTrack.focus();
-        }
-      } else if (e.key === "ArrowDown") {
-        e.preventDefault();
-        if (dom.selectTrack) dom.selectTrack.focus();
-      } else if (e.key === "Escape") {
-        const currentVal = dom.selectTrack ? dom.selectTrack.value : "";
-        dom.inputSearchTrack.value = "";
-        populateTrackDropdown(currentVal);
-      }
-    });
+    dom.inputSearchTrack.addEventListener("keydown", handleTrackSearchKeydown);
   }
 
   if (dom.btnClearTrackSearch) {
     dom.btnClearTrackSearch.addEventListener("click", () => {
-      const currentVal = dom.selectTrack ? dom.selectTrack.value : "";
+      const currentVal = dom.selectTrack?.value ?? "";
       if (dom.inputSearchTrack) {
         dom.inputSearchTrack.value = "";
         populateTrackDropdown(currentVal);
@@ -774,34 +998,16 @@ export function setupEditorEventListeners() {
     });
   }
 
-  // Car Search & Filter
   if (dom.inputSearchCar) {
     dom.inputSearchCar.addEventListener("input", () => {
       populateCarDropdown();
     });
-
-    dom.inputSearchCar.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        const matches = filterCars(dom.inputSearchCar.value.trim());
-        if (matches.length > 0 && dom.selectCar) {
-          dom.selectCar.value = matches[0].car_id;
-          dom.selectCar.focus();
-        }
-      } else if (e.key === "ArrowDown") {
-        e.preventDefault();
-        if (dom.selectCar) dom.selectCar.focus();
-      } else if (e.key === "Escape") {
-        const currentVal = dom.selectCar ? dom.selectCar.value : "";
-        dom.inputSearchCar.value = "";
-        populateCarDropdown(currentVal);
-      }
-    });
+    dom.inputSearchCar.addEventListener("keydown", handleCarSearchKeydown);
   }
 
   if (dom.btnClearCarSearch) {
     dom.btnClearCarSearch.addEventListener("click", () => {
-      const currentVal = dom.selectCar ? dom.selectCar.value : "";
+      const currentVal = dom.selectCar?.value ?? "";
       if (dom.inputSearchCar) {
         dom.inputSearchCar.value = "";
         populateCarDropdown(currentVal);
@@ -809,142 +1015,125 @@ export function setupEditorEventListeners() {
       }
     });
   }
+}
 
-  // Track & Layout change
+/**
+ * Attach track, layout, car, and stop-box dropdown change listeners.
+ */
+function setupDropdownChangeListeners() {
   if (dom.selectTrack) {
     dom.selectTrack.addEventListener("change", async (e) => {
       const trackId = e.target.value;
       populateLayoutDropdown(trackId, "");
-      await fetchAndRenderSpline(trackId, dom.selectLayout ? dom.selectLayout.value : "");
+      await fetchAndRenderSpline(trackId, dom.selectLayout?.value ?? "");
+      triggerAutoCalculateTargets(100);
     });
   }
 
   if (dom.selectLayout) {
     dom.selectLayout.addEventListener("change", async (e) => {
-      await fetchAndRenderSpline(dom.selectTrack ? dom.selectTrack.value : "", e.target.value);
+      await fetchAndRenderSpline(dom.selectTrack?.value ?? "", e.target.value);
+      triggerAutoCalculateTargets(100);
     });
   }
 
-  // Full Lap Toggle
+  if (dom.selectCar) {
+    dom.selectCar.addEventListener("change", () => {
+      triggerAutoCalculateTargets(100);
+    });
+  }
+
+  if (dom.checkStopBox) {
+    dom.checkStopBox.addEventListener("change", () => {
+      triggerAutoCalculateTargets(50);
+    });
+  }
+
   if (dom.toggleFullLap) {
     dom.toggleFullLap.addEventListener("change", (e) => {
       updateFullLapState(e.target.checked);
     });
   }
+}
 
-  // Sliders & Inputs sync
+/**
+ * Attach spatial sliders and manual numeric inputs listeners.
+ */
+function setupPositionControlListeners() {
   if (dom.sliderStart) {
     dom.sliderStart.addEventListener("input", (e) => {
-      setSpatialPositions(parseFloat(e.target.value), parseFloat(dom.sliderFinish ? dom.sliderFinish.value : 1));
+      const finishVal = dom.sliderFinish?.value ?? 1;
+      setSpatialPositions(Number.parseFloat(e.target.value), Number.parseFloat(finishVal));
     });
   }
 
   if (dom.sliderFinish) {
     dom.sliderFinish.addEventListener("input", (e) => {
-      setSpatialPositions(parseFloat(dom.sliderStart ? dom.sliderStart.value : 0), parseFloat(e.target.value));
+      const startVal = dom.sliderStart?.value ?? 0;
+      setSpatialPositions(Number.parseFloat(startVal), Number.parseFloat(e.target.value));
     });
   }
 
   if (dom.inputStart) {
-    dom.inputStart.addEventListener("change", (e) => {
-      setSpatialPositions(parseFloat(e.target.value || 0), parseFloat(dom.inputFinish ? dom.inputFinish.value : 1));
-    });
+    const onStartChange = (e) => {
+      const finishVal = dom.inputFinish?.value ?? 1;
+      setSpatialPositions(Number.parseFloat(e.target.value || 0), Number.parseFloat(finishVal));
+    };
+    dom.inputStart.addEventListener("input", onStartChange);
+    dom.inputStart.addEventListener("change", onStartChange);
   }
 
   if (dom.inputFinish) {
-    dom.inputFinish.addEventListener("change", (e) => {
-      setSpatialPositions(parseFloat(dom.inputStart ? dom.inputStart.value : 0), parseFloat(e.target.value || 1));
-    });
-  }
-
-  // Start Mode Switchers
-  if (dom.cardStanding) {
-    dom.cardStanding.addEventListener("click", () => {
-      setStartMode("STANDING");
-      const activeTier = state.curriculum[state.activeTierIndex];
-      const test = activeTier && activeTier.tests ? activeTier.tests[state.activeTestIndex] : null;
-      if (test) {
-        test.start_mode = "STANDING";
-        test.speed = 0.0;
-        test.spawn_offset = 0.0;
-        delete test.gear;
-        delete test.rpm;
-        if (test.spawn) {
-          test.spawn.initial_speed_kmh = 0.0;
-          test.spawn.spawn_offset_m = 0.0;
-          delete test.spawn.initial_gear;
-          delete test.spawn.initial_rpm;
-        }
-      }
-      hideAISpeedStatus();
-    });
-  }
-
-  if (dom.cardRolling) {
-    dom.cardRolling.addEventListener("click", () => {
-      setStartMode("ROLLING");
-      const activeTier = state.curriculum[state.activeTierIndex];
-      const test = activeTier && activeTier.tests ? activeTier.tests[state.activeTestIndex] : null;
-      if (test) {
-        test.start_mode = "ROLLING";
-        if (!test.speed || test.speed <= 0) {
-          fetchAndApplyAISpeed(false);
-        } else {
-          autoCalculateSpawnOffset(test);
-        }
-      }
-    });
-  }
-
-  if (dom.cardFlying) {
-    dom.cardFlying.addEventListener("click", () => {
-      setStartMode("FLYING_LAP");
-      const activeTier = state.curriculum[state.activeTierIndex];
-      const test = activeTier && activeTier.tests ? activeTier.tests[state.activeTestIndex] : null;
-      if (test) {
-        test.start_mode = "FLYING_LAP";
-        if (!test.speed || test.speed <= 0) {
-          fetchAndApplyAISpeed(false);
-        } else {
-          autoCalculateSpawnOffset(test);
-        }
-      }
-    });
-  }
-
-  if (dom.btnCalcSpeed) {
-    dom.btnCalcSpeed.addEventListener("click", () => {
-      fetchAndApplyAISpeed(true);
-    });
-  }
-
-  if (dom.btnStopAc) dom.btnStopAc.addEventListener("click", cancelActiveACSession);
-  if (dom.btnModalStopAc) dom.btnModalStopAc.addEventListener("click", cancelActiveACSession);
-
-  // Targets Validation
-  [dom.targetGold, dom.targetSilver, dom.targetBronze].forEach((el) => {
-    if (el) el.addEventListener("input", validateTargets);
-  });
-
-  // Form Save
-  if (dom.form) {
-    dom.form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      if (!validateTargets()) {
-        showToast("Please ensure Gold < Silver < Bronze targets.", "error");
-        return;
-      }
-
-      saveFormIntoActiveTest();
-      try {
-        await saveCurrentTier();
-        renderLicenseTabs();
-        renderTestList();
-        showToast(`Saved test ${dom.inputTestId ? dom.inputTestId.value : ""}!`);
-      } catch (err) {
-        showToast("Save failed: " + err.message, "error");
-      }
-    });
+    const onFinishChange = (e) => {
+      const startVal = dom.inputStart?.value ?? 0;
+      setSpatialPositions(Number.parseFloat(startVal), Number.parseFloat(e.target.value || 1));
+    };
+    dom.inputFinish.addEventListener("input", onFinishChange);
+    dom.inputFinish.addEventListener("change", onFinishChange);
   }
 }
 
+/**
+ * Attach start mode card selectors and AC execution buttons listeners.
+ */
+function setupStartModeListeners() {
+  dom.cardStanding?.addEventListener("click", handleCardStandingClick);
+  dom.cardRolling?.addEventListener("click", handleCardRollingClick);
+  dom.cardFlying?.addEventListener("click", handleCardFlyingClick);
+
+  dom.btnCalcSpeed?.addEventListener("click", () => {
+    void fetchAndApplyAISpeed(true);
+  });
+
+  dom.btnStopAc?.addEventListener("click", () => {
+    void cancelActiveACSession();
+  });
+  dom.btnModalStopAc?.addEventListener("click", () => {
+    void cancelActiveACSession();
+  });
+}
+
+/**
+ * Attach DOM listeners for all test editor controls.
+ */
+export function setupEditorEventListeners() {
+  setTrackCanvasPositionCallback((startS, finishS) => {
+    setSpatialPositions(startS, finishS);
+  });
+
+  dom.btnAddTest?.addEventListener("click", handleAddTest);
+  dom.btnDeleteTest?.addEventListener("click", () => {
+    void handleDeleteTest();
+  });
+
+  setupSearchFilterListeners();
+  setupDropdownChangeListeners();
+  setupPositionControlListeners();
+  setupStartModeListeners();
+
+  [dom.targetGold, dom.targetSilver, dom.targetBronze].forEach((el) => {
+    el?.addEventListener("input", validateTargets);
+  });
+
+  dom.form?.addEventListener("submit", handleFormSubmit);
+}

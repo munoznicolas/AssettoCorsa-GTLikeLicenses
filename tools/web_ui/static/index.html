@@ -27,20 +27,20 @@
         </div>
         <div class="header-actions">
           <button
-            id="btn-run-top"
-            class="btn btn-accent"
-            title="Launch current test live in Assetto Corsa"
-          >
-            <span class="icon">🏎️</span> <span>Live Run</span>
-            <span id="run-queue-badge" class="badge" style="display: none; margin-left: 6px; padding: 2px 6px; font-size: 10px; background: #0c4a6e; border: 1px solid #38bdf8; color: #f0f9ff;">0 queued</span>
-          </button>
-          <button
             id="btn-stop-ac"
             class="btn"
             style="display: none; background: #dc2626; color: #fff; border: 1px solid #ef4444;"
             title="Stop / Terminate active Assetto Corsa session"
           >
             <span class="icon">⏹️</span> <span>Stop AC</span>
+          </button>
+          <button
+            id="btn-run-missing-telemetry"
+            class="btn"
+            style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35);"
+            title="Batch run/record telemetry in Assetto Corsa for all rolling start tests missing track+car profiles"
+          >
+            <span class="icon">📡</span> <span>Record Missing Telemetry</span>
           </button>
           <button
             id="btn-rebuild"
@@ -405,16 +405,27 @@
 
             <!-- Section 4: Start Mode (Rolling vs Standing) & Speed -->
             <div class="card form-card">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; flex-wrap: wrap;">
                 <div class="card-title" style="margin-bottom: 0;">Start Mode & Physics Initialization</div>
-                <button
-                  type="button"
-                  id="btn-calc-ai-speed"
-                  class="btn btn-sm btn-accent"
-                  title="Query Assetto Corsa game engine AI telemetry for authentic gate speed, run-up offset, gear, and RPM"
-                >
-                  ⚡ Auto-Calculate from Game Engine
-                </button>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <button
+                    type="button"
+                    id="btn-calc-ai-speed"
+                    class="btn btn-sm btn-accent"
+                    title="Query Assetto Corsa game engine AI telemetry for authentic gate speed, run-up offset, gear, and RPM"
+                  >
+                    ⚡ Auto-Calculate from Game Engine
+                  </button>
+                  <button
+                    type="button"
+                    id="btn-batch-ai-speed"
+                    class="btn btn-sm"
+                    style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35);"
+                    title="Batch record telemetry in Assetto Corsa for all rolling start tests missing track+car profiles"
+                  >
+                    📡 Run Missing Telemetry
+                  </button>
+                </div>
               </div>
               <div class="start-mode-selector">
                 <label class="mode-card" id="mode-card-standing">
@@ -819,6 +830,71 @@
           </div>
           <div class="modal-footer">
             <button type="button" id="run-modal-cancel" class="btn btn-secondary">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal for Batch Recording Missing Telemetry -->
+      <div id="telemetry-batch-modal" class="modal" style="display: none">
+        <div class="modal-content" style="max-width: 720px;">
+          <div class="modal-header">
+            <h3 id="telemetry-modal-title">📡 Record Missing Telemetry (Rolling Starts)</h3>
+            <button id="telemetry-modal-close" class="modal-close-btn">&times;</button>
+          </div>
+          <div class="modal-body">
+            <p style="font-size: 13px; color: #cbd5e1; margin-bottom: 12px; line-height: 1.5;">
+              Rolling start tests require an authentic 100% AI flying lap telemetry profile for their track and car combination to calibrate initial gate speed, gear, RPM, and spawn run-up distance.
+            </p>
+
+            <div style="display: flex; gap: 14px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; background: rgba(255, 255, 255, 0.03); padding: 10px 14px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.08);">
+              <div>
+                <label for="select-telemetry-tier" style="font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px; font-weight: 500;">License Tier</label>
+                <select id="select-telemetry-tier" class="form-control form-control-sm" style="min-width: 170px;">
+                  <option value="ALL">All License Tiers</option>
+                  <option value="National B">National B</option>
+                  <option value="National A">National A</option>
+                  <option value="International B">International B</option>
+                  <option value="International A">International A</option>
+                  <option value="Super License">Super License</option>
+                </select>
+              </div>
+              <div style="margin-top: 18px;">
+                <label class="checkbox-label" style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px;">
+                  <input type="checkbox" id="check-include-flying" checked />
+                  <span>Include Flying Lap tests</span>
+                </label>
+              </div>
+            </div>
+
+            <div id="telemetry-summary-banner" style="padding: 10px 14px; border-radius: 6px; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); margin-bottom: 14px; font-size: 13px;">
+              <span id="telemetry-summary-text">Scanning curriculum tests...</span>
+            </div>
+
+            <div class="table-responsive" style="max-height: 250px; overflow-y: auto; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px;">
+              <table class="ref-data-table" style="font-size: 12px; width: 100%;">
+                <thead>
+                  <tr>
+                    <th>Track</th>
+                    <th>Layout</th>
+                    <th>Car Model</th>
+                    <th>Tests Using Combo</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="telemetry-combos-table-body">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+            <span id="telemetry-queue-info" style="font-size: 12px; color: #94a3b8;"></span>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" id="btn-telemetry-cancel" class="btn btn-secondary">Close</button>
+              <button type="button" id="btn-telemetry-enqueue" class="btn btn-primary" style="background: #f59e0b; border-color: #d97706; color: #000; font-weight: 600;">
+                <span>▶ Run Telemetry for Missing Combos</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

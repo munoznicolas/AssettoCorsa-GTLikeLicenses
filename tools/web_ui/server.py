@@ -27,14 +27,17 @@ if os.path.join(REPO_ROOT, "tools") not in sys.path:
 
 from tools.web_ui.catalog_manager import (
     calculate_test_initial_speed,
+    calculate_test_targets_and_physics,
     generate_and_validate,
     get_ac_curriculum_reference_tests,
     get_available_cars,
     get_available_tracks,
+    get_missing_telemetry_summary,
     get_track_spline_data,
     load_curriculum,
     run_live_test,
     save_tier_catalog,
+    enqueue_missing_telemetry_jobs,
 )
 
 STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
@@ -54,6 +57,12 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
     def log_message(self, format: str, *args: Any) -> None:
         # Keep terminal output clean
         sys.stdout.write(f"[{self.log_date_time_string()}] {format % args}\n")
+
+    def end_headers(self) -> None:
+        self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+        self.send_header("Pragma", "no-cache")
+        self.send_header("Expires", "0")
+        super().end_headers()
 
     def send_json_response(self, data: Any, status: int = 200) -> None:
         body = json.dumps(data, indent=2).encode("utf-8")
@@ -143,10 +152,51 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
                 self.send_json_response({"success": False, "error": str(e)}, status=500)
             return
 
+        if path == "/api/calculate_targets":
+            track_id = query.get("track_id", [""])[0]
+            track_layout = query.get("track_layout", [""])[0] or query.get("layout", [""])[0]
+            car_id = query.get("car_id", [""])[0]
+            try:
+                start_s = float(query.get("start_s", ["0.0"])[0])
+                finish_s = float(query.get("finish_s", ["1.0"])[0])
+            except ValueError:
+                start_s, finish_s = 0.0, 1.0
+            start_mode = query.get("start_mode", ["ROLLING"])[0]
+            with_stop_box = query.get("with_stop_box", ["0"])[0].lower() in ("1", "true", "yes")
+
+            if not track_id or not car_id:
+                self.send_json_response({"success": False, "error": "Missing track_id or car_id"}, status=400)
+                return
+
+            try:
+                res = calculate_test_targets_and_physics(
+                    track_id=track_id,
+                    track_layout=track_layout,
+                    car_id=car_id,
+                    start_s=start_s,
+                    finish_s=finish_s,
+                    start_mode=start_mode,
+                    with_stop_box=with_stop_box,
+                )
+                self.send_json_response(res)
+            except Exception as e:
+                self.send_json_response({"success": False, "error": str(e)}, status=500)
+            return
+
         if path == "/api/queue/status":
             try:
                 from tools.web_ui.runner import queue_mgr
                 self.send_json_response(queue_mgr.get_status())
+            except Exception as e:
+                self.send_json_response({"success": False, "error": str(e)}, status=500)
+            return
+
+        if path == "/api/telemetry/missing":
+            tier = query.get("tier", ["ALL"])[0]
+            include_flying = query.get("include_flying", ["1"])[0].lower() in ("1", "true", "yes")
+            try:
+                res = get_missing_telemetry_summary(tier=tier, include_flying=include_flying)
+                self.send_json_response(res)
             except Exception as e:
                 self.send_json_response({"success": False, "error": str(e)}, status=500)
             return
@@ -272,14 +322,45 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
                 self.send_json_response({"success": False, "error": f"Invalid JSON payload: {e}"}, status=400)
                 return
 
+        if path == "/api/calculate_targets":
+            track_id = payload.get("track_id", "")
+            track_layout = payload.get("track_layout", "")
+            car_id = payload.get("car_id", "")
+            start_s = float(payload.get("start_s", 0.0))
+            finish_s = float(payload.get("finish_s", 1.0))
+            start_mode = payload.get("start_mode", "ROLLING")
+            with_stop_box = bool(payload.get("with_stop_box", False))
+            countdown_sec = float(payload.get("countdown_sec", 3.0))
+
+            if not track_id or not car_id:
+                self.send_json_response({"success": False, "error": "Missing track_id or car_id"}, status=400)
+                return
+
+            try:
+                res = calculate_test_targets_and_physics(
+                    track_id=track_id,
+                    track_layout=track_layout,
+                    car_id=car_id,
+                    start_s=start_s,
+                    finish_s=finish_s,
+                    start_mode=start_mode,
+                    with_stop_box=with_stop_box,
+                    countdown_sec=countdown_sec,
+                )
+                self.send_json_response(res)
+            except Exception as e:
+                self.send_json_response({"success": False, "error": str(e)}, status=500)
+            return
+
         if path == "/api/calculate_initial_speed":
             track_id = payload.get("track_id", "")
             track_layout = payload.get("track_layout", "")
             car_id = payload.get("car_id", "")
             start_s = float(payload.get("start_s", 0.0))
+            finish_s = float(payload.get("finish_s", 1.0))
             start_mode = payload.get("start_mode", "ROLLING")
+            with_stop_box = bool(payload.get("with_stop_box", False))
             countdown_sec = float(payload.get("countdown_sec", 3.0))
-            allow_live_engine = bool(payload.get("allow_live_engine", False))
 
             if not track_id or not car_id:
                 self.send_json_response({"success": False, "error": "Missing track_id or car_id"}, status=400)
@@ -291,9 +372,10 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
                     track_layout=track_layout,
                     car_id=car_id,
                     start_s=start_s,
+                    finish_s=finish_s,
                     start_mode=start_mode,
+                    with_stop_box=with_stop_box,
                     countdown_sec=countdown_sec,
-                    allow_live_engine=allow_live_engine,
                 )
                 self.send_json_response(res)
             except Exception as e:
@@ -340,6 +422,16 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
                 else:
                     ok = queue_mgr.cancel_job(job_id)
                     self.send_json_response({"success": ok, "message": f"Job {job_id} cancellation processed."})
+            except Exception as e:
+                self.send_json_response({"success": False, "error": str(e)}, status=500)
+            return
+
+        if path == "/api/telemetry/queue_missing":
+            tier = payload.get("tier", "ALL")
+            include_flying = bool(payload.get("include_flying", True))
+            try:
+                res = enqueue_missing_telemetry_jobs(tier=tier, include_flying=include_flying)
+                self.send_json_response(res)
             except Exception as e:
                 self.send_json_response({"success": False, "error": str(e)}, status=500)
             return

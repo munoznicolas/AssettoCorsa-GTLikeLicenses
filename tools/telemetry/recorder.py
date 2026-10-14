@@ -244,6 +244,137 @@ class TelemetryProfile:
             "recorded_at": self.recorded_at,
         }
 
+    @staticmethod
+    def _compute_sector_length(
+        tot: float, start_s: float, finish_s: float, start_mode: str
+    ) -> Tuple[float, float]:
+        s0 = (start_s % 1.0 + 1.0) % 1.0
+        s1 = 1.0 if abs(finish_s - 1.0) < 1e-4 else ((finish_s % 1.0 + 1.0) % 1.0)
+        start_dist = s0 * tot
+        finish_dist = s1 * tot
+
+        is_full_lap = (
+            start_mode == "FLYING_LAP"
+            or (s0 <= 0.005 and s1 >= 0.99)
+            or (abs(s0 - s1) < 0.002 and start_mode in ("FLYING_LAP", "STANDING"))
+        )
+
+        if is_full_lap:
+            sec_len = tot
+        elif s1 >= s0:
+            sec_len = finish_dist - start_dist
+        else:
+            sec_len = tot - start_dist + finish_dist
+
+        if sec_len <= 1.0:
+            sec_len = tot if is_full_lap else 100.0
+
+        return start_dist, sec_len
+
+    @staticmethod
+    def _effective_speed(
+        v_flying_ms: float,
+        dist_traveled: float,
+        sec_len: float,
+        start_mode: str,
+        with_stop_box: bool,
+        a_launch: float = 6.0,
+        a_brake: float = 9.0,
+    ) -> float:
+        if start_mode != "STANDING":
+            return v_flying_ms
+
+        v_launch = math.sqrt(2.0 * a_launch * max(0.2, dist_traveled))
+        v_eff = min(v_flying_ms, v_launch)
+        if with_stop_box:
+            dist_rem = max(0.0, sec_len - dist_traveled)
+            v_stop = math.sqrt(2.0 * a_brake * max(0.2, dist_rem))
+            v_eff = min(v_eff, v_stop)
+        return max(2.5, v_eff)
+
+    def _integrate_traversal_time(
+        self,
+        start_dist: float,
+        sec_len: float,
+        start_mode: str,
+        with_stop_box: bool,
+        step_m: float,
+    ) -> float:
+        tot = self.total_track_length_m
+        step = max(0.5, min(step_m, sec_len / 500.0))
+        t_accum = 0.0
+        dist_traveled = 0.0
+
+        while dist_traveled < sec_len:
+            curr_d = (start_dist + dist_traveled) % tot
+            spd_kmh, _, _ = self.query_sample(curr_d)
+            v_ms = self._effective_speed(
+                max(5.0, spd_kmh / 3.6),
+                dist_traveled,
+                sec_len,
+                start_mode,
+                with_stop_box,
+            )
+            t_accum += step / v_ms
+            dist_traveled += step
+
+        if start_mode == "STANDING" and with_stop_box:
+            # 0.5s pause window to register complete vehicle standstill inside stop box
+            t_accum += 0.5
+
+        return t_accum
+
+    @staticmethod
+    def _calculate_medal_targets(t_accum: float, start_mode: str) -> Tuple[float, float, float]:
+        # Gran Turismo balance target calculation
+        if start_mode in ("ROLLING", "FLYING_LAP"):
+            gold = math.ceil(round(t_accum * 0.98, 4) * 10.0) / 10.0
+            silver = math.ceil(round(t_accum * 1.05, 4) * 10.0) / 10.0
+            bronze = math.ceil(round(t_accum * 1.15, 4) * 10.0) / 10.0
+        else:
+            gold = math.ceil(round(t_accum, 4) * 10.0) / 10.0
+            silver = math.ceil(round(gold * (1.05 / 0.98), 4) * 10.0) / 10.0
+            bronze = math.ceil(round(gold * (1.15 / 0.98), 4) * 10.0) / 10.0
+        return gold, silver, bronze
+
+    def calculate_sector_targets(
+        self,
+        start_s: float,
+        finish_s: float,
+        start_mode: str = "ROLLING",
+        with_stop_box: bool = False,
+        step_m: float = 1.0,
+    ) -> Dict[str, Any]:
+        """
+        Numerically integrates traversal time between start_s and finish_s
+        along the telemetry velocity profile, inferring authentic Gold, Silver,
+        and Bronze target times calibrated to standard Gran Turismo balance.
+        """
+        tot = self.total_track_length_m
+        if tot <= 0:
+            return {
+                "gold_seconds": 10.0,
+                "silver_seconds": 12.0,
+                "bronze_seconds": 15.0,
+                "sector_time_s": 10.0,
+                "sector_length_m": 0.0,
+            }
+
+        start_dist, sec_len = self._compute_sector_length(tot, start_s, finish_s, start_mode)
+        t_accum = self._integrate_traversal_time(
+            start_dist, sec_len, start_mode, with_stop_box, step_m
+        )
+        gold, silver, bronze = self._calculate_medal_targets(t_accum, start_mode)
+
+        return {
+            "gold_seconds": gold,
+            "silver_seconds": silver,
+            "bronze_seconds": bronze,
+            "sector_time_s": round(t_accum, 3),
+            "sector_length_m": round(sec_len, 1),
+        }
+
+
 
 def profile_filename(track_id: str, layout: str, car_id: str, ai_level: int = 100) -> str:
     """Standardized profile cache filename."""
@@ -780,6 +911,66 @@ def get_or_calculate_initial_physics(
             save_telemetry_profile(profile)
 
     return profile.calculate_gate_physics(start_s, countdown_sec)
+
+
+def get_or_calculate_targets(
+    track_id: str,
+    layout: str = "",
+    car_id: Optional[str] = None,
+    start_s: float = 0.0,
+    finish_s: float = 1.0,
+    start_mode: str = "ROLLING",
+    with_stop_box: bool = False,
+    ai_level: int = 100,
+    countdown_sec: float = 3.0,
+    allow_live_engine: bool = False,
+    ac_root: str = DEFAULT_AC_ROOT,
+) -> Dict[str, Any]:
+    """
+    Retrieves or generates an authentic AI telemetry profile and computes:
+      1. Target times (Gold, Silver, Bronze) via numerical integration along the trajectory
+      2. Initial speed, spawn offset, gear, and RPM for start countdown
+    """
+    if not track_id:
+        raise ValueError(ERR_MISSING_TRACK_ID)
+    if not car_id:
+        raise ValueError(ERR_MISSING_CAR_ID)
+
+    profile = load_telemetry_profile(track_id, layout, car_id, ai_level)
+    if profile is None:
+        if allow_live_engine:
+            try:
+                profile = record_live_in_engine_telemetry(track_id, layout, car_id, ai_level, ac_root)
+                save_telemetry_profile(profile)
+            except Exception as e:
+                print(f"[!] Live in-engine recording encountered an issue: {e}. Falling back to spline.")
+                profile = None
+
+        if profile is None:
+            profile = calibrate_from_spline(track_id, layout, car_id, ai_level, ac_root)
+            save_telemetry_profile(profile)
+
+    targets_info = profile.calculate_sector_targets(
+        start_s=start_s,
+        finish_s=finish_s,
+        start_mode=start_mode,
+        with_stop_box=with_stop_box,
+    )
+    physics_info = profile.calculate_gate_physics(start_s, countdown_sec)
+
+    return {
+        "success": True,
+        "source": profile.source,
+        "recorded_at": profile.recorded_at,
+        "targets": {
+            "gold_seconds": targets_info["gold_seconds"],
+            "silver_seconds": targets_info["silver_seconds"],
+            "bronze_seconds": targets_info["bronze_seconds"],
+        },
+        "sector_time_s": targets_info["sector_time_s"],
+        "sector_length_m": targets_info["sector_length_m"],
+        "physics": physics_info,
+    }
 
 
 def _pregenerate_curriculum(ai_level: int, ac_root: str) -> int:

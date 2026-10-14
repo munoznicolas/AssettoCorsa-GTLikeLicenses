@@ -72,6 +72,18 @@ export const api = {
   },
 
   /**
+   * Numerically integrates telemetry points to calculate Gold, Silver, Bronze targets and launch physics.
+   */
+  async calculateTargets(payload) {
+    const res = await fetch("/api/calculate_targets", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    return await res.json();
+  },
+
+  /**
    * Get runner process queue and AC process status.
    */
   async getQueueStatus() {
@@ -87,6 +99,30 @@ export const api = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ job_id: jobId, cancel_all: cancelAll }),
+    });
+    return await res.json();
+  },
+
+  /**
+   * Fetch summary of rolling start tests missing track+car telemetry.
+   */
+  async getMissingTelemetry(tier = "ALL", includeFlying = true) {
+    const query = new URLSearchParams({
+      tier: tier || "ALL",
+      include_flying: includeFlying ? "1" : "0",
+    });
+    const res = await fetch(`/api/telemetry/missing?${query.toString()}`);
+    return await res.json();
+  },
+
+  /**
+   * Enqueue in-engine recording for all rolling start tests missing telemetry.
+   */
+  async queueMissingTelemetry(tier = "ALL", includeFlying = true) {
+    const res = await fetch("/api/telemetry/queue_missing", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tier, include_flying: includeFlying }),
     });
     return await res.json();
   },
