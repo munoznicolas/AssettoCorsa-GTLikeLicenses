@@ -730,7 +730,7 @@ function LicenseEngine:update(dt)
     end
   end
 
-  -- 3. Update AI Traffic Coordinator
+  -- 3. Update AI Coordinator
   if self.aiCoordinator then
     self.aiCoordinator:update(dt, self.sessionTime)
   end

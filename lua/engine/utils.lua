@@ -63,20 +63,6 @@ function Utils.safeRequire(name, errorOnFail)
     end
   end
 
-  -- Fallback for legacy gt_ prefixed module names
-  local legacy = name:match("^gt_(.+)$") or ("gt_" .. name)
-  local legacyCandidates = {
-    legacy,
-    "engine/" .. legacy,
-    "lua/engine/" .. legacy
-  }
-  for _, path in ipairs(legacyCandidates) do
-    local ok, mod = pcall(require, path)
-    if ok and mod ~= nil then
-      return mod
-    end
-  end
-
   if errorOnFail then
     error(string.format("utils: Failed to require '%s' across search paths", name))
   end
