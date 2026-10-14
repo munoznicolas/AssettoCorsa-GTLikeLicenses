@@ -74,6 +74,24 @@ function updateTestAISpeedDisplay(test) {
 }
 
 /**
+ * Load GT reference benchmark tests.
+ */
+async function loadReferenceTests() {
+  try {
+    const refData = await api.getReferenceTests();
+    if (refData?.success) {
+      state.referenceTests = refData.tests;
+      const refBadge = document.getElementById("ref-total-badge");
+      if (refBadge) {
+        refBadge.textContent = refData.count ?? refData.tests?.length ?? "";
+      }
+    }
+  } catch (err) {
+    console.warn("Could not load reference benchmark tests:", err);
+  }
+}
+
+/**
  * Initial load of curriculum, tracks, cars, and benchmark reference tests.
  */
 export async function loadInitialData() {
@@ -101,18 +119,7 @@ export async function loadInitialData() {
     }
 
     // 4. Fetch GT Reference Benchmark Tests
-    try {
-      const refData = await api.getReferenceTests();
-      if (refData.success) {
-        state.referenceTests = refData.tests;
-        const refBadge = document.getElementById("ref-total-badge");
-        if (refBadge) {
-          refBadge.textContent = refData.count ?? refData.tests?.length ?? "";
-        }
-      }
-    } catch (err) {
-      console.warn("Could not load reference benchmark tests:", err);
-    }
+    await loadReferenceTests();
   } catch (err) {
     console.error("Initialization failed:", err);
     showToast("Failed to load designer data: " + err.message, "error");
@@ -165,13 +172,58 @@ export function populateLayoutDropdown(trackId, selectedLayout = "") {
   for (const l of track.layouts) {
     const opt = document.createElement("option");
     opt.value = l.layout_id;
-    const layoutText = l.name || (l.layout_id ? l.layout_id : "Default Layout");
-    opt.textContent = layoutText;
+    opt.textContent = l.name || l.layout_id || "Default Layout";
     if (l.layout_id === selectedLayout) {
       opt.selected = true;
     }
     dom.selectLayout.appendChild(opt);
   }
+}
+
+/**
+ * Check if car matches AWD/4WD tokens.
+ */
+function matchesAwd(car, tok) {
+  return (
+    car.dt === "awd" ||
+    car.tags.includes("awd") ||
+    car.tags.includes("4wd") ||
+    car.tags.includes("mawd") ||
+    car.tags.includes("fawd") ||
+    car.id.includes(tok) ||
+    car.name.includes(tok)
+  );
+}
+
+/**
+ * Check if car matches specific drivetrain token (AWD, FWD, RWD).
+ */
+function matchesDrivetrainToken(car, tok) {
+  if (tok === "awd" || tok === "4wd") {
+    return matchesAwd(car, tok);
+  }
+  if (tok === "fwd") {
+    return car.dt === "fwd" || car.tags.includes("fwd") || car.id.includes(tok) || car.name.includes(tok);
+  }
+  if (tok === "rwd") {
+    return car.dt === "rwd" || car.tags.includes("rwd") || car.id.includes(tok) || car.name.includes(tok);
+  }
+  return null;
+}
+
+/**
+ * Check if a car matches a search token.
+ */
+function matchesCarToken(car, tok) {
+  const dtMatch = matchesDrivetrainToken(car, tok);
+  if (dtMatch !== null) return dtMatch;
+  return (
+    car.id.includes(tok) ||
+    car.name.includes(tok) ||
+    car.brand.includes(tok) ||
+    car.dt.includes(tok) ||
+    car.tags.some((t) => t.includes(tok))
+  );
 }
 
 /**
@@ -181,48 +233,14 @@ export function filterCars(query) {
   if (!query) return state.cars;
   const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
   return state.cars.filter((c) => {
-    const id = (c.car_id || "").toLowerCase();
-    const name = (c.name || "").toLowerCase();
-    const brand = (c.brand || "").toLowerCase();
-    const dt = (c.drivetrain || "").toLowerCase();
-    const tags = (c.tags || []).map((t) => String(t).toLowerCase());
-
-    return tokens.every((tok) => {
-      if (tok === "awd" || tok === "4wd") {
-        return (
-          dt === "awd" ||
-          tags.includes("awd") ||
-          tags.includes("4wd") ||
-          tags.includes("mawd") ||
-          tags.includes("fawd") ||
-          id.includes(tok) ||
-          name.includes(tok)
-        );
-      }
-      if (tok === "fwd") {
-        return (
-          dt === "fwd" ||
-          tags.includes("fwd") ||
-          id.includes(tok) ||
-          name.includes(tok)
-        );
-      }
-      if (tok === "rwd") {
-        return (
-          dt === "rwd" ||
-          tags.includes("rwd") ||
-          id.includes(tok) ||
-          name.includes(tok)
-        );
-      }
-      return (
-        id.includes(tok) ||
-        name.includes(tok) ||
-        brand.includes(tok) ||
-        dt.includes(tok) ||
-        tags.some((t) => t.includes(tok))
-      );
-    });
+    const carData = {
+      id: (c.car_id || "").toLowerCase(),
+      name: (c.name || "").toLowerCase(),
+      brand: (c.brand || "").toLowerCase(),
+      dt: (c.drivetrain || "").toLowerCase(),
+      tags: (c.tags || []).map((t) => String(t).toLowerCase()),
+    };
+    return tokens.every((tok) => matchesCarToken(carData, tok));
   });
 }
 
@@ -347,7 +365,7 @@ export function renderTestList() {
         <div class="test-item-meta">
           <span>🏁 ${lapTypeLabel}</span>
           <span>📍 ${escapeHtml(test.track_id)}</span>
-          <span>🥇 ${test.targets ? test.targets.gold_seconds.toFixed(2) + "s" : ""}</span>
+          <span>🥇 ${test.targets?.gold_seconds !== undefined ? `${test.targets.gold_seconds.toFixed(2)}s` : ""}</span>
         </div>
       </div>
     `;
@@ -369,6 +387,38 @@ export function isFullLapTest(test) {
 }
 
 /**
+ * Populate standard test text and dropdown fields in the form.
+ */
+function populateTestFormFields(test) {
+  if (dom.formTestIdBadge) dom.formTestIdBadge.textContent = test.test_id;
+  if (dom.inputTestId) dom.inputTestId.value = test.test_id;
+  if (dom.inputTitle) dom.inputTitle.value = test.title || "";
+  if (dom.inputObjective) dom.inputObjective.value = test.lesson_objective || "";
+  if (dom.inputDescription) dom.inputDescription.value = test.description || "";
+
+  if (dom.inputSearchTrack) dom.inputSearchTrack.value = "";
+  if (dom.inputSearchCar) dom.inputSearchCar.value = "";
+  populateTrackDropdown(test.track_id || "");
+  populateLayoutDropdown(test.track_id || "", test.track_layout || "");
+  populateCarDropdown(test.car_id || "");
+}
+
+/**
+ * Populate medal targets in the form.
+ */
+function populateTestTargets(test) {
+  const targets = test.targets || {
+    gold_seconds: 10,
+    silver_seconds: 12,
+    bronze_seconds: 15,
+  };
+  if (dom.targetGold) dom.targetGold.value = targets.gold_seconds;
+  if (dom.targetSilver) dom.targetSilver.value = targets.silver_seconds;
+  if (dom.targetBronze) dom.targetBronze.value = targets.bronze_seconds;
+  validateTargets();
+}
+
+/**
  * Load test definition into editing form controls.
  */
 export async function loadTestIntoForm(testIdx) {
@@ -383,19 +433,7 @@ export async function loadTestIntoForm(testIdx) {
     el.classList.toggle("active", idx === testIdx);
   });
 
-  // Populate Fields
-  if (dom.formTestIdBadge) dom.formTestIdBadge.textContent = test.test_id;
-  if (dom.inputTestId) dom.inputTestId.value = test.test_id;
-  if (dom.inputTitle) dom.inputTitle.value = test.title || "";
-  if (dom.inputObjective) dom.inputObjective.value = test.lesson_objective || "";
-  if (dom.inputDescription) dom.inputDescription.value = test.description || "";
-
-  // Reset search filters when loading a test
-  if (dom.inputSearchTrack) dom.inputSearchTrack.value = "";
-  if (dom.inputSearchCar) dom.inputSearchCar.value = "";
-  populateTrackDropdown(test.track_id || "");
-  populateLayoutDropdown(test.track_id || "", test.track_layout || "");
-  populateCarDropdown(test.car_id || "");
+  populateTestFormFields(test);
 
   // Lap Mode & Positions
   const fullLap = isFullLapTest(test);
@@ -411,16 +449,7 @@ export async function loadTestIntoForm(testIdx) {
   updateTestAISpeedDisplay(test);
   if (dom.checkStopBox) dom.checkStopBox.checked = Boolean(test.with_stop_box);
 
-  // Targets
-  const targets = test.targets || {
-    gold_seconds: 10,
-    silver_seconds: 12,
-    bronze_seconds: 15,
-  };
-  if (dom.targetGold) dom.targetGold.value = targets.gold_seconds;
-  if (dom.targetSilver) dom.targetSilver.value = targets.silver_seconds;
-  if (dom.targetBronze) dom.targetBronze.value = targets.bronze_seconds;
-  validateTargets();
+  populateTestTargets(test);
 
   // Fetch spline & render map
   await fetchAndRenderSpline(test.track_id, test.track_layout || "");
@@ -491,9 +520,61 @@ export function triggerAutoCalculateTargets(delay = 100, overrideStartS = null, 
   if (autoCalculateTargetsTimer) {
     clearTimeout(autoCalculateTargetsTimer);
   }
-  autoCalculateTargetsTimer = setTimeout(async () => {
-    await autoCalculateTargetsFromTelemetry(overrideStartS, overrideFinishS);
+  autoCalculateTargetsTimer = setTimeout(() => {
+    void autoCalculateTargetsFromTelemetry(overrideStartS, overrideFinishS);
   }, delay);
+}
+
+/**
+ * Update test physics parameters from calculation result.
+ */
+function applyCalculatedPhysics(test, physics, startMode) {
+  if (startMode === "STANDING" || !physics) return;
+  test.speed = physics.speed_kmh;
+  test.spawn_offset = physics.spawn_offset_m;
+  test.gear = physics.gear;
+  test.rpm = physics.rpm;
+  if (test.spawn) {
+    test.spawn.initial_speed_kmh = physics.speed_kmh;
+    test.spawn.spawn_offset_m = physics.spawn_offset_m;
+    test.spawn.initial_gear = physics.gear;
+    test.spawn.initial_rpm = physics.rpm;
+  }
+}
+
+/**
+ * Apply targets and physics from telemetry response to UI and test object.
+ */
+function applyCalculatedTargets(test, res, startMode) {
+  const tg = res.targets;
+  if (dom.targetGold) dom.targetGold.value = tg.gold_seconds.toFixed(1);
+  if (dom.targetSilver) dom.targetSilver.value = tg.silver_seconds.toFixed(1);
+  if (dom.targetBronze) dom.targetBronze.value = tg.bronze_seconds.toFixed(1);
+
+  test.targets = {
+    gold_seconds: tg.gold_seconds,
+    silver_seconds: tg.silver_seconds,
+    bronze_seconds: tg.bronze_seconds,
+  };
+
+  applyCalculatedPhysics(test, res.physics, startMode);
+  validateTargets();
+
+  const speedVal = res.physics?.speed_kmh ?? test.speed;
+  const modeLabel = startMode === "STANDING" ? "Standing Launch" : `${speedVal} km/h Handover`;
+  const sourceLabel = res.source ? ` (${res.source.replaceAll("_", " ")})` : "";
+  showAISpeedStatus(
+    `⚡ Telemetry Targets${sourceLabel}: Gold ${tg.gold_seconds}s | Silver ${tg.silver_seconds}s | Bronze ${tg.bronze_seconds}s • ${modeLabel} • Sector: ${res.sector_time_s}s (${res.sector_length_m}m)`
+  );
+}
+
+/**
+ * Get active start mode string from UI radio buttons.
+ */
+function getSelectedStartMode() {
+  if (dom.radioStanding?.checked) return "STANDING";
+  if (dom.radioRolling?.checked) return "ROLLING";
+  return "FLYING_LAP";
 }
 
 /**
@@ -504,20 +585,15 @@ export async function autoCalculateTargetsFromTelemetry(overrideStartS = null, o
   const test = activeTier?.tests ? activeTier.tests[state.activeTestIndex] : null;
   if (!test) return;
 
-  const trackId = dom.selectTrack ? dom.selectTrack.value : test.track_id;
-  const layout = dom.selectLayout ? dom.selectLayout.value : test.track_layout || "";
-  const carId = dom.selectCar ? dom.selectCar.value : test.car_id;
-  const rawStart = dom.inputStart ? dom.inputStart.value : test.start_s || 0;
-  const rawFinish = dom.inputFinish ? dom.inputFinish.value : test.finish_s || 1;
+  const trackId = dom.selectTrack?.value || test.track_id;
+  const layout = dom.selectLayout?.value ?? test.track_layout ?? "";
+  const carId = dom.selectCar?.value || test.car_id;
+  const rawStart = dom.inputStart?.value ?? test.start_s ?? 0;
+  const rawFinish = dom.inputFinish?.value ?? test.finish_s ?? 1;
   const startS = overrideStartS !== null ? overrideStartS : Number.parseFloat(rawStart);
   const finishS = overrideFinishS !== null ? overrideFinishS : Number.parseFloat(rawFinish);
 
-  let startMode = "FLYING_LAP";
-  if (dom.radioStanding?.checked) {
-    startMode = "STANDING";
-  } else if (dom.radioRolling?.checked) {
-    startMode = "ROLLING";
-  }
+  const startMode = getSelectedStartMode();
   const withStopBox = dom.checkStopBox ? dom.checkStopBox.checked : Boolean(test.with_stop_box);
 
   test.start_s = startS;
@@ -537,38 +613,7 @@ export async function autoCalculateTargetsFromTelemetry(overrideStartS = null, o
     });
 
     if (res?.success && res.targets) {
-      const tg = res.targets;
-      if (dom.targetGold) dom.targetGold.value = tg.gold_seconds.toFixed(1);
-      if (dom.targetSilver) dom.targetSilver.value = tg.silver_seconds.toFixed(1);
-      if (dom.targetBronze) dom.targetBronze.value = tg.bronze_seconds.toFixed(1);
-
-      test.targets = {
-        gold_seconds: tg.gold_seconds,
-        silver_seconds: tg.silver_seconds,
-        bronze_seconds: tg.bronze_seconds,
-      };
-
-      if (startMode !== "STANDING" && res.physics) {
-        test.speed = res.physics.speed_kmh;
-        test.spawn_offset = res.physics.spawn_offset_m;
-        test.gear = res.physics.gear;
-        test.rpm = res.physics.rpm;
-        if (test.spawn) {
-          test.spawn.initial_speed_kmh = res.physics.speed_kmh;
-          test.spawn.spawn_offset_m = res.physics.spawn_offset_m;
-          test.spawn.initial_gear = res.physics.gear;
-          test.spawn.initial_rpm = res.physics.rpm;
-        }
-      }
-
-      validateTargets();
-
-      const speedVal = res.physics?.speed_kmh ?? test.speed;
-      const modeLabel = startMode === "STANDING" ? "Standing Launch" : `${speedVal} km/h Handover`;
-      const sourceLabel = res.source ? ` (${res.source.replaceAll("_", " ")})` : "";
-      showAISpeedStatus(
-        `⚡ Telemetry Targets${sourceLabel}: Gold ${tg.gold_seconds}s | Silver ${tg.silver_seconds}s | Bronze ${tg.bronze_seconds}s • ${modeLabel} • Sector: ${res.sector_time_s}s (${res.sector_length_m}m)`
-      );
+      applyCalculatedTargets(test, res, startMode);
     }
   } catch (err) {
     console.warn("Auto-calculate targets error:", err);
@@ -648,11 +693,7 @@ export function renumberTierTests(tier) {
  * Auto-calculate spawn run-up distance based on speed and 3-second countdown.
  */
 export function autoCalculateSpawnOffset(test = null) {
-  let targetTest = test;
-  if (!targetTest) {
-    const activeTier = state.curriculum[state.activeTierIndex];
-    targetTest = activeTier?.tests ? activeTier.tests[state.activeTestIndex] : null;
-  }
+  const targetTest = test ?? state.curriculum[state.activeTierIndex]?.tests?.[state.activeTestIndex] ?? null;
   if (!targetTest) return;
   const spdKmh = Number.parseFloat(targetTest.speed) || 0;
   // Formula: spawn_offset = v_mps * 3.0 seconds
@@ -739,13 +780,13 @@ export function saveFormIntoActiveTest() {
   const test = activeTier.tests[state.activeTestIndex];
   if (!test) return;
 
-  test.test_id = dom.inputTestId ? dom.inputTestId.value.trim() : test.test_id;
-  test.title = dom.inputTitle ? dom.inputTitle.value.trim() : test.title;
-  test.lesson_objective = dom.inputObjective ? dom.inputObjective.value.trim() : "";
-  test.description = dom.inputDescription ? dom.inputDescription.value.trim() : "";
-  test.car_id = dom.selectCar ? dom.selectCar.value : test.car_id;
-  test.track_id = dom.selectTrack ? dom.selectTrack.value : test.track_id;
-  test.track_layout = dom.selectLayout ? dom.selectLayout.value : "";
+  test.test_id = dom.inputTestId?.value.trim() || test.test_id;
+  test.title = dom.inputTitle?.value.trim() || test.title;
+  test.lesson_objective = dom.inputObjective?.value.trim() ?? "";
+  test.description = dom.inputDescription?.value.trim() ?? "";
+  test.car_id = dom.selectCar?.value || test.car_id;
+  test.track_id = dom.selectTrack?.value || test.track_id;
+  test.track_layout = dom.selectLayout?.value ?? "";
 
   const rawStart = dom.inputStart?.value ?? 0;
   const rawFinish = dom.inputFinish?.value ?? 1;
@@ -792,8 +833,8 @@ function handleAddTest() {
     title: `Test ${count}: New Sector Challenge`,
     description: "Execute the prescribed driving line cleanly with zero track limit infractions.",
     lesson_objective: "Mastering vehicle balance through the sector.",
-    car_id: state.cars[0] ? state.cars[0].car_id : "ks_mazda_miata",
-    track_id: state.tracks[0] ? state.tracks[0].track_id : "ks_vallelunga",
+    car_id: state.cars[0]?.car_id ?? "ks_mazda_miata",
+    track_id: state.tracks[0]?.track_id ?? "ks_vallelunga",
     track_layout: "",
     start_mode: "ROLLING",
     start_s: 0.1,
@@ -906,17 +947,7 @@ function handleCardStandingClick() {
   const activeTier = state.curriculum[state.activeTierIndex];
   const test = activeTier?.tests ? activeTier.tests[state.activeTestIndex] : null;
   if (test) {
-    test.start_mode = "STANDING";
-    test.speed = 0.0;
-    test.spawn_offset = 0.0;
-    delete test.gear;
-    delete test.rpm;
-    if (test.spawn) {
-      test.spawn.initial_speed_kmh = 0.0;
-      test.spawn.spawn_offset_m = 0.0;
-      delete test.spawn.initial_gear;
-      delete test.spawn.initial_rpm;
-    }
+    applyStandingMode(test);
   }
   hideAISpeedStatus();
 }
@@ -984,7 +1015,9 @@ function setupSearchFilterListeners() {
     dom.inputSearchTrack.addEventListener("input", () => {
       populateTrackDropdown();
     });
-    dom.inputSearchTrack.addEventListener("keydown", handleTrackSearchKeydown);
+    dom.inputSearchTrack.addEventListener("keydown", (e) => {
+      void handleTrackSearchKeydown(e);
+    });
   }
 
   if (dom.btnClearTrackSearch) {
@@ -1022,17 +1055,17 @@ function setupSearchFilterListeners() {
  */
 function setupDropdownChangeListeners() {
   if (dom.selectTrack) {
-    dom.selectTrack.addEventListener("change", async (e) => {
+    dom.selectTrack.addEventListener("change", (e) => {
       const trackId = e.target.value;
       populateLayoutDropdown(trackId, "");
-      await fetchAndRenderSpline(trackId, dom.selectLayout?.value ?? "");
+      void fetchAndRenderSpline(trackId, dom.selectLayout?.value ?? "");
       triggerAutoCalculateTargets(100);
     });
   }
 
   if (dom.selectLayout) {
-    dom.selectLayout.addEventListener("change", async (e) => {
-      await fetchAndRenderSpline(dom.selectTrack?.value ?? "", e.target.value);
+    dom.selectLayout.addEventListener("change", (e) => {
+      void fetchAndRenderSpline(dom.selectTrack?.value ?? "", e.target.value);
       triggerAutoCalculateTargets(100);
     });
   }
@@ -1135,5 +1168,7 @@ export function setupEditorEventListeners() {
     el?.addEventListener("input", validateTargets);
   });
 
-  dom.form?.addEventListener("submit", handleFormSubmit);
+  dom.form?.addEventListener("submit", (e) => {
+    void handleFormSubmit(e);
+  });
 }

@@ -12,7 +12,7 @@ import math
 import os
 import re
 import sys
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if REPO_ROOT not in sys.path:
@@ -703,44 +703,62 @@ def _format_time_str(s: Optional[float]) -> str:
     return f"{m}:{sec_part:06.3f}"
 
 
+def _parse_ui_car_specs(
+    ui_path: str,
+    default_name: str,
+) -> Tuple[str, Optional[int], Optional[int], Optional[float]]:
+    """Extracts car display name, hp, weight, and pwratio from ui_car.json."""
+    if not os.path.isfile(ui_path):
+        return default_name, None, None, None
+
+    try:
+        with open(ui_path, "r", encoding="utf-8", errors="ignore") as f:
+            d = json.loads(f.read(), strict=False)
+            name = d.get("name", default_name)
+            specs = d.get("specs", {})
+
+            bhp_m = re.search(r"(\d+)", specs.get("bhp", ""))
+            hp = int(bhp_m.group(1)) if bhp_m else None
+
+            wt_m = re.search(r"(\d+)", specs.get("weight", ""))
+            wt = int(wt_m.group(1)) if wt_m else None
+
+            pw_m = re.search(r"([\d.]+)", specs.get("pwratio", ""))
+            pw = float(pw_m.group(1)) if pw_m else None
+
+            return name, hp, wt, pw
+    except Exception:
+        return default_name, None, None, None
+
+
+def _derive_missing_specs(
+    hp: Optional[int],
+    wt: Optional[int],
+    pw: Optional[float],
+) -> Tuple[Optional[int], Optional[float]]:
+    """Derives weight or power-to-weight ratio if one is missing and the other is available."""
+    if hp:
+        if wt and not pw:
+            pw = round(wt / hp, 2)
+        elif pw and not wt:
+            wt = round(hp * pw)
+    return wt, pw
+
+
 def _resolve_car_specs(
     car_id: str,
     default_name: str,
     ac_cars_dir: str,
 ) -> Tuple[str, int, Optional[int], Optional[float]]:
     """Resolves car display name, horsepower, weight, and power-to-weight ratio."""
-    hp: Optional[int] = None
-    wt: Optional[int] = None
-    pw: Optional[float] = None
-    car_display_name = default_name
-
     if car_id in CAR_SPECS_CACHE:
         hp, wt, pw, _ = CAR_SPECS_CACHE[car_id]
+        car_display_name = default_name
     else:
         ui_path = os.path.join(ac_cars_dir, car_id, "ui", "ui_car.json")
-        if os.path.isfile(ui_path):
-            try:
-                with open(ui_path, "r", encoding="utf-8", errors="ignore") as f:
-                    d = json.loads(f.read(), strict=False)
-                    car_display_name = d.get("name", default_name)
-                    specs = d.get("specs", {})
-                    bhp_m = re.search(r"(\d+)", specs.get("bhp", ""))
-                    if bhp_m:
-                        hp = int(bhp_m.group(1))
-                    wt_m = re.search(r"(\d+)", specs.get("weight", ""))
-                    if wt_m:
-                        wt = int(wt_m.group(1))
-                    pw_m = re.search(r"([\d.]+)", specs.get("pwratio", ""))
-                    if pw_m:
-                        pw = float(pw_m.group(1))
-            except Exception:
-                pass
+        car_display_name, hp, wt, pw = _parse_ui_car_specs(ui_path, default_name)
 
-    if hp and wt and not pw:
-        pw = round(wt / hp, 2)
-    if hp and pw and not wt:
-        wt = round(hp * pw)
-
+    wt, pw = _derive_missing_specs(hp, wt, pw)
     return car_display_name, hp or 200, wt, pw
 
 
@@ -1047,6 +1065,96 @@ def run_live_test(
     }
 
 
+def _extract_telemetry_combo(job_data: Optional[Dict[str, Any]]) -> Optional[Tuple[str, str, str]]:
+    """Extracts (track_id, track_layout, car_id) tuple if job is record_telemetry."""
+    if not job_data or job_data.get("type") != "record_telemetry":
+        return None
+    p = job_data.get("params", {})
+    return (p.get("track_id", ""), p.get("track_layout", ""), p.get("car_id", ""))
+
+
+def _get_queued_telemetry_combos(queue_status: Dict[str, Any]) -> Set[Tuple[str, str, str]]:
+    """Collects set of active or enqueued telemetry recording combos."""
+    queued_combos: Set[Tuple[str, str, str]] = set()
+    active_combo = _extract_telemetry_combo(queue_status.get("active_job"))
+    if active_combo:
+        queued_combos.add(active_combo)
+
+    for qj in queue_status.get("queue", []):
+        combo = _extract_telemetry_combo(qj)
+        if combo:
+            queued_combos.add(combo)
+    return queued_combos
+
+
+def _resolve_combo_status(is_cached: bool, is_queued: bool) -> str:
+    """Returns 'cached', 'queued', or 'missing' status for a telemetry combo."""
+    if is_cached:
+        return "cached"
+    if is_queued:
+        return "queued"
+    return "missing"
+
+
+def _is_tier_matching(tier_name: str, requested_tier: Optional[str]) -> bool:
+    """Checks whether tier matches filter (or filter is ALL/None)."""
+    if not requested_tier or requested_tier == "ALL":
+        return True
+    return tier_name.lower() == requested_tier.lower()
+
+
+def _collect_rolling_tests(
+    curriculum: List[Dict[str, Any]],
+    tier: Optional[str],
+    valid_modes: Set[str],
+) -> List[Tuple[Dict[str, Any], str]]:
+    """Gathers all rolling start tests matching tier filter and valid start modes."""
+    rolling_tests: List[Tuple[Dict[str, Any], str]] = []
+    for s in curriculum:
+        tier_name = s.get("tier_name", "")
+        if not _is_tier_matching(tier_name, tier):
+            continue
+
+        for t in s.get("tests", []):
+            if t.get("start_mode", "STANDING") not in valid_modes:
+                continue
+            if not t.get("track_id") or not t.get("car_id"):
+                continue
+            rolling_tests.append((t, tier_name))
+    return rolling_tests
+
+
+def _update_combo_entry(
+    combos_map: Dict[Tuple[str, str, str], Dict[str, Any]],
+    combo_key: Tuple[str, str, str],
+    test: Dict[str, Any],
+    tier_name: str,
+    is_cached: bool,
+    is_queued: bool,
+) -> None:
+    """Adds or updates combination entry in combos_map with test ID and tier."""
+    test_id = test.get("test_id", "")
+    if combo_key not in combos_map:
+        combos_map[combo_key] = {
+            "track_id": combo_key[0],
+            "track_layout": combo_key[1],
+            "car_id": combo_key[2],
+            "test_ids": [test_id],
+            "tiers": [tier_name],
+            "sample_test": test,
+            "is_cached": is_cached,
+            "is_queued": is_queued,
+            "status": _resolve_combo_status(is_cached, is_queued),
+        }
+        return
+
+    entry = combos_map[combo_key]
+    if test_id not in entry["test_ids"]:
+        entry["test_ids"].append(test_id)
+    if tier_name not in entry["tiers"]:
+        entry["tiers"].append(tier_name)
+
+
 def get_missing_telemetry_summary(
     tier: Optional[str] = None,
     include_flying: bool = True,
@@ -1061,74 +1169,34 @@ def get_missing_telemetry_summary(
 
     curriculum = load_curriculum()
     valid_modes = {"ROLLING", "FLYING_LAP"} if include_flying else {"ROLLING"}
-
-    # Query currently active / queued jobs in runner to detect in-progress recordings
-    queue_status = queue_mgr.get_status()
-    queued_combos = set()
-    active_job = queue_status.get("active_job")
-    if active_job and active_job.get("type") == "record_telemetry":
-        p = active_job.get("params", {})
-        queued_combos.add((p.get("track_id", ""), p.get("track_layout", ""), p.get("car_id", "")))
-    for qj in queue_status.get("queue", []):
-        if qj.get("type") == "record_telemetry":
-            p = qj.get("params", {})
-            queued_combos.add((p.get("track_id", ""), p.get("track_layout", ""), p.get("car_id", "")))
+    queued_combos = _get_queued_telemetry_combos(queue_mgr.get_status())
 
     combos_map: Dict[Tuple[str, str, str], Dict[str, Any]] = {}
-    missing_tests = []
-    total_rolling_tests = 0
+    missing_tests: List[Dict[str, Any]] = []
+    rolling_tests = _collect_rolling_tests(curriculum, tier, valid_modes)
 
-    for s in curriculum:
-        tier_name = s.get("tier_name", "")
-        if tier and tier != "ALL" and tier_name.lower() != tier.lower():
-            continue
+    for t, tier_name in rolling_tests:
+        track_id = t.get("track_id", "")
+        layout = t.get("track_layout", "")
+        car_id = t.get("car_id", "")
+        combo_key = (track_id, layout, car_id)
 
-        for t in s.get("tests", []):
-            start_mode = t.get("start_mode", "STANDING")
-            if start_mode not in valid_modes:
-                continue
+        profile = load_telemetry_profile(track_id, layout, car_id, ai_level=100)
+        is_cached = profile is not None
+        is_queued = combo_key in queued_combos
 
-            track_id = t.get("track_id", "")
-            layout = t.get("track_layout", "")
-            car_id = t.get("car_id", "")
-            if not track_id or not car_id:
-                continue
+        if not is_cached:
+            missing_tests.append({
+                "test_id": t.get("test_id", ""),
+                "tier": tier_name,
+                "title": t.get("title", ""),
+                "track_id": track_id,
+                "track_layout": layout,
+                "car_id": car_id,
+                "start_mode": t.get("start_mode", "STANDING"),
+            })
 
-            total_rolling_tests += 1
-            combo_key = (track_id, layout, car_id)
-
-            profile = load_telemetry_profile(track_id, layout, car_id, ai_level=100)
-            is_cached = profile is not None
-            is_queued = combo_key in queued_combos
-
-            if not is_cached:
-                missing_tests.append({
-                    "test_id": t.get("test_id", ""),
-                    "tier": tier_name,
-                    "title": t.get("title", ""),
-                    "track_id": track_id,
-                    "track_layout": layout,
-                    "car_id": car_id,
-                    "start_mode": start_mode,
-                })
-
-            if combo_key not in combos_map:
-                combos_map[combo_key] = {
-                    "track_id": track_id,
-                    "track_layout": layout,
-                    "car_id": car_id,
-                    "test_ids": [t.get("test_id", "")],
-                    "tiers": [tier_name],
-                    "sample_test": t,
-                    "is_cached": is_cached,
-                    "is_queued": is_queued,
-                    "status": "cached" if is_cached else ("queued" if is_queued else "missing"),
-                }
-            else:
-                if t.get("test_id", "") not in combos_map[combo_key]["test_ids"]:
-                    combos_map[combo_key]["test_ids"].append(t.get("test_id", ""))
-                if tier_name not in combos_map[combo_key]["tiers"]:
-                    combos_map[combo_key]["tiers"].append(tier_name)
+        _update_combo_entry(combos_map, combo_key, t, tier_name, is_cached, is_queued)
 
     unique_missing_combos = [c for c in combos_map.values() if not c["is_cached"]]
 
@@ -1136,7 +1204,7 @@ def get_missing_telemetry_summary(
         "success": True,
         "tier": tier or "ALL",
         "include_flying": include_flying,
-        "total_rolling_tests": total_rolling_tests,
+        "total_rolling_tests": len(rolling_tests),
         "missing_tests_count": len(missing_tests),
         "unique_combos_count": len(unique_missing_combos),
         "unique_missing_combos": unique_missing_combos,

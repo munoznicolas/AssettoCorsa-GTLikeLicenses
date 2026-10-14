@@ -502,13 +502,75 @@ export function closeMissingTelemetryModal() {
 }
 
 /**
+ * Render HTML for a telemetry combo status badge.
+ */
+function getTelemetryStatusBadge(combo) {
+  if (combo.is_cached) {
+    return `<span class="badge" style="background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4);">✓ Recorded</span>`;
+  }
+  if (combo.is_queued) {
+    return `<span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4);">⏳ In Queue</span>`;
+  }
+  return `<span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4);">⚠️ Missing</span>`;
+}
+
+/**
+ * Render a single telemetry combo table row.
+ */
+function renderTelemetryComboRow(combo) {
+  const statusBadge = getTelemetryStatusBadge(combo);
+  const layoutLabel = combo.track_layout
+    ? escapeHtml(combo.track_layout)
+    : `<span style="color: #64748b; font-style: italic;">Default</span>`;
+
+  const testTags = (combo.test_ids || []).map(id =>
+    `<span class="tag-code" style="font-size: 10px; margin-right: 4px; padding: 1px 5px; background: rgba(255,255,255,0.08); border-radius: 3px;">${escapeHtml(id)}</span>`
+  ).join("");
+
+  return `
+    <tr style="${combo.is_cached ? 'opacity: 0.6;' : ''}">
+      <td style="font-weight: 500; color: #f8fafc;">${escapeHtml(combo.track_id)}</td>
+      <td>${layoutLabel}</td>
+      <td style="color: #38bdf8; font-family: monospace;">${escapeHtml(combo.car_id)}</td>
+      <td>${testTags}</td>
+      <td>${statusBadge}</td>
+    </tr>
+  `;
+}
+
+/**
+ * Update UI controls and summary text for missing telemetry data.
+ */
+function updateMissingTelemetryUI(tier, data) {
+  const missingCount = data.missing_tests_count || 0;
+  const uniqueCombosCount = data.unique_combos_count || 0;
+
+  if (dom.telemetrySummaryText) {
+    dom.telemetrySummaryText.innerHTML = missingCount > 0
+      ? `Found <strong style="color: #fbbf24;">${missingCount} rolling start tests</strong> across <strong style="color: #38bdf8;">${uniqueCombosCount} unique track+car combinations</strong> lacking telemetry profiles in <strong>${escapeHtml(tier)}</strong>.`
+      : `<span style="color: #4ade80;">🏁 All rolling start tests in <strong>${escapeHtml(tier)}</strong> already have authentic telemetry recorded!</span>`;
+  }
+
+  if (dom.btnTelemetryEnqueue) {
+    dom.btnTelemetryEnqueue.disabled = uniqueCombosCount === 0;
+    dom.btnTelemetryEnqueue.innerHTML = uniqueCombosCount > 0
+      ? `<span>▶ Run Telemetry for Missing Combos (${uniqueCombosCount} Jobs)</span>`
+      : "<span>✓ All Telemetry Recorded</span>";
+  }
+
+  if (dom.telemetryQueueInfo) {
+    dom.telemetryQueueInfo.textContent = `Total in scope: ${data.total_rolling_tests || 0} rolling tests`;
+  }
+}
+
+/**
  * Fetch and render missing telemetry combinations table and summary.
  */
 export async function loadMissingTelemetryData() {
   if (!dom.telemetryCombosTableBody) return;
 
-  const tier = dom.selectTelemetryTier ? dom.selectTelemetryTier.value : "ALL";
-  const includeFlying = dom.checkIncludeFlying ? dom.checkIncludeFlying.checked : true;
+  const tier = dom.selectTelemetryTier?.value || "ALL";
+  const includeFlying = dom.checkIncludeFlying?.checked ?? true;
 
   if (dom.telemetrySummaryText) {
     dom.telemetrySummaryText.innerHTML = "⏳ Scanning curriculum tests for missing telemetry profiles...";
@@ -520,40 +582,16 @@ export async function loadMissingTelemetryData() {
 
   try {
     const data = await api.getMissingTelemetry(tier, includeFlying);
-    if (!data || !data.success) {
+    if (!data?.success) {
       if (dom.telemetrySummaryText) {
         dom.telemetrySummaryText.innerHTML = `<span style="color: #ef4444;">Error scanning tests: ${escapeHtml(data?.error || "Unknown error")}</span>`;
       }
       return;
     }
 
-    const missingCount = data.missing_tests_count || 0;
-    const uniqueCombosCount = data.unique_combos_count || 0;
+    updateMissingTelemetryUI(tier, data);
+
     const combos = data.all_combos || [];
-
-    if (dom.telemetrySummaryText) {
-      if (missingCount > 0) {
-        dom.telemetrySummaryText.innerHTML = `Found <strong style="color: #fbbf24;">${missingCount} rolling start tests</strong> across <strong style="color: #38bdf8;">${uniqueCombosCount} unique track+car combinations</strong> lacking telemetry profiles in <strong>${escapeHtml(tier)}</strong>.`;
-      } else {
-        dom.telemetrySummaryText.innerHTML = `<span style="color: #4ade80;">🏁 All rolling start tests in <strong>${escapeHtml(tier)}</strong> already have authentic telemetry recorded!</span>`;
-      }
-    }
-
-    if (dom.btnTelemetryEnqueue) {
-      if (uniqueCombosCount > 0) {
-        dom.btnTelemetryEnqueue.disabled = false;
-        dom.btnTelemetryEnqueue.innerHTML = `<span>▶ Run Telemetry for Missing Combos (${uniqueCombosCount} Jobs)</span>`;
-      } else {
-        dom.btnTelemetryEnqueue.disabled = true;
-        dom.btnTelemetryEnqueue.innerHTML = "<span>✓ All Telemetry Recorded</span>";
-      }
-    }
-
-    if (dom.telemetryQueueInfo) {
-      dom.telemetryQueueInfo.textContent = `Total in scope: ${data.total_rolling_tests || 0} rolling tests`;
-    }
-
-    // Render table rows
     if (combos.length === 0) {
       dom.telemetryCombosTableBody.innerHTML = `
         <tr>
@@ -565,34 +603,7 @@ export async function loadMissingTelemetryData() {
       return;
     }
 
-    dom.telemetryCombosTableBody.innerHTML = combos.map(combo => {
-      let statusBadge = "";
-      if (combo.is_cached) {
-        statusBadge = `<span class="badge" style="background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4);">✓ Recorded</span>`;
-      } else if (combo.is_queued) {
-        statusBadge = `<span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4);">⏳ In Queue</span>`;
-      } else {
-        statusBadge = `<span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4);">⚠️ Missing</span>`;
-      }
-
-      const layoutLabel = combo.track_layout
-        ? escapeHtml(combo.track_layout)
-        : `<span style="color: #64748b; font-style: italic;">Default</span>`;
-
-      const testTags = (combo.test_ids || []).map(id =>
-        `<span class="tag-code" style="font-size: 10px; margin-right: 4px; padding: 1px 5px; background: rgba(255,255,255,0.08); border-radius: 3px;">${escapeHtml(id)}</span>`
-      ).join("");
-
-      return `
-        <tr style="${combo.is_cached ? 'opacity: 0.6;' : ''}">
-          <td style="font-weight: 500; color: #f8fafc;">${escapeHtml(combo.track_id)}</td>
-          <td>${layoutLabel}</td>
-          <td style="color: #38bdf8; font-family: monospace;">${escapeHtml(combo.car_id)}</td>
-          <td>${testTags}</td>
-          <td>${statusBadge}</td>
-        </tr>
-      `;
-    }).join("");
+    dom.telemetryCombosTableBody.innerHTML = combos.map(renderTelemetryComboRow).join("");
 
   } catch (err) {
     if (dom.telemetrySummaryText) {
@@ -605,8 +616,8 @@ export async function loadMissingTelemetryData() {
  * Execute batch enqueuing of missing telemetry recordings.
  */
 export async function executeQueueMissingTelemetry() {
-  const tier = dom.selectTelemetryTier ? dom.selectTelemetryTier.value : "ALL";
-  const includeFlying = dom.checkIncludeFlying ? dom.checkIncludeFlying.checked : true;
+  const tier = dom.selectTelemetryTier?.value || "ALL";
+  const includeFlying = dom.checkIncludeFlying?.checked ?? true;
 
   if (dom.btnTelemetryEnqueue) {
     dom.btnTelemetryEnqueue.disabled = true;
@@ -615,7 +626,7 @@ export async function executeQueueMissingTelemetry() {
 
   try {
     const res = await api.queueMissingTelemetry(tier, includeFlying);
-    if (res && res.success) {
+    if (res?.success) {
       showToast(res.message || `Enqueued ${res.enqueued_count} telemetry recording session(s)!`, "success");
       void pollQueueStatus();
       await loadMissingTelemetryData();

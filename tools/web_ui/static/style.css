@@ -663,6 +663,17 @@ body {
   color: #fff;
 }
 
+.btn-warning {
+  background-color: #451a03;
+  color: #fef3c7;
+  border: 1px solid #b45309;
+}
+.btn-warning:hover {
+  background-color: #78350f;
+  color: #ffffff;
+  border-color: #d97706;
+}
+
 /* Badges */
 .badge {
   display: inline-block;
