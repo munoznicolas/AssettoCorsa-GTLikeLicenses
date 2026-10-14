@@ -46,13 +46,12 @@ def run_stage(name: str, cmd: list) -> bool:
 def main():
     print_header("ASSETTO CORSA GT LICENSES - FULL AUTOMATED VERIFICATION SUITE")
     stages = [
-        ("1. Lua Linter (11 modules)", [sys.executable, "tools/lint_lua.py"]),
+        ("1. Lua Linter (10 modules)", [sys.executable, "tools/lint_lua.py"]),
         ("2. Engine Math & Adjudication Geometry Tests", [sys.executable, "tests/unit/test_engine_math.py"]),
         ("3. UI Rendering Contract Tests", [sys.executable, "tests/unit/test_ui_modules.py"]),
-        ("4. Ghost Trajectory & Pacer Tests", [sys.executable, "tests/unit/test_ghost_manager.py"]),
-        ("5. Curriculum & Asset Validator", [sys.executable, "tools/validate_curriculum.py"]),
-        ("6. Layer 1: Headless 60 Hz Kinematic Simulation (348 Scenarios)", [sys.executable, "tools/simulate_all_tests.py"]),
-        ("7. Layer 2: In-Engine Launch & Asset Integrity (58 Tests Dry-Run)", [sys.executable, "tools/test_ac_launch.py", "--dry-run", "--all"]),
+        ("4. Curriculum & Asset Validator", [sys.executable, "tools/validate_curriculum.py"]),
+        ("5. Layer 1: Headless 60 Hz Kinematic Simulation (348 Scenarios)", [sys.executable, "tools/simulate_all_tests.py"]),
+        ("6. Layer 2: In-Engine Launch & Asset Integrity (58 Tests Dry-Run)", [sys.executable, "tools/test_ac_launch.py", "--dry-run", "--all"]),
     ]
 
     passed_count = 0

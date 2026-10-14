@@ -7,7 +7,6 @@
 
 local Theme           = require("ui/common/gt_ui_theme")
 local GTTimerWidget   = require("ui/screens/gt_timer_widget")
-local GTGhostWidget   = require("ui/screens/gt_ghost_widget")
 local GTModalOverlays = require("ui/screens/gt_modal_overlays")
 local GTLicenseShared = nil
 pcall(function() GTLicenseShared = require("engine/shared_state") end)
@@ -57,14 +56,6 @@ end
 -- Internal component functions retained for contract tests & legacy compatibility
 local function drawStopwatchCluster(screenW, sessionTime, targets, currentState)
     GTTimerWidget.drawFixed(screenW, sessionTime, targets, currentState)
-end
-
-local function drawGhostDelta(screenW, ghostState)
-    GTGhostWidget.drawFixedDelta(screenW, ghostState)
-end
-
-local function drawGhostOSD(screenW, screenH, ghostState)
-    GTGhostWidget.drawFixedOSD(screenW, screenH, ghostState)
 end
 
 local function drawCountdown(screenW, screenH, timer, isGo)
@@ -129,7 +120,7 @@ end
 
 --- Master HUD Drawing Hook
 --- Invoked within script.drawUI()
-function GTLicenseHUD.draw(sessionTime, targetsOrConfig, currentState, failReason, speedKmh, medalAchieved, callbacks, ghostState)
+function GTLicenseHUD.draw(sessionTime, targetsOrConfig, currentState, failReason, speedKmh, medalAchieved, callbacks)
     local uiState = ac and ac.getUI and ac.getUI()
     local screenW = (uiState and uiState.windowSize and uiState.windowSize.x) or 1920
     local screenH = (uiState and uiState.windowSize and uiState.windowSize.y) or 1080
@@ -159,14 +150,6 @@ function GTLicenseHUD.draw(sessionTime, targetsOrConfig, currentState, failReaso
     -- If movable UI App is not active, render in-race HUD widgets directly as fallback
     if not isUIAppActive() then
         drawStopwatchCluster(screenW, sessionTime, targets, currentState)
-        if currentState == GTLicenseHUD.STATE.RUNNING and ghostState then
-            drawGhostDelta(screenW, ghostState)
-        end
-    end
-
-    -- Ghost Hotkey Notification Banner
-    if ghostState then
-        drawGhostOSD(screenW, screenH, ghostState)
     end
 
     -- Fullscreen Modal Overlays (Always rendered cleanly in script.drawUI)
@@ -197,8 +180,7 @@ function GTLicenseHUD.drawHUD(opts)
         opts.failReason,
         opts.speedKmh or 0,
         opts.medalAchieved,
-        opts.callbacks,
-        opts.ghostState
+        opts.callbacks
     )
 end
 

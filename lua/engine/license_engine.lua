@@ -21,7 +21,6 @@ local Utils          = safeRequire("utils")
 local PhysicsHooks   = safeRequire("physics_hooks")
 local Adjudicator    = safeRequire("adjudicator")
 local SessionReset   = safeRequire("session_reset")
-local GhostManager   = safeRequire("ghost_manager")
 local ConfigLoader   = safeRequire("config_loader")
 local Results        = safeRequire("results")
 
@@ -208,13 +207,6 @@ function LicenseEngine.new(testDefinition)
       end
     end)
   end
-
-  -- Initialize Ghost Manager
-  local ghostTrajectory = nil
-  if self.testConfig.ghost and self.testConfig.ghost.trajectory then
-    ghostTrajectory = self.testConfig.ghost.trajectory
-  end
-  self.ghostManager = GhostManager.new(self.testConfig, ghostTrajectory)
 
   -- Initialize AI & Rolling Start Coordinator
   if AICoordinator then
@@ -446,9 +438,6 @@ function LicenseEngine:onSessionResetTriggered(reason)
   self.spawnInitialized = false
   PhysicsHooks.releaseFailureBraking(0)
   self.isAIRollingActive = false
-  if self.ghostManager then
-    self.ghostManager:reset()
-  end
   if self.telemetryLogger then
     self.telemetryLogger:reset()
   end
@@ -746,16 +735,6 @@ function LicenseEngine:update(dt)
     self.aiCoordinator:update(dt, self.sessionTime)
   end
 
-  -- 4. Update Ghost Manager
-  if self.ghostManager then
-    local carPos = nil
-    if car and car.position then
-      carPos = { car.position.x, car.position.y, car.position.z }
-    end
-    local gTime = (self.state == LicenseEngine.STATE.RUNNING) and self.sessionTime or 0.0
-    self.ghostManager:update(dt, gTime, carPos)
-  end
-
   -- 4. Update audio cues if audio manager is loaded
   if GTAudioManager and GTAudioManager.update then
     GTAudioManager.update(dt, self:getNumericState(), self.countdownTimer, self.achievedMedal)
@@ -785,15 +764,6 @@ function LicenseEngine:update(dt)
       self.sharedState.rpm = car.rpm or 0
     end
     self.sharedState.medalAchieved = self.achievedMedal or ""
-    if self.ghostManager then
-      local gState = self.ghostManager:getState()
-      if gState then
-        self.sharedState.ghostDelta = gState.delta or 0
-        self.sharedState.ghostActive = gState.active or false
-        self.sharedState.ghostMode = gState.mode or 1
-        self.sharedState.ghostOSD = gState.osd_message or ""
-      end
-    end
   end
 
   -- 6. Continuous in-game telemetry recording (samples across countdown, running, and restarts)
@@ -884,7 +854,6 @@ function LicenseEngine:drawUI()
       onRestart = function() self:restart() end,
       onExit = function() self:exitSession() end
     }
-    local ghostState = self.ghostManager and self.ghostManager:getState() or nil
     GTLicenseHUD.draw(
       self.sessionTime,
       self.testConfig,
@@ -892,14 +861,13 @@ function LicenseEngine:drawUI()
       self.failReason,
       speedKmh,
       self.achievedMedal,
-      callbacks,
-      ghostState
+      callbacks
     )
   end
 end
 
 function LicenseEngine:getGhostState()
-  return self.ghostManager and self.ghostManager:getState() or nil
+  return nil
 end
 
 -- ==============================================================================

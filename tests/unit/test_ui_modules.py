@@ -71,7 +71,6 @@ class TestUIModules(unittest.TestCase):
             "ui.beginTransparentWindow",
             "ui.endTransparentWindow",
             "drawStopwatchCluster",
-            "drawGhostDelta",
             "drawCountdown",
             "drawDisqualifiedBanner",
             "drawResultsScreen",
@@ -125,7 +124,7 @@ class TestUIModules(unittest.TestCase):
         screens_dir = REPO_ROOT / "lua" / "ui" / "screens"
         self.assertTrue((screens_dir / "gt_timer_widget.lua").is_file())
         self.assertFalse((screens_dir / "gt_banner_widget.lua").exists())
-        self.assertTrue((screens_dir / "gt_ghost_widget.lua").is_file())
+        self.assertFalse((screens_dir / "gt_ghost_widget.lua").exists())
         self.assertTrue((screens_dir / "gt_modal_overlays.lua").is_file())
 
         overlay_file = screens_dir / "gt_modal_overlays.lua"
@@ -157,18 +156,16 @@ class TestUIModules(unittest.TestCase):
             "FUNCTION_MAIN = configHUD",
             "ID = timer",
             "FUNCTION_MAIN = timerHUD",
-            "ID = ghost",
-            "FUNCTION_MAIN = ghostHUD",
         ]:
             self.assertIn(req, manifest_text)
         self.assertNotIn("ID = banner", manifest_text)
+        self.assertNotIn("ID = ghost", manifest_text)
 
         # Screens
         screens_dir = app_dir / "screens"
         self.assertTrue(screens_dir.is_dir(), "screens directory missing in gt_license app")
         required_screens = [
             "timer_screen.lua",
-            "ghost_screen.lua",
             "config_screen.lua",
             "settings.lua",
             "shared_state.lua",
@@ -177,6 +174,7 @@ class TestUIModules(unittest.TestCase):
         for s in required_screens:
             self.assertTrue((screens_dir / s).is_file(), f"Missing app screen: {s}")
         self.assertFalse((screens_dir / "banner_screen.lua").exists())
+        self.assertFalse((screens_dir / "ghost_screen.lua").exists())
 
         # Icons
         icons_dir = app_dir / "icons"

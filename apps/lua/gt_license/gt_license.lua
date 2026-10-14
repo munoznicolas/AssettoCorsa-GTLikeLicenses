@@ -9,5 +9,4 @@ require("screens/settings")
 require("screens/shared_state")
 
 require("screens/timer_screen")
-require("screens/ghost_screen")
 require("screens/config_screen")
