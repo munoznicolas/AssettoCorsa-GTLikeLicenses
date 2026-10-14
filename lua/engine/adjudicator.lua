@@ -8,7 +8,6 @@
 --              4. Stop box spatial containment and verified complete standstill
 --              5. Target time limit expiration (> bronze_seconds)
 --              6. 2D line segment gate crossing detection (start/finish)
---              7. Pace car speed and proximity regulation
 -- ==============================================================================
 
 local Adjudicator = {}
@@ -341,38 +340,6 @@ function Adjudicator:checkGateCrossings(currPos, sessionTime)
   return self.hasCrossedFinishGate
 end
 
----Adjudicates pace car rules (IB-5).
----@param car table
----@return boolean failed, string? reason
-function Adjudicator:checkPaceCarRules(car)
-  if not self.testConfig or self.testConfig.start_mode ~= "PACE_CAR" then
-    return false
-  end
-
-  local pc = self.testConfig.pace_car or {}
-  local paceCarIndex = pc.car_index or 1
-  local maxAllowedGap = pc.max_allowed_gap_m or 30.0
-
-  if ac and ac.getCar then
-    local paceCar = ac.getCar(paceCarIndex)
-    if paceCar then
-      -- Player cannot overtake pace car before green flag
-      if not self.hasPassedStartGate and car.splinePosition > paceCar.splinePosition then
-        return true, "Passed Pace Car Before Green Zone"
-      end
-
-      -- Player cannot fall too far behind pace car
-      local trackLength = (ac.getSim() and ac.getSim().trackLengthM) or 1000.0
-      local gap = (paceCar.splinePosition - car.splinePosition) * trackLength
-      if gap > maxAllowedGap then
-        return true, string.format("Fell Too Far Behind Pace Car (%.0fm > %.0fm)", gap, maxAllowedGap)
-      end
-    end
-  end
-
-  return false
-end
-
 ---Main per-frame adjudication tick implementing composable rule evaluation.
 ---@param dt number @Delta time in seconds
 ---@param sessionTime number @Active running time in seconds
@@ -423,15 +390,7 @@ function Adjudicator:_adjudicateInternal(dt, sessionTime, car)
     return { status = "FAILED", reason = self.failReason }
   end
 
-  -- 5. Check pace car compliance
-  local paceFailed, paceReason = self:checkPaceCarRules(car)
-  if paceFailed then
-    self.isDisqualified = true
-    self.failReason = paceReason
-    return { status = "FAILED", reason = self.failReason }
-  end
-
-  -- 6. Evaluate gate crossings
+  -- 5. Evaluate gate crossings
   self:checkGateCrossings(currPos, sessionTime)
 
   -- 7. Evaluate completion criteria (Stop Box vs Finish Gate)

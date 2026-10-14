@@ -1,7 +1,7 @@
 -- ==============================================================================
 -- Gran Turismo License Engine for Assetto Corsa (CSP)
 -- File: lua/engine/ai_coordinator.lua
--- Description: AI Traffic, Pace Car, and 2-Phase Rolling Start Coordinator.
+-- Description: AI Traffic and 2-Phase Rolling Start Coordinator.
 --              Handles spline progress distance math, proportional gap scaling,
 --              organic micro-weaving, and smooth green-flag transitions.
 -- ==============================================================================
@@ -117,14 +117,6 @@ function AICoordinator.new(testConfig)
   self.laneDistanceM = rs.lane_distance_m or 3.0
   self.p1LaneSide = rs.p1_lane_side or "LEFT"
 
-  -- Pace Car Parameters
-  local pc = testConfig.pace_car or {}
-  self.isPaceCarActive = (testConfig.start_mode == "PACE_CAR") or (pc.enabled == true)
-  self.paceCarIndex = pc.car_index or 1
-  self.paceSpeedKmh = pc.target_speed_kmh or 80.0
-  self.paceTargetGapM = pc.target_gap_m or 10.0
-  self.paceMaxAllowedGapM = pc.max_allowed_gap_m or 30.0
-
   -- Dynamic Tracking Tables
   self.currentSplineOffsets = {}
   self.hasEnteredPhase2 = {}
@@ -132,7 +124,7 @@ function AICoordinator.new(testConfig)
   return self
 end
 
----Updates AI traffic, pace car regulation, or rolling start state machine.
+---Updates AI traffic or rolling start state machine.
 ---@param dt number @Frame delta time in seconds
 ---@param sessionTime number @Accumulated session time in seconds
 function AICoordinator:update(dt, sessionTime)
@@ -141,33 +133,11 @@ function AICoordinator:update(dt, sessionTime)
   local sim = ac.getSim()
   local carsCount = sim.carsCount or 1
 
-  -- 1. Handle Pace Car Test Mode (IB-5)
-  if self.isPaceCarActive then
-    self:updatePaceCar(dt, sessionTime)
-  end
-
-  -- 2. Handle Rolling Start Procedure
+  -- Handle Rolling Start Procedure
   if self.testConfig.start_mode == "ROLLING" and not self.isGreenFlag then
     self:updateRollingStart(dt, sessionTime, carsCount)
   elseif self.isGreenFlag then
     self:updateGreenFlagTransition(dt, carsCount)
-  end
-end
-
----Regulates Pace Car behavior (e.g. IB-5 Pace Car Challenge).
----@param dt number @Frame delta time
----@param sessionTime number @Session time in seconds
-function AICoordinator:updatePaceCar(dt, sessionTime)
-  if not ac or not ac.getCar then return end
-
-  local paceCar = ac.getCar(self.paceCarIndex)
-  if not paceCar then return end
-
-  -- Apply top speed ceiling on Pace Car
-  if PhysicsHooks then
-    PhysicsHooks.setAITopSpeed(self.paceCarIndex, self.paceSpeedKmh)
-    PhysicsHooks.setAIThrottleLimit(self.paceCarIndex, 1.0)
-    PhysicsHooks.setAICaution(self.paceCarIndex, 2.0)
   end
 end
 

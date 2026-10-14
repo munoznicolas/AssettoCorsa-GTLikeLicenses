@@ -209,7 +209,7 @@ function LicenseEngine.new(testDefinition)
     end)
   end
 
-  -- Initialize Ghost & Pace Car Manager
+  -- Initialize Ghost Manager
   local ghostTrajectory = nil
   if self.testConfig.ghost and self.testConfig.ghost.trajectory then
     ghostTrajectory = self.testConfig.ghost.trajectory
@@ -741,12 +741,12 @@ function LicenseEngine:update(dt)
     end
   end
 
-  -- 3. Update AI Traffic & Pace Car Coordinator
+  -- 3. Update AI Traffic Coordinator
   if self.aiCoordinator then
     self.aiCoordinator:update(dt, self.sessionTime)
   end
 
-  -- 4. Update Ghost & Pace Car Manager
+  -- 4. Update Ghost Manager
   if self.ghostManager then
     local carPos = nil
     if car and car.position then

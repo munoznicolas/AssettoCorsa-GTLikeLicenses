@@ -12,7 +12,7 @@ GhostManager.__index = GhostManager
 GhostManager.MODE = {
   OFF   = 0, -- Ghost hidden
   EXACT = 1, -- Running at exact Gold medal pace (0.0s delta)
-  PACER = 2  -- Running ahead as a pace car (+0.5s lead)
+  PACER = 2  -- Running ahead as a pacer (+0.5s lead)
 }
 
 local MODE_NAMES = {
