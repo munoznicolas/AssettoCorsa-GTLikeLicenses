@@ -45,6 +45,9 @@ from tools.testing.ac_launcher import (
 )
 
 PROFILES_DIR = os.path.join(REPO_ROOT, "data", "telemetry_profiles")
+ACTIVE_TEST_FILENAME = "active_test.json"
+ERR_MISSING_TRACK_ID = "Missing required parameter: track_id"
+ERR_MISSING_CAR_ID = "Missing required parameter: car_id"
 
 
 class SPageFilePhysics(ctypes.Structure):
@@ -328,9 +331,9 @@ def calibrate_from_spline(
     Scales recorded reference speed by (ai_level / 100.0) and derives transmission states.
     """
     if not track_id:
-        raise ValueError("Missing required parameter: track_id")
+        raise ValueError(ERR_MISSING_TRACK_ID)
     if not car_id:
-        raise ValueError("Missing required parameter: car_id")
+        raise ValueError(ERR_MISSING_CAR_ID)
 
     spline_path = find_spline_file(track_id, layout, ac_root)
     if not spline_path:
@@ -374,43 +377,42 @@ def calibrate_from_spline(
     return profile
 
 
-def record_live_in_engine_telemetry(
-    track_id: str,
-    layout: str = "",
-    car_id: Optional[str] = None,
-    ai_level: int = 100,
-    ac_root: str = DEFAULT_AC_ROOT,
-    timeout_sec: Optional[int] = None,
-    stop_event: Optional[Any] = None,
-    proc_callback: Optional[Any] = None,
-) -> TelemetryProfile:
-    """
-    Launches acs.exe with AI_LEVEL=100 in Hotlap mode (HOTLAP_START flying lap)
-    and logs live 60Hz telemetry via Assetto Corsa Shared Memory.
-    Arms on start/finish line crossing and records exactly one full flying lap.
-    Falls back to calibrated spline profile if shared memory is inaccessible or run is cancelled.
-    """
-    if not track_id:
-        raise ValueError("Missing required parameter: track_id")
-    if not car_id:
-        raise ValueError("Missing required parameter: car_id")
-
-    print(f"[*] Initializing live in-engine {ai_level}% AI recording session for {car_id} at {track_id}...")
-
-    # Determine track length from AI spline if available
-    track_total_len = 1000.0
+def _get_track_total_len(track_id: str, layout: str, ac_root: str) -> float:
     try:
         spline_file = find_spline_file(track_id, layout, ac_root)
         if spline_file:
             parser = SplineParser(spline_file)
             if parser.total_length > 10.0:
-                track_total_len = parser.total_length
+                return parser.total_length
     except Exception as e:
         print(f"[*] Spline length pre-check note: {e}")
+    return 1000.0
 
-    if timeout_sec is None:
-        timeout_sec = max(240, int((track_total_len / 25.0) * 2.5) + 60)
 
+def _write_file_safely(path: str, content: str) -> None:
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(content)
+    except Exception:
+        pass
+
+
+def _remove_file_safely(path: str) -> None:
+    if os.path.isfile(path):
+        try:
+            os.remove(path)
+        except Exception:
+            pass
+
+
+def _prepare_recording_environment(
+    track_id: str,
+    layout: str,
+    car_id: str,
+    ai_level: int,
+    ac_root: str,
+) -> List[str]:
     test_data = {
         "car_id": car_id,
         "track_id": track_id,
@@ -428,18 +430,12 @@ def record_live_in_engine_telemetry(
         ai_test_mode=True,
     )
 
-    target_race_paths = [
+    for rp in [
         RACE_INI_PATH,
         os.path.join(ALT_USER_DOCS_AC, "cfg", "race.ini"),
         os.path.join(ac_root, "cfg", "race.ini"),
-    ]
-    for rp in target_race_paths:
-        try:
-            os.makedirs(os.path.dirname(rp), exist_ok=True)
-            with open(rp, "w", encoding="utf-8") as f:
-                f.write(race_ini_str)
-        except Exception:
-            pass
+    ]:
+        _write_file_safely(rp, race_ini_str)
 
     active_test_payload = {
         "test_id": "AI_TELEMETRY_RECORDER",
@@ -453,26 +449,256 @@ def record_live_in_engine_telemetry(
     active_test_json_str = json.dumps(active_test_payload, indent=2)
 
     active_test_targets = [
-        os.path.join(REPO_ROOT, "active_test.json"),
-        os.path.join(REPO_ROOT, "lua", "active_test.json"),
-        os.path.join(REPO_ROOT, "lua", "data", "active_test.json"),
-        os.path.join(ac_root, "extension", "lua", "new-modes", "gt-license", "active_test.json"),
-        os.path.join(ac_root, "extension", "lua", "new-modes", "gt-license", "data", "active_test.json"),
+        os.path.join(REPO_ROOT, ACTIVE_TEST_FILENAME),
+        os.path.join(REPO_ROOT, "lua", ACTIVE_TEST_FILENAME),
+        os.path.join(REPO_ROOT, "lua", "data", ACTIVE_TEST_FILENAME),
+        os.path.join(ac_root, "extension", "lua", "new-modes", "gt-license", ACTIVE_TEST_FILENAME),
+        os.path.join(ac_root, "extension", "lua", "new-modes", "gt-license", "data", ACTIVE_TEST_FILENAME),
     ]
     for atp in active_test_targets:
-        try:
-            os.makedirs(os.path.dirname(atp), exist_ok=True)
-            with open(atp, "w", encoding="utf-8") as f:
-                f.write(active_test_json_str)
-        except Exception:
-            pass
+        _write_file_safely(atp, active_test_json_str)
 
     for lp in [LOG_TXT_PATH, os.path.join(ALT_USER_DOCS_AC, "logs", "log.txt")]:
-        if os.path.isfile(lp):
+        _remove_file_safely(lp)
+
+    return active_test_targets
+
+
+def _connect_shared_memory(
+    proc: subprocess.Popen,
+    stop_event: Optional[Any] = None,
+    timeout_sec: float = 35.0,
+) -> Tuple[Optional[mmap.mmap], Optional[mmap.mmap]]:
+    connect_start = time.time()
+    while time.time() - connect_start < timeout_sec:
+        if stop_event and getattr(stop_event, "is_set", lambda: False)():
+            print("[*] Recording cancelled before shared memory connection.")
+            return None, None
+        if proc.poll() is not None:
+            print(f"[!] acs.exe terminated unexpectedly (code {proc.returncode})")
+            return None, None
+        try:
+            shm_physics = mmap.mmap(0, ctypes.sizeof(SPageFilePhysics), "Local\\acpmf_physics")
+            shm_graphics = mmap.mmap(0, ctypes.sizeof(SPageFileGraphic), "Local\\acpmf_graphics")
+            print("[+] Connected to Assetto Corsa Shared Memory!")
+            return shm_physics, shm_graphics
+        except OSError:
+            time.sleep(0.5)
+
+    print("[!] Could not connect to Assetto Corsa Shared Memory in time.")
+    return None, None
+
+
+class _LiveTelemetrySession:
+    """Manages state transitions and sample collection for live telemetry recording."""
+
+    def __init__(self, track_total_len: float) -> None:
+        self.track_total_len = track_total_len
+        self.samples: List[TelemetrySample] = []
+        self.recording_state = "WAITING"
+        self.initial_completed_laps: Optional[int] = None
+        self.has_passed_midpoint = False
+        self.lap_start_time: Optional[float] = None
+        self.prev_progress = -1.0
+        self.start_wait_time = time.time()
+        self.lap_duration = 0.0
+
+    @staticmethod
+    def _map_gear(gear_raw: int, spd_raw: float) -> int:
+        if gear_raw <= 1:
+            return 1 if spd_raw > 15.0 else 0
+        return gear_raw - 1
+
+    def _should_start_lap(self, progress: float, spd_raw: float, is_in_pit: int) -> bool:
+        if is_in_pit != 0 or spd_raw <= 30.0:
+            return False
+        line_crossed = (self.prev_progress > 0.75 and progress < 0.25)
+        spawned_on_flying_lap = (
+            self.prev_progress < 0
+            and progress < 0.10
+            and spd_raw > 50.0
+            and (time.time() - self.start_wait_time < 5.0)
+        )
+        return line_crossed or spawned_on_flying_lap
+
+    def _handle_waiting(self, progress: float, spd_raw: float, completed_laps: int, is_in_pit: int) -> None:
+        if not self._should_start_lap(progress, spd_raw, is_in_pit):
+            return
+        self.recording_state = "RECORDING"
+        self.initial_completed_laps = completed_laps
+        self.lap_start_time = time.time()
+        self.samples.clear()
+        self.has_passed_midpoint = False
+        print(
+            f"[+] Flying lap STARTED at progress={progress:.3f}, speed={spd_raw:.1f} km/h (laps={completed_laps})! Capturing telemetry..."
+        )
+
+    def _should_finish_lap(self, progress: float, completed_laps: int) -> bool:
+        if not self.has_passed_midpoint or len(self.samples) < 300:
+            return False
+        line_finished = (self.prev_progress > 0.80 and progress < 0.20)
+        laps_incremented = (
+            self.initial_completed_laps is not None and completed_laps > self.initial_completed_laps
+        )
+        return line_finished or laps_incremented
+
+    def _handle_recording(
+        self,
+        progress: float,
+        spd_raw: float,
+        gear: int,
+        rpm_raw: int,
+        steer_angle: float,
+        completed_laps: int,
+        i_last_time: int,
+        session_start_time: float,
+    ) -> bool:
+        if 0.35 < progress < 0.75:
+            self.has_passed_midpoint = True
+
+        dist_m = progress * self.track_total_len
+        self.samples.append(
+            TelemetrySample(
+                progress=round(progress, 4),
+                distance_m=round(dist_m, 2),
+                speed_kmh=round(spd_raw, 1),
+                gear=gear,
+                rpm=rpm_raw,
+                steer_norm=round(steer_angle, 3),
+            )
+        )
+
+        if len(self.samples) % 150 == 0:
+            print(
+                f"    [Lap Telemetry] Progress: {progress*100:.1f}% | Speed: {spd_raw:.1f} km/h | Gear: {gear} | RPM: {rpm_raw} | Samples: {len(self.samples)}"
+            )
+
+        if self._should_finish_lap(progress, completed_laps):
+            self.recording_state = "COMPLETED"
+            self.lap_duration = (
+                round(i_last_time / 1000.0, 3)
+                if i_last_time > 0
+                else round(time.time() - (self.lap_start_time or session_start_time), 2)
+            )
+            print(
+                f"[+] Completed flying lap telemetry capture! ({len(self.samples)} samples, lap time: {self.lap_duration:.2f}s)"
+            )
+            return True
+        return False
+
+    def process_frame(
+        self,
+        phys: SPageFilePhysics,
+        graph: SPageFileGraphic,
+        session_start_time: float,
+    ) -> bool:
+        """Processes a single telemetry frame. Returns True if lap completed."""
+        spd_raw = float(phys.speedKmh)
+        gear_raw = int(phys.gear)
+        rpm_raw = int(phys.rpms)
+        steer_angle = float(phys.steerAngle)
+
+        progress = float(graph.normalizedCarPosition)
+        completed_laps = int(graph.completedLaps)
+        is_in_pit = int(graph.isInPit) or int(graph.isInPitLine)
+        i_last_time = int(graph.iLastTime)
+        gear = self._map_gear(gear_raw, spd_raw)
+
+        lap_finished = False
+        if self.recording_state == "WAITING":
+            self._handle_waiting(progress, spd_raw, completed_laps, is_in_pit)
+        elif self.recording_state == "RECORDING":
+            lap_finished = self._handle_recording(
+                progress, spd_raw, gear, rpm_raw, steer_angle, completed_laps, i_last_time, session_start_time
+            )
+
+        self.prev_progress = progress
+        return lap_finished
+
+
+def _record_telemetry_loop(
+    shm_physics: mmap.mmap,
+    shm_graphics: mmap.mmap,
+    proc: subprocess.Popen,
+    track_total_len: float,
+    timeout_sec: int,
+    stop_event: Optional[Any],
+) -> Tuple[List[TelemetrySample], float, float]:
+    phys = SPageFilePhysics.from_buffer(shm_physics)
+    graph = SPageFileGraphic.from_buffer(shm_graphics)
+    session = _LiveTelemetrySession(track_total_len)
+    start_time = time.time()
+
+    try:
+        while time.time() - start_time < timeout_sec:
+            if stop_event and getattr(stop_event, "is_set", lambda: False)():
+                print("[*] Recording session received cancellation signal.")
+                break
+            if proc.poll() is not None:
+                break
+
+            if session.process_frame(phys, graph, start_time):
+                break
+
+            time.sleep(0.035)
+    except Exception as e:
+        print(f"[!] Shared memory reading note: {e}")
+
+    return session.samples, session.lap_duration, start_time
+
+
+def _cleanup_recording_resources(
+    shm_physics: Optional[mmap.mmap],
+    shm_graphics: Optional[mmap.mmap],
+    proc: Optional[subprocess.Popen],
+    active_test_targets: List[str],
+) -> None:
+    for shm in (shm_physics, shm_graphics):
+        if shm:
             try:
-                os.remove(lp)
+                shm.close()
             except Exception:
                 pass
+
+    if proc and proc.poll() is None:
+        proc.terminate()
+        try:
+            proc.wait(timeout=3)
+        except Exception:
+            proc.kill()
+
+    for atp in active_test_targets:
+        _remove_file_safely(atp)
+
+
+def record_live_in_engine_telemetry(
+    track_id: str,
+    layout: str = "",
+    car_id: Optional[str] = None,
+    ai_level: int = 100,
+    ac_root: str = DEFAULT_AC_ROOT,
+    timeout_sec: Optional[int] = None,
+    stop_event: Optional[Any] = None,
+    proc_callback: Optional[Any] = None,
+) -> TelemetryProfile:
+    """
+    Launches acs.exe with AI_LEVEL=100 in Hotlap mode (HOTLAP_START flying lap)
+    and logs live 60Hz telemetry via Assetto Corsa Shared Memory.
+    Arms on start/finish line crossing and records exactly one full flying lap.
+    Falls back to calibrated spline profile if shared memory is inaccessible or run is cancelled.
+    """
+    if not track_id:
+        raise ValueError(ERR_MISSING_TRACK_ID)
+    if not car_id:
+        raise ValueError(ERR_MISSING_CAR_ID)
+
+    print(f"[*] Initializing live in-engine {ai_level}% AI recording session for {car_id} at {track_id}...")
+
+    track_total_len = _get_track_total_len(track_id, layout, ac_root)
+    if timeout_sec is None:
+        timeout_sec = max(240, int((track_total_len / 25.0) * 2.5) + 60)
+
+    active_test_targets = _prepare_recording_environment(track_id, layout, car_id, ai_level, ac_root)
 
     acs_exe = os.path.join(ac_root, "acs.exe")
     if not os.path.isfile(acs_exe):
@@ -484,166 +710,27 @@ def record_live_in_engine_telemetry(
     if proc_callback:
         proc_callback(proc)
 
-    samples: List[TelemetrySample] = []
     shm_physics = None
     shm_graphics = None
+    samples: List[TelemetrySample] = []
     lap_duration = 0.0
+    start_time = time.time()
 
     try:
-        # Wait up to 35 seconds for Assetto Corsa to load and initialize shared memory
-        connected = False
-        connect_start = time.time()
-        while time.time() - connect_start < 35.0:
-            if stop_event and getattr(stop_event, "is_set", lambda: False)():
-                print("[*] Recording cancelled before shared memory connection.")
-                break
-            if proc.poll() is not None:
-                print(f"[!] acs.exe terminated unexpectedly (code {proc.returncode})")
-                break
-            try:
-                shm_physics = mmap.mmap(0, ctypes.sizeof(SPageFilePhysics), "Local\\acpmf_physics")
-                shm_graphics = mmap.mmap(0, ctypes.sizeof(SPageFileGraphic), "Local\\acpmf_graphics")
-                connected = True
-                print("[+] Connected to Assetto Corsa Shared Memory!")
-                break
-            except OSError:
-                time.sleep(0.5)
-
-        if not connected:
-            print("[!] Could not connect to Assetto Corsa Shared Memory in time.")
+        shm_physics, shm_graphics = _connect_shared_memory(proc, stop_event=stop_event)
+        if not shm_physics or not shm_graphics:
             return calibrate_from_spline(track_id, layout, car_id, ai_level, ac_root)
 
-        phys = SPageFilePhysics.from_buffer(shm_physics)
-        graph = SPageFileGraphic.from_buffer(shm_graphics)
-
-        start_time = time.time()
-        recording_state = "WAITING"
-        initial_completed_laps = None
-        has_passed_midpoint = False
-        lap_start_time = None
-        prev_progress = -1.0
-        start_wait_time = time.time()
-
-        # Sample at ~25-30Hz
-        while time.time() - start_time < timeout_sec:
-            if stop_event and getattr(stop_event, "is_set", lambda: False)():
-                print("[*] Recording session received cancellation signal.")
-                break
-            if proc.poll() is not None:
-                break
-
-            spd_raw = float(phys.speedKmh)
-            gear_raw = int(phys.gear)
-            rpm_raw = int(phys.rpms)
-            steer_angle = float(phys.steerAngle)
-
-            progress = float(graph.normalizedCarPosition)
-            completed_laps = int(graph.completedLaps)
-            is_in_pit = int(graph.isInPit) or int(graph.isInPitLine)
-            i_last_time = int(graph.iLastTime)
-
-            # Map Assetto Corsa gear (0=R, 1=N, 2=1st, 3=2nd...) to 1-based gear
-            if gear_raw <= 1:
-                gear = 1 if spd_raw > 15.0 else 0
-            else:
-                gear = gear_raw - 1
-
-            if recording_state == "WAITING":
-                # Detect start of flying lap:
-                # 1. Car must be on-track (not in pit) and moving at speed (> 30 km/h)
-                # 2. Car crosses the start/finish line (wrap from > 0.75 to < 0.25)
-                #    OR car spawned directly at progress < 0.10 at road speed (> 50 km/h) within the first 5s
-                line_crossed = (prev_progress > 0.75 and progress < 0.25)
-                spawned_on_flying_lap = (
-                    prev_progress < 0 and progress < 0.10 and spd_raw > 50.0 and (time.time() - start_wait_time < 5.0)
-                )
-
-                if (line_crossed or spawned_on_flying_lap) and is_in_pit == 0 and spd_raw > 30.0:
-                    recording_state = "RECORDING"
-                    initial_completed_laps = completed_laps
-                    lap_start_time = time.time()
-                    samples.clear()
-                    has_passed_midpoint = False
-                    print(
-                        f"[+] Flying lap STARTED at progress={progress:.3f}, speed={spd_raw:.1f} km/h (laps={completed_laps})! Capturing telemetry..."
-                    )
-
-            elif recording_state == "RECORDING":
-                # Track midpoint crossing (must drive through middle of the track before lap can finish)
-                if progress > 0.35 and progress < 0.75:
-                    has_passed_midpoint = True
-
-                dist_m = progress * track_total_len
-                samples.append(
-                    TelemetrySample(
-                        progress=round(progress, 4),
-                        distance_m=round(dist_m, 2),
-                        speed_kmh=round(spd_raw, 1),
-                        gear=gear,
-                        rpm=rpm_raw,
-                        steer_norm=round(steer_angle, 3),
-                    )
-                )
-
-                # Periodic progress logging
-                if len(samples) % 150 == 0:
-                    print(
-                        f"    [Lap Telemetry] Progress: {progress*100:.1f}% | Speed: {spd_raw:.1f} km/h | Gear: {gear} | RPM: {rpm_raw} | Samples: {len(samples)}"
-                    )
-
-                # Detect flying lap completion:
-                # Must have passed midpoint, recorded at least 300 samples (~10s),
-                # and either crossed finish line (wrap from > 0.80 to < 0.20) or completedLaps incremented
-                line_finished = (prev_progress > 0.80 and progress < 0.20)
-                laps_incremented = (
-                    initial_completed_laps is not None and completed_laps > initial_completed_laps
-                )
-
-                if has_passed_midpoint and len(samples) >= 300 and (line_finished or laps_incremented):
-                    recording_state = "COMPLETED"
-                    lap_duration = (
-                        round(i_last_time / 1000.0, 3)
-                        if i_last_time > 0
-                        else round(time.time() - (lap_start_time or start_time), 2)
-                    )
-                    print(
-                        f"[+] Completed flying lap telemetry capture! ({len(samples)} samples, lap time: {lap_duration:.2f}s)"
-                    )
-                    break
-
-            prev_progress = progress
-            time.sleep(0.035)
-
-    except Exception as e:
-        print(f"[!] Shared memory reading note: {e}")
+        samples, lap_duration, start_time = _record_telemetry_loop(
+            shm_physics, shm_graphics, proc, track_total_len, timeout_sec, stop_event
+        )
     finally:
-        if shm_physics:
-            try:
-                shm_physics.close()
-            except Exception:
-                pass
-        if shm_graphics:
-            try:
-                shm_graphics.close()
-            except Exception:
-                pass
-        if proc.poll() is None:
-            proc.terminate()
-            try:
-                proc.wait(timeout=3)
-            except Exception:
-                proc.kill()
-        for atp in active_test_targets:
-            if os.path.isfile(atp):
-                try:
-                    os.remove(atp)
-                except Exception:
-                    pass
+        _cleanup_recording_resources(shm_physics, shm_graphics, proc, active_test_targets)
 
     if len(samples) > 100:
         samples.sort(key=lambda s: s.progress)
         print(f"[+] Successfully captured {len(samples)} live telemetry samples across full circuit.")
-        profile = TelemetryProfile(
+        return TelemetryProfile(
             track_id=track_id,
             track_layout=layout,
             car_id=car_id,
@@ -654,7 +741,6 @@ def record_live_in_engine_telemetry(
             sample_count=len(samples),
             samples=samples,
         )
-        return profile
 
     print("[*] Insufficient live samples collected. Generating high-fidelity calibrated spline profile...")
     return calibrate_from_spline(track_id, layout, car_id, ai_level, ac_root)
@@ -675,9 +761,9 @@ def get_or_calculate_initial_physics(
     the exact gate speed, spawn offset, gear, and RPM for a rolling start or flying lap.
     """
     if not track_id:
-        raise ValueError("Missing required parameter: track_id")
+        raise ValueError(ERR_MISSING_TRACK_ID)
     if not car_id:
-        raise ValueError("Missing required parameter: car_id")
+        raise ValueError(ERR_MISSING_CAR_ID)
 
     profile = load_telemetry_profile(track_id, layout, car_id, ai_level)
     if profile is None:
@@ -696,54 +782,32 @@ def get_or_calculate_initial_physics(
     return profile.calculate_gate_physics(start_s, countdown_sec)
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description="Assetto Corsa 100% AI Telemetry Recorder & Profiler")
-    parser.add_argument("--track", type=str, help="Track ID")
-    parser.add_argument("--layout", type=str, default="", help="Track layout (default: empty for base layout)")
-    parser.add_argument("--car", type=str, help="Car ID")
-    parser.add_argument("--ai-level", type=int, default=100, help="AI proficiency level (default: 100)")
-    parser.add_argument("--live", action="store_true", help="Launch acs.exe to record live in-engine telemetry")
-    parser.add_argument("--all-curriculum", action="store_true", help="Pre-generate telemetry profiles for all curriculum track/car pairings")
-    parser.add_argument("--ac-root", type=str, default=DEFAULT_AC_ROOT, help="Assetto Corsa installation root")
+def _pregenerate_curriculum(ai_level: int, ac_root: str) -> int:
+    from generate_all_content import TEST_CATALOG
 
-    args = parser.parse_args()
+    pairings = {(t["track_id"], t.get("track_layout", ""), t["car_id"]) for t in TEST_CATALOG}
+    print(f"[*] Pre-generating 95% AI telemetry profiles for {len(pairings)} curriculum track/car pairings...")
+    count = 0
+    for tid, lay, cid in sorted(pairings):
+        try:
+            prof = calibrate_from_spline(tid, lay, cid, ai_level, ac_root)
+            save_telemetry_profile(prof)
+            count += 1
+            print(f"  [{count:02d}/{len(pairings)}] Cached: {tid} [{lay or 'default'}] + {cid} (lap: {prof.lap_time_s:.1f}s)")
+        except Exception as e:
+            print(f"  [!] Skipped {tid} [{lay}]: {e}")
+    print(f"[+] Pre-generation complete! {count} telemetry profiles ready in {PROFILES_DIR}")
+    return 0 if count == len(pairings) else 1
 
-    if not args.all_curriculum:
-        missing = []
-        if not args.track:
-            missing.append("--track")
-        if not args.car:
-            missing.append("--car")
-        if missing:
-            parser.error(f"missing required parameter: {', '.join(missing)}")
 
-    if args.all_curriculum:
-        from generate_all_content import TEST_CATALOG
-        pairings = set((t["track_id"], t.get("track_layout", ""), t["car_id"]) for t in TEST_CATALOG)
-        print(f"[*] Pre-generating 95% AI telemetry profiles for {len(pairings)} curriculum track/car pairings...")
-        count = 0
-        for tid, lay, cid in sorted(pairings):
-            try:
-                prof = calibrate_from_spline(tid, lay, cid, args.ai_level, args.ac_root)
-                saved_path = save_telemetry_profile(prof)
-                count += 1
-                print(f"  [{count:02d}/{len(pairings)}] Cached: {tid} [{lay or 'default'}] + {cid} (lap: {prof.lap_time_s:.1f}s)")
-            except Exception as e:
-                print(f"  [!] Skipped {tid} [{lay}]: {e}")
-        print(f"[+] Pre-generation complete! {count} telemetry profiles ready in {PROFILES_DIR}")
-        return 0
-
-    if args.live:
-        profile = record_live_in_engine_telemetry(args.track, args.layout, args.car, args.ai_level, args.ac_root)
-    else:
-        profile = calibrate_from_spline(args.track, args.layout, args.car, args.ai_level, args.ac_root)
-
-    path = save_telemetry_profile(profile)
-    print(f"\n[+] 95% AI Telemetry Profile saved:")
+def _print_profile_summary(profile: TelemetryProfile, path: str) -> None:
+    print("\n[+] 95% AI Telemetry Profile saved:")
     print(f"    Path: {path}")
     print(f"    Track: {profile.track_id} [{profile.track_layout or 'default'}]")
     print(f"    Car: {profile.car_id} | AI Level: {profile.ai_level}%")
-    print(f"    Length: {profile.total_track_length_m:.1f}m | Lap Time: {profile.lap_time_s:.1f}s | Samples: {profile.sample_count}")
+    print(
+        f"    Length: {profile.total_track_length_m:.1f}m | Lap Time: {profile.lap_time_s:.1f}s | Samples: {profile.sample_count}"
+    )
 
     # Display sample straight speeds
     print("\n  Sample Telemetry Checkpoints:")
@@ -752,6 +816,44 @@ def main() -> int:
             spd, gear, rpm = profile.query_sample(dist)
             print(f"    dist {dist:6.1f}m -> Speed: {spd:5.1f} km/h | Gear: {gear} | RPM: {rpm}")
 
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Assetto Corsa 100% AI Telemetry Recorder & Profiler")
+    parser.add_argument("--track", type=str, help="Track ID")
+    parser.add_argument("--layout", type=str, default="", help="Track layout (default: empty for base layout)")
+    parser.add_argument("--car", type=str, help="Car ID")
+    parser.add_argument("--ai-level", type=int, default=100, help="AI proficiency level (default: 100)")
+    parser.add_argument("--live", action="store_true", help="Launch acs.exe to record live in-engine telemetry")
+    parser.add_argument(
+        "--all-curriculum",
+        action="store_true",
+        help="Pre-generate telemetry profiles for all curriculum track/car pairings",
+    )
+    parser.add_argument("--ac-root", type=str, default=DEFAULT_AC_ROOT, help="Assetto Corsa installation root")
+
+    args = parser.parse_args()
+
+    if args.all_curriculum:
+        return _pregenerate_curriculum(args.ai_level, args.ac_root)
+
+    missing = []
+    if not args.track:
+        missing.append("--track")
+    if not args.car:
+        missing.append("--car")
+    if missing:
+        parser.error(f"missing required parameter: {', '.join(missing)}")
+
+    if args.live:
+        profile = record_live_in_engine_telemetry(args.track, args.layout, args.car, args.ai_level, args.ac_root)
+    else:
+        profile = calibrate_from_spline(args.track, args.layout, args.car, args.ai_level, args.ac_root)
+
+    path = save_telemetry_profile(profile)
+    if not os.path.isfile(path):
+        return 1
+
+    _print_profile_summary(profile, path)
     return 0
 
 

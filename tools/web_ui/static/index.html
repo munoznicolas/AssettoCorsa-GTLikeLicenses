@@ -32,7 +32,7 @@
             title="Launch current test live in Assetto Corsa"
           >
             <span class="icon">🏎️</span> <span>Live Run</span>
-            <span id="run-queue-badge" class="badge" style="display: none; margin-left: 6px; padding: 2px 6px; font-size: 10px; background: rgba(56, 189, 248, 0.25); border: 1px solid #38bdf8; color: #38bdf8;">0 queued</span>
+            <span id="run-queue-badge" class="badge" style="display: none; margin-left: 6px; padding: 2px 6px; font-size: 10px; background: #0c4a6e; border: 1px solid #38bdf8; color: #f0f9ff;">0 queued</span>
           </button>
           <button
             id="btn-stop-ac"
@@ -121,11 +121,13 @@
             <div class="form-header">
               <div class="form-title-group">
                 <span id="form-test-id-badge" class="badge badge-lg">B-1</span>
+                <label for="input-title" class="visually-hidden">Test Title</label>
                 <input
                   type="text"
                   id="input-title"
                   class="form-control title-input"
                   placeholder="Test Title"
+                  aria-label="Test Title"
                   required
                 />
               </div>
@@ -218,11 +220,13 @@
                   </div>
                   <div class="filter-search-box">
                     <span class="search-icon">🔍</span>
+                    <label for="input-search-track" class="visually-hidden">Search track name or ID</label>
                     <input
                       type="text"
                       id="input-search-track"
                       class="form-control filter-input"
                       placeholder="Search track name / ID..."
+                      aria-label="Search track name or ID"
                       autocomplete="off"
                     />
                     <button
@@ -263,11 +267,13 @@
                   </div>
                   <div class="filter-search-box">
                     <span class="search-icon">🔍</span>
+                    <label for="input-search-car" class="visually-hidden">Search car model</label>
                     <input
                       type="text"
                       id="input-search-car"
                       class="form-control filter-input"
                       placeholder="Search model, brand, drivetrain (FWD/RWD/AWD)..."
+                      aria-label="Search car model"
                       autocomplete="off"
                     />
                     <button
@@ -340,6 +346,7 @@
                       >Start Position (<span id="disp-start-s">0.00%</span> /
                       <span id="disp-start-m">0 m</span>)</label
                     >
+                    <label for="input-start-s" class="visually-hidden">Start Position Value</label>
                     <input
                       type="number"
                       id="input-start-s"
@@ -348,6 +355,7 @@
                       max="1"
                       step="0.0001"
                       value="0.0"
+                      aria-label="Start Position Value"
                     />
                   </div>
                   <input
@@ -367,6 +375,7 @@
                       >Finish Position (<span id="disp-finish-s">100.00%</span>
                       / <span id="disp-finish-m">0 m</span>)</label
                     >
+                    <label for="input-finish-s" class="visually-hidden">Finish Position Value</label>
                     <input
                       type="number"
                       id="input-finish-s"
@@ -375,6 +384,7 @@
                       max="1"
                       step="0.0001"
                       value="1.0"
+                      aria-label="Finish Position Value"
                     />
                   </div>
                   <input
@@ -456,7 +466,7 @@
                 </label>
               </div>
 
-              <div id="ai-speed-status-badge" class="mt-2" style="display: none; font-size: 11px; padding: 4px 8px; border-radius: 4px; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: #fbbf24;">
+              <div id="ai-speed-status-badge" class="mt-2" style="display: none; font-size: 11px; padding: 4px 8px; border-radius: 4px; background: #451a03; border: 1px solid #d97706; color: #fef3c7;">
                 <span id="ai-speed-status-text">Calculated from AI Telemetry</span>
               </div>
 
@@ -543,7 +553,7 @@
 
           <!-- Game Selector Controls -->
           <div class="ref-controls">
-            <label class="ref-control-label">SELECT GAME:</label>
+            <span class="ref-control-label">SELECT GAME:</span>
             <div id="game-selector-pills" class="game-pills">
               <button class="pill-btn active" data-game="ALL">All Games</button>
               <button class="pill-btn" data-game="GT1">GT1</button>
@@ -696,13 +706,16 @@
               <span id="table-count-label" class="badge">406 Tests</span>
             </div>
             <div class="table-filters">
+              <label for="ref-search-input" class="visually-hidden">Search reference table</label>
               <input
                 type="text"
                 id="ref-search-input"
                 class="form-control table-search"
                 placeholder="Search test, car, track, drivetrain..."
+                aria-label="Search reference table"
               />
-              <select id="ref-tier-select" class="form-control table-select">
+              <label for="ref-tier-select" class="visually-hidden">Filter by license tier</label>
+              <select id="ref-tier-select" class="form-control table-select" aria-label="Filter by license tier">
                 <option value="ALL">All License Tiers</option>
               </select>
             </div>
