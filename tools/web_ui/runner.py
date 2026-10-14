@@ -291,12 +291,13 @@ class ACQueueManager:
             job.error = f"Unknown job type: {job_type}"
 
     def _run_record_telemetry(self, job: ACJob, params: Dict[str, Any]) -> None:
-        """Launches Assetto Corsa in the background to capture 95% AI flying lap telemetry."""
+        """Launches Assetto Corsa in the background to capture 100% AI flying lap telemetry."""
         track_id = params.get("track_id", "")
         track_layout = params.get("track_layout", "")
         car_id = params.get("car_id", "")
         start_s = float(params.get("start_s", 0.0))
         countdown_sec = float(params.get("countdown_sec", 3.0))
+        ai_level = int(params.get("ai_level", 100))
 
         def proc_cb(proc: subprocess.Popen) -> None:
             job.proc = proc
@@ -305,9 +306,9 @@ class ACQueueManager:
             track_id=track_id,
             layout=track_layout,
             car_id=car_id,
-            ai_level=95,
+            ai_level=ai_level,
             ac_root=self.ac_root,
-            timeout_sec=140,
+            timeout_sec=None,
             stop_event=job.stop_event,
             proc_callback=proc_cb,
         )

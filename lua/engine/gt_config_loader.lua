@@ -140,7 +140,7 @@ function GTConfigLoader.loadTestConfig(filepath)
       return {
         test_id = "AI_TELEMETRY_RECORDER",
         is_telemetry_recording = true,
-        title = "95% AI Telemetry Lap Profiler",
+        title = "100% AI Telemetry Lap Profiler",
         start_mode = "FLYING_LAP",
       }
     end

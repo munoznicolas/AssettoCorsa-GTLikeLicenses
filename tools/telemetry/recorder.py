@@ -242,17 +242,29 @@ class TelemetryProfile:
         }
 
 
-def profile_filename(track_id: str, layout: str, car_id: str, ai_level: int = 95) -> str:
+def profile_filename(track_id: str, layout: str, car_id: str, ai_level: int = 100) -> str:
     """Standardized profile cache filename."""
     tag = f"{track_id}__{layout}" if layout else track_id
     return f"{tag}__{car_id}__ai{ai_level}.json"
 
 
-def load_telemetry_profile(track_id: str, layout: str, car_id: str, ai_level: int = 95) -> Optional[TelemetryProfile]:
+def load_telemetry_profile(track_id: str, layout: str, car_id: str, ai_level: int = 100) -> Optional[TelemetryProfile]:
     """Loads a cached profile from disk if available."""
-    fname = profile_filename(track_id, layout, car_id, ai_level)
-    path = os.path.join(PROFILES_DIR, fname)
-    if not os.path.isfile(path):
+    levels_to_try = [ai_level]
+    if 100 not in levels_to_try:
+        levels_to_try.append(100)
+    if 95 not in levels_to_try:
+        levels_to_try.append(95)
+
+    path = None
+    for lvl in levels_to_try:
+        fname = profile_filename(track_id, layout, car_id, lvl)
+        p = os.path.join(PROFILES_DIR, fname)
+        if os.path.isfile(p):
+            path = p
+            break
+
+    if not path:
         return None
 
     try:
@@ -308,11 +320,11 @@ def calibrate_from_spline(
     track_id: str,
     layout: str = "",
     car_id: str = "ks_mazda_miata",
-    ai_level: int = 95,
+    ai_level: int = 100,
     ac_root: str = DEFAULT_AC_ROOT,
 ) -> TelemetryProfile:
     """
-    Synthesizes an authentic 95% AI speed profile from the track's binary fast_lane.ai.
+    Synthesizes an authentic 100% AI speed profile from the track's binary fast_lane.ai.
     Scales recorded reference speed by (ai_level / 100.0) and derives transmission states.
     """
     spline_path = find_spline_file(track_id, layout, ac_root)
@@ -348,7 +360,7 @@ def calibrate_from_spline(
         track_layout=layout,
         car_id=car_id,
         ai_level=ai_level,
-        source="spline_calibrated_ai95",
+        source=f"spline_calibrated_ai{ai_level}",
         total_track_length_m=round(parser.total_length, 2),
         lap_time_s=round(total_time, 2),
         sample_count=len(samples),
@@ -361,19 +373,19 @@ def record_live_in_engine_telemetry(
     track_id: str,
     layout: str = "",
     car_id: str = "ks_mazda_miata",
-    ai_level: int = 95,
+    ai_level: int = 100,
     ac_root: str = DEFAULT_AC_ROOT,
     timeout_sec: Optional[int] = None,
     stop_event: Optional[Any] = None,
     proc_callback: Optional[Any] = None,
 ) -> TelemetryProfile:
     """
-    Launches acs.exe with AI_LEVEL=95 in Hotlap mode (HOTLAP_START flying lap)
+    Launches acs.exe with AI_LEVEL=100 in Hotlap mode (HOTLAP_START flying lap)
     and logs live 60Hz telemetry via Assetto Corsa Shared Memory.
     Arms on start/finish line crossing and records exactly one full flying lap.
     Falls back to calibrated spline profile if shared memory is inaccessible or run is cancelled.
     """
-    print(f"[*] Initializing live in-engine 95% AI recording session for {car_id} at {track_id}...")
+    print(f"[*] Initializing live in-engine {ai_level}% AI recording session for {car_id} at {track_id}...")
 
     # Determine track length from AI spline if available
     track_total_len = 1000.0
@@ -422,7 +434,7 @@ def record_live_in_engine_telemetry(
     active_test_payload = {
         "test_id": "AI_TELEMETRY_RECORDER",
         "is_telemetry_recording": True,
-        "title": "95% AI Telemetry Lap Profiler",
+        "title": f"{ai_level}% AI Telemetry Lap Profiler",
         "start_mode": "FLYING_LAP",
         "car_id": car_id,
         "track_id": track_id,
@@ -644,7 +656,7 @@ def get_or_calculate_initial_physics(
     car_id: str = "ks_mazda_miata",
     start_s: float = 0.0,
     countdown_sec: float = 3.0,
-    ai_level: int = 95,
+    ai_level: int = 100,
     allow_live_engine: bool = False,
     ac_root: str = DEFAULT_AC_ROOT,
 ) -> Dict[str, Any]:
@@ -670,11 +682,11 @@ def get_or_calculate_initial_physics(
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Assetto Corsa 95% AI Telemetry Recorder & Profiler")
+    parser = argparse.ArgumentParser(description="Assetto Corsa 100% AI Telemetry Recorder & Profiler")
     parser.add_argument("--track", type=str, default="ks_vallelunga", help="Track ID (default: ks_vallelunga)")
     parser.add_argument("--layout", type=str, default="club_circuit", help="Track layout (default: club_circuit)")
     parser.add_argument("--car", type=str, default="ks_mazda_miata", help="Car ID (default: ks_mazda_miata)")
-    parser.add_argument("--ai-level", type=int, default=95, help="AI proficiency level (default: 95)")
+    parser.add_argument("--ai-level", type=int, default=100, help="AI proficiency level (default: 100)")
     parser.add_argument("--live", action="store_true", help="Launch acs.exe to record live in-engine telemetry")
     parser.add_argument("--all-curriculum", action="store_true", help="Pre-generate telemetry profiles for all curriculum track/car pairings")
     parser.add_argument("--ac-root", type=str, default=DEFAULT_AC_ROOT, help="Assetto Corsa installation root")

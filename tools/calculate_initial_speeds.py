@@ -94,7 +94,7 @@ def calculate_for_test(
         car_id=car_id,
         start_s=start_s,
         countdown_sec=countdown_sec,
-        ai_level=95,
+        ai_level=100,
         allow_live_engine=allow_live_engine,
         ac_root=ac_root,
     )

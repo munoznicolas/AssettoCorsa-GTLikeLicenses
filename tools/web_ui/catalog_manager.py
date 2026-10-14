@@ -710,7 +710,7 @@ def calculate_test_initial_speed(
     from tools.web_ui.runner import queue_mgr
 
     # 1. Check if an authentic telemetry profile is already cached
-    cached_profile = load_telemetry_profile(track_id, track_layout, car_id, ai_level=95)
+    cached_profile = load_telemetry_profile(track_id, track_layout, car_id, ai_level=100)
     if cached_profile:
         physics = cached_profile.calculate_gate_physics(start_s, countdown_sec)
         physics["success"] = True
@@ -727,7 +727,7 @@ def calculate_test_initial_speed(
                 "success": True,
                 "status": "queued",
                 "job_id": active_job["id"],
-                "message": f"Assetto Corsa is currently recording AI telemetry for {car_id} at {track_id}...",
+                "message": f"Assetto Corsa is currently recording 100% AI telemetry for {car_id} at {track_id}...",
             }
 
     for qj in queue_status.get("queue", []):
@@ -738,20 +738,21 @@ def calculate_test_initial_speed(
                     "success": True,
                     "status": "queued",
                     "job_id": qj["id"],
-                    "message": f"Telemetry recording for {car_id} at {track_id} is already in queue...",
+                    "message": f"100% AI Telemetry recording for {car_id} at {track_id} is already in queue...",
                 }
 
     # 3. Automatically queue a full lap recording in Assetto Corsa
     job = queue_mgr.enqueue_job(
         job_type="record_telemetry",
         test_id="TELEMETRY_REC",
-        title=f"Record 95% AI Telemetry: {car_id} @ {track_id}",
+        title=f"Record 100% AI Telemetry: {car_id} @ {track_id}",
         params={
             "track_id": track_id,
             "track_layout": track_layout,
             "car_id": car_id,
             "start_s": start_s,
             "countdown_sec": countdown_sec,
+            "ai_level": 100,
         },
     )
 
