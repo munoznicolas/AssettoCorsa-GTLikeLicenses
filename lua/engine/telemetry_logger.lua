@@ -181,8 +181,5 @@ function TelemetryLogger:reset()
   self.sampleTimer = 0
 end
 
--- Backward compatibility alias
-TelemetryLogger.GTTelemetryLogger = TelemetryLogger
-
 return TelemetryLogger
 

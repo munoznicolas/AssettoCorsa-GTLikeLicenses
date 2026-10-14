@@ -97,9 +97,5 @@ function SharedState.connect()
     return connectionInstance
 end
 
--- Backward compatibility aliases
-SharedState.LicenseShared = SharedState
-SharedState.GTLicenseShared = SharedState
-
 return SharedState
 

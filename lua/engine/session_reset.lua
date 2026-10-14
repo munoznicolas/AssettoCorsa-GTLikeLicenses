@@ -129,8 +129,5 @@ function SessionReset:update(dt)
   return false
 end
 
--- Backward compatibility alias
-SessionReset.GTSessionReset = SessionReset
-
 return SessionReset
 

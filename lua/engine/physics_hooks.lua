@@ -797,7 +797,5 @@ function PhysicsHooks.smoothSplineOffsetDecay(currentOffset, targetOffset, dt, m
   end
 end
 
-PhysicsHooks.GTPhysicsHooks = PhysicsHooks
-
 return PhysicsHooks
 

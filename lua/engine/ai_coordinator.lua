@@ -93,6 +93,4 @@ function AICoordinator:updateAIShifting(car)
   end
 end
 
-AICoordinator.GTAICoordinator = AICoordinator
-
 return AICoordinator

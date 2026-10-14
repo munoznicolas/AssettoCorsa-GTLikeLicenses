@@ -14,7 +14,7 @@ local function safeRequire(name)
   if ok then return mod end
   ok, mod = pcall(require, "lua/engine/" .. name)
   if ok then return mod end
-  error(string.format("gt_license_engine: Failed to require '%s': %s", name, tostring(mod)))
+  error(string.format("license_engine: Failed to require '%s': %s", name, tostring(mod)))
 end
 
 local Utils          = safeRequire("utils")
@@ -919,8 +919,6 @@ if script ~= nil then
     end
   end
 end
-
-LicenseEngine.GTLicenseEngine = LicenseEngine
 
 return LicenseEngine
 

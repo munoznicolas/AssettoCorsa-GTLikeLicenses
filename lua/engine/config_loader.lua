@@ -229,8 +229,5 @@ function ConfigLoader.loadTestConfig(filepath)
   return nil, err
 end
 
--- Backward compatibility alias
-ConfigLoader.GTConfigLoader = ConfigLoader
-
 return ConfigLoader
 

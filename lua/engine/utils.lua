@@ -130,8 +130,5 @@ function Utils.draw3DLine(p1, p2, color, thickness)
   end
 end
 
--- Backward compatibility alias
-Utils.GTUtils = Utils
-
 return Utils
 

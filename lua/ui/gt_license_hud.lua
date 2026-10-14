@@ -8,13 +8,10 @@
 local Theme           = require("ui/common/gt_ui_theme")
 local GTTimerWidget   = require("ui/screens/gt_timer_widget")
 local GTModalOverlays = require("ui/screens/gt_modal_overlays")
-local GTLicenseShared = nil
-pcall(function() GTLicenseShared = require("engine/shared_state") end)
-if not GTLicenseShared then
-  pcall(function() GTLicenseShared = require("engine/gt_shared_state") end)
-end
-if not GTLicenseShared then
-  pcall(function() GTLicenseShared = require("shared_state") end)
+local SharedState = nil
+pcall(function() SharedState = require("engine/shared_state") end)
+if not SharedState then
+  pcall(function() SharedState = require("shared_state") end)
 end
 
 local GTLicenseHUD = {}
@@ -28,7 +25,6 @@ GTLicenseHUD.STATE = {
     FAILED    = 4,
 }
 
--- Re-export Theme Colors for backward compatibility
 GTLicenseHUD.COLORS = Theme.COLORS
 
 -- Local internal state
@@ -39,7 +35,7 @@ local animTimer = 0.0
 local lastState = GTLicenseHUD.STATE.PREPARE
 local cachedMedalAchieved = nil
 
-local sharedState = GTLicenseShared.connect()
+local sharedState = SharedState and SharedState.connect and SharedState.connect()
 
 local function isUIAppActive()
     if not sharedState or not sharedState.uiAppActive then return false end

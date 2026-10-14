@@ -56,8 +56,5 @@ function Results.compileResults(testConfig, sessionTime, achievedMedal, failReas
   }
 end
 
--- Backward compatibility alias
-Results.GTResults = Results
-
 return Results
 

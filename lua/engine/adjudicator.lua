@@ -432,6 +432,4 @@ function Adjudicator:adjudicate(dt, sessionTime, car)
   return res
 end
 
-Adjudicator.GTAdjudicator = Adjudicator
-
 return Adjudicator
