@@ -101,12 +101,33 @@ function LicenseEngine.new(testDefinition)
   end)
 
   -- Load test definition
+  local cfg, loadErr = nil, nil
   if type(testDefinition) == "table" then
-    self.testConfig = testDefinition
+    cfg = testDefinition
   elseif type(testDefinition) == "string" then
-    self.testConfig = LicenseEngine.loadTestConfig(testDefinition)
+    cfg, loadErr = LicenseEngine.loadTestConfig(testDefinition)
   else
-    self.testConfig = LicenseEngine.loadTestConfig(nil)
+    cfg, loadErr = LicenseEngine.loadTestConfig(nil)
+  end
+
+  if not cfg then
+    local err = loadErr or string.format("No valid test configuration found for '%s'", tostring(testDefinition or "active session"))
+    if ac and ac.log then
+      ac.log(string.format("[GTLicense] FATAL CONFIG ERROR: %s", err))
+    end
+    self.loadError = err
+    self.testConfig = {
+      test_id = "ERROR",
+      title = "Configuration Error",
+      start_mode = "STANDING",
+      spawn = { position = { 0, 0, 0 }, forward_vector = { 0, 0, 1 }, initial_speed_kmh = 0 },
+      timing = {},
+      fail_rules = {},
+      targets = { gold_seconds = 0, silver_seconds = 0, bronze_seconds = 0 },
+    }
+  else
+    self.testConfig = cfg
+    self.loadError = nil
   end
 
   local initSpeed = (self.testConfig.spawn and self.testConfig.spawn.initial_speed_kmh) or 0
@@ -119,11 +140,16 @@ function LicenseEngine.new(testDefinition)
   end
 
   -- State machine variables
-  self.state = LicenseEngine.STATE.INITIALIZING
+  if self.loadError then
+    self.state = LicenseEngine.STATE.FAILED
+    self.failReason = self.loadError
+  else
+    self.state = LicenseEngine.STATE.INITIALIZING
+    self.failReason = nil
+  end
   self.sessionTime = 0
   self.countdownTimer = 3.0
   self.countdownLastStep = 4
-  self.failReason = nil
   self.achievedMedal = nil
   self.resultsTimer = 0
   self.results = {}
@@ -305,8 +331,13 @@ function LicenseEngine:setState(newState)
   end
 end
 
----Starts or restarts the 3-2-1 countdown sequence.
 function LicenseEngine:startCountdown()
+  if self.loadError then
+    self:setState(LicenseEngine.STATE.FAILED)
+    self.failReason = self.loadError
+    return
+  end
+
   PhysicsHooks.releaseFailureBraking(0)
 
   if self.isTelemetryRecorder then
@@ -375,9 +406,10 @@ function LicenseEngine:startCountdown()
     targetRPM = isStanding and 1000 or 3500
   end
   self.targetStartingGear = targetGear
-  self.targetStartingRPM = targetRPM
-
-  PhysicsHooks.setupSpawn(self.testConfig, 0)
+  local spawnOk, spawnErr = PhysicsHooks.setupSpawn(self.testConfig, 0)
+  if not spawnOk and ac and ac.log then
+    ac.log(string.format("[GTLicense] WARNING: Initial setupSpawn noted: %s", tostring(spawnErr)))
+  end
 
   -- Lock controls during countdown
   PhysicsHooks.lockControls(3.0, isStanding, targetGear, targetRPM)
@@ -448,9 +480,14 @@ function LicenseEngine:exitSession()
   end
 end
 
----Main per-frame simulation update step.
----@param dt number @Frame delta time in seconds
 function LicenseEngine:update(dt)
+  if self.loadError then
+    if self.state ~= LicenseEngine.STATE.FAILED then
+      self:setState(LicenseEngine.STATE.FAILED)
+      self.failReason = self.loadError
+    end
+    return
+  end
   -- Check for UI App requested restart
   if self.sharedState and self.sharedState.requestRestart then
     self.sharedState.requestRestart = false
@@ -525,7 +562,16 @@ function LicenseEngine:update(dt)
       return
     end
 
-    PhysicsHooks.setupSpawn(self.testConfig, 0)
+    local spawnOk, spawnErr = PhysicsHooks.setupSpawn(self.testConfig, 0)
+    if not spawnOk then
+      if ac and ac.log then
+        ac.log(string.format("[GTLicense] CRITICAL: Live frame setupSpawn failed: %s! Aborting countdown to prevent pit collision.", tostring(spawnErr)))
+      end
+      self.state = LicenseEngine.STATE.FAILED
+      self.failReason = "Invalid Spawn Configuration: " .. tostring(spawnErr)
+      return
+    end
+
     local isStanding = (self.testConfig.start_mode == "STANDING")
     PhysicsHooks.lockControls(3.0, isStanding, self.targetStartingGear, self.targetStartingRPM)
 

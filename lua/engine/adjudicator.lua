@@ -164,10 +164,8 @@ function Adjudicator:checkOffTrack(car)
   local wheelsOff = 0
   local hasWheelData = false
 
-  -- Authoritative per-wheel contact patch evaluation
   if car.wheels then
-    local wCount = car.wheelsCount or 4
-    for i = 0, wCount - 1 do
+    for i = 0, 3 do
       local w = car.wheels[i]
       if w and w.surfaceValidTrack ~= nil then
         hasWheelData = true

@@ -65,6 +65,108 @@ def terminate_all_acs_instances() -> None:
         pass
 
 
+def ensure_complete_test_data(
+    test_data: Dict[str, Any],
+    ac_root: str = DEFAULT_AC_ROOT,
+    repo_root: str = REPO_ROOT,
+) -> Dict[str, Any]:
+    """
+    Ensures test_data contains valid 3D coordinates (spawn.position, spawn.forward_vector)
+    and timing gates. If missing or if spatial coordinates need calculation from the spline,
+    synthesizes them using track AI spline (fast_lane.ai) or falls back to pre-generated JSON.
+    """
+    if not isinstance(test_data, dict):
+        return test_data
+
+    has_valid_pos = (
+        isinstance(test_data.get("spawn"), dict)
+        and isinstance(test_data["spawn"].get("position"), (list, tuple))
+        and len(test_data["spawn"]["position"]) == 3
+        and isinstance(test_data["spawn"].get("forward_vector"), (list, tuple))
+        and len(test_data["spawn"]["forward_vector"]) == 3
+    )
+    has_timing = (
+        isinstance(test_data.get("timing"), dict)
+        and "start_gate" in test_data["timing"]
+        and "finish_gate" in test_data["timing"]
+    )
+
+    if has_valid_pos and has_timing:
+        return test_data
+
+    test_id = test_data.get("test_id", "")
+    track_id = test_data.get("track_id", "")
+    layout = test_data.get("track_layout", "")
+
+    # 1. Synthesize 3D spatial parameters from track AI spline
+    try:
+        from tools.extract_spline_coords import SplineParser, find_spline_file, generate_test_parameters
+
+        spline_file = find_spline_file(track_id, layout, ac_root)
+        if spline_file and os.path.isfile(spline_file):
+            parser = SplineParser(spline_file)
+            start_s = float(test_data.get("start_s", 0.0))
+            finish_s = float(test_data.get("finish_s", 1.0))
+            spawn_offset = float(test_data.get("spawn_offset", 0.0))
+            speed = float(test_data.get("speed", 0.0))
+            with_stop_box = bool(test_data.get("with_stop_box", False))
+            gear = test_data.get("gear")
+            if gear is None and isinstance(test_data.get("spawn"), dict):
+                gear = test_data["spawn"].get("initial_gear") or test_data["spawn"].get("gear")
+            rpm = test_data.get("rpm")
+            if rpm is None and isinstance(test_data.get("spawn"), dict):
+                rpm = test_data["spawn"].get("initial_rpm") or test_data["spawn"].get("rpm")
+
+            geom = generate_test_parameters(
+                parser=parser,
+                start_progress=start_s,
+                finish_progress=finish_s,
+                spawn_offset_m=spawn_offset,
+                initial_speed_kmh=speed,
+                with_stop_box=with_stop_box,
+                gear=int(gear) if gear is not None else None,
+                rpm=int(rpm) if rpm is not None else None,
+            )
+
+            test_data["spawn"] = geom["spawn"]
+            test_data["timing"] = geom["timing"]
+            if "fail_rules" not in test_data:
+                test_data["fail_rules"] = {
+                    "max_wheels_off": 2,
+                    "wall_collision_threshold_n": 1500,
+                    "max_yaw_angle_deg": 90,
+                    "stop_box_overshoot_fail": with_stop_box,
+                }
+            return test_data
+    except Exception as e:
+        print(f"[!] Note: spline synthesis for {test_id}: {e}")
+
+    # 2. Fallback: load existing pre-generated test JSON from repository
+    try:
+        from tools.testing.eval_loop import find_test_file_by_id
+        repo_file = find_test_file_by_id(test_id, repo_root)
+        if repo_file and os.path.isfile(repo_file):
+            with open(repo_file, "r", encoding="utf-8") as rf:
+                saved = json.load(rf)
+                if "spawn" in saved and not has_valid_pos:
+                    spawn_dict = dict(saved["spawn"])
+                    if "speed" in test_data:
+                        spawn_dict["initial_speed_kmh"] = float(test_data["speed"])
+                    if "gear" in test_data:
+                        spawn_dict["gear"] = int(test_data["gear"])
+                    if "rpm" in test_data:
+                        spawn_dict["rpm"] = int(test_data["rpm"])
+                    test_data["spawn"] = spawn_dict
+                if "timing" in saved and not has_timing:
+                    test_data["timing"] = saved["timing"]
+                if "fail_rules" not in test_data and "fail_rules" in saved:
+                    test_data["fail_rules"] = saved["fail_rules"]
+    except Exception as e:
+        print(f"[!] Note: repo test fallback for {test_id}: {e}")
+
+    return test_data
+
+
 @dataclass
 class ACJob:
     id: str
@@ -236,7 +338,10 @@ class ACQueueManager:
         """
         Stages in-memory test configuration into Assetto Corsa's GT-License runtime paths
         without altering the repository's permanent catalog files.
+        Ensures complete 3D spatial parameters (spawn.position, timing gates) are synthesized.
         """
+        test_data = ensure_complete_test_data(test_data, self.ac_root, REPO_ROOT)
+
         gt_mode_base = os.path.join(self.ac_root, "extension", "lua", "new-modes", "gt-license")
         test_id = test_data.get("test_id", "")
         tier = test_data.get("tier", "National B")
@@ -393,6 +498,9 @@ class ACQueueManager:
             job.status = "failed"
             job.error = f"Test configuration for {test_id} not found."
             return
+
+        # Ensure complete 3D spatial parameters (spawn.position, timing gates)
+        test_data = ensure_complete_test_data(test_data, self.ac_root, REPO_ROOT)
 
         # Stage active in-memory test configuration
         self._stage_test_configuration(test_data)

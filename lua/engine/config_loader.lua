@@ -27,49 +27,8 @@ local Utils = safeRequire("utils")
 
 local ConfigLoader = {}
 
--- Default fallback test configuration (used if no JSON file is found)
-ConfigLoader.DEFAULT_TEST_CONFIG = {
-  test_id = "B-1",
-  tier = "National B",
-  title = "Starting & Stopping: 1000m Acceleration & Braking",
-  description = "Launch cleanly and bring the car to a full stop inside the marked grid box.",
-  lesson_objective = "Straight-line threshold braking without locking wheels.",
-  car_id = "abarth500",
-  track_id = "magione",
-  track_layout = "",
-  start_mode = "STANDING",
-  spawn = {
-    position = { 0.0, 0.5, 0.0 },
-    forward_vector = { 0.0, 0.0, 1.0 },
-    initial_speed_kmh = 0
-  },
-  timing = {
-    start_gate = {
-      p1 = { -10.0, 0.0, 0.0 },
-      p2 = { 10.0, 0.0, 0.0 }
-    },
-    finish_gate = {
-      p1 = { -10.0, 0.0, 1000.0 },
-      p2 = { 10.0, 0.0, 1000.0 }
-    },
-    stop_box = {
-      center = { 0.0, 0.0, 1025.0 },
-      size = { 12.0, 4.0, 50.0 },
-      rotation_deg = 0
-    }
-  },
-  fail_rules = {
-    max_wheels_off = 2,
-    wall_collision_threshold_n = 1500,
-    max_yaw_angle_deg = 90,
-    stop_box_overshoot_fail = true
-  },
-  targets = {
-    gold_seconds = 26.500,
-    silver_seconds = 28.000,
-    bronze_seconds = 31.000
-  }
-}
+-- Deprecated fallback alias kept as nil; engine reports explicit errors instead of loading random defaults
+ConfigLoader.DEFAULT_TEST_CONFIG = nil
 
 ---Extracts the active test identifier from race configuration using a prioritized resolution pipeline.
 ---@param race table? @INIConfig instance
@@ -162,6 +121,20 @@ end
 
 ---Loads a JSON test definition file from disk or resolves via CSP race.ini.
 ---@param filepath string? @Optional path to test JSON file
+local function isValidTestConfig(cfg)
+  if not cfg or type(cfg) ~= "table" then return false end
+  if not cfg.test_id or #tostring(cfg.test_id) == 0 then return false end
+  if not cfg.spawn or type(cfg.spawn) ~= "table" then return false end
+  local pos = cfg.spawn.position
+  if not pos or type(pos) ~= "table" then return false end
+  if (pos[1] == nil and pos.x == nil) or (pos[2] == nil and pos.y == nil) or (pos[3] == nil and pos.z == nil) then
+    return false
+  end
+  return true
+end
+
+---Loads a JSON test definition file from disk or resolves via CSP race.ini.
+---@param filepath string? @Optional path to test JSON file
 ---@return table testConfig
 function ConfigLoader.loadTestConfig(filepath)
   local content = nil
@@ -177,74 +150,83 @@ function ConfigLoader.loadTestConfig(filepath)
         f:close()
       end
     end
+    if content and #content > 0 then
+      local parsed = Utils.parseJSONSafe(content)
+      if isValidTestConfig(parsed) then
+        return parsed
+      end
+    end
   end
 
   -- Search standard CSP directory locations if no content yet
-  if not content then
-    local race = nil
-    if ac and ac.INIConfig and ac.INIConfig.raceConfig then
-      local ok, r = pcall(ac.INIConfig.raceConfig)
-      if ok then race = r end
+  local race = nil
+  if ac and ac.INIConfig and ac.INIConfig.raceConfig then
+    local ok, r = pcall(ac.INIConfig.raceConfig)
+    if ok then race = r end
+  end
+
+  local testId = ConfigLoader.resolveActiveTestId(race)
+
+  if ac and ac.log then
+    ac.log(string.format("[GTLicense] loadTestConfig: detected testId='%s'", tostring(testId)))
+  end
+
+  if testId == "AI_TELEMETRY_RECORDER" then
+    return {
+      test_id = "AI_TELEMETRY_RECORDER",
+      is_telemetry_recording = true,
+      title = "100% AI Telemetry Lap Profiler",
+      start_mode = "FLYING_LAP",
+    }
+  end
+
+  local searchFolders = ConfigLoader.getSearchFolders()
+  local candidates = {}
+  local relFile = (testId and #testId > 0) and Utils.getTestFilePath(testId) or nil
+
+  for _, baseFolder in ipairs(searchFolders) do
+    if relFile then
+      table.insert(candidates, baseFolder .. "/data/tests/" .. relFile)
+      table.insert(candidates, baseFolder .. "/data/" .. relFile)
+      table.insert(candidates, baseFolder .. "/" .. relFile)
     end
+    table.insert(candidates, baseFolder .. "/active_test.json")
+    table.insert(candidates, baseFolder .. "/data/active_test.json")
+    table.insert(candidates, baseFolder .. "/data/tests/active_test.json")
+  end
 
-    local testId = ConfigLoader.resolveActiveTestId(race)
-
-    if ac and ac.log then
-      ac.log(string.format("[GTLicense] loadTestConfig: detected testId='%s'", tostring(testId)))
+  for _, path in ipairs(candidates) do
+    local fileContent = nil
+    if io.load then
+      fileContent = io.load(path)
     end
-
-    if testId == "AI_TELEMETRY_RECORDER" then
-      return {
-        test_id = "AI_TELEMETRY_RECORDER",
-        is_telemetry_recording = true,
-        title = "100% AI Telemetry Lap Profiler",
-        start_mode = "FLYING_LAP",
-      }
-    end
-
-    local searchFolders = ConfigLoader.getSearchFolders()
-    local candidates = {}
-    local relFile = (testId and #testId > 0) and Utils.getTestFilePath(testId) or nil
-
-    for _, baseFolder in ipairs(searchFolders) do
-      if relFile then
-        table.insert(candidates, baseFolder .. "/data/tests/" .. relFile)
-        table.insert(candidates, baseFolder .. "/data/" .. relFile)
-        table.insert(candidates, baseFolder .. "/" .. relFile)
+    if not fileContent then
+      local f = io.open(path, "r")
+      if f then
+        fileContent = f:read("*all")
+        f:close()
       end
-      table.insert(candidates, baseFolder .. "/active_test.json")
-      table.insert(candidates, baseFolder .. "/data/active_test.json")
-      table.insert(candidates, baseFolder .. "/data/tests/active_test.json")
     end
-
-    for _, path in ipairs(candidates) do
-      if io.load then
-        content = io.load(path)
-      end
-      if not content then
-        local f = io.open(path, "r")
-        if f then
-          content = f:read("*all")
-          f:close()
-        end
-      end
-      if content and #content > 0 then
+    if fileContent and #fileContent > 0 then
+      local parsed = Utils.parseJSONSafe(fileContent)
+      if isValidTestConfig(parsed) then
         if ac and ac.log then
-          ac.log(string.format("[GTLicense] loadTestConfig: successfully loaded JSON from '%s' (%d bytes)", path, #content))
+          ac.log(string.format("[GTLicense] loadTestConfig: valid test JSON loaded from '%s' (%d bytes)", path, #fileContent))
         end
-        break
+        return parsed
+      elseif parsed and parsed.test_id then
+        if ac and ac.log then
+          ac.log(string.format("[GTLicense] loadTestConfig: skipping incomplete candidate '%s' (missing spawn.position)", path))
+        end
       end
     end
   end
 
-  if content and #content > 0 then
-    local parsed = Utils.parseJSONSafe(content)
-    if parsed and parsed.test_id then
-      return parsed
-    end
+  local err = string.format("Failed to find or load valid test configuration for '%s'", tostring(testId or filepath or "unknown session"))
+  if ac and ac.log then
+    ac.log(string.format("[GTLicense] loadTestConfig ERROR: %s", err))
   end
-
-  return ConfigLoader.DEFAULT_TEST_CONFIG
+  return nil, err
 end
 
 -- Backward compatibility alias

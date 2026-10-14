@@ -82,10 +82,11 @@ function PhysicsHooks.teleportCar(carIndex, position, forwardVector, verticalOff
   verticalOffset = verticalOffset or 0.5
 
   local rawPos = PhysicsHooks.toVec3(position)
-  -- Safety guard: if rawPos is dummy default (0, 0.5, 0) and track is not magione, do not drop car into void
-  if math.abs(rawPos.x) < 0.01 and math.abs(rawPos.z) < 0.01 and ac and ac.getTrackID and ac.getTrackID() ~= "magione" then
+
+  -- Safety guard: if rawPos is dummy default (0, 0.5, 0), do not drop car into void
+  if math.abs(rawPos.x) < 0.01 and math.abs(rawPos.z) < 0.01 and rawPos.y < 1.0 then
     if ac and ac.log then
-      ac.log("[PhysicsHooks] Guard: detected dummy (0, 0.5, 0) spawn on non-magione track. Preserving native spawn point.")
+      ac.log("[PhysicsHooks] Guard: detected dummy (0, 0.5, 0) spawn. Preserving native spawn point.")
     end
     return true
   end
@@ -338,9 +339,6 @@ function PhysicsHooks.releaseGearOverride(carIndex)
       ctrl.clutch = 0.0
     end
   end
-  if physics and physics.setAIShiftingThresholds then
-    physics.setAIShiftingThresholds(carIndex, 6500, 3000)
-  end
 end
 
 ---Deploys car brakes at specified intensity upon test failure/disqualification or completion.
@@ -534,7 +532,10 @@ function PhysicsHooks.maintainAIRolling(carIndex, targetSpeedKmh, fallbackFwd, d
     -- re-assert forward velocity so the vehicle doesn't bog down or crawl in 1st gear
     local car = ac.getCar and ac.getCar(carIndex)
     if targetSpeedKmh > 0 and car and car.speedKmh < (targetSpeedKmh * 0.75) then
-      local fwd = safeNormalize(PhysicsHooks.toVec3(fallbackFwd))
+      local rawFwd = PhysicsHooks.toVec3(fallbackFwd)
+      local fwd = (rawFwd.x ~= 0 or rawFwd.y ~= 0 or rawFwd.z ~= 0)
+        and safeNormalize(rawFwd)
+        or (car and car.look and safeNormalize(car.look) or vec3(0, 0, 1))
       local speedMs = targetSpeedKmh / 3.6
       local curVy = (car.velocity and car.velocity.y) or (fwd.y * speedMs)
       local vel = vec3(fwd.x * speedMs, curVy, fwd.z * speedMs)
@@ -547,7 +548,10 @@ function PhysicsHooks.maintainAIRolling(carIndex, targetSpeedKmh, fallbackFwd, d
     -- Maintain horizontal forward velocity while preserving vertical velocity (vy)
     -- so natural gravity and suspension compression remain fully active
     local car = ac.getCar and ac.getCar(carIndex)
-    local fwd = safeNormalize(PhysicsHooks.toVec3(fallbackFwd))
+    local rawFwd = PhysicsHooks.toVec3(fallbackFwd)
+    local fwd = (rawFwd.x ~= 0 or rawFwd.y ~= 0 or rawFwd.z ~= 0)
+      and safeNormalize(rawFwd)
+      or (car and car.look and safeNormalize(car.look) or vec3(0, 0, 1))
     local speedMs = targetSpeedKmh / 3.6
     local curVy = (car and car.velocity and car.velocity.y) or (fwd.y * speedMs)
     local vel = vec3(fwd.x * speedMs, curVy, fwd.z * speedMs)
@@ -631,10 +635,6 @@ function PhysicsHooks.setupSpawn(testConfig, carIndex)
     return false, "Failed to teleport car to spawn coordinates"
   end
 
-  -- 2. Prevent AI from shifting down due to engine stall on spawn
-  if physics and physics.setAIShiftingThresholds then
-    physics.setAIShiftingThresholds(carIndex, 99999, -1)
-  end
   if physics and physics.setEngineRPM then
     physics.setEngineRPM(carIndex, targetRPM)
   end

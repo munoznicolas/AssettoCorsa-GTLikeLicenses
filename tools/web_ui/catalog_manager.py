@@ -72,6 +72,26 @@ def load_curriculum() -> List[Dict[str, Any]]:
         for idx, t in enumerate(tests, start=1):
             td = dict(t)
             td["preview_image"] = f"/content/career/{s_meta['folder']}/event{idx}/preview.png"
+
+            # Enrich with pre-generated 3D spatial parameters if test file exists
+            t_id = td.get("test_id", "")
+            if "-" in t_id:
+                try:
+                    prefix, num_str = t_id.split("-", 1)
+                    test_fn = f"test_{prefix.lower()}{int(num_str):02d}.json"
+                    test_fp = os.path.join(REPO_ROOT, "content", "tests", folder, test_fn)
+                    if os.path.isfile(test_fp):
+                        with open(test_fp, "r", encoding="utf-8") as tf:
+                            saved_cfg = json.load(tf)
+                            if "spawn" in saved_cfg and isinstance(saved_cfg["spawn"], dict):
+                                td["spawn"] = saved_cfg["spawn"]
+                            if "timing" in saved_cfg:
+                                td["timing"] = saved_cfg["timing"]
+                            if "fail_rules" in saved_cfg:
+                                td["fail_rules"] = saved_cfg["fail_rules"]
+                except Exception:
+                    pass
+
             tests_data.append(td)
 
         # Copy tests to avoid mutating loaded modules directly

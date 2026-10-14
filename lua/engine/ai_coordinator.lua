@@ -303,44 +303,21 @@ function AICoordinator:maintainAutopilot(carIndex, aiLevel, isTelemetryRecorder)
   end
 end
 
----Manages autonomous AI transmission shifting and anti-neutral protection.
+---Ensures the vehicle is not stalled in neutral if user controls previously interfered.
+---All regular gear shifting (upshifts, downshifts, powerband management) is completely handled
+---by Assetto Corsa's native AI transmission logic.
 ---@param car table? @Assetto Corsa car state (ac.getCar)
 function AICoordinator:updateAIShifting(car)
   if not car then return end
-  local maxRpm = (car.rpmLimiter and car.rpmLimiter > 3000) and car.rpmLimiter or 6800
-  local minRpm = (car.rpmMinimum and car.rpmMinimum > 500) and car.rpmMinimum or 1000
-  local gearCount = (car.gearCount and car.gearCount > 0) and car.gearCount or 6
-  local now = (os and (os.preciseClock or os.clock) and (os.preciseClock or os.clock)()) or 0
 
-  -- Anti-neutral guard: If vehicle slips to neutral (gear <= 0), engage 1st gear immediately
-  if car.gear <= 0 then
+  -- Anti-neutral recovery: If vehicle slips to neutral (gear <= 0) while rolling, engage 1st gear
+  if car.gear <= 0 and car.speedKmh > 5 then
     if physics and physics.engageGear then
       physics.engageGear(0, 1)
     end
-    if physics and physics.setEngineRPM then
-      physics.setEngineRPM(0, 3000)
-    end
-  elseif car.rpm >= (maxRpm * 0.93) and car.gear > 0 and car.gear < gearCount then
-    if not self.lastAIShiftTime or (now - self.lastAIShiftTime >= 0.75) then
-      self.lastAIShiftTime = now
-      local nextGear = car.gear + 1
-      if physics and physics.engageGear then
-        physics.engageGear(0, nextGear)
-      end
-      if ac and ac.log then
-        ac.log(string.format("[GTLicense] AI Shifting UP: gear %d -> %d at %.0f RPM (spd=%.1f km/h)", car.gear, nextGear, car.rpm, car.speedKmh))
-      end
-    end
-  elseif car.rpm <= math.max(2200, minRpm + 1000) and car.gear > 1 and car.speedKmh > 15 then
-    if not self.lastAIShiftTime or (now - self.lastAIShiftTime >= 0.75) then
-      self.lastAIShiftTime = now
-      local prevGear = car.gear - 1
-      if physics and physics.engageGear then
-        physics.engageGear(0, prevGear)
-      end
-      if ac and ac.log then
-        ac.log(string.format("[GTLicense] AI Shifting DOWN: gear %d -> %d at %.0f RPM (spd=%.1f km/h)", car.gear, prevGear, car.rpm, car.speedKmh))
-      end
+    if ac and ac.overrideCarControls then
+      local ctrl = ac.overrideCarControls(0)
+      if ctrl then ctrl.requestedGearIndex = 1 end
     end
   end
 end
