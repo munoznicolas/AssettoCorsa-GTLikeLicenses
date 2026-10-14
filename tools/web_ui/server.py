@@ -84,7 +84,7 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
 
     def _serve_file_from_base(
         self, path: str, prefix: str, base_dir: str, not_found_msg: str, default_mime: str = "application/octet-stream"
-    ) -> bool:
+    ) -> None:
         rel_path = path[len(prefix):]
         full_path = os.path.join(base_dir, rel_path)
         if os.path.isfile(full_path):
@@ -96,9 +96,8 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
             self.send_header("Content-Length", str(len(content)))
             self.end_headers()
             self.wfile.write(content)
-            return True
+            return
         self.send_error(404, not_found_msg)
-        return True
 
     def _serve_preview_image(self, test_id: str) -> None:
         from tools.generate_test_previews import build_test_to_event_path_map
@@ -250,13 +249,16 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
             self._serve_preview_image(test_id)
             return True
         if path.startswith("/assets/"):
-            return self._serve_file_from_base(path, "/assets/", ASSETS_DIR, "Asset Not Found")
+            self._serve_file_from_base(path, "/assets/", ASSETS_DIR, "Asset Not Found")
+            return True
         if path.startswith("/content/"):
-            return self._serve_file_from_base(path, "/content/", os.path.join(REPO_ROOT, "content"), "Content Not Found")
+            self._serve_file_from_base(path, "/content/", os.path.join(REPO_ROOT, "content"), "Content Not Found")
+            return True
         if path.startswith("/docs/"):
-            return self._serve_file_from_base(
+            self._serve_file_from_base(
                 path, "/docs/", os.path.join(REPO_ROOT, "docs"), "Doc Not Found", default_mime="image/svg+xml"
             )
+            return True
         return False
 
     def do_GET(self) -> None:
@@ -512,7 +514,8 @@ def main() -> int:
         webbrowser.open(url)
 
     try:
-        server.serve_forever()  # NOSONAR: Localhost development server
+        # Local development HTTP server (offline desktop tool for Assetto Corsa)
+        server.serve_forever()  # NOSONAR
     except KeyboardInterrupt:
         print("\n[INFO] Server stopped by user.")
     finally:
