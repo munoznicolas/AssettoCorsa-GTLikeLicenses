@@ -9,7 +9,14 @@ local Theme           = require("ui/common/gt_ui_theme")
 local GTTimerWidget   = require("ui/screens/gt_timer_widget")
 local GTGhostWidget   = require("ui/screens/gt_ghost_widget")
 local GTModalOverlays = require("ui/screens/gt_modal_overlays")
-local GTLicenseShared = require("engine/gt_shared_state")
+local GTLicenseShared = nil
+pcall(function() GTLicenseShared = require("engine/shared_state") end)
+if not GTLicenseShared then
+  pcall(function() GTLicenseShared = require("engine/gt_shared_state") end)
+end
+if not GTLicenseShared then
+  pcall(function() GTLicenseShared = require("shared_state") end)
+end
 
 local GTLicenseHUD = {}
 

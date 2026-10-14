@@ -1,36 +1,36 @@
 -- ==============================================================================
 -- Gran Turismo License Engine for Assetto Corsa (CSP)
--- File: lua/engine/gt_ghost_manager.lua
+-- File: lua/engine/ghost_manager.lua
 -- Description: Manages Gold medal ghost car trajectory evaluation,
 --              lead offset pacing, delta computation, and driver mode toggling.
 -- ==============================================================================
 
-local GTGhostManager = {}
-GTGhostManager.__index = GTGhostManager
+local GhostManager = {}
+GhostManager.__index = GhostManager
 
 -- Ghost Modes
-GTGhostManager.MODE = {
+GhostManager.MODE = {
   OFF   = 0, -- Ghost hidden
   EXACT = 1, -- Running at exact Gold medal pace (0.0s delta)
   PACER = 2  -- Running ahead as a pace car (+0.5s lead)
 }
 
 local MODE_NAMES = {
-  [GTGhostManager.MODE.OFF]   = "DISABLED",
-  [GTGhostManager.MODE.EXACT] = "EXACT GOLD (0.0s)",
-  [GTGhostManager.MODE.PACER] = "PACER (+0.5s LEAD)"
+  [GhostManager.MODE.OFF]   = "DISABLED",
+  [GhostManager.MODE.EXACT] = "EXACT GOLD (0.0s)",
+  [GhostManager.MODE.PACER] = "PACER (+0.5s LEAD)"
 }
 
 ---Constructs a new Ghost Manager instance.
 ---@param testConfig table @Test JSON definition
 ---@param ghostTrajectory table|nil @Precomputed ghost trajectory array
----@return table @GTGhostManager instance
-function GTGhostManager.new(testConfig, ghostTrajectory)
-  local self = setmetatable({}, GTGhostManager)
+---@return table @GhostManager instance
+function GhostManager.new(testConfig, ghostTrajectory)
+  local self = setmetatable({}, GhostManager)
 
   self.testConfig = testConfig or {}
   self.trajectory = ghostTrajectory or {}
-  self.mode = GTGhostManager.MODE.OFF -- Default to OFF (disabled)
+  self.mode = GhostManager.MODE.OFF -- Default to OFF (disabled)
   self.leadOffset = 0.5 -- 0.5s lead in PACER mode
 
   self.goldTime = 20.0
@@ -56,7 +56,7 @@ function GTGhostManager.new(testConfig, ghostTrajectory)
 end
 
 ---Resets the ghost state to initial conditions (called during session reset).
-function GTGhostManager:reset()
+function GhostManager:reset()
   self.activePos = nil
   self.activeHeading = { 0, 0, 1 }
   self.activeSpeed = 0.0
@@ -76,13 +76,13 @@ function GTGhostManager:reset()
 end
 
 ---Toggles ghost mode in order: PACER -> EXACT -> OFF -> PACER.
-function GTGhostManager:toggleMode()
-  if self.mode == GTGhostManager.MODE.PACER then
-    self.mode = GTGhostManager.MODE.EXACT
-  elseif self.mode == GTGhostManager.MODE.EXACT then
-    self.mode = GTGhostManager.MODE.OFF
+function GhostManager:toggleMode()
+  if self.mode == GhostManager.MODE.PACER then
+    self.mode = GhostManager.MODE.EXACT
+  elseif self.mode == GhostManager.MODE.EXACT then
+    self.mode = GhostManager.MODE.OFF
   else
-    self.mode = GTGhostManager.MODE.PACER
+    self.mode = GhostManager.MODE.PACER
   end
 
   self.osdMessage = "[G] GHOST MODE: " .. (MODE_NAMES[self.mode] or "UNKNOWN")
@@ -91,14 +91,14 @@ end
 
 ---Sets explicit ghost mode.
 ---@param mode number
-function GTGhostManager:setMode(mode)
-  self.mode = mode or GTGhostManager.MODE.OFF
+function GhostManager:setMode(mode)
+  self.mode = mode or GhostManager.MODE.OFF
 end
 
 ---Interpolates trajectory sample points at time t.
 ---@param t number @Target time in seconds
 ---@return table @{ pos, heading, speed_kmh, is_braking }
-function GTGhostManager:sampleTrajectory(t)
+function GhostManager:sampleTrajectory(t)
   local samples = self.trajectory
   local n = #samples
 
@@ -182,7 +182,7 @@ end
 ---@param dt number @Frame delta time
 ---@param sessionTime number @Current running session time in seconds
 ---@param playerPos table|nil @Player 3D world position {x, y, z}
-function GTGhostManager:update(dt, sessionTime, playerPos)
+function GhostManager:update(dt, sessionTime, playerPos)
   -- 1. Update OSD timer
   if self.osdTimer > 0 then
     self.osdTimer = self.osdTimer - dt
@@ -209,12 +209,12 @@ function GTGhostManager:update(dt, sessionTime, playerPos)
   end
 
   -- If ghost is turned off, skip trajectory sampling
-  if self.mode == GTGhostManager.MODE.OFF then
+  if self.mode == GhostManager.MODE.OFF then
     return
   end
 
   -- 3. Calculate effective ghost sample time
-  local offset = (self.mode == GTGhostManager.MODE.PACER) and self.leadOffset or 0.0
+  local offset = (self.mode == GhostManager.MODE.PACER) and self.leadOffset or 0.0
   local sampleT = math.max(0.0, sessionTime + offset)
 
   local sample = self:sampleTrajectory(sampleT)
@@ -241,9 +241,9 @@ end
 
 ---Returns the active ghost render state.
 ---@return table @{ active, mode, pos, heading, speed_kmh, is_braking, delta, osd_message }
-function GTGhostManager:getState()
+function GhostManager:getState()
   return {
-    active = (self.mode ~= GTGhostManager.MODE.OFF and self.activePos ~= nil),
+    active = (self.mode ~= GhostManager.MODE.OFF and self.activePos ~= nil),
     mode = self.mode,
     mode_name = MODE_NAMES[self.mode] or "DISABLED",
     pos = self.activePos,
@@ -255,4 +255,6 @@ function GTGhostManager:getState()
   }
 end
 
-return GTGhostManager
+GhostManager.GTGhostManager = GhostManager
+
+return GhostManager

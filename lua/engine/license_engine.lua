@@ -1,6 +1,6 @@
 -- ==============================================================================
 -- Gran Turismo License Engine for Assetto Corsa (CSP)
--- File: lua/engine/gt_license_engine.lua
+-- File: lua/engine/license_engine.lua
 -- Description: Master scenario coordinator managing the state machine
 --              (COUNTDOWN -> RUNNING -> PASSED / FAILED -> RESULTS),
 --              loading the active test JSON definition, and driving
@@ -17,13 +17,13 @@ local function safeRequire(name)
   error(string.format("gt_license_engine: Failed to require '%s': %s", name, tostring(mod)))
 end
 
-local GTUtils        = safeRequire("gt_utils")
-local GTPhysicsHooks = safeRequire("gt_physics_hooks")
-local GTAdjudicator  = safeRequire("gt_adjudicator")
-local GTSessionReset = safeRequire("gt_session_reset")
-local GTGhostManager = safeRequire("gt_ghost_manager")
-local GTConfigLoader = safeRequire("gt_config_loader")
-local GTResults      = safeRequire("gt_results")
+local Utils          = safeRequire("utils")
+local PhysicsHooks   = safeRequire("physics_hooks")
+local Adjudicator    = safeRequire("adjudicator")
+local SessionReset   = safeRequire("session_reset")
+local GhostManager   = safeRequire("ghost_manager")
+local ConfigLoader   = safeRequire("config_loader")
+local Results        = safeRequire("results")
 
 local function tryRequireEngine(name)
   local ok, mod = pcall(require, name)
@@ -35,7 +35,8 @@ local function tryRequireEngine(name)
   return nil
 end
 
-local GTAICoordinator = tryRequireEngine("gt_ai_coordinator")
+local AICoordinator   = tryRequireEngine("ai_coordinator")
+local TelemetryLogger = tryRequireEngine("telemetry_logger")
 
 local function tryRequireUI(name)
   local ok, mod = pcall(require, name)
@@ -51,16 +52,16 @@ local GTLicenseHUD   = tryRequireUI("gt_license_hud")
 local GTRenderGates  = tryRequireUI("gt_render_gates")
 local GTAudioManager = tryRequireUI("gt_audio_manager")
 
-local GTLicenseShared = nil
-pcall(function() GTLicenseShared = require("engine/gt_shared_state") end)
-if not GTLicenseShared then
-  pcall(function() GTLicenseShared = require("gt_shared_state") end)
+local LicenseShared = nil
+pcall(function() LicenseShared = require("engine/shared_state") end)
+if not LicenseShared then
+  pcall(function() LicenseShared = require("shared_state") end)
 end
 
-local GTLicenseEngine = {}
+local LicenseEngine = {}
 
 -- Engine Lifecycle States
-GTLicenseEngine.STATE = {
+LicenseEngine.STATE = {
   INITIALIZING = "INITIALIZING",
   COUNTDOWN    = "COUNTDOWN",
   RUNNING      = "RUNNING",
@@ -70,15 +71,15 @@ GTLicenseEngine.STATE = {
 }
 
 -- Default fallback test configuration & loader delegation
-GTLicenseEngine.DEFAULT_TEST_CONFIG = GTConfigLoader.DEFAULT_TEST_CONFIG
-GTLicenseEngine.loadTestConfig = GTConfigLoader.loadTestConfig
-local DEFAULT_TEST_CONFIG = GTConfigLoader.DEFAULT_TEST_CONFIG
+LicenseEngine.DEFAULT_TEST_CONFIG = ConfigLoader.DEFAULT_TEST_CONFIG
+LicenseEngine.loadTestConfig = ConfigLoader.loadTestConfig
+local DEFAULT_TEST_CONFIG = ConfigLoader.DEFAULT_TEST_CONFIG
 
 ---Creates and initializes the master license engine coordinator.
 ---@param testDefinition table|string? @Test config table or path to test JSON
----@return table GTLicenseEngine instance
-function GTLicenseEngine.new(testDefinition)
-  local self = setmetatable({}, { __index = GTLicenseEngine })
+---@return table LicenseEngine instance
+function LicenseEngine.new(testDefinition)
+  local self = setmetatable({}, { __index = LicenseEngine })
 
   -- Event listeners
   self.listeners = {
@@ -92,7 +93,7 @@ function GTLicenseEngine.new(testDefinition)
   }
 
   -- Initialize Session Reset Controller
-  self.sessionReset = GTSessionReset.new({
+  self.sessionReset = SessionReset.new({
     autoResetDelay = 1.8
   })
   self.sessionReset:onReset(function(reason)
@@ -103,9 +104,9 @@ function GTLicenseEngine.new(testDefinition)
   if type(testDefinition) == "table" then
     self.testConfig = testDefinition
   elseif type(testDefinition) == "string" then
-    self.testConfig = GTLicenseEngine.loadTestConfig(testDefinition)
+    self.testConfig = LicenseEngine.loadTestConfig(testDefinition)
   else
-    self.testConfig = GTLicenseEngine.loadTestConfig(nil)
+    self.testConfig = LicenseEngine.loadTestConfig(nil)
   end
 
   local initSpeed = (self.testConfig.spawn and self.testConfig.spawn.initial_speed_kmh) or 0
@@ -118,7 +119,7 @@ function GTLicenseEngine.new(testDefinition)
   end
 
   -- State machine variables
-  self.state = GTLicenseEngine.STATE.INITIALIZING
+  self.state = LicenseEngine.STATE.INITIALIZING
   self.sessionTime = 0
   self.countdownTimer = 3.0
   self.countdownLastStep = 4
@@ -128,7 +129,7 @@ function GTLicenseEngine.new(testDefinition)
   self.results = {}
 
   -- Initialize Adjudicator
-  self.adjudicator = GTAdjudicator.new(self.testConfig)
+  self.adjudicator = Adjudicator.new(self.testConfig)
 
   -- Telemetry recording check
   self.isTelemetryRecorder = (self.testConfig and (self.testConfig.test_id == "AI_TELEMETRY_RECORDER" or self.testConfig.is_telemetry_recording == true or self.testConfig.isTelemetryRecording == true)) or false
@@ -187,16 +188,21 @@ function GTLicenseEngine.new(testDefinition)
   if self.testConfig.ghost and self.testConfig.ghost.trajectory then
     ghostTrajectory = self.testConfig.ghost.trajectory
   end
-  self.ghostManager = GTGhostManager.new(self.testConfig, ghostTrajectory)
+  self.ghostManager = GhostManager.new(self.testConfig, ghostTrajectory)
 
   -- Initialize AI & Rolling Start Coordinator
-  if GTAICoordinator then
-    self.aiCoordinator = GTAICoordinator.new(self.testConfig)
+  if AICoordinator then
+    self.aiCoordinator = AICoordinator.new(self.testConfig)
+  end
+
+  -- Initialize Telemetry & Diagnostics Logger
+  if TelemetryLogger then
+    self.telemetryLogger = TelemetryLogger.new()
   end
 
   -- Initialize Inter-Process Shared State
-  if GTLicenseShared and GTLicenseShared.connect then
-    self.sharedState = GTLicenseShared.connect()
+  if LicenseShared and LicenseShared.connect then
+    self.sharedState = LicenseShared.connect()
   end
 
   -- Begin countdown immediately upon creation
@@ -207,43 +213,43 @@ end
 
 ---Registers an event callback for state changes.
 ---@param fn fun(newState: string, oldState: string)
-function GTLicenseEngine:onStateChanged(fn)
+function LicenseEngine:onStateChanged(fn)
   table.insert(self.listeners.stateChanged, fn)
 end
 
 ---Registers an event callback for countdown ticks (3, 2, 1).
 ---@param fn fun(tick: integer)
-function GTLicenseEngine:onCountdownTick(fn)
+function LicenseEngine:onCountdownTick(fn)
   table.insert(self.listeners.countdownTick, fn)
 end
 
 ---Registers an event callback for the "GO!" signal.
 ---@param fn fun()
-function GTLicenseEngine:onGo(fn)
+function LicenseEngine:onGo(fn)
   table.insert(self.listeners.go, fn)
 end
 
 ---Registers an event callback for test completion (pass).
 ---@param fn fun(results: table)
-function GTLicenseEngine:onTestPassed(fn)
+function LicenseEngine:onTestPassed(fn)
   table.insert(self.listeners.testPassed, fn)
 end
 
 ---Registers an event callback for test failure (disqualification).
 ---@param fn fun(reason: string)
-function GTLicenseEngine:onTestFailed(fn)
+function LicenseEngine:onTestFailed(fn)
   table.insert(self.listeners.testFailed, fn)
 end
 
 ---Registers an event callback for results screen presentation.
 ---@param fn fun(results: table)
-function GTLicenseEngine:onResultsShown(fn)
+function LicenseEngine:onResultsShown(fn)
   table.insert(self.listeners.resultsShown, fn)
 end
 
 ---Registers an event callback for session resets.
 ---@param fn fun(reason: string)
-function GTLicenseEngine:onReset(fn)
+function LicenseEngine:onReset(fn)
   table.insert(self.listeners.reset, fn)
 end
 
@@ -262,34 +268,34 @@ end
 ---Returns true if the specified state requires vehicle braking (FAILED, PASSED, RESULTS).
 ---@param state string
 ---@return boolean
-function GTLicenseEngine.isBrakingState(state)
-  return state == GTLicenseEngine.STATE.FAILED
-      or state == GTLicenseEngine.STATE.PASSED
-      or state == GTLicenseEngine.STATE.RESULTS
+function LicenseEngine.isBrakingState(state)
+  return state == LicenseEngine.STATE.FAILED
+      or state == LicenseEngine.STATE.PASSED
+      or state == LicenseEngine.STATE.RESULTS
 end
 
 ---Changes the current state and notifies listeners.
 ---@param newState string
-function GTLicenseEngine:setState(newState)
+function LicenseEngine:setState(newState)
   if self.state ~= newState then
     local oldState = self.state
     self.state = newState
 
-    local wasBraking = GTLicenseEngine.isBrakingState(oldState)
-    local isBraking = GTLicenseEngine.isBrakingState(newState)
+    local wasBraking = LicenseEngine.isBrakingState(oldState)
+    local isBraking = LicenseEngine.isBrakingState(newState)
 
     if isBraking and not wasBraking then
-      local enableAI = (newState == GTLicenseEngine.STATE.PASSED or newState == GTLicenseEngine.STATE.RESULTS)
-      GTPhysicsHooks.applyFailureBraking(0, 0.5, enableAI)
+      local enableAI = (newState == LicenseEngine.STATE.PASSED or newState == LicenseEngine.STATE.RESULTS)
+      PhysicsHooks.applyFailureBraking(0, 0.5, enableAI)
       if ac and ac.log then
-        if newState == GTLicenseEngine.STATE.FAILED then
+        if newState == LicenseEngine.STATE.FAILED then
           ac.log(string.format("[GTLicense] Failure triggered: reason='%s' | Deploying 50%% emergency braking", tostring(self.failReason)))
         else
           ac.log(string.format("[GTLicense] Test completed: medal='%s' | Deploying 50%% controlled braking with AI steering", tostring(self.achievedMedal or "NONE")))
         end
       end
     elseif wasBraking and not isBraking then
-      GTPhysicsHooks.releaseFailureBraking(0)
+      PhysicsHooks.releaseFailureBraking(0)
       if ac and ac.log then
         ac.log("[GTLicense] Leaving completed/failed state | Releasing failure braking")
       end
@@ -300,11 +306,11 @@ function GTLicenseEngine:setState(newState)
 end
 
 ---Starts or restarts the 3-2-1 countdown sequence.
-function GTLicenseEngine:startCountdown()
-  GTPhysicsHooks.releaseFailureBraking(0)
+function LicenseEngine:startCountdown()
+  PhysicsHooks.releaseFailureBraking(0)
 
   if self.isTelemetryRecorder then
-    self:setState(GTLicenseEngine.STATE.RUNNING)
+    self:setState(LicenseEngine.STATE.RUNNING)
     self.sessionTime = 0
     self.spawnInitialized = false
     self.countdownTimer = 0
@@ -315,23 +321,8 @@ function GTLicenseEngine:startCountdown()
     self.sessionReset:cancelAutoReset()
 
     -- Engage native Assetto Corsa AI autopilot at 100% proficiency for hotlap recording
-    if physics and physics.setCarAutopilot then
-      physics.setCarAutopilot(true, false)
-    end
-    if physics and physics.setAILevel then
-      physics.setAILevel(0, self.aiLevel or 1.0)
-    end
-    if physics and physics.setAIAggression then
-      physics.setAIAggression(0, 0.0)
-    end
-    if physics and physics.setAICaution then
-      physics.setAICaution(0, 0.0)
-    end
-    if physics and physics.setAITopSpeed then
-      physics.setAITopSpeed(0, 999999.0)
-    end
-    if physics and physics.setAISplineAbsoluteOffset then
-      physics.setAISplineAbsoluteOffset(0, 0.0, false)
+    if self.aiCoordinator then
+      self.aiCoordinator:initAutopilot(0, self.aiLevel or 1.0, self.isTelemetryRecorder)
     end
     if physics and physics.lockUserControlsFor then
       physics.lockUserControlsFor(0)
@@ -348,9 +339,6 @@ function GTLicenseEngine:startCountdown()
     if physics and physics.forceUserHandbrakeFor then
       physics.forceUserHandbrakeFor(0, 0)
     end
-    if physics and physics.setAIThrottleLimit then
-      physics.setAIThrottleLimit(0, 1.0)
-    end
 
     if ac and ac.log then
       ac.log(string.format("[GTLicense] AI Telemetry Recorder: Hotlap start initialized, native AI autopilot engaged at %.0f%% AI level.", (self.aiLevel or 1.0) * 100))
@@ -359,7 +347,7 @@ function GTLicenseEngine:startCountdown()
     return
   end
 
-  self:setState(GTLicenseEngine.STATE.COUNTDOWN)
+  self:setState(LicenseEngine.STATE.COUNTDOWN)
   self.sessionTime = 0
   self.spawnInitialized = false
   self.countdownTimer = 3.0
@@ -380,7 +368,7 @@ function GTLicenseEngine:startCountdown()
 
   local targetGear = tonumber(self.testConfig.spawn and self.testConfig.spawn.gear)
   if not targetGear or targetGear <= 0 then
-    targetGear = isStanding and 1 or GTPhysicsHooks.estimateStartingGear(initialSpeed)
+    targetGear = isStanding and 1 or PhysicsHooks.estimateStartingGear(initialSpeed)
   end
   local targetRPM = tonumber(self.testConfig.spawn and self.testConfig.spawn.rpm)
   if not targetRPM or targetRPM <= 0 then
@@ -389,10 +377,10 @@ function GTLicenseEngine:startCountdown()
   self.targetStartingGear = targetGear
   self.targetStartingRPM = targetRPM
 
-  GTPhysicsHooks.setupSpawn(self.testConfig, 0)
+  PhysicsHooks.setupSpawn(self.testConfig, 0)
 
   -- Lock controls during countdown
-  GTPhysicsHooks.lockControls(3.0, isStanding, targetGear, targetRPM)
+  PhysicsHooks.lockControls(3.0, isStanding, targetGear, targetRPM)
 
   if ac and ac.log then
     ac.log(string.format("[GTLicense] Countdown started | start_mode=%s | isStanding=%s | initial_speed=%.1f km/h | gear=%d | rpm=%d",
@@ -404,48 +392,51 @@ end
 ---Evaluates medal rank based on achieved session time.
 ---@param timeSeconds number
 ---@return string medal ("GOLD" | "SILVER" | "BRONZE" | "NONE")
-function GTLicenseEngine:evaluateMedal(timeSeconds)
+function LicenseEngine:evaluateMedal(timeSeconds)
   if self.isAITestMode then
     return "GOLD"
   end
-  return GTResults.evaluateMedal(timeSeconds, self.testConfig and self.testConfig.targets)
+  return Results.evaluateMedal(timeSeconds, self.testConfig and self.testConfig.targets)
 end
 
 ---Builds the results report table.
 ---@return table results
-function GTLicenseEngine:compileResults()
-  return GTResults.compileResults(self.testConfig, self.sessionTime, self.achievedMedal, self.failReason)
+function LicenseEngine:compileResults()
+  return Results.compileResults(self.testConfig, self.sessionTime, self.achievedMedal, self.failReason)
 end
 
----Called when GTSessionReset fires a reset.
+---Called when SessionReset fires a reset.
 ---@param reason string
-function GTLicenseEngine:onSessionResetTriggered(reason)
+function LicenseEngine:onSessionResetTriggered(reason)
   self.restartCount = (self.restartCount or 0) + 1
   self.gearOverrideReleased = false
   self.lastAIShiftTime = 0
   self.spawnInitialized = false
-  GTPhysicsHooks.releaseFailureBraking(0)
+  PhysicsHooks.releaseFailureBraking(0)
   self.isAIRollingActive = false
   if self.ghostManager then
     self.ghostManager:reset()
+  end
+  if self.telemetryLogger then
+    self.telemetryLogger:reset()
   end
   dispatchEvent(self, "reset", reason)
   self:startCountdown()
 end
 
 ---Triggers manual session restart immediately.
-function GTLicenseEngine:restart()
+function LicenseEngine:restart()
   self.sessionReset:executeReset("MANUAL_CALL")
 end
 
 ---Ends the current session and exits back to Content Manager or AC menu.
-function GTLicenseEngine:exitSession()
+function LicenseEngine:exitSession()
   if ac and ac.log then
     ac.log("[GTLicense] User requested session exit via Exit button or ESC")
   end
   if ac and ac.endSession then
     local medal = self.achievedMedal or "NONE"
-    local passed = (self.state == GTLicenseEngine.STATE.PASSED or self.state == GTLicenseEngine.STATE.RESULTS)
+    local passed = (self.state == LicenseEngine.STATE.PASSED or self.state == LicenseEngine.STATE.RESULTS)
     local resultsObj = nil
     if self.results and self.results.final_time then
       resultsObj = {
@@ -459,7 +450,7 @@ end
 
 ---Main per-frame simulation update step.
 ---@param dt number @Frame delta time in seconds
-function GTLicenseEngine:update(dt)
+function LicenseEngine:update(dt)
   -- Check for UI App requested restart
   if self.sharedState and self.sharedState.requestRestart then
     self.sharedState.requestRestart = false
@@ -468,7 +459,7 @@ function GTLicenseEngine:update(dt)
   end
 
   -- Check for automated programmed test restart (used for automated telemetry validation)
-  if self.restartAtTime and self.state == GTLicenseEngine.STATE.RUNNING and (self.restartCount or 0) == 0 and self.sessionTime >= self.restartAtTime then
+  if self.restartAtTime and self.state == LicenseEngine.STATE.RUNNING and (self.restartCount or 0) == 0 and self.sessionTime >= self.restartAtTime then
     if ac and ac.log then
       ac.log(string.format("[GTLicense] Automated programmed restart triggered at sessionTime=%.2fs", self.sessionTime))
     end
@@ -484,7 +475,7 @@ function GTLicenseEngine:update(dt)
   end
 
   -- Check ESC key for exit during terminal/results states
-  if self.state == GTLicenseEngine.STATE.RESULTS or self.state == GTLicenseEngine.STATE.PASSED or self.state == GTLicenseEngine.STATE.FAILED then
+  if self.state == LicenseEngine.STATE.RESULTS or self.state == LicenseEngine.STATE.PASSED or self.state == LicenseEngine.STATE.FAILED then
     local escPressed = false
     if ui and ui.keyboardButtonPressed and ui.KeyIndex and ui.KeyIndex.Escape then
       escPressed = ui.keyboardButtonPressed(ui.KeyIndex.Escape)
@@ -508,23 +499,8 @@ function GTLicenseEngine:update(dt)
     if self.isTelemetryRecorder then
       -- In telemetry recording mode, preserve Assetto Corsa's native hotlap spawn!
       -- Do NOT force artificial gear, RPM, or velocity overrides.
-      if physics and physics.setCarAutopilot then
-        physics.setCarAutopilot(true, false)
-      end
-      if physics and physics.setAILevel then
-        physics.setAILevel(0, self.aiLevel or 1.0)
-      end
-      if physics and physics.setAIAggression then
-        physics.setAIAggression(0, 0.0)
-      end
-      if physics and physics.setAICaution then
-        physics.setAICaution(0, 0.0)
-      end
-      if physics and physics.setAITopSpeed then
-        physics.setAITopSpeed(0, 999999.0)
-      end
-      if physics and physics.setAISplineAbsoluteOffset then
-        physics.setAISplineAbsoluteOffset(0, 0.0, false)
+      if self.aiCoordinator then
+        self.aiCoordinator:initAutopilot(0, self.aiLevel or 1.0, self.isTelemetryRecorder)
       end
       if physics and physics.lockUserControlsFor then
         physics.lockUserControlsFor(0)
@@ -541,9 +517,6 @@ function GTLicenseEngine:update(dt)
       if physics and physics.forceUserHandbrakeFor then
         physics.forceUserHandbrakeFor(0, 0)
       end
-      if physics and physics.setAIThrottleLimit then
-        physics.setAIThrottleLimit(0, 1.0)
-      end
 
       if ac and ac.log then
         ac.log(string.format("[GTLicense] First live frame telemetry recorder init (native hotlap start): spd=%.2f km/h, gear=%d, AI level=%.2f",
@@ -552,9 +525,9 @@ function GTLicenseEngine:update(dt)
       return
     end
 
-    GTPhysicsHooks.setupSpawn(self.testConfig, 0)
+    PhysicsHooks.setupSpawn(self.testConfig, 0)
     local isStanding = (self.testConfig.start_mode == "STANDING")
-    GTPhysicsHooks.lockControls(3.0, isStanding, self.targetStartingGear, self.targetStartingRPM)
+    PhysicsHooks.lockControls(3.0, isStanding, self.targetStartingGear, self.targetStartingRPM)
 
     if ac and ac.log then
       ac.log(string.format("[GTLicense] First live frame spawn applied: pos=(%.2f, %.2f, %.2f), look=(%.2f, %.2f, %.2f), speed=%.2f km/h",
@@ -566,7 +539,7 @@ function GTLicenseEngine:update(dt)
   end
 
   -- 2. State machine evaluation
-  if self.state == GTLicenseEngine.STATE.COUNTDOWN then
+  if self.state == LicenseEngine.STATE.COUNTDOWN then
     self.countdownTimer = self.countdownTimer - dt
     local currentStep = math.ceil(self.countdownTimer)
 
@@ -576,23 +549,18 @@ function GTLicenseEngine:update(dt)
       local isStanding = (self.testConfig.start_mode == "STANDING") or (initialSpeed <= 0)
       local targetGear = self.targetStartingGear
         or (tonumber(self.testConfig.spawn.gear) and tonumber(self.testConfig.spawn.gear) > 0 and tonumber(self.testConfig.spawn.gear))
-        or (isStanding and 1 or GTPhysicsHooks.estimateStartingGear(initialSpeed))
+        or (isStanding and 1 or PhysicsHooks.estimateStartingGear(initialSpeed))
       local targetRPM = self.targetStartingRPM
         or (tonumber(self.testConfig.spawn.rpm) and tonumber(self.testConfig.spawn.rpm) > 0 and tonumber(self.testConfig.spawn.rpm))
         or (isStanding and 1000 or 3500)
 
       if initialSpeed > 0 then
-        GTPhysicsHooks.maintainAIRolling(0, initialSpeed, self.testConfig.spawn.forward_vector, dt, targetGear, targetRPM)
+        PhysicsHooks.maintainAIRolling(0, initialSpeed, self.testConfig.spawn.forward_vector, dt, targetGear, targetRPM)
       else
         -- Standing start: maintain 1st gear engaged and brakes held during countdown
         if not car or car.gear ~= 1 then
           if physics and physics.engageGear then
             physics.engageGear(0, 1)
-          end
-        end
-        if ac and ac.overrideCarControls then
-          local ctrl = ac.overrideCarControls(0)
-          if ctrl then
           end
         end
       end
@@ -601,33 +569,8 @@ function GTLicenseEngine:update(dt)
     if currentStep >= 1 and currentStep < self.countdownLastStep then
       self.countdownLastStep = currentStep
       dispatchEvent(self, "countdownTick", currentStep)
-      if ac and ac.log then
-        local spd = car and car.speedKmh or 0
-        local gear = car and car.gear or 0
-        local lx = car and car.look and car.look.x or 0
-        local lz = car and car.look and car.look.z or 0
-        local hb = car and car.handbrake or 0
-        local brk = car and car.brake or 0
-        local gas = car and car.gas or 0
-        local vy = car and car.velocity and car.velocity.y or 0
-        local wFL = (car and car.wheels and car.wheels[0] and car.wheels[0].angularSpeed) or 0
-        local wFR = (car and car.wheels and car.wheels[1] and car.wheels[1].angularSpeed) or 0
-        local wRL = (car and car.wheels and car.wheels[2] and car.wheels[2].angularSpeed) or 0
-        local wRR = (car and car.wheels and car.wheels[3] and car.wheels[3].angularSpeed) or 0
-        local sFL = (car and car.wheels and car.wheels[0] and car.wheels[0].suspensionTravel) or 0
-        local sRL = (car and car.wheels and car.wheels[2] and car.wheels[2].suspensionTravel) or 0
-        local ldFL = (car and car.wheels and car.wheels[0] and car.wheels[0].load) or 0
-        local ldRL = (car and car.wheels and car.wheels[2] and car.wheels[2].load) or 0
-        local slpRL = (car and car.wheels and car.wheels[2] and car.wheels[2].slipRatio) or 0
-        local cphys = ac.getCarPhysics and ac.getCarPhysics(0)
-        local dtVel = cphys and cphys.drivetrainVelocity or 0
-        local clState = cphys and cphys.clutchState or 0
-        local px = car and car.position and car.position.x or 0
-        local py = car and car.position and car.position.y or 0
-        local pz = car and car.position and car.position.z or 0
-        local st = car and car.steer or 0
-        ac.log(string.format("[GTLicense] Countdown Tick %d | Spd=%.1f | Gear=%d | pos=(%.1f, %.1f, %.1f) | vy=%.2f | Gas=%.2f | Susp=(FL:%.3f, RL:%.3f) | Load=(FL:%.0f, RL:%.0f) | SlipRL=%.2f | Omegas=(FL:%.1f, FR:%.1f, RL:%.1f, RR:%.1f) | DT=%.1f | Cl=%.2f",
-          currentStep, spd, gear, px, py, pz, vy, gas, sFL, sRL, ldFL, ldRL, slpRL, wFL, wFR, wRL, wRR, dtVel, clState))
+      if self.telemetryLogger then
+        self.telemetryLogger:logCountdownTick(car, currentStep)
       end
     end
 
@@ -637,39 +580,24 @@ function GTLicenseEngine:update(dt)
       local isStanding = (self.testConfig.start_mode == "STANDING") or (initSpeed <= 0)
       local targetGear = self.targetStartingGear
         or (self.testConfig.spawn and self.testConfig.spawn.gear and tonumber(self.testConfig.spawn.gear) > 0 and tonumber(self.testConfig.spawn.gear))
-        or (isStanding and 1 or GTPhysicsHooks.estimateStartingGear(initSpeed))
+        or (isStanding and 1 or PhysicsHooks.estimateStartingGear(initSpeed))
 
       if self.isAITestMode then
         -- Autonomous AI test mode: keep AI autopilot engaged at target AI level (e.g. 95%)
-        if physics and physics.setCarAutopilot then
-          physics.setCarAutopilot(true, false)
+        if self.aiCoordinator then
+          self.aiCoordinator:initAutopilot(0, self.aiLevel or 0.95, false)
         end
-        if physics and physics.setAILevel then
-          physics.setAILevel(0, self.aiLevel or 0.95)
-        end
-        if physics and physics.setAIAggression then
-          physics.setAIAggression(0, 0.0)
-        end
-        if physics and physics.setAICaution then
-          physics.setAICaution(0, 0.05)
-        end
-        if physics and physics.setAITopSpeed then
-          physics.setAITopSpeed(0, 999999.0)
-        end
-        if physics and physics.setAISplineAbsoluteOffset then
-          physics.setAISplineAbsoluteOffset(0, 0.0, false)
-        end
-        GTPhysicsHooks.unlockControls(0, targetGear)
+        PhysicsHooks.unlockControls(0, targetGear)
         self.isAIRollingActive = false
         if ac and ac.log then
           ac.log(string.format("[GTLicense] AI Test Mode ACTIVE: Autopilot maintained at %.0f%% AI level", (self.aiLevel or 0.95) * 100))
         end
       else
         if self.isAIRollingActive or initSpeed > 0 then
-          GTPhysicsHooks.stopAIRolling(0, targetGear)
+          PhysicsHooks.stopAIRolling(0, targetGear)
           self.isAIRollingActive = false
         else
-          GTPhysicsHooks.unlockControls(0, targetGear)
+          PhysicsHooks.unlockControls(0, targetGear)
         end
       end
 
@@ -680,55 +608,22 @@ function GTLicenseEngine:update(dt)
         self.adjudicator.hasPassedStartGate = true
       end
       dispatchEvent(self, "go")
-      self:setState(GTLicenseEngine.STATE.RUNNING)
-      if ac and ac.log then
-        local spd = car and car.speedKmh or 0
-        local lx = car and car.look and car.look.x or 0
-        local lz = car and car.look and car.look.z or 0
-        local px = car and car.position and car.position.x or 0
-        local py = car and car.position and car.position.y or 0
-        local pz = car and car.position and car.position.z or 0
-        local st = car and car.steer or 0
-        local wFL = (car and car.wheels and car.wheels[0] and car.wheels[0].angularSpeed) or 0
-        local wFR = (car and car.wheels and car.wheels[1] and car.wheels[1].angularSpeed) or 0
-        local wRL = (car and car.wheels and car.wheels[2] and car.wheels[2].angularSpeed) or 0
-        local wRR = (car and car.wheels and car.wheels[3] and car.wheels[3].angularSpeed) or 0
-        local cphys = ac.getCarPhysics and ac.getCarPhysics(0)
-        local dtVel = cphys and cphys.drivetrainVelocity or 0
-        local clState = cphys and cphys.clutchState or 0
-        local rBrk = cphys and cphys.wheels and cphys.wheels[2] and cphys.wheels[2].brakeTorque or 0
-        local rHb = cphys and cphys.wheels and cphys.wheels[2] and cphys.wheels[2].handbrakeTorque or 0
-        local rShaft = cphys and cphys.wheels and cphys.wheels[2] and cphys.wheels[2].shaftVelocity or 0
-        ac.log(string.format("[GTLicense] Countdown GO! | Spd=%.1f | Gear=%d | pos=(%.1f, %.1f, %.1f) | look=(%.2f, %.2f) | Steer=%.1f deg | Omegas=(FL:%.1f, FR:%.1f, RL:%.1f, RR:%.1f)",
-          spd, targetGear, px, py, pz, lx, lz, st, wFL, wFR, wRL, wRR))
+      self:setState(LicenseEngine.STATE.RUNNING)
+      if self.telemetryLogger then
+        self.telemetryLogger:logCountdownGo(car, targetGear)
       end
     end
 
-  elseif self.state == GTLicenseEngine.STATE.RUNNING then
+  elseif self.state == LicenseEngine.STATE.RUNNING then
     self.sessionTime = self.sessionTime + dt
 
     -- Continuously maintain AI autopilot parameters at maximum performance in AI test mode
-    if self.isAITestMode then
-      if physics and physics.setAILevel then
-        physics.setAILevel(0, math.max(1.0, self.aiLevel or 1.0))
-      end
-      if physics and physics.setAIAggression then
-        physics.setAIAggression(0, self.isTelemetryRecorder and 0.0 or 1.0)
-      end
-      if physics and physics.setAICaution then
-        physics.setAICaution(0, 0.0)
-      end
-      if physics and physics.setAITopSpeed then
-        physics.setAITopSpeed(0, 999999.0)
-      end
+    if self.isAITestMode and self.aiCoordinator then
+      self.aiCoordinator:maintainAutopilot(0, math.max(1.0, self.aiLevel or 1.0), self.isTelemetryRecorder)
     end
 
-    if not self.lastPeriodicLog or (self.sessionTime - self.lastPeriodicLog >= 2.0) then
-      self.lastPeriodicLog = self.sessionTime
-      if car and ac and ac.log then
-        ac.log(string.format("[GTLicense] LIVE TRACK: t=%.1fs | pos=(%.1f, %.1f, %.1f) | spd=%.1f | spline=%.4f | gear=%d",
-          self.sessionTime, car.position.x, car.position.y, car.position.z, car.speedKmh, car.splinePosition or 0, car.gear))
-      end
+    if self.telemetryLogger then
+      self.telemetryLogger:logLiveTrack(car, self.sessionTime)
     end
 
     -- Ensure gear remains firmly engaged right after handover on rolling and standing starts
@@ -737,7 +632,7 @@ function GTLicenseEngine:update(dt)
       local isStanding = (self.testConfig.start_mode == "STANDING") or (initSpeed <= 0)
       local targetGear = self.targetStartingGear
         or (tonumber(self.testConfig.spawn.gear) and tonumber(self.testConfig.spawn.gear) > 0 and tonumber(self.testConfig.spawn.gear))
-        or (isStanding and 1 or GTPhysicsHooks.estimateStartingGear(initSpeed))
+        or (isStanding and 1 or PhysicsHooks.estimateStartingGear(initSpeed))
       local targetRPM = self.targetStartingRPM
         or (tonumber(self.testConfig.spawn.rpm) and tonumber(self.testConfig.spawn.rpm) > 0 and tonumber(self.testConfig.spawn.rpm))
         or (isStanding and 1000 or 3500)
@@ -749,68 +644,20 @@ function GTLicenseEngine:update(dt)
       end
     elseif self.sessionTime >= 0.5 and not self.gearOverrideReleased then
       self.gearOverrideReleased = true
-      GTPhysicsHooks.releaseGearOverride(0)
+      PhysicsHooks.releaseGearOverride(0)
       if ac and ac.log then
         ac.log("[GTLicense] Handover gear guard expired (t>=0.5s) | Released sticky gearbox control override")
       end
     end
 
-    -- Autonomous AI shifting assistance in AI test mode
-    if self.isAITestMode and self.sessionTime >= 0.5 and car then
-      local maxRpm = (car.rpmLimiter and car.rpmLimiter > 3000) and car.rpmLimiter or 6800
-      local minRpm = (car.rpmMinimum and car.rpmMinimum > 500) and car.rpmMinimum or 1000
-      local gearCount = (car.gearCount and car.gearCount > 0) and car.gearCount or 6
-      local now = (os and (os.preciseClock or os.clock) and (os.preciseClock or os.clock)()) or 0
-
-      -- Anti-neutral guard: If car is in neutral (gear <= 0), engage 1st gear immediately
-      if car.gear <= 0 then
-        if physics and physics.engageGear then
-          physics.engageGear(0, 1)
-        end
-        if physics and physics.setEngineRPM then
-          physics.setEngineRPM(0, 3000)
-        end
-      elseif car.rpm >= (maxRpm * 0.93) and car.gear > 0 and car.gear < gearCount then
-        if not self.lastAIShiftTime or (now - self.lastAIShiftTime >= 0.75) then
-          self.lastAIShiftTime = now
-          local nextGear = car.gear + 1
-          if physics and physics.engageGear then
-            physics.engageGear(0, nextGear)
-          end
-          if ac and ac.log then
-            ac.log(string.format("[GTLicense] AI Shifting UP: gear %d -> %d at %.0f RPM (spd=%.1f km/h)", car.gear, nextGear, car.rpm, car.speedKmh))
-          end
-        end
-      elseif car.rpm <= math.max(2200, minRpm + 1000) and car.gear > 1 and car.speedKmh > 15 then
-        if not self.lastAIShiftTime or (now - self.lastAIShiftTime >= 0.75) then
-          self.lastAIShiftTime = now
-          local prevGear = car.gear - 1
-          if physics and physics.engageGear then
-            physics.engageGear(0, prevGear)
-          end
-          if ac and ac.log then
-            ac.log(string.format("[GTLicense] AI Shifting DOWN: gear %d -> %d at %.0f RPM (spd=%.1f km/h)", car.gear, prevGear, car.rpm, car.speedKmh))
-          end
-        end
-      end
+    -- Autonomous AI transmission shifting & anti-neutral guard in AI test mode
+    if self.isAITestMode and self.sessionTime >= 0.5 and car and self.aiCoordinator then
+      self.aiCoordinator:updateAIShifting(car)
     end
 
     -- Telemetry logging of wheel speeds and suspension right after GO
-    if self.sessionTime <= 1.2 and ac and ac.log then
-      if not self.lastPostGoLog or (self.sessionTime - self.lastPostGoLog >= 0.2) then
-        self.lastPostGoLog = self.sessionTime
-        local wFL = (car and car.wheels and car.wheels[0] and car.wheels[0].angularSpeed) or 0
-        local wFR = (car and car.wheels and car.wheels[1] and car.wheels[1].angularSpeed) or 0
-        local wRL = (car and car.wheels and car.wheels[2] and car.wheels[2].angularSpeed) or 0
-        local wRR = (car and car.wheels and car.wheels[3] and car.wheels[3].angularSpeed) or 0
-        local sFL = (car and car.wheels and car.wheels[0] and car.wheels[0].suspensionTravel) or 0
-        local sRL = (car and car.wheels and car.wheels[2] and car.wheels[2].suspensionTravel) or 0
-        local ldFL = (car and car.wheels and car.wheels[0] and car.wheels[0].load) or 0
-        local ldRL = (car and car.wheels and car.wheels[2] and car.wheels[2].load) or 0
-        local vy = car and car.velocity and car.velocity.y or 0
-        ac.log(string.format("[GTLicense] Post-GO t=%.2fs | Spd=%.1f | Gear=%d | vy=%.2f | Susp=(FL:%.3f, RL:%.3f) | Load=(FL:%.0f, RL:%.0f) | Omegas=(FL:%.1f, FR:%.1f, RL:%.1f, RR:%.1f)",
-          self.sessionTime, car and car.speedKmh or 0, car and car.gear or 0, vy, sFL, sRL, ldFL, ldRL, wFL, wFR, wRL, wRR))
-      end
+    if self.sessionTime <= 1.2 and self.telemetryLogger then
+      self.telemetryLogger:logHandoverKinematics(car, self.sessionTime)
     end
 
     -- Adjudicate failure conditions and finish gate/stop box completion
@@ -819,7 +666,7 @@ function GTLicenseEngine:update(dt)
 
       if adjResult.status == "FAILED" then
         self.failReason = adjResult.reason or "Disqualified"
-        self:setState(GTLicenseEngine.STATE.FAILED)
+        self:setState(LicenseEngine.STATE.FAILED)
         dispatchEvent(self, "testFailed", self.failReason)
         -- Do NOT auto restart on timer; wait for user input (hotkey, gamepad, or UI retry)
         self.sessionReset:cancelAutoReset()
@@ -827,22 +674,22 @@ function GTLicenseEngine:update(dt)
       elseif adjResult.status == "PASSED" then
         self.achievedMedal = self:evaluateMedal(self.sessionTime)
         self.results = self:compileResults()
-        self:setState(GTLicenseEngine.STATE.PASSED)
+        self:setState(LicenseEngine.STATE.PASSED)
         dispatchEvent(self, "testPassed", self.results)
         self.resultsTimer = 1.2
       end
     end
 
-  elseif GTLicenseEngine.isBrakingState(self.state) then
+  elseif LicenseEngine.isBrakingState(self.state) then
     -- Continuously maintain 50% braking across completed and failed states (PASSED, RESULTS, FAILED)
-    local enableAI = (self.state == GTLicenseEngine.STATE.PASSED or self.state == GTLicenseEngine.STATE.RESULTS)
-    GTPhysicsHooks.applyFailureBraking(0, 0.5, enableAI)
+    local enableAI = (self.state == LicenseEngine.STATE.PASSED or self.state == LicenseEngine.STATE.RESULTS)
+    PhysicsHooks.applyFailureBraking(0, 0.5, enableAI)
 
-    if self.state == GTLicenseEngine.STATE.PASSED then
+    if self.state == LicenseEngine.STATE.PASSED then
       -- Brief celebration delay before showing results dialog
       self.resultsTimer = self.resultsTimer - dt
       if self.resultsTimer <= 0 then
-        self:setState(GTLicenseEngine.STATE.RESULTS)
+        self:setState(LicenseEngine.STATE.RESULTS)
         dispatchEvent(self, "resultsShown", self.results)
       end
     end
@@ -859,7 +706,7 @@ function GTLicenseEngine:update(dt)
     if car and car.position then
       carPos = { car.position.x, car.position.y, car.position.z }
     end
-    local gTime = (self.state == GTLicenseEngine.STATE.RUNNING) and self.sessionTime or 0.0
+    local gTime = (self.state == LicenseEngine.STATE.RUNNING) and self.sessionTime or 0.0
     self.ghostManager:update(dt, gTime, carPos)
   end
 
@@ -874,7 +721,7 @@ function GTLicenseEngine:update(dt)
     self.sharedState.sessionTime = self.sessionTime
     self.sharedState.currentState = self:getNumericState()
     self.sharedState.countdownTimer = self.countdownTimer
-    self.sharedState.isGo = (self.state == GTLicenseEngine.STATE.RUNNING and self.sessionTime < 0.85)
+    self.sharedState.isGo = (self.state == LicenseEngine.STATE.RUNNING and self.sessionTime < 0.85)
     self.sharedState.failReason = self.failReason or ""
     if self.testConfig then
       self.sharedState.testId = self.testConfig.test_id or ""
@@ -904,44 +751,17 @@ function GTLicenseEngine:update(dt)
   end
 
   -- 6. Continuous in-game telemetry recording (samples across countdown, running, and restarts)
-  if not self.telemetrySamples then
-    self.telemetrySamples = {}
-    self.lastTelemetrySampleTime = 0
-  end
-  self.lastTelemetrySampleTime = (self.lastTelemetrySampleTime or 0) + dt
-  if self.lastTelemetrySampleTime >= 0.15 then
-    self.lastTelemetrySampleTime = 0
-    if car then
-      table.insert(self.telemetrySamples, {
-        t = self.sessionTime,
-        countdown = (self.state == GTLicenseEngine.STATE.COUNTDOWN) and self.countdownTimer or 0,
-        state = self.state,
-        speedKmh = car.speedKmh,
-        posX = car.position.x,
-        posY = car.position.y,
-        posZ = car.position.z,
-        lookX = car.look.x,
-        lookY = car.look.y,
-        lookZ = car.look.z,
-        gear = car.gear,
-        rpm = car.rpm,
-        restartCount = self.restartCount or 0
-      })
-      if io and io.save and JSON and JSON.stringify then
-        local dump = {
-          test_id = self.testConfig and self.testConfig.test_id or "UNKNOWN",
-          start_mode = self.testConfig and self.testConfig.start_mode or "STANDING",
-          initial_speed_kmh = (self.testConfig and self.testConfig.spawn and self.testConfig.spawn.initial_speed_kmh) or 0,
-          target_gear = self.targetStartingGear or 1,
-          restart_count = self.restartCount or 0,
-          samples = self.telemetrySamples
-        }
-        local scriptFolder = ac and ac.getFolder and (ac.getFolder(ac.FolderID.ScriptOrigin) or ac.getFolder(1024))
-        if scriptFolder then
-          io.save(scriptFolder .. "/data/telemetry_eval.json", JSON.stringify(dump))
-        end
-      end
-    end
+  if self.telemetryLogger then
+    self.telemetryLogger:recordSample(
+      car,
+      self.sessionTime,
+      dt,
+      self.state,
+      self.countdownTimer,
+      self.testConfig,
+      self.targetStartingGear,
+      self.restartCount
+    )
   end
 end
 
@@ -949,19 +769,19 @@ end
 -- Public Getters for HUD, 3D Rendering & Audio Subsystems
 -- ==============================================================================
 
-function GTLicenseEngine:getState()
+function LicenseEngine:getState()
   return self.state
 end
 
-function GTLicenseEngine:getSessionTime()
+function LicenseEngine:getSessionTime()
   return self.sessionTime
 end
 
-function GTLicenseEngine:getCountdownTimer()
+function LicenseEngine:getCountdownTimer()
   return math.max(0, self.countdownTimer)
 end
 
-function GTLicenseEngine:getCountdownStep()
+function LicenseEngine:getCountdownStep()
   if self.countdownTimer > 0 then
     return math.ceil(self.countdownTimer)
   else
@@ -969,37 +789,37 @@ function GTLicenseEngine:getCountdownStep()
   end
 end
 
-function GTLicenseEngine:getFailReason()
+function LicenseEngine:getFailReason()
   return self.failReason
 end
 
-function GTLicenseEngine:getMedal()
+function LicenseEngine:getMedal()
   return self.achievedMedal
 end
 
-function GTLicenseEngine:getResults()
+function LicenseEngine:getResults()
   return self.results
 end
 
-function GTLicenseEngine:getActiveTest()
+function LicenseEngine:getActiveTest()
   return self.testConfig
 end
 
-function GTLicenseEngine:getNumericState()
-  if self.state == GTLicenseEngine.STATE.COUNTDOWN then
+function LicenseEngine:getNumericState()
+  if self.state == LicenseEngine.STATE.COUNTDOWN then
     return 1
-  elseif self.state == GTLicenseEngine.STATE.RUNNING then
+  elseif self.state == LicenseEngine.STATE.RUNNING then
     return 2
-  elseif self.state == GTLicenseEngine.STATE.PASSED or self.state == GTLicenseEngine.STATE.RESULTS then
+  elseif self.state == LicenseEngine.STATE.PASSED or self.state == LicenseEngine.STATE.RESULTS then
     return 3
-  elseif self.state == GTLicenseEngine.STATE.FAILED then
+  elseif self.state == LicenseEngine.STATE.FAILED then
     return 4
   else
     return 0
   end
 end
 
-function GTLicenseEngine:draw3D(dt)
+function LicenseEngine:draw3D(dt)
   if GTRenderGates and GTRenderGates.draw3D then
     local car = ac and ac.getCar and ac.getCar(0)
     local carPos = car and car.position
@@ -1010,7 +830,7 @@ function GTLicenseEngine:draw3D(dt)
   -- Ghost wireframe rendering completely removed
 end
 
-function GTLicenseEngine:drawUI()
+function LicenseEngine:drawUI()
   if GTLicenseHUD and GTLicenseHUD.draw then
     local car = ac and ac.getCar and ac.getCar(0)
     local speedKmh = car and car.speedKmh or 0
@@ -1032,7 +852,7 @@ function GTLicenseEngine:drawUI()
   end
 end
 
-function GTLicenseEngine:getGhostState()
+function LicenseEngine:getGhostState()
   return self.ghostManager and self.ghostManager:getState() or nil
 end
 
@@ -1041,7 +861,7 @@ end
 -- ==============================================================================
 -- If executed as the top-level CSP scenario script, wire directly into script.*
 if script ~= nil then
-  local activeEngine = GTLicenseEngine.new(nil)
+  local activeEngine = LicenseEngine.new(nil)
   if GTLicenseHUD and GTLicenseHUD.init then
     GTLicenseHUD.init(activeEngine:getActiveTest())
   end
@@ -1054,7 +874,7 @@ if script ~= nil then
 
   function script.init()
     if not activeEngine then
-      activeEngine = GTLicenseEngine.new(nil)
+      activeEngine = LicenseEngine.new(nil)
       if GTLicenseHUD and GTLicenseHUD.init then
         GTLicenseHUD.init(activeEngine:getActiveTest())
       end
@@ -1086,5 +906,7 @@ if script ~= nil then
   end
 end
 
-return GTLicenseEngine
+LicenseEngine.GTLicenseEngine = LicenseEngine
+
+return LicenseEngine
 

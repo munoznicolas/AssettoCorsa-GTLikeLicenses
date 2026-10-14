@@ -1,17 +1,17 @@
 -- ==============================================================================
 -- Gran Turismo License Engine - Results & Medal Evaluator
--- File: lua/engine/gt_results.lua
+-- File: lua/engine/results.lua
 -- Description: Adjudicates medal achievements (GOLD, SILVER, BRONZE, NONE)
 --              and compiles comprehensive session performance results.
 -- ==============================================================================
 
-local GTResults = {}
+local Results = {}
 
 ---Evaluates medal rank based on achieved session time against target thresholds.
 ---@param timeSeconds number
 ---@param targets table? @{ gold_seconds = x, silver_seconds = y, bronze_seconds = z }
 ---@return string medal ("GOLD" | "SILVER" | "BRONZE" | "NONE")
-function GTResults.evaluateMedal(timeSeconds, targets)
+function Results.evaluateMedal(timeSeconds, targets)
   targets = targets or {}
   local gold = tonumber(targets.gold_seconds) or 999
   local silver = tonumber(targets.silver_seconds) or 999
@@ -34,7 +34,7 @@ end
 ---@param achievedMedal string?
 ---@param failReason string?
 ---@return table results
-function GTResults.compileResults(testConfig, sessionTime, achievedMedal, failReason)
+function Results.compileResults(testConfig, sessionTime, achievedMedal, failReason)
   local targets = (testConfig and testConfig.targets) or {}
   local gold = tonumber(targets.gold_seconds) or 0
   local silver = tonumber(targets.silver_seconds) or 0
@@ -56,5 +56,8 @@ function GTResults.compileResults(testConfig, sessionTime, achievedMedal, failRe
   }
 end
 
-return GTResults
+-- Backward compatibility alias
+Results.GTResults = Results
+
+return Results
 

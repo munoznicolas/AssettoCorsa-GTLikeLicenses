@@ -311,33 +311,64 @@ class TestEngineMath(unittest.TestCase):
         self.assertIn("4 wheels off", reason)
 
     def test_failure_braking_hooks_and_engine_contracts(self):
-        """Validates that GTPhysicsHooks exposes applyFailureBraking and releaseFailureBraking,
-        and GTLicenseEngine hooks them up with 50% brake intensity on failure."""
-        hooks_path = os.path.join(REPO_ROOT, "lua", "engine", "gt_physics_hooks.lua")
+        """Validates that PhysicsHooks exposes applyFailureBraking and releaseFailureBraking,
+        and LicenseEngine hooks them up with 50% brake intensity on failure."""
+        hooks_path = os.path.join(REPO_ROOT, "lua", "engine", "physics_hooks.lua")
+        if not os.path.isfile(hooks_path):
+            hooks_path = os.path.join(REPO_ROOT, "lua", "engine", "gt_physics_hooks.lua")
         self.assertTrue(os.path.isfile(hooks_path))
         with open(hooks_path, "r", encoding="utf-8") as f:
             hooks_code = f.read()
 
-        self.assertIn("function GTPhysicsHooks.applyFailureBraking(carIndex, intensity)", hooks_code)
+        self.assertTrue(
+            "function PhysicsHooks.applyFailureBraking(carIndex, intensity" in hooks_code
+            or "function GTPhysicsHooks.applyFailureBraking(carIndex, intensity" in hooks_code
+        )
         self.assertIn("physics.forceUserBrakesFor(1.0, intensity)", hooks_code)
         self.assertIn("physics.forceUserThrottleFor(1.0, 0.0)", hooks_code)
-        self.assertIn("function GTPhysicsHooks.releaseFailureBraking(carIndex)", hooks_code)
+        self.assertTrue(
+            "function PhysicsHooks.releaseFailureBraking(carIndex)" in hooks_code
+            or "function GTPhysicsHooks.releaseFailureBraking(carIndex)" in hooks_code
+        )
         self.assertIn("physics.forceUserBrakesFor(0, 0)", hooks_code)
         self.assertIn("physics.forceUserThrottleFor(0, 0)", hooks_code)
 
-        engine_path = os.path.join(REPO_ROOT, "lua", "engine", "gt_license_engine.lua")
+        engine_path = os.path.join(REPO_ROOT, "lua", "engine", "license_engine.lua")
+        if not os.path.isfile(engine_path):
+            engine_path = os.path.join(REPO_ROOT, "lua", "engine", "gt_license_engine.lua")
         self.assertTrue(os.path.isfile(engine_path))
         with open(engine_path, "r", encoding="utf-8") as f:
             engine_code = f.read()
 
-        self.assertIn("GTPhysicsHooks.applyFailureBraking(0, 0.5)", engine_code)
-        self.assertIn("GTPhysicsHooks.releaseFailureBraking(0)", engine_code)
-        self.assertIn("function GTLicenseEngine.isBrakingState(state)", engine_code)
-        self.assertIn("GTLicenseEngine.isBrakingState(self.state)", engine_code)
-        self.assertIn("function GTLicenseEngine:exitSession()", engine_code)
+        self.assertTrue(
+            "PhysicsHooks.applyFailureBraking(0, 0.5" in engine_code
+            or "GTPhysicsHooks.applyFailureBraking(0, 0.5" in engine_code
+        )
+        self.assertTrue(
+            "PhysicsHooks.releaseFailureBraking(0)" in engine_code
+            or "GTPhysicsHooks.releaseFailureBraking(0)" in engine_code
+        )
+        self.assertTrue(
+            "function LicenseEngine.isBrakingState(state)" in engine_code
+            or "function GTLicenseEngine.isBrakingState(state)" in engine_code
+        )
+        self.assertTrue(
+            "LicenseEngine.isBrakingState(self.state)" in engine_code
+            or "GTLicenseEngine.isBrakingState(self.state)" in engine_code
+        )
+        self.assertTrue(
+            "function LicenseEngine:exitSession()" in engine_code
+            or "function GTLicenseEngine:exitSession()" in engine_code
+        )
         self.assertIn("onExit = function() self:exitSession() end", engine_code)
-        self.assertIn("GTPhysicsHooks.applyControlledBraking = GTPhysicsHooks.applyFailureBraking", hooks_code)
-        self.assertIn("GTPhysicsHooks.releaseControlledBraking = GTPhysicsHooks.releaseFailureBraking", hooks_code)
+        self.assertTrue(
+            "PhysicsHooks.applyControlledBraking = PhysicsHooks.applyFailureBraking" in hooks_code
+            or "GTPhysicsHooks.applyControlledBraking = GTPhysicsHooks.applyFailureBraking" in hooks_code
+        )
+        self.assertTrue(
+            "PhysicsHooks.releaseControlledBraking = PhysicsHooks.releaseFailureBraking" in hooks_code
+            or "GTPhysicsHooks.releaseControlledBraking = GTPhysicsHooks.releaseFailureBraking" in hooks_code
+        )
 
 
 if __name__ == "__main__":

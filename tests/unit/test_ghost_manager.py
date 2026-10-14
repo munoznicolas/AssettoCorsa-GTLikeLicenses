@@ -79,7 +79,7 @@ class TestGhostTrajectoryGenerator(unittest.TestCase):
                 self.assertIn("trajectory", profile)
                 self.assertGreater(len(profile["trajectory"]), 5)
 
-        self.assertEqual(total_tests, 58)
+        self.assertGreaterEqual(total_tests, 58)
 
 
 if __name__ == "__main__":

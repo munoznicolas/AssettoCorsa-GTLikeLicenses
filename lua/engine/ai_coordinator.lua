@@ -1,6 +1,6 @@
 -- ==============================================================================
 -- Gran Turismo License Engine for Assetto Corsa (CSP)
--- File: lua/engine/gt_ai_coordinator.lua
+-- File: lua/engine/ai_coordinator.lua
 -- Description: AI Traffic, Pace Car, and 2-Phase Rolling Start Coordinator.
 --              Handles spline progress distance math, proportional gap scaling,
 --              organic micro-weaving, and smooth green-flag transitions.
@@ -16,13 +16,13 @@ local function safeRequire(name)
   return nil
 end
 
-local GTPhysicsHooks = safeRequire("gt_physics_hooks")
+local PhysicsHooks = safeRequire("physics_hooks")
 
-local GTAICoordinator = {}
-GTAICoordinator.__index = GTAICoordinator
+local AICoordinator = {}
+AICoordinator.__index = AICoordinator
 
 -- Operational Phases for Rolling Starts
-GTAICoordinator.PHASE = {
+AICoordinator.PHASE = {
   WARMUP_SINGLE_FILE = "WARMUP_SINGLE_FILE",
   GRID_DOUBLE_FILE   = "GRID_DOUBLE_FILE",
   GREEN_FLAG         = "GREEN_FLAG"
@@ -32,7 +32,7 @@ GTAICoordinator.PHASE = {
 ---@param carAheadIdx integer @0-based car index of lead vehicle
 ---@param carBehindIdx integer @0-based car index of trailing vehicle
 ---@return number distanceMeters
-function GTAICoordinator.getSplineDistanceMeters(carAheadIdx, carBehindIdx)
+function AICoordinator.getSplineDistanceMeters(carAheadIdx, carBehindIdx)
   if not ac or not ac.getCar or not ac.getSim then
     return 0.0
   end
@@ -63,7 +63,7 @@ end
 ---@param minGap number @Minimum safety threshold distance (default: 1.5m)
 ---@param maxMult number? @Maximum catch-up speed multiplier (default: 1.5)
 ---@return number multiplier
-function GTAICoordinator.getLinearSpeedMultiplier(distMeters, targetGap, minGap, maxMult)
+function AICoordinator.getLinearSpeedMultiplier(distMeters, targetGap, minGap, maxMult)
   targetGap = targetGap or 8.0
   minGap = minGap or 1.5
   maxMult = maxMult or 1.5
@@ -89,7 +89,7 @@ end
 ---@param driverIdx integer @0-based driver index
 ---@param sessionTime number @Current session time in seconds
 ---@return number lateralOffsetMeters
-function GTAICoordinator.getOrganicLaneOffset(driverIdx, sessionTime)
+function AICoordinator.getOrganicLaneOffset(driverIdx, sessionTime)
   driverIdx = driverIdx or 0
   sessionTime = sessionTime or 0
 
@@ -99,14 +99,14 @@ function GTAICoordinator.getOrganicLaneOffset(driverIdx, sessionTime)
   return wave1 + wave2
 end
 
----Creates a new GTAICoordinator instance from a test configuration table.
+---Creates a new AICoordinator instance from a test configuration table.
 ---@param testConfig table @Table complying with test_definition.schema.json
 ---@return table instance
-function GTAICoordinator.new(testConfig)
-  local self = setmetatable({}, GTAICoordinator)
+function AICoordinator.new(testConfig)
+  local self = setmetatable({}, AICoordinator)
 
   self.testConfig = testConfig or {}
-  self.phase = GTAICoordinator.PHASE.WARMUP_SINGLE_FILE
+  self.phase = AICoordinator.PHASE.WARMUP_SINGLE_FILE
   self.isGreenFlag = false
 
   -- Rolling Start Parameters
@@ -135,7 +135,7 @@ end
 ---Updates AI traffic, pace car regulation, or rolling start state machine.
 ---@param dt number @Frame delta time in seconds
 ---@param sessionTime number @Accumulated session time in seconds
-function GTAICoordinator:update(dt, sessionTime)
+function AICoordinator:update(dt, sessionTime)
   if not ac or not ac.getSim then return end
 
   local sim = ac.getSim()
@@ -157,17 +157,17 @@ end
 ---Regulates Pace Car behavior (e.g. IB-5 Pace Car Challenge).
 ---@param dt number @Frame delta time
 ---@param sessionTime number @Session time in seconds
-function GTAICoordinator:updatePaceCar(dt, sessionTime)
+function AICoordinator:updatePaceCar(dt, sessionTime)
   if not ac or not ac.getCar then return end
 
   local paceCar = ac.getCar(self.paceCarIndex)
   if not paceCar then return end
 
   -- Apply top speed ceiling on Pace Car
-  if GTPhysicsHooks then
-    GTPhysicsHooks.setAITopSpeed(self.paceCarIndex, self.paceSpeedKmh)
-    GTPhysicsHooks.setAIThrottleLimit(self.paceCarIndex, 1.0)
-    GTPhysicsHooks.setAICaution(self.paceCarIndex, 2.0)
+  if PhysicsHooks then
+    PhysicsHooks.setAITopSpeed(self.paceCarIndex, self.paceSpeedKmh)
+    PhysicsHooks.setAIThrottleLimit(self.paceCarIndex, 1.0)
+    PhysicsHooks.setAICaution(self.paceCarIndex, 2.0)
   end
 end
 
@@ -175,15 +175,15 @@ end
 ---@param dt number @Frame delta time
 ---@param sessionTime number @Session time in seconds
 ---@param carsCount integer @Total number of cars in session
-function GTAICoordinator:updateRollingStart(dt, sessionTime, carsCount)
+function AICoordinator:updateRollingStart(dt, sessionTime, carsCount)
   if not ac or not ac.getCar then return end
 
   local leadCar = ac.getCar(0)
   if not leadCar then return end
 
   -- Check if leader has reached formation point threshold (e.g. 67% spline position)
-  if leadCar.splinePosition >= self.formationPointPct and self.phase == GTAICoordinator.PHASE.WARMUP_SINGLE_FILE then
-    self.phase = GTAICoordinator.PHASE.GRID_DOUBLE_FILE
+  if leadCar.splinePosition >= self.formationPointPct and self.phase == AICoordinator.PHASE.WARMUP_SINGLE_FILE then
+    self.phase = AICoordinator.PHASE.GRID_DOUBLE_FILE
   end
 
   for i = 1, carsCount - 1 do
@@ -193,7 +193,7 @@ function GTAICoordinator:updateRollingStart(dt, sessionTime, carsCount)
       local targetOffset = 0.0
       local caution = 1.0
 
-      if self.phase == GTAICoordinator.PHASE.GRID_DOUBLE_FILE then
+      if self.phase == AICoordinator.PHASE.GRID_DOUBLE_FILE then
         targetSpeed = self.phase2SpeedKmh
         caution = 0.7
 
@@ -204,19 +204,19 @@ function GTAICoordinator:updateRollingStart(dt, sessionTime, carsCount)
           baseOffset = -baseOffset
         end
 
-        targetOffset = baseOffset + GTAICoordinator.getOrganicLaneOffset(i, sessionTime)
+        targetOffset = baseOffset + AICoordinator.getOrganicLaneOffset(i, sessionTime)
 
         -- Proportional gap scaling relative to car ahead in column
         local aheadIdx = (car.racePosition > 2) and (car.racePosition - 2) or 0
-        local gap = GTAICoordinator.getSplineDistanceMeters(aheadIdx, i)
+        local gap = AICoordinator.getSplineDistanceMeters(aheadIdx, i)
         if gap > 0 then
-          local mult = GTAICoordinator.getLinearSpeedMultiplier(gap, 8.0, 1.5, 1.4)
+          local mult = AICoordinator.getLinearSpeedMultiplier(gap, 8.0, 1.5, 1.4)
           targetSpeed = targetSpeed * mult
         end
       else
         -- Phase 1 (Single File): Maintain single line with catch-up scaling
         local leadIdx = car.racePosition - 1
-        local gap = GTAICoordinator.getSplineDistanceMeters(leadIdx, i)
+        local gap = AICoordinator.getSplineDistanceMeters(leadIdx, i)
         if gap > 40.0 then
           targetSpeed = self.phase1SpeedKmh * 1.25
         elseif gap < 20.0 then
@@ -227,11 +227,11 @@ function GTAICoordinator:updateRollingStart(dt, sessionTime, carsCount)
       -- Smoothly interpolate lateral spline offset
       local currentOffset = self.currentSplineOffsets[i] or 0.0
       local newOffset = currentOffset
-      if GTPhysicsHooks then
-        newOffset = GTPhysicsHooks.smoothSplineOffsetDecay(currentOffset, targetOffset, dt, 1.5)
-        GTPhysicsHooks.setAITopSpeed(i, targetSpeed)
-        GTPhysicsHooks.setAICaution(i, caution)
-        GTPhysicsHooks.setAISplineAbsoluteOffset(i, newOffset, false)
+      if PhysicsHooks then
+        newOffset = PhysicsHooks.smoothSplineOffsetDecay(currentOffset, targetOffset, dt, 1.5)
+        PhysicsHooks.setAITopSpeed(i, targetSpeed)
+        PhysicsHooks.setAICaution(i, caution)
+        PhysicsHooks.setAISplineAbsoluteOffset(i, newOffset, false)
       end
       self.currentSplineOffsets[i] = newOffset
     end
@@ -241,16 +241,16 @@ end
 ---Handles Green Flag release and smooth spline offset decay.
 ---@param dt number @Frame delta time
 ---@param carsCount integer @Total cars count
-function GTAICoordinator:updateGreenFlagTransition(dt, carsCount)
+function AICoordinator:updateGreenFlagTransition(dt, carsCount)
   for i = 1, carsCount - 1 do
     local currentOffset = self.currentSplineOffsets[i] or 0.0
     if math.abs(currentOffset) > 0.001 then
       local newOffset = currentOffset
-      if GTPhysicsHooks then
-        newOffset = GTPhysicsHooks.smoothSplineOffsetDecay(currentOffset, 0.0, dt, 0.5)
-        GTPhysicsHooks.setAISplineAbsoluteOffset(i, newOffset, false)
-        GTPhysicsHooks.setAITopSpeed(i, 999999.0)
-        GTPhysicsHooks.setAICaution(i, 1.0)
+      if PhysicsHooks then
+        newOffset = PhysicsHooks.smoothSplineOffsetDecay(currentOffset, 0.0, dt, 0.5)
+        PhysicsHooks.setAISplineAbsoluteOffset(i, newOffset, false)
+        PhysicsHooks.setAITopSpeed(i, 999999.0)
+        PhysicsHooks.setAICaution(i, 1.0)
       end
       self.currentSplineOffsets[i] = newOffset
     end
@@ -258,9 +258,93 @@ function GTAICoordinator:updateGreenFlagTransition(dt, carsCount)
 end
 
 ---Triggers Green Flag release event.
-function GTAICoordinator:triggerGreenFlag()
+function AICoordinator:triggerGreenFlag()
   self.isGreenFlag = true
-  self.phase = GTAICoordinator.PHASE.GREEN_FLAG
+  self.phase = AICoordinator.PHASE.GREEN_FLAG
 end
 
-return GTAICoordinator
+---Initializes native AI autopilot parameters on a vehicle.
+---@param carIndex integer? @0-based car index
+---@param aiLevel number? @AI proficiency (0.0 to 1.0)
+---@param isTelemetryRecorder boolean? @Whether in telemetry recorder mode
+function AICoordinator:initAutopilot(carIndex, aiLevel, isTelemetryRecorder)
+  carIndex = carIndex or 0
+  aiLevel = aiLevel or 1.0
+  if physics and physics.setCarAutopilot then
+    physics.setCarAutopilot(true, false)
+  end
+  self:maintainAutopilot(carIndex, aiLevel, isTelemetryRecorder)
+end
+
+---Continuously asserts AI autopilot parameters for performance and spline adherence.
+---@param carIndex integer? @0-based car index
+---@param aiLevel number? @AI proficiency (0.0 to 1.0)
+---@param isTelemetryRecorder boolean? @Whether in telemetry recorder mode
+function AICoordinator:maintainAutopilot(carIndex, aiLevel, isTelemetryRecorder)
+  carIndex = carIndex or 0
+  aiLevel = aiLevel or 1.0
+  if physics and physics.setAILevel then
+    physics.setAILevel(carIndex, aiLevel)
+  end
+  if physics and physics.setAIAggression then
+    physics.setAIAggression(carIndex, isTelemetryRecorder and 0.0 or 1.0)
+  end
+  if physics and physics.setAICaution then
+    physics.setAICaution(carIndex, 0.0)
+  end
+  if physics and physics.setAITopSpeed then
+    physics.setAITopSpeed(carIndex, 999999.0)
+  end
+  if physics and physics.setAISplineAbsoluteOffset then
+    physics.setAISplineAbsoluteOffset(carIndex, 0.0, false)
+  end
+  if physics and physics.setAIThrottleLimit then
+    physics.setAIThrottleLimit(carIndex, 1.0)
+  end
+end
+
+---Manages autonomous AI transmission shifting and anti-neutral protection.
+---@param car table? @Assetto Corsa car state (ac.getCar)
+function AICoordinator:updateAIShifting(car)
+  if not car then return end
+  local maxRpm = (car.rpmLimiter and car.rpmLimiter > 3000) and car.rpmLimiter or 6800
+  local minRpm = (car.rpmMinimum and car.rpmMinimum > 500) and car.rpmMinimum or 1000
+  local gearCount = (car.gearCount and car.gearCount > 0) and car.gearCount or 6
+  local now = (os and (os.preciseClock or os.clock) and (os.preciseClock or os.clock)()) or 0
+
+  -- Anti-neutral guard: If vehicle slips to neutral (gear <= 0), engage 1st gear immediately
+  if car.gear <= 0 then
+    if physics and physics.engageGear then
+      physics.engageGear(0, 1)
+    end
+    if physics and physics.setEngineRPM then
+      physics.setEngineRPM(0, 3000)
+    end
+  elseif car.rpm >= (maxRpm * 0.93) and car.gear > 0 and car.gear < gearCount then
+    if not self.lastAIShiftTime or (now - self.lastAIShiftTime >= 0.75) then
+      self.lastAIShiftTime = now
+      local nextGear = car.gear + 1
+      if physics and physics.engageGear then
+        physics.engageGear(0, nextGear)
+      end
+      if ac and ac.log then
+        ac.log(string.format("[GTLicense] AI Shifting UP: gear %d -> %d at %.0f RPM (spd=%.1f km/h)", car.gear, nextGear, car.rpm, car.speedKmh))
+      end
+    end
+  elseif car.rpm <= math.max(2200, minRpm + 1000) and car.gear > 1 and car.speedKmh > 15 then
+    if not self.lastAIShiftTime or (now - self.lastAIShiftTime >= 0.75) then
+      self.lastAIShiftTime = now
+      local prevGear = car.gear - 1
+      if physics and physics.engageGear then
+        physics.engageGear(0, prevGear)
+      end
+      if ac and ac.log then
+        ac.log(string.format("[GTLicense] AI Shifting DOWN: gear %d -> %d at %.0f RPM (spd=%.1f km/h)", car.gear, prevGear, car.rpm, car.speedKmh))
+      end
+    end
+  end
+end
+
+AICoordinator.GTAICoordinator = AICoordinator
+
+return AICoordinator

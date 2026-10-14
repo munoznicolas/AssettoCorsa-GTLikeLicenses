@@ -1,30 +1,31 @@
 -- ==============================================================================
 -- Gran Turismo License Engine for Assetto Corsa (CSP)
--- File: lua/engine/gt_adjudicator.lua
--- Description: Real-time adjudication engine for failure conditions:
---              1. Off-track limits (> max_wheels_off)
---              2. Wall/barrier impact force threshold (physics.getCarCollisions)
+-- File: lua/engine/adjudicator.lua
+-- Description: Real-time adjudication engine for driving test evaluations:
+--              1. Off-track limits (> max_wheels_off) with debounced contact points
+--              2. Wall/barrier impact force threshold (collision depth)
 --              3. Vehicle spin-out detection (> max_yaw_angle_deg)
---              4. Stop box spatial containment and complete rest (0 km/h) check
+--              4. Stop box spatial containment and verified complete standstill
 --              5. Target time limit expiration (> bronze_seconds)
 --              6. 2D line segment gate crossing detection (start/finish)
+--              7. Pace car speed and proximity regulation
 -- ==============================================================================
 
-local GTAdjudicator = {}
-GTAdjudicator.__index = GTAdjudicator
+local Adjudicator = {}
+Adjudicator.__index = Adjudicator
 
 ---Creates a new Adjudicator instance bound to a specific test configuration.
 ---@param testConfig table @Test configuration complying with test_definition.schema.json
----@return table GTAdjudicator instance
-function GTAdjudicator.new(testConfig)
-  local self = setmetatable({}, GTAdjudicator)
+---@return table Adjudicator instance
+function Adjudicator.new(testConfig)
+  local self = setmetatable({}, Adjudicator)
   self:init(testConfig)
   return self
 end
 
 ---Initializes or reinitializes the adjudicator state.
 ---@param testConfig table
-function GTAdjudicator:init(testConfig)
+function Adjudicator:init(testConfig)
   self.testConfig = testConfig or {}
   local failRules = self.testConfig.fail_rules or {}
   local targets = self.testConfig.targets or {}
@@ -90,7 +91,7 @@ end
 ---@param p3 table|vec3|number[] @Gate point 1
 ---@param p4 table|vec3|number[] @Gate point 2
 ---@return boolean intersects
-function GTAdjudicator.segmentsIntersect2D(p1, p2, p3, p4)
+function Adjudicator.segmentsIntersect2D(p1, p2, p3, p4)
   local x1, z1 = p1.x or p1[1], p1.z or p1[3]
   local x2, z2 = p2.x or p2[1], p2.z or p2[3]
   local x3, z3 = p3.x or p3[1], p3.z or p3[3]
@@ -112,7 +113,7 @@ end
 ---@param pos table|vec3 @Vehicle world position
 ---@param stopBox table @{ center=[x,y,z], size=[sx,sy,sz], rotation_deg=deg }
 ---@return boolean isInside, number localX, number localZ
-function GTAdjudicator.isInsideStopBox(pos, stopBox)
+function Adjudicator.isInsideStopBox(pos, stopBox)
   if not stopBox or not stopBox.center or not stopBox.size then
     return false, 0, 0
   end
@@ -138,10 +139,11 @@ function GTAdjudicator.isInsideStopBox(pos, stopBox)
   local dx = px - cx
   local dz = pz - cz
 
-  -- Rotation into local stop box space
-  local rotRad = -math.rad(stopBox.rotation_deg or 0)
-  local cosR = math.cos(rotRad)
-  local sinR = math.sin(rotRad)
+  -- 2D rotation around Y axis
+  local rotDeg = stopBox.rotation_deg or 0
+  local rad = math.rad(-rotDeg)
+  local cosR = math.cos(rad)
+  local sinR = math.sin(rad)
 
   local localX = dx * cosR - dz * sinR
   local localZ = dx * sinR + dz * cosR
@@ -149,47 +151,41 @@ function GTAdjudicator.isInsideStopBox(pos, stopBox)
   local halfX = sx * 0.5
   local halfZ = sz * 0.5
 
-  local isInside = (math.abs(localX) <= halfX) and (math.abs(localZ) <= halfZ)
-  return isInside, localX, localZ
+  local inside = (math.abs(localX) <= halfX) and (math.abs(localZ) <= halfZ)
+  return inside, localX, localZ
 end
 
----Adjudicates off-track limit violations (> max_wheels_off).
----Evaluates wheel surface validity (ac.StateWheel.surfaceValidTrack) across all 4 wheels,
----with fallback to car.wheelsOutside. Requires persistent violation over consecutive frames
----to debounce instantaneous geometry seam glitches.
+---Adjudicates track limits: debounces contact patch track valid status for 2 frames.
 ---@param car table|ac.CarState
 ---@return boolean failed, string? reason
-function GTAdjudicator:checkOffTrack(car)
+function Adjudicator:checkOffTrack(car)
   if not car then return false end
 
-  local wheelsOut = 0
+  local wheelsOff = 0
+  local hasWheelData = false
 
-  -- 1. Primary check: Query surfaceValidTrack for each wheel from physics contact
-  pcall(function()
-    if car.wheels then
-      for i = 0, 3 do
-        local w = car.wheels[i]
-        if w and w.surfaceValidTrack == false then
-          wheelsOut = wheelsOut + 1
+  -- Authoritative per-wheel contact patch evaluation
+  if car.wheels then
+    local wCount = car.wheelsCount or 4
+    for i = 0, wCount - 1 do
+      local w = car.wheels[i]
+      if w and w.surfaceValidTrack ~= nil then
+        hasWheelData = true
+        if w.surfaceValidTrack == false then
+          wheelsOff = wheelsOff + 1
         end
       end
     end
-  end)
+  end
 
-  -- 2. Fallback check: CSP/AC car.wheelsOutside telemetry counter
-  pcall(function()
-    local nativeWheelsOut = tonumber(car.wheelsOutside) or 0
-    if nativeWheelsOut > wheelsOut then
-      wheelsOut = nativeWheelsOut
-    end
-  end)
+  if not hasWheelData then
+    wheelsOff = tonumber(car.wheelsOutside) or 0
+  end
 
-  -- 3. Adjudicate against threshold with debounce filter (2 consecutive frames)
-  if wheelsOut > self.maxWheelsOff then
-    self.consecutiveOffTrackFrames = (self.consecutiveOffTrackFrames or 0) + 1
-    -- 2 consecutive frames (~33ms at 60fps) to debounce instantaneous geometry seam glitches
+  if wheelsOff > self.maxWheelsOff then
+    self.consecutiveOffTrackFrames = self.consecutiveOffTrackFrames + 1
     if self.consecutiveOffTrackFrames >= 2 then
-      return true, string.format("Off Track: Exceeded Track Limits (%d wheels off)", wheelsOut)
+      return true, string.format("Track Limits Exceeded (%d wheels off track)", wheelsOff)
     end
   else
     self.consecutiveOffTrackFrames = 0
@@ -199,10 +195,9 @@ function GTAdjudicator:checkOffTrack(car)
 end
 
 ---Adjudicates wall and barrier collision events against force thresholds.
----Uses car.collisionDepth with safe pcall evaluation.
 ---@param car table|ac.CarState
 ---@return boolean failed, string? reason
-function GTAdjudicator:checkWallCollision(car)
+function Adjudicator:checkWallCollision(car)
   if not car then return false end
 
   local depth = 0
@@ -221,16 +216,15 @@ end
 ---Adjudicates vehicle spin out (> max_yaw_angle_deg).
 ---@param car table|ac.CarState
 ---@return boolean failed, string? reason
-function GTAdjudicator:checkVehicleSpin(car)
+function Adjudicator:checkVehicleSpin(car)
   if not car then return false end
 
   local speedKmh = car.speedKmh or 0
-  -- Only evaluate spin when moving with sufficient kinetic momentum (> 15 km/h)
   if speedKmh < 15 then
     return false
   end
 
-  -- Angle between car look vector and velocity direction
+  -- Angle between vehicle forward look vector and linear velocity
   if car.velocity and car.look then
     local vx, vz = car.velocity.x, car.velocity.z
     local velLen = math.sqrt(vx * vx + vz * vz)
@@ -274,25 +268,24 @@ end
 ---@param car table|ac.CarState
 ---@param dt number
 ---@return boolean isComplete, boolean isFailed, string? statusReason
-function GTAdjudicator:checkStopBoxStatus(car, dt)
+function Adjudicator:checkStopBoxStatus(car, dt)
   if not self.stopBox or not car then
     return false, false, nil
   end
 
   local pos = car.position
   local speedKmh = car.speedKmh or 0
-  local isInside, localX, localZ = GTAdjudicator.isInsideStopBox(pos, self.stopBox)
+  local isInside, _, localZ = Adjudicator.isInsideStopBox(pos, self.stopBox)
   local halfZ = (self.stopBox.size[3] or 20) * 0.5
 
-  -- Track whether vehicle has launched from initial standing start
+  -- Track vehicle launch from initial standing start
   if speedKmh >= 5.0 then
     self.hasLaunched = true
   end
 
-  -- Check if car came to a complete stop (speed < 0.5 km/h) after launching
+  -- Check complete standstill (speed < 0.5 km/h for 0.3s)
   if self.hasLaunched and speedKmh < 0.5 then
     self.standstillTimer = self.standstillTimer + dt
-    -- Require 0.3s of verified standstill to prevent transient speed dips
     if self.standstillTimer >= 0.3 then
       if isInside then
         return true, false, "Stopped inside target box"
@@ -304,7 +297,7 @@ function GTAdjudicator:checkStopBoxStatus(car, dt)
     self.standstillTimer = 0
   end
 
-  -- Check for stop box overshoot (car traveled beyond the far boundary while moving)
+  -- Check stop box overshoot (car traveled beyond boundary while moving)
   if self.stopBoxOvershootFail and (localZ > (halfZ + 1.0)) and (speedKmh > 5.0) then
     return false, true, "Overshot Stop Box"
   end
@@ -312,120 +305,19 @@ function GTAdjudicator:checkStopBoxStatus(car, dt)
   return false, false, nil
 end
 
----Main per-frame adjudication tick.
----@param dt number @Delta time in seconds
----@param sessionTime number @Active running time in seconds
----@param car table|ac.CarState @Car state from ac.getCar(0)
----@return table result @{ status="RUNNING"|"PASSED"|"FAILED", reason=string, gateCrossed=boolean }
-function GTAdjudicator:_adjudicateInternal(dt, sessionTime, car)
-  -- If already in a terminal state, return cached status
-  if self.isDisqualified then
-    return { status = "FAILED", reason = self.failReason }
-  end
-  if self.isPassed then
-    return { status = "PASSED", reason = nil }
-  end
-
-  if not car then
-    return { status = "RUNNING" }
-  end
-
-  local currPos = car.position
-
-  -- Periodic diagnostic log during RUNNING
-  if not self.lastAdjDiag or (sessionTime - self.lastAdjDiag >= 1.0) then
-    self.lastAdjDiag = sessionTime
-    local fgDist = -1
-    if self.finishGate and self.finishGate.p1 and self.finishGate.p2 then
-      local p1 = self.finishGate.p1
-      local p2 = self.finishGate.p2
-      local midX = ((p1.x or p1[1]) + (p2.x or p2[1])) * 0.5
-      local midZ = ((p1.z or p1[3]) + (p2.z or p2[3])) * 0.5
-      fgDist = math.sqrt((currPos.x - midX)^2 + (currPos.z - midZ)^2)
-    end
-    if ac and ac.log then
-      ac.log(string.format("[GTLicense] AdjTick: t=%.1f | fgDist=%.1fm | fgCrossed=%s | prevPos=%s | fgPresent=%s",
-        sessionTime, fgDist, tostring(self.hasCrossedFinishGate), tostring(self.previousCarPos ~= nil), tostring(self.finishGate ~= nil)))
-    end
-  end
-
-  -- 1. Check start gate crossing
+---Adjudicates start/finish gate crossing logic.
+---@param currPos table
+---@param sessionTime number
+---@return boolean crossedFinish
+function Adjudicator:checkGateCrossings(currPos, sessionTime)
+  -- 1. Start Gate
   if not self.hasPassedStartGate and self.previousCarPos and self.startGate then
-    if GTAdjudicator.segmentsIntersect2D(self.previousCarPos, currPos, self.startGate.p1, self.startGate.p2) then
+    if Adjudicator.segmentsIntersect2D(self.previousCarPos, currPos, self.startGate.p1, self.startGate.p2) then
       self.hasPassedStartGate = true
     end
   end
 
-  -- 2. Check bronze time limit expiration
-  local limitSeconds = (self.isAITestMode and (self.bronzeSeconds + 30.0)) or self.bronzeSeconds
-  if sessionTime > limitSeconds then
-    self.isDisqualified = true
-    self.failReason = "Time Limit Exceeded"
-    if ac and ac.log then
-      ac.log(string.format("[GTLicense] Adjudicator DISQUALIFIED: %s (t=%.2fs)", self.failReason, sessionTime))
-    end
-    return { status = "FAILED", reason = self.failReason }
-  end
-
-  -- 3. Adjudicate off-track violation
-  local offTrack, offTrackReason = self:checkOffTrack(car)
-  if offTrack then
-    self.isDisqualified = true
-    self.failReason = offTrackReason
-    if ac and ac.log then
-      ac.log(string.format("[GTLicense] Adjudicator DISQUALIFIED: %s (t=%.2fs)", self.failReason, sessionTime))
-    end
-    return { status = "FAILED", reason = self.failReason }
-  end
-
-  -- 4. Adjudicate wall/barrier impact
-  local hitWall, wallReason = self:checkWallCollision(car)
-  if hitWall then
-    self.isDisqualified = true
-    self.failReason = wallReason
-    if ac and ac.log then
-      ac.log(string.format("[GTLicense] Adjudicator DISQUALIFIED: %s (t=%.2fs)", self.failReason, sessionTime))
-    end
-    return { status = "FAILED", reason = self.failReason }
-  end
-
-  -- 5. Adjudicate spin out
-  local spun, spinReason = self:checkVehicleSpin(car)
-  if spun then
-    self.isDisqualified = true
-    self.failReason = spinReason
-    return { status = "FAILED", reason = self.failReason }
-  end
-
-  -- 5b. Adjudicate Pace Car & Rolling Start rules
-  if self.testConfig and self.testConfig.start_mode == "PACE_CAR" then
-    local pc = self.testConfig.pace_car or {}
-    local paceCarIndex = pc.car_index or 1
-    local maxAllowedGap = pc.max_allowed_gap_m or 30.0
-
-    if ac and ac.getCar then
-      local paceCar = ac.getCar(paceCarIndex)
-      if paceCar then
-        -- Check if player overtakes pace car before green flag
-        if not self.hasPassedStartGate and car.splinePosition > paceCar.splinePosition then
-          self.isDisqualified = true
-          self.failReason = "Passed Pace Car Before Green Zone"
-          return { status = "FAILED", reason = self.failReason }
-        end
-
-        -- Check if player falls too far behind pace car
-        local trackLength = (ac.getSim() and ac.getSim().trackLengthM) or 1000.0
-        local gap = (paceCar.splinePosition - car.splinePosition) * trackLength
-        if gap > maxAllowedGap then
-          self.isDisqualified = true
-          self.failReason = string.format("Fell Too Far Behind Pace Car (%.0fm > %.0fm)", gap, maxAllowedGap)
-          return { status = "FAILED", reason = self.failReason }
-        end
-      end
-    end
-  end
-
-  -- 6. Adjudicate finish line / Stop box logic
+  -- 2. Finish Gate
   if self.finishGate and not self.hasCrossedFinishGate then
     local p1 = self.finishGate.p1
     local p2 = self.finishGate.p2
@@ -434,30 +326,118 @@ function GTAdjudicator:_adjudicateInternal(dt, sessionTime, car)
     local distToFinish = math.sqrt((currPos.x - midX)^2 + (currPos.z - midZ)^2)
 
     local ep1, ep2 = getExtendedGate(self.finishGate, 15.0)
-    if distToFinish < 25.0 and (not self.lastFinishApproachLog or (sessionTime - self.lastFinishApproachLog >= 0.5)) then
-      self.lastFinishApproachLog = sessionTime
-      if ac and ac.log then
-        ac.log(string.format("[GTLicense] Approaching Finish Gate: dist=%.1fm | pos=(%.1f, %.1f, %.1f)",
-          distToFinish, currPos.x, currPos.y, currPos.z))
-      end
-    end
-
     local crossedSegment = false
     if self.previousCarPos and ep1 and ep2 then
-      crossedSegment = GTAdjudicator.segmentsIntersect2D(self.previousCarPos, currPos, ep1, ep2)
+      crossedSegment = Adjudicator.segmentsIntersect2D(self.previousCarPos, currPos, ep1, ep2)
     end
 
     if crossedSegment or (distToFinish <= 12.0) then
       self.hasCrossedFinishGate = true
       if ac and ac.log then
-        ac.log(string.format("[GTLicense] Finish Gate CROSSED at t=%.2fs! pos=(%.2f, %.2f, %.2f), distToMid=%.1fm, crossedSegment=%s",
-          sessionTime, currPos.x, currPos.y, currPos.z, distToFinish, tostring(crossedSegment)))
+        ac.log(string.format("[GTLicense] Finish Gate CROSSED at t=%.2fs! pos=(%.2f, %.2f, %.2f), distToMid=%.1fm",
+          sessionTime, currPos.x, currPos.y, currPos.z, distToFinish))
       end
     end
   end
 
+  return self.hasCrossedFinishGate
+end
+
+---Adjudicates pace car rules (IB-5).
+---@param car table
+---@return boolean failed, string? reason
+function Adjudicator:checkPaceCarRules(car)
+  if not self.testConfig or self.testConfig.start_mode ~= "PACE_CAR" then
+    return false
+  end
+
+  local pc = self.testConfig.pace_car or {}
+  local paceCarIndex = pc.car_index or 1
+  local maxAllowedGap = pc.max_allowed_gap_m or 30.0
+
+  if ac and ac.getCar then
+    local paceCar = ac.getCar(paceCarIndex)
+    if paceCar then
+      -- Player cannot overtake pace car before green flag
+      if not self.hasPassedStartGate and car.splinePosition > paceCar.splinePosition then
+        return true, "Passed Pace Car Before Green Zone"
+      end
+
+      -- Player cannot fall too far behind pace car
+      local trackLength = (ac.getSim() and ac.getSim().trackLengthM) or 1000.0
+      local gap = (paceCar.splinePosition - car.splinePosition) * trackLength
+      if gap > maxAllowedGap then
+        return true, string.format("Fell Too Far Behind Pace Car (%.0fm > %.0fm)", gap, maxAllowedGap)
+      end
+    end
+  end
+
+  return false
+end
+
+---Main per-frame adjudication tick implementing composable rule evaluation.
+---@param dt number @Delta time in seconds
+---@param sessionTime number @Active running time in seconds
+---@param car table|ac.CarState @Car state from ac.getCar(0)
+---@return table result @{ status="RUNNING"|"PASSED"|"FAILED", reason=string }
+function Adjudicator:_adjudicateInternal(dt, sessionTime, car)
+  if self.isDisqualified then
+    return { status = "FAILED", reason = self.failReason }
+  end
+  if self.isPassed then
+    return { status = "PASSED", reason = nil }
+  end
+  if not car then
+    return { status = "RUNNING" }
+  end
+
+  local currPos = car.position
+
+  -- 1. Check bronze target time limit
+  local limitSeconds = (self.isAITestMode and (self.bronzeSeconds + 30.0)) or self.bronzeSeconds
+  if sessionTime > limitSeconds then
+    self.isDisqualified = true
+    self.failReason = "Time Limit Exceeded"
+    return { status = "FAILED", reason = self.failReason }
+  end
+
+  -- 2. Check track limits
+  local offTrack, offTrackReason = self:checkOffTrack(car)
+  if offTrack then
+    self.isDisqualified = true
+    self.failReason = offTrackReason
+    return { status = "FAILED", reason = self.failReason }
+  end
+
+  -- 3. Check barrier collisions
+  local hitWall, wallReason = self:checkWallCollision(car)
+  if hitWall then
+    self.isDisqualified = true
+    self.failReason = wallReason
+    return { status = "FAILED", reason = self.failReason }
+  end
+
+  -- 4. Check vehicle spinout
+  local spun, spinReason = self:checkVehicleSpin(car)
+  if spun then
+    self.isDisqualified = true
+    self.failReason = spinReason
+    return { status = "FAILED", reason = self.failReason }
+  end
+
+  -- 5. Check pace car compliance
+  local paceFailed, paceReason = self:checkPaceCarRules(car)
+  if paceFailed then
+    self.isDisqualified = true
+    self.failReason = paceReason
+    return { status = "FAILED", reason = self.failReason }
+  end
+
+  -- 6. Evaluate gate crossings
+  self:checkGateCrossings(currPos, sessionTime)
+
+  -- 7. Evaluate completion criteria (Stop Box vs Finish Gate)
   if self.stopBox then
-    -- Acceleration & Braking test: requires stopping inside the stop box
     local complete, failed, reason = self:checkStopBoxStatus(car, dt)
     if failed then
       self.isDisqualified = true
@@ -468,7 +448,6 @@ function GTAdjudicator:_adjudicateInternal(dt, sessionTime, car)
       return { status = "PASSED", reason = nil }
     end
   else
-    -- Standard sector or lap test: crossing the finish gate triggers pass
     if self.hasCrossedFinishGate then
       self.isPassed = true
       return { status = "PASSED", reason = nil }
@@ -477,7 +456,6 @@ function GTAdjudicator:_adjudicateInternal(dt, sessionTime, car)
 
   -- Store position for next frame's segment crossing calculations
   self.previousCarPos = { x = currPos.x, y = currPos.y, z = currPos.z }
-
   return { status = "RUNNING" }
 end
 
@@ -486,7 +464,7 @@ end
 ---@param sessionTime number
 ---@param car table|ac.CarState
 ---@return table result
-function GTAdjudicator:adjudicate(dt, sessionTime, car)
+function Adjudicator:adjudicate(dt, sessionTime, car)
   local ok, res = pcall(self._adjudicateInternal, self, dt, sessionTime, car)
   if not ok then
     if ac and ac.log then
@@ -497,4 +475,6 @@ function GTAdjudicator:adjudicate(dt, sessionTime, car)
   return res
 end
 
-return GTAdjudicator
+Adjudicator.GTAdjudicator = Adjudicator
+
+return Adjudicator

@@ -1,16 +1,16 @@
 -- ==============================================================================
 -- Gran Turismo License Engine for Assetto Corsa (CSP)
--- File: lua/engine/gt_utils.lua
+-- File: lua/engine/utils.lua
 -- Description: Shared utilities, vector math helpers, module loaders, and
---              JSON / 3D rendering fallbacks for GT License subsystems.
+--              JSON / 3D rendering fallbacks for License subsystems.
 -- ==============================================================================
 
-local GTUtils = {}
+local Utils = {}
 
 ---Converts an array {x, y, z}, table {x=..., y=..., z=...}, or vec3 to a valid vec3.
 ---@param v table|vec3|number[]|nil
 ---@return vec3
-function GTUtils.toVec3(v)
+function Utils.toVec3(v)
   if v == nil then
     return vec3(0, 0, 0)
   end
@@ -34,8 +34,8 @@ end
 ---Safely normalizes a 3D direction vector.
 ---@param dir vec3|table|number[]
 ---@return vec3
-function GTUtils.safeNormalize(dir)
-  local v = GTUtils.toVec3(dir)
+function Utils.safeNormalize(dir)
+  local v = Utils.toVec3(dir)
   local len = math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z)
   if len > 0.0001 then
     return vec3(v.x / len, v.y / len, v.z / len)
@@ -47,7 +47,7 @@ end
 ---@param name string @Module name or relative path
 ---@param errorOnFail boolean? @Whether to raise an error if require fails
 ---@return any module
-function GTUtils.safeRequire(name, errorOnFail)
+function Utils.safeRequire(name, errorOnFail)
   local candidates = {
     name,
     "engine/" .. name,
@@ -63,8 +63,22 @@ function GTUtils.safeRequire(name, errorOnFail)
     end
   end
 
+  -- Fallback for legacy gt_ prefixed module names
+  local legacy = name:match("^gt_(.+)$") or ("gt_" .. name)
+  local legacyCandidates = {
+    legacy,
+    "engine/" .. legacy,
+    "lua/engine/" .. legacy
+  }
+  for _, path in ipairs(legacyCandidates) do
+    local ok, mod = pcall(require, path)
+    if ok and mod ~= nil then
+      return mod
+    end
+  end
+
   if errorOnFail then
-    error(string.format("gt_utils: Failed to require '%s' across search paths", name))
+    error(string.format("utils: Failed to require '%s' across search paths", name))
   end
   return nil
 end
@@ -72,7 +86,7 @@ end
 ---Safely parses a JSON string using CSP JSON global.
 ---@param str string
 ---@return table|nil
-function GTUtils.parseJSONSafe(str)
+function Utils.parseJSONSafe(str)
   if not str or #str == 0 then return nil end
   if JSON and JSON.parse then
     local ok, res = pcall(JSON.parse, str)
@@ -84,7 +98,7 @@ end
 ---Maps a test code (e.g. "B-3", "IA-12", "S-1") to its relative JSON path.
 ---@param testId string
 ---@return string|nil relativePath
-function GTUtils.getTestFilePath(testId)
+function Utils.getTestFilePath(testId)
   if not testId or #testId == 0 then return nil end
   local prefix, numStr = testId:match("^([%a]+)%-(%d+)$")
   if not prefix or not numStr then return nil end
@@ -119,10 +133,10 @@ end
 ---@param p2 vec3|table
 ---@param color rgbm
 ---@param thickness number?
-function GTUtils.draw3DLine(p1, p2, color, thickness)
+function Utils.draw3DLine(p1, p2, color, thickness)
   thickness = thickness or 2.0
-  local v1 = GTUtils.toVec3(p1)
-  local v2 = GTUtils.toVec3(p2)
+  local v1 = Utils.toVec3(p1)
+  local v2 = Utils.toVec3(p2)
   if render and render.drawLine then
     render.drawLine(v1, v2, color, thickness)
   elseif render and render.polyline then
@@ -130,5 +144,8 @@ function GTUtils.draw3DLine(p1, p2, color, thickness)
   end
 end
 
-return GTUtils
+-- Backward compatibility alias
+Utils.GTUtils = Utils
+
+return Utils
 

@@ -100,11 +100,11 @@ local function safeRequire(name)
     return nil
 end
 
-local GTUtils = safeRequire("gt_utils")
+local Utils = safeRequire("utils") or safeRequire("gt_utils")
 
 --- Helper to safely convert array {x, y, z} or vec3 into a vec3 object
 local function toVec3(p)
-    if GTUtils and GTUtils.toVec3 then return GTUtils.toVec3(p) end
+    if Utils and Utils.toVec3 then return Utils.toVec3(p) end
     if not p then return vec3(0, 0, 0) end
     if type(p.x) == "number" and type(p.y) == "number" and type(p.z) == "number" then
         return vec3(p.x, p.y, p.z)

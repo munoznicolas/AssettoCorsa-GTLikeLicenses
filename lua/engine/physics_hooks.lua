@@ -1,6 +1,6 @@
 -- ==============================================================================
 -- Gran Turismo License Engine for Assetto Corsa (CSP)
--- File: lua/engine/gt_physics_hooks.lua
+-- File: lua/engine/physics_hooks.lua
 -- Description: Physics manipulation hooks for car teleportation, rolling launch
 --              velocity vectors, and control locking during countdown sequences.
 -- ==============================================================================
@@ -15,10 +15,10 @@ local function safeRequire(name)
   return nil
 end
 
-local GTUtils = safeRequire("gt_utils")
-local GTPhysicsHooks = {}
+local Utils = safeRequire("utils")
+local PhysicsHooks = {}
 
-GTPhysicsHooks.toVec3 = GTUtils and GTUtils.toVec3 or function(v)
+PhysicsHooks.toVec3 = Utils and Utils.toVec3 or function(v)
   if v == nil then return vec3(0, 0, 0) end
   if type(v) == 'cdata' or (type(v) == 'userdata') then return v end
   if type(v) == 'table' then
@@ -31,8 +31,8 @@ GTPhysicsHooks.toVec3 = GTUtils and GTUtils.toVec3 or function(v)
   return vec3(0, 0, 0)
 end
 
-local safeNormalize = GTUtils and GTUtils.safeNormalize or function(dir)
-  local v = GTPhysicsHooks.toVec3(dir)
+local safeNormalize = Utils and Utils.safeNormalize or function(dir)
+  local v = PhysicsHooks.toVec3(dir)
   local len = math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z)
   if len > 0.0001 then return vec3(v.x / len, v.y / len, v.z / len) end
   return vec3(0, 0, 1)
@@ -43,7 +43,7 @@ local lastGearEngageTime = {}
 ---Estimates a realistic starting gear for rolling start velocity.
 ---@param speedKmh number
 ---@return integer gearIndex (1-based gear, 1 to 6)
-function GTPhysicsHooks.estimateStartingGear(speedKmh)
+function PhysicsHooks.estimateStartingGear(speedKmh)
   if speedKmh <= 0 then
     return 1
   elseif speedKmh <= 45 then
@@ -61,6 +61,15 @@ function GTPhysicsHooks.estimateStartingGear(speedKmh)
   end
 end
 
+---Converts world forward vector to Assetto Corsa's internal orientation coordinate convention.
+---In AC C++ physics, the orientation vector convention is negated relative to car.look (-fwd).
+---@param forwardVector table|vec3|number[]
+---@return vec3
+function PhysicsHooks.toACLookVector(forwardVector)
+  local fwd = safeNormalize(PhysicsHooks.toVec3(forwardVector))
+  return vec3(-fwd.x, -fwd.y, -fwd.z)
+end
+
 ---Teleports the car to the specified world coordinates and heading vector.
 ---Raises the car slightly (+0.05m) to avoid bottoming out or clipping into road colliders.
 ---@param carIndex integer @0-based car index (0 for player car)
@@ -68,39 +77,38 @@ end
 ---@param forwardVector table|vec3|number[] @Heading direction [dX, dY, dZ]
 ---@param verticalOffset number? @Optional elevation offset in meters (default: 0.05m)
 ---@return boolean success
-function GTPhysicsHooks.teleportCar(carIndex, position, forwardVector, verticalOffset)
+function PhysicsHooks.teleportCar(carIndex, position, forwardVector, verticalOffset)
   carIndex = carIndex or 0
   verticalOffset = verticalOffset or 0.5
 
-  local rawPos = GTPhysicsHooks.toVec3(position)
+  local rawPos = PhysicsHooks.toVec3(position)
   -- Safety guard: if rawPos is dummy default (0, 0.5, 0) and track is not magione, do not drop car into void
   if math.abs(rawPos.x) < 0.01 and math.abs(rawPos.z) < 0.01 and ac and ac.getTrackID and ac.getTrackID() ~= "magione" then
     if ac and ac.log then
-      ac.log("[GTPhysicsHooks] Guard: detected dummy (0, 0.5, 0) spawn on non-magione track. Preserving native spawn point.")
+      ac.log("[PhysicsHooks] Guard: detected dummy (0, 0.5, 0) spawn on non-magione track. Preserving native spawn point.")
     end
     return true
   end
 
-  local fwd = safeNormalize(GTPhysicsHooks.toVec3(forwardVector))
+  local fwd = safeNormalize(PhysicsHooks.toVec3(forwardVector))
   local targetPos = vec3(rawPos.x, rawPos.y + verticalOffset, rawPos.z)
 
   local carBefore = ac and ac.getCar and ac.getCar(carIndex)
   if carBefore and ac and ac.log then
-    ac.log(string.format("[GTPhysicsHooks] Teleport BEFORE: pos=(%.2f, %.2f, %.2f), look=(%.2f, %.2f, %.2f)",
+    ac.log(string.format("[PhysicsHooks] Teleport BEFORE: pos=(%.2f, %.2f, %.2f), look=(%.2f, %.2f, %.2f)",
       carBefore.position.x, carBefore.position.y, carBefore.position.z,
       carBefore.look.x, carBefore.look.y, carBefore.look.z))
   end
 
   -- Teleport car using CSP physics APIs
-  -- In Assetto Corsa physics, the orientation dir vector convention is inverted relative to car.look,
-  -- so passing -fwd aligns car.look directly with target forwardVector (+fwd).
+  -- Assetto Corsa orientation convention is encapsulated by toACLookVector
   if physics and physics.setCarPosition then
-    physics.setCarPosition(carIndex, targetPos, vec3(-fwd.x, -fwd.y, -fwd.z))
+    physics.setCarPosition(carIndex, targetPos, PhysicsHooks.toACLookVector(forwardVector))
   end
 
   local carAfter = ac and ac.getCar and ac.getCar(carIndex)
   if carAfter and ac and ac.log then
-    ac.log(string.format("[GTPhysicsHooks] Teleport AFTER: pos=(%.2f, %.2f, %.2f), look=(%.2f, %.2f, %.2f), targetFwd=(%.2f, %.2f, %.2f)",
+    ac.log(string.format("[PhysicsHooks] Teleport AFTER: pos=(%.2f, %.2f, %.2f), look=(%.2f, %.2f, %.2f), targetFwd=(%.2f, %.2f, %.2f)",
       carAfter.position.x, carAfter.position.y, carAfter.position.z,
       carAfter.look.x, carAfter.look.y, carAfter.look.z,
       fwd.x, fwd.y, fwd.z))
@@ -116,7 +124,7 @@ end
 ---@param targetGear integer? @Optional gear index to engage
 ---@param targetRPM number? @Optional target engine RPM
 ---@return boolean success
-function GTPhysicsHooks.applyRollingVelocity(carIndex, forwardVector, speedKmh, targetGear, targetRPM)
+function PhysicsHooks.applyRollingVelocity(carIndex, forwardVector, speedKmh, targetGear, targetRPM)
   carIndex = carIndex or 0
   speedKmh = tonumber(speedKmh) or 0
 
@@ -143,7 +151,7 @@ function GTPhysicsHooks.applyRollingVelocity(carIndex, forwardVector, speedKmh, 
     return true
   end
 
-  local fwd = safeNormalize(GTPhysicsHooks.toVec3(forwardVector))
+  local fwd = safeNormalize(PhysicsHooks.toVec3(forwardVector))
   local speedMs = speedKmh / 3.6
   local vel = vec3(fwd.x * speedMs, fwd.y * speedMs, fwd.z * speedMs)
 
@@ -160,7 +168,7 @@ function GTPhysicsHooks.applyRollingVelocity(carIndex, forwardVector, speedKmh, 
   end
 
   -- Engage an appropriate gear and engine RPM for rolling launch speed
-  local gear = (targetGear and targetGear > 0) and targetGear or GTPhysicsHooks.estimateStartingGear(speedKmh)
+  local gear = (targetGear and targetGear > 0) and targetGear or PhysicsHooks.estimateStartingGear(speedKmh)
   local rpm = (targetRPM and targetRPM > 0) and targetRPM or 3500
 
   if physics and physics.engageGear then
@@ -191,7 +199,7 @@ function GTPhysicsHooks.applyRollingVelocity(carIndex, forwardVector, speedKmh, 
   end
 
   if ac and ac.log then
-    ac.log(string.format("[GTPhysicsHooks] applyRollingVelocity car=%d: targetSpeed=%.1f km/h, vel=(%.2f, %.2f, %.2f), gear=%d, rpm=%d",
+    ac.log(string.format("[PhysicsHooks] applyRollingVelocity car=%d: targetSpeed=%.1f km/h, vel=(%.2f, %.2f, %.2f), gear=%d, rpm=%d",
       carIndex, speedKmh, vel.x, vel.y, vel.z, gear, rpm))
   end
 
@@ -203,7 +211,7 @@ end
 ---@param isStandingStart boolean @Whether this test is a standing launch (if true, forces brakes)
 ---@param targetGear integer? @Target gear to lock
 ---@param targetRPM number? @Target engine RPM
-function GTPhysicsHooks.lockControls(durationSeconds, isStandingStart, targetGear, targetRPM)
+function PhysicsHooks.lockControls(durationSeconds, isStandingStart, targetGear, targetRPM)
   durationSeconds = durationSeconds or 3.0
 
   if isStandingStart then
@@ -261,10 +269,21 @@ function GTPhysicsHooks.lockControls(durationSeconds, isStandingStart, targetGea
   end
 end
 
+---Releases steering lock and restores normal driver or AI steering input.
+---Under CSP, passing NaN to physics.overrideSteering clears the override.
+---@param carIndex integer? @0-based car index
+function PhysicsHooks.releaseSteeringOverride(carIndex)
+  carIndex = carIndex or 0
+  local nan = (math and math.nan) or (0 / 0)
+  if physics and physics.overrideSteering then
+    physics.overrideSteering(carIndex, nan)
+  end
+end
+
 ---Immediately unlocks all user inputs and releases forced brakes.
 ---@param carIndex integer? @0-based car index (default: 0)
 ---@param targetGear integer? @Optional gear to engage upon control release (e.g. 2 for rolling start)
-function GTPhysicsHooks.unlockControls(carIndex, targetGear)
+function PhysicsHooks.unlockControls(carIndex, targetGear)
   carIndex = carIndex or 0
   if physics and physics.lockUserControlsFor then
     physics.lockUserControlsFor(0)
@@ -281,10 +300,7 @@ function GTPhysicsHooks.unlockControls(carIndex, targetGear)
   if physics and physics.forceUserHandbrakeFor then
     physics.forceUserHandbrakeFor(0, 0)
   end
-  local nan = (math and math.nan) or (0 / 0)
-  if physics and physics.overrideSteering then
-    physics.overrideSteering(carIndex, nan)
-  end
+  PhysicsHooks.releaseSteeringOverride(carIndex)
   if physics and physics.setAIThrottleLimit then
     physics.setAIThrottleLimit(carIndex, 1.0)
   end
@@ -312,7 +328,7 @@ end
 
 ---Releases sticky gearbox override flags in overrideCarControls, allowing player and AI to freely shift gears.
 ---@param carIndex integer? @0-based car index (default: 0)
-function GTPhysicsHooks.releaseGearOverride(carIndex)
+function PhysicsHooks.releaseGearOverride(carIndex)
   carIndex = carIndex or 0
   if ac and ac.overrideCarControls then
     local ctrl = ac.overrideCarControls(carIndex)
@@ -332,7 +348,7 @@ end
 ---@param carIndex integer? @0-based car index (default: 0)
 ---@param intensity number? @Braking intensity between 0.0 and 1.0 (default: 0.5 for 50%)
 ---@param enableAI boolean? @Whether to enable AI autopilot for steering
-function GTPhysicsHooks.applyFailureBraking(carIndex, intensity, enableAI)
+function PhysicsHooks.applyFailureBraking(carIndex, intensity, enableAI)
   carIndex = carIndex or 0
   intensity = tonumber(intensity) or 0.5
   if physics and physics.setCarAutopilot then
@@ -358,11 +374,11 @@ function GTPhysicsHooks.applyFailureBraking(carIndex, intensity, enableAI)
 end
 
 -- Aliases for completion and general controlled post-test braking
-GTPhysicsHooks.applyControlledBraking = GTPhysicsHooks.applyFailureBraking
+PhysicsHooks.applyControlledBraking = PhysicsHooks.applyFailureBraking
 
 ---Releases failure or completion braking and restores user throttle and brake control.
 ---@param carIndex integer? @0-based car index (default: 0)
-function GTPhysicsHooks.releaseFailureBraking(carIndex)
+function PhysicsHooks.releaseFailureBraking(carIndex)
   carIndex = carIndex or 0
   if physics and physics.forceUserThrottleFor then
     physics.forceUserThrottleFor(0, 0)
@@ -383,7 +399,7 @@ function GTPhysicsHooks.releaseFailureBraking(carIndex)
 end
 
 -- Aliases for completion and general controlled post-test braking
-GTPhysicsHooks.releaseControlledBraking = GTPhysicsHooks.releaseFailureBraking
+PhysicsHooks.releaseControlledBraking = PhysicsHooks.releaseFailureBraking
 
 ---Engages rolling start countdown physics along the straight sector line via native AI autopilot.
 ---Enables autopilot, caps AI speed to target rolling speed, and locks to the ideal racing line.
@@ -392,10 +408,10 @@ GTPhysicsHooks.releaseControlledBraking = GTPhysicsHooks.releaseFailureBraking
 ---@param targetGear integer? @Target gear to engage and maintain
 ---@param targetRPM number? @Target engine RPM to maintain
 ---@param fallbackFwd table|vec3|number[]? @Forward vector
-function GTPhysicsHooks.startAIRolling(carIndex, targetSpeedKmh, targetGear, targetRPM, fallbackFwd)
+function PhysicsHooks.startAIRolling(carIndex, targetSpeedKmh, targetGear, targetRPM, fallbackFwd)
   carIndex = carIndex or 0
   targetSpeedKmh = tonumber(targetSpeedKmh) or 70.0
-  targetGear = (targetGear and targetGear > 0) and targetGear or GTPhysicsHooks.estimateStartingGear(targetSpeedKmh)
+  targetGear = (targetGear and targetGear > 0) and targetGear or PhysicsHooks.estimateStartingGear(targetSpeedKmh)
   targetRPM = (targetRPM and targetRPM > 0) and targetRPM or 3500
 
   -- Ensure no forced pedal locks hold the car or starve AI throttle
@@ -448,7 +464,7 @@ function GTPhysicsHooks.startAIRolling(carIndex, targetSpeedKmh, targetGear, tar
   end
 
   if ac and ac.log then
-    ac.log(string.format("[GTPhysicsHooks] startAIRolling car=%d: autopilot=true, speed=%.1f km/h, gear=%d, rpm=%d",
+    ac.log(string.format("[PhysicsHooks] startAIRolling car=%d: autopilot=true, speed=%.1f km/h, gear=%d, rpm=%d",
       carIndex, targetSpeedKmh, targetGear, targetRPM))
   end
 end
@@ -456,7 +472,7 @@ end
 ---Disengages AI autopilot and seamlessly returns full control to the player at GO!
 ---@param carIndex integer? @0-based car index (default: 0)
 ---@param targetGear integer? @Optional gear to engage upon control release
-function GTPhysicsHooks.stopAIRolling(carIndex, targetGear)
+function PhysicsHooks.stopAIRolling(carIndex, targetGear)
   carIndex = carIndex or 0
 
   -- Deactivate AI autopilot
@@ -476,10 +492,10 @@ function GTPhysicsHooks.stopAIRolling(carIndex, targetGear)
   end
 
   -- Unlock controls, gearbox lock, and engage target gear
-  GTPhysicsHooks.unlockControls(carIndex, targetGear)
+  PhysicsHooks.unlockControls(carIndex, targetGear)
 
   if ac and ac.log then
-    ac.log(string.format("[GTPhysicsHooks] stopAIRolling car=%d: autopilot=false, handover complete, gear=%d", carIndex, targetGear or 0))
+    ac.log(string.format("[PhysicsHooks] stopAIRolling car=%d: autopilot=false, handover complete, gear=%d", carIndex, targetGear or 0))
   end
 end
 
@@ -492,10 +508,10 @@ end
 ---@param dt number? @Frame delta time
 ---@param targetGear integer? @Target gear to continuously maintain
 ---@param targetRPM number? @Target engine RPM to maintain
-function GTPhysicsHooks.maintainAIRolling(carIndex, targetSpeedKmh, fallbackFwd, dt, targetGear, targetRPM)
+function PhysicsHooks.maintainAIRolling(carIndex, targetSpeedKmh, fallbackFwd, dt, targetGear, targetRPM)
   carIndex = carIndex or 0
   targetSpeedKmh = tonumber(targetSpeedKmh) or 70.0
-  targetGear = (targetGear and targetGear > 0) and targetGear or GTPhysicsHooks.estimateStartingGear(targetSpeedKmh)
+  targetGear = (targetGear and targetGear > 0) and targetGear or PhysicsHooks.estimateStartingGear(targetSpeedKmh)
   targetRPM = (targetRPM and targetRPM > 0) and targetRPM or 3500
 
   local hasSpline = (ac and ac.hasTrackSpline) and ac.hasTrackSpline() or true
@@ -518,7 +534,7 @@ function GTPhysicsHooks.maintainAIRolling(carIndex, targetSpeedKmh, fallbackFwd,
     -- re-assert forward velocity so the vehicle doesn't bog down or crawl in 1st gear
     local car = ac.getCar and ac.getCar(carIndex)
     if targetSpeedKmh > 0 and car and car.speedKmh < (targetSpeedKmh * 0.75) then
-      local fwd = safeNormalize(GTPhysicsHooks.toVec3(fallbackFwd))
+      local fwd = safeNormalize(PhysicsHooks.toVec3(fallbackFwd))
       local speedMs = targetSpeedKmh / 3.6
       local curVy = (car.velocity and car.velocity.y) or (fwd.y * speedMs)
       local vel = vec3(fwd.x * speedMs, curVy, fwd.z * speedMs)
@@ -531,7 +547,7 @@ function GTPhysicsHooks.maintainAIRolling(carIndex, targetSpeedKmh, fallbackFwd,
     -- Maintain horizontal forward velocity while preserving vertical velocity (vy)
     -- so natural gravity and suspension compression remain fully active
     local car = ac.getCar and ac.getCar(carIndex)
-    local fwd = safeNormalize(GTPhysicsHooks.toVec3(fallbackFwd))
+    local fwd = safeNormalize(PhysicsHooks.toVec3(fallbackFwd))
     local speedMs = targetSpeedKmh / 3.6
     local curVy = (car and car.velocity and car.velocity.y) or (fwd.y * speedMs)
     local vel = vec3(fwd.x * speedMs, curVy, fwd.z * speedMs)
@@ -561,14 +577,14 @@ end
 ---@param testConfig table @Table complying with test_definition.schema.json
 ---@param carIndex integer? @0-based car index (default: 0)
 ---@return boolean success, string? errorMessage
-function GTPhysicsHooks.setupSpawn(testConfig, carIndex)
+function PhysicsHooks.setupSpawn(testConfig, carIndex)
   if not testConfig then
     return false, "Invalid test configuration: nil"
   end
 
   if testConfig.test_id == "AI_TELEMETRY_RECORDER" or testConfig.is_telemetry_recording then
     if ac and ac.log then
-      ac.log("[GTPhysicsHooks] Telemetry recording mode: preserving native track spawn point")
+      ac.log("[PhysicsHooks] Telemetry recording mode: preserving native track spawn point")
     end
     return true
   end
@@ -584,7 +600,7 @@ function GTPhysicsHooks.setupSpawn(testConfig, carIndex)
 
   local targetGear = tonumber(spawn.gear)
   if not targetGear or targetGear <= 0 then
-    targetGear = isStanding and 1 or GTPhysicsHooks.estimateStartingGear(initialSpeed)
+    targetGear = isStanding and 1 or PhysicsHooks.estimateStartingGear(initialSpeed)
   end
   local targetRPM = tonumber(spawn.rpm)
   if not targetRPM or targetRPM <= 0 then
@@ -610,7 +626,7 @@ function GTPhysicsHooks.setupSpawn(testConfig, carIndex)
 
   -- Reposition car to target sector coordinates
   lastGearEngageTime[carIndex] = 0
-  local ok = GTPhysicsHooks.teleportCar(carIndex, spawn.position, spawn.forward_vector)
+  local ok = PhysicsHooks.teleportCar(carIndex, spawn.position, spawn.forward_vector)
   if not ok then
     return false, "Failed to teleport car to spawn coordinates"
   end
@@ -631,13 +647,13 @@ function GTPhysicsHooks.setupSpawn(testConfig, carIndex)
     if physics and physics.forceUserBrakesFor then
       physics.forceUserBrakesFor(0, 0)
     end
-    GTPhysicsHooks.applyRollingVelocity(carIndex, spawn.forward_vector, initialSpeed, targetGear, targetRPM)
-    GTPhysicsHooks.startAIRolling(carIndex, initialSpeed, targetGear, targetRPM, spawn.forward_vector)
+    PhysicsHooks.applyRollingVelocity(carIndex, spawn.forward_vector, initialSpeed, targetGear, targetRPM)
+    PhysicsHooks.startAIRolling(carIndex, initialSpeed, targetGear, targetRPM, spawn.forward_vector)
   else
     if physics and physics.setCarAutopilot then
       physics.setCarAutopilot(false)
     end
-    GTPhysicsHooks.applyRollingVelocity(carIndex, spawn.forward_vector, 0, targetGear, targetRPM)
+    PhysicsHooks.applyRollingVelocity(carIndex, spawn.forward_vector, 0, targetGear, targetRPM)
   end
 
   -- 4. Firmly assert target gear and lock gearbox immediately upon spawn
@@ -652,7 +668,7 @@ function GTPhysicsHooks.setupSpawn(testConfig, carIndex)
   end
 
   if ac and ac.log then
-    ac.log(string.format("[GTPhysicsHooks] setupSpawn car=%d: start_mode=%s, initial_speed=%.1f km/h, gear=%d, rpm=%d, pos=(%.2f, %.2f, %.2f)",
+    ac.log(string.format("[PhysicsHooks] setupSpawn car=%d: start_mode=%s, initial_speed=%.1f km/h, gear=%d, rpm=%d, pos=(%.2f, %.2f, %.2f)",
       carIndex, tostring(testConfig.start_mode), initialSpeed, targetGear, targetRPM, spawn.position[1], spawn.position[2], spawn.position[3]))
   end
 
@@ -665,12 +681,12 @@ end
 ---@param forwardVector table|vec3|number[] @Forward facing direction
 ---@param speedKmh number @Target rolling speed in km/h
 ---@return boolean success
-function GTPhysicsHooks.maintainRollingVelocity(carIndex, forwardVector, speedKmh)
+function PhysicsHooks.maintainRollingVelocity(carIndex, forwardVector, speedKmh)
   carIndex = carIndex or 0
   speedKmh = tonumber(speedKmh) or 0
   if speedKmh <= 0 then return false end
 
-  local fwd = safeNormalize(GTPhysicsHooks.toVec3(forwardVector))
+  local fwd = safeNormalize(PhysicsHooks.toVec3(forwardVector))
   local speedMs = speedKmh / 3.6
   local vel = vec3(fwd.x * speedMs, fwd.y * speedMs, fwd.z * speedMs)
 
@@ -678,7 +694,7 @@ function GTPhysicsHooks.maintainRollingVelocity(carIndex, forwardVector, speedKm
     physics.setCarVelocity(carIndex, vel)
   end
 
-  local gear = GTPhysicsHooks.estimateStartingGear(speedKmh)
+  local gear = PhysicsHooks.estimateStartingGear(speedKmh)
   if physics and physics.engageGear then
     physics.engageGear(carIndex, gear)
   end
@@ -703,7 +719,7 @@ end
 ---Sets an absolute top speed ceiling (in km/h) on an AI controlled vehicle.
 ---@param carIndex integer @0-based car index
 ---@param speedKmh number @Speed limit in km/h (use 1e9 or 999999 for unlimited)
-function GTPhysicsHooks.setAITopSpeed(carIndex, speedKmh)
+function PhysicsHooks.setAITopSpeed(carIndex, speedKmh)
   carIndex = carIndex or 0
   speedKmh = tonumber(speedKmh) or 999999.0
   if physics and physics.setAITopSpeed then
@@ -714,7 +730,7 @@ end
 ---Limits the maximum throttle output of an AI car.
 ---@param carIndex integer @0-based car index
 ---@param throttleLimit number @Throttle cap between 0.0 and 1.0
-function GTPhysicsHooks.setAIThrottleLimit(carIndex, throttleLimit)
+function PhysicsHooks.setAIThrottleLimit(carIndex, throttleLimit)
   carIndex = carIndex or 0
   throttleLimit = math.max(0.0, math.min(1.0, tonumber(throttleLimit) or 1.0))
   if physics and physics.setAIThrottleLimit then
@@ -725,7 +741,7 @@ end
 ---Adjusts the caution level of an AI driver.
 ---@param carIndex integer @0-based car index
 ---@param level number @Caution level (0.0 = aggressive, 1.0 = normal, 3.0+ = extra cautious)
-function GTPhysicsHooks.setAICaution(carIndex, level)
+function PhysicsHooks.setAICaution(carIndex, level)
   carIndex = carIndex or 0
   level = tonumber(level) or 1.0
   if physics and physics.setAICaution then
@@ -737,7 +753,7 @@ end
 ---@param carIndex integer @0-based car index
 ---@param offsetMeters number @Offset distance in meters (negative = left, positive = right)
 ---@param isRelative boolean? @Whether offset is relative to car position (default: false)
-function GTPhysicsHooks.setAISplineAbsoluteOffset(carIndex, offsetMeters, isRelative)
+function PhysicsHooks.setAISplineAbsoluteOffset(carIndex, offsetMeters, isRelative)
   carIndex = carIndex or 0
   offsetMeters = tonumber(offsetMeters) or 0.0
   isRelative = isRelative or false
@@ -751,7 +767,7 @@ end
 ---Commands an AI car to remain stationary for a set duration.
 ---@param carIndex integer @0-based car index
 ---@param seconds number @Hold duration in seconds
-function GTPhysicsHooks.setAIStopCounter(carIndex, seconds)
+function PhysicsHooks.setAIStopCounter(carIndex, seconds)
   carIndex = carIndex or 0
   seconds = math.max(0.0, tonumber(seconds) or 0.0)
   if physics and physics.setAIStopCounter then
@@ -765,7 +781,7 @@ end
 ---@param dt number @Frame delta time in seconds
 ---@param maxRate number? @Max rate of offset decay in m/s (default: 0.5 m/s)
 ---@return number newOffset
-function GTPhysicsHooks.smoothSplineOffsetDecay(currentOffset, targetOffset, dt, maxRate)
+function PhysicsHooks.smoothSplineOffsetDecay(currentOffset, targetOffset, dt, maxRate)
   currentOffset = tonumber(currentOffset) or 0.0
   targetOffset = tonumber(targetOffset) or 0.0
   dt = tonumber(dt) or 0.016
@@ -781,5 +797,7 @@ function GTPhysicsHooks.smoothSplineOffsetDecay(currentOffset, targetOffset, dt,
   end
 end
 
-return GTPhysicsHooks
+PhysicsHooks.GTPhysicsHooks = PhysicsHooks
+
+return PhysicsHooks
 

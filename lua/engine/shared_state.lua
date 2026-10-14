@@ -1,10 +1,10 @@
 --[[
-    Gran Turismo Shared State Subsystem
+    License Shared State Subsystem
     Exposes high-speed, zero-copy shared memory via CSP's `ac.connect()`
     between the CSP New Mode simulation engine and the movable AC Lua Apps.
 ]]
 
-local GTLicenseShared = {}
+local SharedState = {}
 
 -- Schema layout for inter-process / inter-script communication
 local function buildLayout()
@@ -76,7 +76,7 @@ local connectionInstance = nil
 
 --- Connect to the shared memory block
 --- @return table Connected shared memory structure or fallback table
-function GTLicenseShared.connect()
+function SharedState.connect()
     if connectionInstance and connectionInstance.isActive ~= nil then return connectionInstance end
 
     if ac and ac.connect and ac.StructItem then
@@ -97,5 +97,9 @@ function GTLicenseShared.connect()
     return connectionInstance
 end
 
-return GTLicenseShared
+-- Backward compatibility aliases
+SharedState.LicenseShared = SharedState
+SharedState.GTLicenseShared = SharedState
+
+return SharedState
 
