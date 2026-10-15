@@ -153,11 +153,6 @@ function GTLicenseHUD.draw(sessionTime, targetsOrConfig, currentState, failReaso
 
     ui.beginTransparentWindow("gtLicenseHudWindow", vec2(0, 0), vec2(screenW, screenH), false)
 
-    -- If movable UI App is not active, render in-race HUD widgets directly as fallback
-    if not isUIAppActive() then
-        drawStopwatchCluster(screenW, sessionTime, targets, currentState)
-    end
-
     -- Fullscreen Modal Overlays (Always rendered cleanly in script.drawUI)
     if currentState == GTLicenseHUD.STATE.COUNTDOWN then
         drawCountdown(screenW, screenH, countdownTimer, false)

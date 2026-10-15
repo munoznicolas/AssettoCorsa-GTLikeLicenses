@@ -75,6 +75,25 @@ function GTTheme.evaluateMedal(time, targets)
     return nil
 end
 
+--- Determine the active target threshold label and accent color for the stopwatch
+--- @param sessionTime number Elapsed session time in seconds
+--- @param targets table? Targets table { gold_seconds, silver_seconds, bronze_seconds }
+--- @return string|nil label, rgbm|nil color
+function GTTheme.getTargetDisplay(sessionTime, targets)
+    if not targets or not targets.gold_seconds then return nil, nil end
+
+    local time = sessionTime or 0
+    if time <= targets.gold_seconds then
+        return "TARGET (GOLD)  " .. GTTheme.formatTime(targets.gold_seconds), GTTheme.COLORS.GOLD
+    elseif targets.silver_seconds and time <= targets.silver_seconds then
+        return "TARGET (SILVER)  " .. GTTheme.formatTime(targets.silver_seconds), GTTheme.COLORS.SILVER
+    elseif targets.bronze_seconds and time <= targets.bronze_seconds then
+        return "TARGET (BRONZE)  " .. GTTheme.formatTime(targets.bronze_seconds), GTTheme.COLORS.BRONZE
+    else
+        return "OVER TARGET TIME", GTTheme.COLORS.FAIL_RED
+    end
+end
+
 --- Fallback: 4-cardinal ImGui outline (optimized from 8-directional to cut draw calls by 50%)
 function GTTheme.drawTextOutlinedFallback(text, pos, textColor, outlineColor, thickness)
     if not text or text == "" or not ui then return end

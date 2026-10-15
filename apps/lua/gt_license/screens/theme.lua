@@ -41,6 +41,25 @@ function Theme.formatDelta(delta)
     return string.format("%s%d.%03d", sign, secs, millis)
 end
 
+--- Determine the active target threshold label and accent color for the stopwatch
+--- @param sessionTime number Elapsed session time in seconds
+--- @param targets table? Targets table { gold_seconds, silver_seconds, bronze_seconds }
+--- @return string|nil label, rgbm|nil color
+function Theme.getTargetDisplay(sessionTime, targets)
+    if not targets or not targets.gold_seconds then return nil, nil end
+
+    local time = sessionTime or 0
+    if time <= targets.gold_seconds then
+        return "TARGET (GOLD)  " .. Theme.formatTime(targets.gold_seconds), Theme.COLORS.GOLD
+    elseif targets.silver_seconds and time <= targets.silver_seconds then
+        return "TARGET (SILVER)  " .. Theme.formatTime(targets.silver_seconds), Theme.COLORS.SILVER
+    elseif targets.bronze_seconds and time <= targets.bronze_seconds then
+        return "TARGET (BRONZE)  " .. Theme.formatTime(targets.bronze_seconds), Theme.COLORS.BRONZE
+    else
+        return "OVER TARGET TIME", Theme.COLORS.FAIL_RED
+    end
+end
+
 function Theme.drawTimingText(text, fontSize, pos, textColor)
     if not text or text == "" or not ui then return end
     textColor = textColor or Theme.COLORS.WHITE

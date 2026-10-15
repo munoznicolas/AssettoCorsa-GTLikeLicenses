@@ -136,7 +136,7 @@ class TestUIModules(unittest.TestCase):
         theme_file = REPO_ROOT / "lua" / "ui" / "common" / "ui_theme.lua"
         self.assertTrue(theme_file.is_file())
         theme_code = theme_file.read_text(encoding="utf-8")
-        for req in ["GTTheme.COLORS", "GTTheme.formatTime", "GTTheme.formatDelta", "GTTheme.evaluateMedal"]:
+        for req in ["GTTheme.COLORS", "GTTheme.formatTime", "GTTheme.formatDelta", "GTTheme.evaluateMedal", "GTTheme.getTargetDisplay"]:
             self.assertIn(req, theme_code)
 
     def test_ui_app_structure(self):

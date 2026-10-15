@@ -29,22 +29,11 @@ function GTTimerWidget.drawFixed(screenW, sessionTime, targets, currentState)
     Theme.drawTimingText(timeText, 34, vec2(posX, posY + 16), clockCol)
 
     -- Dynamic Target Display: live target threshold indicator beneath clock if targets provided
-    if targets and targets.gold_seconds and currentState == 2 then
-        local targetLabel = "TARGET (GOLD)  " .. Theme.formatTime(targets.gold_seconds)
-        local targetCol = Theme.COLORS.GOLD
-        if sessionTime > targets.gold_seconds and targets.silver_seconds then
-            targetLabel = "TARGET (SILVER)  " .. Theme.formatTime(targets.silver_seconds)
-            targetCol = Theme.COLORS.SILVER
-            if sessionTime > targets.silver_seconds and targets.bronze_seconds then
-                targetLabel = "TARGET (BRONZE)  " .. Theme.formatTime(targets.bronze_seconds)
-                targetCol = Theme.COLORS.BRONZE
-                if sessionTime > targets.bronze_seconds then
-                    targetLabel = "OVER TARGET TIME"
-                    targetCol = Theme.COLORS.FAIL_RED
-                end
-            end
+    if currentState and currentState > 0 then
+        local targetLabel, targetCol = Theme.getTargetDisplay(sessionTime, targets)
+        if targetLabel then
+            Theme.drawGTText(targetLabel, 11, vec2(posX, posY + 54), targetCol, "Regular")
         end
-        Theme.drawGTText(targetLabel, 11, vec2(posX, posY + 54), targetCol, "Regular")
     end
 end
 
@@ -60,6 +49,7 @@ function GTTimerWidget.drawWindow(sessionTime, targets, currentState, scaleVal)
 
     local labelSize = math.max(10, math.floor(12 * s))
     local timingSize = math.max(16, math.floor(34 * s))
+    local targetSize = math.max(9, math.floor(11 * s))
     local gap = math.max(3, math.floor(timingSize * 0.1))
 
     -- Header label: "TIME"
@@ -69,6 +59,15 @@ function GTTimerWidget.drawWindow(sessionTime, targets, currentState, scaleVal)
     local timeText = Theme.formatTime(sessionTime)
     local clockCol = (currentState == 4) and Theme.COLORS.FAIL_RED or Theme.COLORS.WHITE
     Theme.drawTimingText(timeText, timingSize, vec2(originX, originY + labelSize + gap), clockCol)
+
+    -- Dynamic Target Display
+    if currentState and currentState > 0 then
+        local targetLabel, targetCol = Theme.getTargetDisplay(sessionTime, targets)
+        if targetLabel then
+            local targetY = originY + labelSize + gap + timingSize + gap
+            Theme.drawGTText(targetLabel, targetSize, vec2(originX, targetY), targetCol, "Regular")
+        end
+    end
 end
 
 return GTTimerWidget
