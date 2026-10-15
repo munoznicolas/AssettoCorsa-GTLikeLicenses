@@ -156,6 +156,18 @@ export const api = {
   },
 
   /**
+   * Trigger Track Miniature Builder for a specific test.
+   */
+  async generateMiniature(testId, testData = null) {
+    const res = await fetch("/api/generate_miniature", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ test_id: testId, test_data: testData }),
+    });
+    return await res.json();
+  },
+
+  /**
    * Trigger live sync directly to Assetto Corsa root.
    */
   async syncToAC() {

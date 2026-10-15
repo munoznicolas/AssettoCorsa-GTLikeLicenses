@@ -1266,3 +1266,13 @@ def enqueue_missing_telemetry_jobs(
         "message": f"Successfully enqueued {len(enqueued_jobs)} AI telemetry recording session(s) in Assetto Corsa queue runner.",
     }
 
+
+def build_test_miniature(
+    test_id: str,
+    test_data: Optional[Dict[str, Any]] = None,
+    ac_root: str = DEFAULT_AC_ROOT,
+) -> Dict[str, Any]:
+    """Fires off the Track Miniature Builder for a specific test."""
+    from tools.content.generator import generate_single_miniature
+    return generate_single_miniature(test_id=test_id, test_data=test_data, ac_root=ac_root)
+

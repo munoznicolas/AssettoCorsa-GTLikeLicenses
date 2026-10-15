@@ -39,6 +39,40 @@ def build_test_to_event_path_map() -> Dict[str, str]:
     return mapping
 
 
+def get_preview_path_for_test(test_id: str, tier: Optional[str] = None) -> Optional[str]:
+    """
+    Resolves destination career preview.png path for a given test_id.
+    e.g. 'B-3' -> 'content/career/series_gt_license_b/event3/preview.png'
+    """
+    mapping = build_test_to_event_path_map()
+    if test_id in mapping:
+        return mapping[test_id]
+    if "-" in test_id:
+        prefix, num_str = test_id.split("-", 1)
+        try:
+            num = int(num_str)
+            from tools.content.catalog import SERIES_METADATA
+            s_meta = next(
+                (
+                    s
+                    for s in SERIES_METADATA
+                    if s["code"].upper() == prefix.upper()
+                    or s["test_prefix"].rstrip("-").upper() == prefix.upper()
+                ),
+                None,
+            )
+            if not s_meta and tier:
+                s_meta = next(
+                    (s for s in SERIES_METADATA if s["tier_name"].lower() == tier.lower()),
+                    None,
+                )
+            if s_meta:
+                return os.path.join(CAREER_ROOT, s_meta["folder"], f"event{num}", "preview.png")
+        except ValueError:
+            pass
+    return None
+
+
 def render(test, wps):
     pts = [(w.x, w.z) for w in wps]
     idx, _ = sector_indices(test, pts)
@@ -66,22 +100,16 @@ def render(test, wps):
     stroke(pts, road * 1.3, (119, 119, 119))
     stroke(pts, road, (42, 42, 42))
     stroke(sec, road * 0.8, (255, 159, 26))
+    dot_r = road / 2.0
     for is_start, col in ((True, (46, 204, 113)), (False, (255, 59, 48))):
         target_idx = idx[0] if is_start else idx[-1]
-        wp = pts[target_idx]
-        w = wps[target_idx]
-        nx, nz = w.normal[0], w.normal[2]
-        nl = (nx * nx + nz * nz) ** 0.5 or 1.0
-        nx, nz = nx / nl, nz / nl
-        target_len_m = (road * 1.5) / scale
-        half = target_len_m / 2.0
-        gp1 = tp((wp[0] - nx * half, wp[1] - nz * half))
-        gp2 = tp((wp[0] + nx * half, wp[1] + nz * half))
-        d.line([gp1, gp2], fill=col, width=int(5 * SS))
+        x, y = tp(pts[target_idx])
+        d.ellipse((x - dot_r, y - dot_r, x + dot_r, y + dot_r), fill=col)
     sp = test.get("spawn", {}).get("position")
     if sp:
-        x, y = tp((sp[0], sp[2])); r = 9 * SS
-        d.ellipse((x - r, y - r, x + r, y + r), fill=(255, 212, 0), outline=(0, 0, 0), width=2 * SS)
+        x, y = tp((sp[0], sp[2]))
+        sr = 9 * SS
+        d.ellipse((x - sr, y - sr, x + sr, y + sr), fill=(255, 212, 0), outline=(0, 0, 0), width=2 * SS)
     return img.resize((W, H), Image.LANCZOS)
 
 
@@ -124,6 +152,104 @@ def generate_previews(
         count += 1
         print(f"OK {test_id} -> {os.path.relpath(dest_file, REPO_ROOT)}")
     return count
+
+
+def generate_single_preview(
+    test_id: str,
+    test_data: Optional[Dict] = None,
+    ac_root: str = None,
+) -> Optional[str]:
+    """
+    Generates a 1024x576 zoomed track miniature preview PNG for a single test.
+    Saves to content/career/<series>/event<idx>/preview.png and returns destination path.
+    """
+    from tools.spline.parser import DEFAULT_AC_ROOT
+    if ac_root is None:
+        ac_root = DEFAULT_AC_ROOT
+
+    t = dict(test_data) if test_data else None
+    if not t:
+        from tools.testing.eval_loop import find_test_file_by_id
+        repo_file = find_test_file_by_id(test_id, REPO_ROOT)
+        if repo_file and os.path.isfile(repo_file):
+            try:
+                with open(repo_file, "r", encoding="utf-8") as fh:
+                    t = json.load(fh)
+            except Exception:
+                pass
+
+    if not t:
+        from tools.content.catalog import TESTS_BY_ID
+        t = TESTS_BY_ID.get(test_id)
+        if t:
+            t = dict(t)
+
+    if not t:
+        print(f"[!] Warning: Test {test_id} not found for preview generation", file=sys.stderr)
+        return None
+
+    track_id = t.get("track_id")
+    layout = t.get("track_layout", "")
+    if not track_id:
+        return None
+
+    spline_file = find_spline_file(track_id, layout, ac_root=ac_root)
+    if not spline_file or not os.path.isfile(spline_file):
+        print(f"[!] Warning: Spline file not found for track {track_id} ({layout})", file=sys.stderr)
+        return None
+
+    parser = SplineParser(spline_file)
+    wps = parser.waypoints
+    if not wps:
+        return None
+
+    has_timing = (
+        isinstance(t.get("timing"), dict)
+        and "start_gate" in t["timing"]
+        and "finish_gate" in t["timing"]
+    )
+    if not has_timing or "start_s" in t:
+        from tools.spline.parser import generate_test_parameters
+        geom = generate_test_parameters(
+            parser=parser,
+            start_progress=float(t.get("start_s", 0.0)),
+            finish_progress=float(t.get("finish_s", 1.0)),
+            spawn_offset_m=float(t.get("spawn_offset", 0.0)),
+            initial_speed_kmh=float(t.get("speed", 0.0)),
+            with_stop_box=bool(t.get("with_stop_box", False)),
+            gear=int(t["gear"]) if t.get("gear") is not None else None,
+            rpm=int(t["rpm"]) if t.get("rpm") is not None else None,
+            gate_width=t.get("gate_width"),
+            track_id=t.get("track_id"),
+        )
+        t["spawn"] = geom["spawn"]
+        t["timing"] = geom["timing"]
+
+    dest_file = get_preview_path_for_test(test_id, tier=t.get("tier"))
+    if not dest_file:
+        return None
+
+    os.makedirs(os.path.dirname(dest_file), exist_ok=True)
+    img = render(t, wps)
+    img.save(dest_file)
+
+    # Mirror to assets/previews/tests/<TEST_ID>.png if directory exists
+    alt_dir = os.path.join(REPO_ROOT, "assets", "previews", "tests")
+    if os.path.isdir(alt_dir):
+        img.save(os.path.join(alt_dir, f"{test_id}.png"))
+
+    # Mirror directly to local Assetto Corsa install directory if it exists
+    if ac_root and os.path.isdir(ac_root):
+        rel_to_repo = os.path.relpath(dest_file, REPO_ROOT)
+        ac_dest = os.path.join(ac_root, rel_to_repo)
+        if os.path.isdir(os.path.dirname(ac_dest)):
+            try:
+                import shutil
+                shutil.copyfile(dest_file, ac_dest)
+            except Exception:
+                pass
+
+    return dest_file
 
 
 def main():

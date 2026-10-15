@@ -11,6 +11,7 @@ import json
 import math
 import os
 import sys
+from typing import Dict, Optional
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
@@ -64,15 +65,8 @@ def build(test, wps):
     def gate(is_start, color):
         target_idx = idx[0] if is_start else idx[-1]
         wp = pts[target_idx]
-        w = wps[target_idx]
-        nx, nz = w.normal[0], w.normal[2]
-        nl = math.hypot(nx, nz) or 1.0
-        nx, nz = nx / nl, nz / nl
-        half = (road * 1.6) / 2.0
-        x1, z1 = wp[0] - nx * half, wp[1] - nz * half
-        x2, z2 = wp[0] + nx * half, wp[1] + nz * half
-        return ('<line x1="%.2f" y1="%.2f" x2="%.2f" y2="%.2f" stroke="%s" stroke-width="%.2f"/>'
-                % (x1, -z1, x2, -z2, color, road * 0.5))
+        return ('<circle cx="%.2f" cy="%.2f" r="%.2f" fill="%s"/>'
+                % (wp[0], -wp[1], road / 2.0, color))
     sp = test.get("spawn", {}).get("position")
     spawn = ('<circle cx="%.2f" cy="%.2f" r="%.2f" fill="#ffd400" stroke="#000" stroke-width="%.2f"/>'
              % (sp[0], -sp[2], r * 0.7, road * 0.15)) if sp else ""
@@ -126,8 +120,85 @@ def generate_maps(
         with open(dest_file, "w", encoding="utf-8") as fh:
             fh.write(build(t, cache[key]))
         count += 1
-        print("OK", t["test_id"])
     return count
+
+
+def generate_single_map(
+    test_id: str,
+    test_data: Optional[Dict] = None,
+    ac_root: str = None,
+    out_dir: str = OUT_DIR,
+) -> Optional[str]:
+    """
+    Generates a vector SVG track map with highlighted test sector for a single test.
+    Saves to docs/test_maps/<test_id>.svg and returns destination path.
+    """
+    from tools.spline.parser import DEFAULT_AC_ROOT
+    if ac_root is None:
+        ac_root = DEFAULT_AC_ROOT
+
+    t = dict(test_data) if test_data else None
+    if not t:
+        from tools.testing.eval_loop import find_test_file_by_id
+        repo_file = find_test_file_by_id(test_id, REPO_ROOT)
+        if repo_file and os.path.isfile(repo_file):
+            try:
+                with open(repo_file, "r", encoding="utf-8") as fh:
+                    t = json.load(fh)
+            except Exception:
+                pass
+
+    if not t:
+        from tools.content.catalog import TESTS_BY_ID
+        t = TESTS_BY_ID.get(test_id)
+        if t:
+            t = dict(t)
+
+    if not t:
+        return None
+
+    track_id = t.get("track_id")
+    layout = t.get("track_layout", "")
+    if not track_id:
+        return None
+
+    spline_file = find_spline_file(track_id, layout, ac_root=ac_root)
+    if not spline_file or not os.path.isfile(spline_file):
+        return None
+
+    parser = SplineParser(spline_file)
+    wps = parser.waypoints
+    if not wps:
+        return None
+
+    has_timing = (
+        isinstance(t.get("timing"), dict)
+        and "start_gate" in t["timing"]
+        and "finish_gate" in t["timing"]
+    )
+    if not has_timing or "start_s" in t:
+        from tools.spline.parser import generate_test_parameters
+        geom = generate_test_parameters(
+            parser=parser,
+            start_progress=float(t.get("start_s", 0.0)),
+            finish_progress=float(t.get("finish_s", 1.0)),
+            spawn_offset_m=float(t.get("spawn_offset", 0.0)),
+            initial_speed_kmh=float(t.get("speed", 0.0)),
+            with_stop_box=bool(t.get("with_stop_box", False)),
+            gear=int(t["gear"]) if t.get("gear") is not None else None,
+            rpm=int(t["rpm"]) if t.get("rpm") is not None else None,
+            gate_width=t.get("gate_width"),
+            track_id=t.get("track_id"),
+        )
+        t["spawn"] = geom["spawn"]
+        t["timing"] = geom["timing"]
+
+    os.makedirs(out_dir, exist_ok=True)
+    dest_file = os.path.join(out_dir, f"{test_id}.svg")
+    with open(dest_file, "w", encoding="utf-8") as fh:
+        fh.write(build(t, wps))
+
+    return dest_file
 
 
 def main():

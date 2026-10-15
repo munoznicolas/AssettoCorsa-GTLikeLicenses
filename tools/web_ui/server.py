@@ -40,6 +40,7 @@ from tools.web_ui.catalog_manager import (
     run_live_test,
     save_tier_catalog,
     enqueue_missing_telemetry_jobs,
+    build_test_miniature,
 )
 
 STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
@@ -103,9 +104,9 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
         self.send_error(404, not_found_msg)
 
     def _serve_preview_image(self, test_id: str) -> None:
-        from tools.generate_test_previews import build_test_to_event_path_map
+        from tools.generate_test_previews import build_test_to_event_path_map, get_preview_path_for_test
         preview_map = build_test_to_event_path_map()
-        preview_file = preview_map.get(test_id)
+        preview_file = preview_map.get(test_id) or get_preview_path_for_test(test_id)
         if preview_file and os.path.isfile(preview_file):
             with open(preview_file, "rb") as f:
                 content = f.read()
@@ -429,6 +430,24 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
         except Exception as e:
             self.send_json_response({"success": False, "error": str(e)}, status=500)
 
+    def _handle_post_generate_miniature(self, payload: Dict[str, Any]) -> None:
+        test_id = payload.get("test_id", "")
+        test_data = payload.get("test_data")
+        if not test_id:
+            self.send_json_response({"success": False, "error": "Missing test_id"}, status=400)
+            return
+
+        try:
+            res = build_test_miniature(test_id=test_id, test_data=test_data)
+            self.send_json_response(res)
+        except Exception as e:
+            import traceback
+            self.send_json_response({
+                "success": False,
+                "error": str(e),
+                "traceback": traceback.format_exc(),
+            }, status=500)
+
     def _handle_post_generate(self, _payload: Dict[str, Any]) -> None:
         try:
             report = generate_and_validate()
@@ -473,6 +492,7 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
             "/api/queue/cancel": self._handle_post_queue_cancel,
             "/api/telemetry/queue_missing": self._handle_post_telemetry_queue_missing,
             "/api/save_tier": self._handle_post_save_tier,
+            "/api/generate_miniature": self._handle_post_generate_miniature,
             "/api/generate": self._handle_post_generate,
             "/api/sync": self._handle_post_sync,
         }

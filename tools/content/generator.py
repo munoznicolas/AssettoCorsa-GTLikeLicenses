@@ -15,7 +15,7 @@ import json
 import os
 import shutil
 import sys
-from typing import Optional
+from typing import Any, Dict, Optional
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, REPO_ROOT)
@@ -220,6 +220,210 @@ def generate_miniatures(ac_root: str = DEFAULT_AC_ROOT) -> int:
     generate_maps(ac_root=ac_root)
     print(f"  + Generated {preview_count} track miniatures and maps")
     return preview_count
+
+
+def generate_single_test_json(tdef: Dict[str, Any], ac_root: str = DEFAULT_AC_ROOT) -> str:
+    """Generates or updates content/tests/<tier>/test_<num>.json for a single test definition."""
+    t_id = tdef["test_id"]
+    tier = tdef.get("tier")
+    if not tier or tier not in TIER_FOLDER_MAP:
+        prefix = t_id.split("-")[0].upper()
+        s_meta = next(
+            (s for s in SERIES_METADATA if s["code"] == prefix or s["test_prefix"].rstrip("-") == prefix),
+            None,
+        )
+        tier = s_meta["tier_name"] if s_meta else "National B"
+
+    tier_dir = os.path.join(REPO_ROOT, "content", "tests", TIER_FOLDER_MAP[tier])
+    os.makedirs(tier_dir, exist_ok=True)
+
+    prefix, num_str = t_id.split("-")
+    filename = f"test_{prefix.lower()}{int(num_str):02d}.json"
+    target_path = os.path.join(tier_dir, filename)
+
+    track_id = tdef["track_id"]
+    layout = tdef.get("track_layout", "")
+
+    spline_file = find_spline_file(track_id, layout, ac_root)
+    if not spline_file:
+        raise FileNotFoundError(f"Missing AI spline for track {track_id} (layout: '{layout}')")
+
+    parser = SplineParser(spline_file)
+    geom = generate_test_parameters(
+        parser=parser,
+        start_progress=tdef["start_s"],
+        finish_progress=tdef["finish_s"],
+        spawn_offset_m=tdef.get("spawn_offset", 0.0),
+        initial_speed_kmh=tdef.get("speed", 0.0),
+        with_stop_box=tdef.get("with_stop_box", False),
+        gear=tdef.get("gear"),
+        rpm=tdef.get("rpm"),
+        gate_width=tdef.get("gate_width"),
+        track_id=tdef.get("track_id"),
+    )
+
+    targets = tdef.get("targets", {})
+    test_json = {
+        "test_id": tdef["test_id"],
+        "tier": tier,
+        "title": tdef["title"],
+        "description": tdef["description"],
+        "lesson_objective": tdef.get("lesson_objective", ""),
+        "car_id": tdef["car_id"],
+        "track_id": tdef["track_id"],
+        "track_layout": tdef.get("track_layout", ""),
+        "start_mode": tdef.get("start_mode", "STANDING"),
+        "spawn": geom["spawn"],
+        "timing": geom["timing"],
+        "fail_rules": {
+            "max_wheels_off": 2,
+            "wall_collision_threshold_n": 1500,
+            "max_yaw_angle_deg": 90,
+            "stop_box_overshoot_fail": tdef.get("with_stop_box", False),
+        },
+        "targets": {
+            "gold_seconds": float(targets.get("gold_seconds", 10.0)),
+            "silver_seconds": float(targets.get("silver_seconds", 12.0)),
+            "bronze_seconds": float(targets.get("bronze_seconds", 15.0)),
+        },
+    }
+
+    with open(target_path, "w", encoding="utf-8") as f:
+        json.dump(test_json, f, indent=2)
+
+    return target_path
+
+
+def generate_single_career_event(tdef: Dict[str, Any]) -> str:
+    """Generates or updates content/career/series_gt_license_<tier>/event<num>/event.ini for a single test."""
+    t_id = tdef["test_id"]
+    tier = tdef.get("tier")
+    s_meta = next((s for s in SERIES_METADATA if s["tier_name"].lower() == str(tier).lower()), None)
+    if not s_meta and "-" in t_id:
+        prefix = t_id.split("-")[0].upper()
+        s_meta = next(
+            (s for s in SERIES_METADATA if s["code"] == prefix or s["test_prefix"].rstrip("-") == prefix),
+            None,
+        )
+
+    if not s_meta:
+        return ""
+
+    num_str = t_id.split("-")[1]
+    idx = int(num_str)
+    career_root = os.path.join(REPO_ROOT, "content", "career")
+    event_dir = os.path.join(career_root, s_meta["folder"], f"event{idx}")
+    os.makedirs(event_dir, exist_ok=True)
+    event_ini_path = os.path.join(event_dir, "event.ini")
+
+    ecp = configparser.ConfigParser(interpolation=None)
+    ecp.optionxform = str
+    ecp["EVENT"] = {
+        "NAME": f"{tdef['test_id']}: {tdef['title']}",
+        "DESCRIPTION": f"{tdef['description']}\n\nObjective: {tdef.get('lesson_objective', '')}",
+    }
+    ecp["RACE"] = {
+        "TRACK": tdef["track_id"],
+        "CONFIG_TRACK": tdef.get("track_layout", ""),
+        "MODEL": tdef["car_id"],
+        "MODEL_CONFIG": "",
+        "CARS": "1",
+        "AI_LEVEL": "98",
+        "DRIFT_MODE": "0",
+        "FIXED_SETUP": "1",
+        "PENALTIES": "1",
+        "__CM_CUSTOM_MODE": "gt-license",
+    }
+    ecp["CAR_0"] = {
+        "MODEL": tdef["car_id"],
+        "MODEL_CONFIG": "",
+        "SETUP": "",
+        "SKIN": "",
+        "BALLAST": "0",
+        "RESTRICTOR": "0",
+    }
+    ecp["LIGHTING"] = {
+        "SUN_ANGLE": "48",
+        "TIME_MULT": "1",
+        "CLOUD_SPEED": "0.2",
+    }
+    ecp["SESSION_0"] = {
+        "NAME": "License Test",
+        "TYPE": "1",
+        "DURATION": "0",
+        "SPAWN_SET": "PIT",
+    }
+    targets = tdef.get("targets", {})
+    gold = float(targets.get("gold_seconds", 10.0))
+    silver = float(targets.get("silver_seconds", 12.0))
+    bronze = float(targets.get("bronze_seconds", 15.0))
+    ecp["CONDITION_0"] = {
+        "TYPE": "TIME",
+        "OBJECTIVE": str(int(bronze * 1000)),
+    }
+    ecp["CONDITION_1"] = {
+        "TYPE": "TIME",
+        "OBJECTIVE": str(int(silver * 1000)),
+    }
+    ecp["CONDITION_2"] = {
+        "TYPE": "TIME",
+        "OBJECTIVE": str(int(gold * 1000)),
+    }
+
+    with open(event_ini_path, "w", encoding="utf-8") as f:
+        ecp.write(f, space_around_delimiters=False)
+
+    return event_ini_path
+
+
+def generate_single_miniature(
+    test_id: str,
+    test_data: Optional[Dict[str, Any]] = None,
+    ac_root: str = DEFAULT_AC_ROOT,
+) -> Dict[str, Any]:
+    """
+    Builds the track miniature preview (PNG) and vector map (SVG) for a specific test.
+    Also syncs the single test JSON and career event definition if test parameters are provided.
+    """
+    from tools.generate_test_previews import generate_single_preview
+    from tools.generate_test_maps import generate_single_map
+
+    tdef = dict(test_data) if test_data else None
+    if not tdef:
+        from tools.testing.eval_loop import find_test_file_by_id
+        repo_file = find_test_file_by_id(test_id, REPO_ROOT)
+        if repo_file and os.path.isfile(repo_file):
+            try:
+                with open(repo_file, "r", encoding="utf-8") as fh:
+                    tdef = json.load(fh)
+            except Exception:
+                pass
+
+    if not tdef:
+        from tools.content.catalog import TESTS_BY_ID
+        tdef = TESTS_BY_ID.get(test_id)
+        if tdef:
+            tdef = dict(tdef)
+
+    if not tdef:
+        return {"success": False, "error": f"Test {test_id} not found"}
+
+    if "start_s" in tdef and "track_id" in tdef:
+        try:
+            generate_single_test_json(tdef, ac_root=ac_root)
+            generate_single_career_event(tdef)
+        except Exception as e:
+            print(f"[!] Note: Single test file sync for {test_id}: {e}", file=sys.stderr)
+
+    preview_path = generate_single_preview(test_id, test_data=tdef, ac_root=ac_root)
+    svg_path = generate_single_map(test_id, test_data=tdef, ac_root=ac_root)
+
+    return {
+        "success": True,
+        "test_id": test_id,
+        "preview_path": preview_path,
+        "svg_path": svg_path,
+    }
 
 
 def main() -> int:

@@ -997,13 +997,44 @@ async function handleFormSubmit(e) {
   }
 
   saveFormIntoActiveTest();
+
+  const activeTier = state.curriculum[state.activeTierIndex];
+  const activeTest = activeTier?.tests?.[state.activeTestIndex];
+  const testId = dom.inputTestId?.value.trim() || activeTest?.test_id;
+
+  const submitBtn = dom.btnSaveTest || dom.form?.querySelector('button[type="submit"]');
+  const originalHtml = submitBtn ? submitBtn.innerHTML : "";
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<span>⏳ Saving & Building Miniature...</span>`;
+  }
+
   try {
     await saveCurrentTier();
+
+    // Fire off Track Miniature Builder for this particular test so it updates its image
+    if (testId) {
+      try {
+        const minResult = await api.generateMiniature(testId, activeTest);
+        if (minResult && !minResult.success) {
+          console.warn("Track Miniature Builder reported warning:", minResult.error);
+        }
+      } catch (minErr) {
+        console.warn("Track Miniature Builder network/execution warning:", minErr);
+      }
+    }
+
+    state.cacheBuster = Date.now();
     renderLicenseTabs();
     renderTestList();
-    showToast(`Saved test ${dom.inputTestId?.value ?? ""}!`);
+    showToast(`Saved test ${testId}! Track miniature updated.`);
   } catch (err) {
     showToast("Save failed: " + err.message, "error");
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalHtml;
+    }
   }
 }
 
