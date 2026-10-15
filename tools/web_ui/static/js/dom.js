@@ -73,7 +73,6 @@ export function initDom() {
   dom.cardStanding = document.getElementById("mode-card-standing");
   dom.cardRolling = document.getElementById("mode-card-rolling");
   dom.cardFlying = document.getElementById("mode-card-flying");
-  dom.btnCalcSpeed = document.getElementById("btn-calc-ai-speed");
   dom.aiSpeedBadge = document.getElementById("ai-speed-status-badge");
   dom.aiSpeedText = document.getElementById("ai-speed-status-text");
   dom.checkStopBox = document.getElementById("check-stop-box");
@@ -96,7 +95,6 @@ export function initDom() {
 
   // Missing Telemetry Batch Modal & Buttons
   dom.btnRunMissingTelemetry = document.getElementById("btn-run-missing-telemetry");
-  dom.btnBatchAiSpeed = document.getElementById("btn-batch-ai-speed");
   dom.telemetryBatchModal = document.getElementById("telemetry-batch-modal");
   dom.telemetryModalClose = document.getElementById("telemetry-modal-close");
   dom.selectTelemetryTier = document.getElementById("select-telemetry-tier");

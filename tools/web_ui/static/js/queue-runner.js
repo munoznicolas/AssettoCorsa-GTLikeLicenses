@@ -614,7 +614,6 @@ export function setupQueueEventListeners() {
 
   // Missing Telemetry Batch Controls
   if (dom.btnRunMissingTelemetry) dom.btnRunMissingTelemetry.addEventListener("click", openMissingTelemetryModal);
-  if (dom.btnBatchAiSpeed) dom.btnBatchAiSpeed.addEventListener("click", openMissingTelemetryModal);
   if (dom.telemetryModalClose) dom.telemetryModalClose.addEventListener("click", closeMissingTelemetryModal);
   if (dom.btnTelemetryCancel) dom.btnTelemetryCancel.addEventListener("click", closeMissingTelemetryModal);
   if (dom.selectTelemetryTier) dom.selectTelemetryTier.addEventListener("change", () => {

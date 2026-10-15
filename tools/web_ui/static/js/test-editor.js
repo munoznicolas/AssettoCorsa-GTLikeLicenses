@@ -1134,10 +1134,6 @@ function setupStartModeListeners() {
   dom.cardRolling?.addEventListener("click", handleCardRollingClick);
   dom.cardFlying?.addEventListener("click", handleCardFlyingClick);
 
-  dom.btnCalcSpeed?.addEventListener("click", () => {
-    void fetchAndApplyAISpeed(true);
-  });
-
   dom.btnStopAc?.addEventListener("click", () => {
     void cancelActiveACSession();
   });
