@@ -57,8 +57,11 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
         super().__init__(*args, directory=STATIC_DIR, **kwargs)
 
     def log_message(self, format: str, *args: Any) -> None:
-        # Keep terminal output clean
-        sys.stdout.write(f"[{self.log_date_time_string()}] {format % args}\n")
+        # Suppress routine queue status polling noise from console logs
+        msg = format % args
+        if "/api/queue/status" in msg and " 200 " in msg:
+            return
+        sys.stdout.write(f"[{self.log_date_time_string()}] {msg}\n")
 
     def end_headers(self) -> None:
         self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")

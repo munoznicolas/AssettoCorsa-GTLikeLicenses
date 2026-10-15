@@ -267,10 +267,11 @@ class SplineParser:
     def compute_gate(
         self,
         distance: float,
-        fixed_width: Optional[float] = None
+        fixed_width: Optional[float] = None,
+        default_width: float = 12.0,
     ) -> GateDefinition:
-        """Computes a planar gate (p1, p2) perpendicular to spline tangent."""
-        pos, fwd, wl, wr = self.query_distance(distance)
+        """Computes a planar gate (p1, p2) centered on the AI spline / trajectory with uniform width."""
+        pos, fwd, _, _ = self.query_distance(distance)
 
         # Compute horizontal left perpendicular: (-fz, 0, fx)
         lx = -fwd[2]
@@ -282,41 +283,29 @@ class SplineParser:
         else:
             lx, lz = 1.0, 0.0
 
-        if fixed_width is not None and fixed_width > 0:
-            wl = fixed_width / 2.0
-            wr = fixed_width / 2.0
-        else:
-            # Enforce realistic track boundaries (8m <= width <= 25m)
-            total_w = wl + wr
-            if total_w < 8.0:
-                scale = 8.0 / total_w if total_w > 0 else 1.0
-                wl *= scale
-                wr *= scale
-            elif total_w > 25.0:
-                scale = 25.0 / total_w
-                wl *= scale
-                wr *= scale
+        width = fixed_width if (fixed_width is not None and fixed_width > 0) else default_width
+        half_w = width / 2.0
 
         p1 = [
-            round(pos[0] + lx * wl, 3),
+            round(pos[0] + lx * half_w, 3),
             round(pos[1], 3),
-            round(pos[2] + lz * wl, 3),
+            round(pos[2] + lz * half_w, 3),
         ]
         p2 = [
-            round(pos[0] - lx * wr, 3),
+            round(pos[0] - lx * half_w, 3),
             round(pos[1], 3),
-            round(pos[2] - lz * wr, 3),
+            round(pos[2] - lz * half_w, 3),
         ]
 
-        width = math.sqrt(
+        gate_width = math.sqrt(
             (p1[0] - p2[0])**2 + (p1[1] - p2[1])**2 + (p1[2] - p2[2])**2
         )
-        return GateDefinition(p1=p1, p2=p2, width=round(width, 2))
+        return GateDefinition(p1=p1, p2=p2, width=round(gate_width, 2))
 
     def compute_stop_box(
         self,
         distance: float,
-        width: float = 12.0,
+        width: float = 8.0,
         length: float = 20.0,
         height: float = 4.0
     ) -> StopBoxDefinition:
@@ -373,8 +362,9 @@ def generate_test_parameters(
     stop_box_offset_m: float = 0.0,
     gear: Optional[int] = None,
     rpm: Optional[int] = None,
+    **kwargs: Any,
 ) -> Dict[str, Any]:
-    """Generates schema-compliant spawn and timing dictionaries."""
+    """Generates schema-compliant spawn and timing dictionaries centered on trajectory."""
     total_len = parser.total_length
 
     start_dist = start_progress * total_len
@@ -548,6 +538,7 @@ def main() -> int:
         gate_width=args.gate_width,
         with_stop_box=args.stop_box,
         stop_box_offset_m=args.stop_box_offset,
+        track_id=args.track,
     )
 
     formatted_json = json.dumps(result, indent=2)

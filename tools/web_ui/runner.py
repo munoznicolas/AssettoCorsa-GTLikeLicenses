@@ -126,6 +126,8 @@ def ensure_complete_test_data(
                 with_stop_box=with_stop_box,
                 gear=int(gear) if gear is not None else None,
                 rpm=int(rpm) if rpm is not None else None,
+                gate_width=test_data.get("gate_width"),
+                track_id=test_data.get("track_id"),
             )
 
             test_data["spawn"] = geom["spawn"]

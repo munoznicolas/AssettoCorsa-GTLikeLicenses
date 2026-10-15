@@ -214,20 +214,32 @@ async function checkPendingTelemetryJob() {
 }
 
 /**
- * Periodically poll runner process queue and monitor background jobs.
+ * Poll runner process queue and monitor background jobs.
+ * Automatically backs off when queue and AC process are idle to eliminate polling spam.
  */
 export async function pollQueueStatus() {
+  clearTimeout(queuePollTimer);
+  queuePollTimer = null;
+
+  let isBusy = false;
   try {
     const data = await api.getQueueStatus();
     if (data?.success) {
       updateQueueUI(data);
       await checkPendingTelemetryJob();
+      isBusy = Boolean(data.is_ac_running || (data.queue_length || 0) > 0 || pendingTelemetryJobId);
     }
   } catch (err) {
     console.debug("Queue poll error:", err);
   } finally {
     clearTimeout(queuePollTimer);
-    queuePollTimer = setTimeout(pollQueueStatus, 2500);
+    if (isBusy) {
+      // Actively poll while AC simulation is running or jobs are queued in background
+      queuePollTimer = setTimeout(pollQueueStatus, 2500);
+    } else {
+      // Idle: do not poll continuously. Relaxed fallback heartbeat (60s)
+      queuePollTimer = setTimeout(pollQueueStatus, 60000);
+    }
   }
 }
 
@@ -339,6 +351,7 @@ export function hideAISpeedStatus() {
  * Open the Assetto Corsa live execution modal.
  */
 export function openRunModal() {
+  void pollQueueStatus();
   const test = getActiveTest();
   if (!test) {
     showToast("No active test selected.", "warning");
@@ -673,5 +686,13 @@ export function setupQueueEventListeners() {
   });
   if (dom.btnTelemetryEnqueue) dom.btnTelemetryEnqueue.addEventListener("click", () => {
     void executeQueueMissingTelemetry();
+  });
+
+  // Refresh queue status immediately when user switches back to this browser tab
+  window.addEventListener("focus", () => void pollQueueStatus());
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      void pollQueueStatus();
+    }
   });
 }

@@ -71,6 +71,8 @@ def generate_tests(ac_root: str = DEFAULT_AC_ROOT) -> None:
             with_stop_box=tdef["with_stop_box"],
             gear=tdef.get("gear"),
             rpm=tdef.get("rpm"),
+            gate_width=tdef.get("gate_width"),
+            track_id=tdef.get("track_id"),
         )
 
         test_json = {
