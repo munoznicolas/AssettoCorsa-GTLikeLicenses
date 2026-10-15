@@ -251,44 +251,10 @@ function updateAcProcessUI(data) {
   if (dom.btnStopAc) {
     dom.btnStopAc.style.display = isRunning ? "inline-flex" : "none";
   }
-  if (dom.runModalActiveBanner) {
-    dom.runModalActiveBanner.style.display = isRunning ? "block" : "none";
-  }
-  if (isRunning && dom.runModalActiveDesc) {
-    const title = data.active_job?.title || "Simulation Running";
-    const pid = data.active_job?.pid ? ` (PID: ${data.active_job.pid})` : "";
-    dom.runModalActiveDesc.textContent = `${title}${pid}`;
-  }
 }
 
 /**
- * Render items in the queued simulation list.
- */
-function renderQueueItems(queue) {
-  if (!dom.runModalQueueList) return;
-  dom.runModalQueueList.innerHTML = (queue || []).map((j, idx) => `
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: rgba(255, 255, 255, 0.05); border-radius: 4px; font-size: 11px;">
-      <div>
-        <strong style="color: #38bdf8;">#${idx + 1}</strong> <span style="color: #cbd5e1;">${escapeHtml(j.title)}</span>
-      </div>
-      <button type="button" class="btn btn-sm btn-cancel-job" data-id="${j.id}" style="padding: 2px 6px; font-size: 10px; background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 3px; cursor: pointer;">Cancel</button>
-    </div>
-  `).join("");
-
-  dom.runModalQueueList.querySelectorAll(".btn-cancel-job").forEach(btn => {
-    btn.addEventListener("click", async (e) => {
-      const jid = (e.currentTarget || e.target)?.dataset?.id;
-      if (jid) {
-        await api.cancelQueueJob({ jobId: jid });
-        showToast(`Cancelled job #${jid}`, "info");
-        void pollQueueStatus();
-      }
-    });
-  });
-}
-
-/**
- * Update UI for queued simulations count and list.
+ * Update UI for queued simulations count.
  */
 function updateQueueListUI(data) {
   const qLen = data.queue_length || 0;
@@ -296,14 +262,8 @@ function updateQueueListUI(data) {
     dom.runQueueBadge.textContent = `${qLen} queued`;
     dom.runQueueBadge.style.display = qLen > 0 ? "inline-block" : "none";
   }
-  if (dom.runModalQueueSection) {
-    dom.runModalQueueSection.style.display = qLen > 0 ? "block" : "none";
-  }
   if (dom.queueCountNum) {
     dom.queueCountNum.textContent = qLen;
-  }
-  if (qLen > 0) {
-    renderQueueItems(data.queue);
   }
 }
 
@@ -348,30 +308,16 @@ export function hideAISpeedStatus() {
 }
 
 /**
- * Open the Assetto Corsa live execution modal.
+ * Direct launch of Assetto Corsa live session (AI Autopilot Demo).
  */
 export function openRunModal() {
-  void pollQueueStatus();
-  const test = getActiveTest();
-  if (!test) {
-    showToast("No active test selected.", "warning");
-    return;
-  }
-  if (dom.runModalTitle) {
-    dom.runModalTitle.textContent = `🏎️ Live Run: [${test.test_id}] ${test.title}`;
-  }
-  if (dom.runModalDesc) {
-    dom.runModalDesc.innerHTML = `Launch <strong>${test.test_id}: ${escapeHtml(test.title)}</strong> (${test.car_id} at ${test.track_id}) directly into Assetto Corsa (<code style="color: #38bdf8;">acs.exe</code>).`;
-  }
-  if (dom.runModal) dom.runModal.style.display = "flex";
+  void executeRunLiveTest("ai");
 }
 
 /**
- * Close the Assetto Corsa live execution modal.
+ * Close modal shim for backwards compatibility.
  */
-export function closeRunModal() {
-  if (dom.runModal) dom.runModal.style.display = "none";
-}
+export function closeRunModal() {}
 
 /**
  * Set modal status badge text, color, and log text during evaluation.
@@ -437,19 +383,18 @@ function monitorEvalJob(evalJobId) {
 
 /**
  * Launch test session into AC with the specified execution mode.
- * @param {"play"|"ai"|"eval"} mode
+ * @param {"ai"|"eval"} mode
  */
-export async function executeRunLiveTest(mode) {
+export async function executeRunLiveTest(mode = "ai") {
   const test = getActiveTest();
   if (!test) {
     showToast("No active test selected.", "warning");
     return;
   }
-  const syncFirst = dom.checkRunSync ? dom.checkRunSync.checked : true;
+  const syncFirst = true;
 
   // Save current form inputs into the in-memory test object
   saveFormIntoActiveTest();
-  closeRunModal();
 
   if (mode === "eval") {
     openModal(
@@ -457,8 +402,7 @@ export async function executeRunLiveTest(mode) {
       `Executing in-engine launch test for ${test.test_id} with 8s evaluation loop...\nMonitoring acs.exe process and checking physics/telemetry logs.`
     );
   } else {
-    const modeLabel = mode === "ai" ? "AI Autopilot Demo" : "Driver Control";
-    showToast(`Launching ${test.test_id} in Assetto Corsa (${modeLabel})...`, "info");
+    showToast(`Launching ${test.test_id} in Assetto Corsa (AI Autopilot Demo)...`, "info");
   }
 
   try {
@@ -657,18 +601,13 @@ export async function executeQueueMissingTelemetry() {
  * Attach listeners for run modal and queue controls.
  */
 export function setupQueueEventListeners() {
-  if (dom.btnRunLive) dom.btnRunLive.addEventListener("click", openRunModal);
-  if (dom.btnRunTop) dom.btnRunTop.addEventListener("click", openRunModal);
-  if (dom.runModalClose) dom.runModalClose.addEventListener("click", closeRunModal);
-  if (dom.runModalCancel) dom.runModalCancel.addEventListener("click", closeRunModal);
-
-  if (dom.btnRunModePlay) {
-    dom.btnRunModePlay.addEventListener("click", () => {
-      void executeRunLiveTest("play");
+  if (dom.btnRunLive) {
+    dom.btnRunLive.addEventListener("click", () => {
+      void executeRunLiveTest("ai");
     });
   }
-  if (dom.btnRunModeAi) {
-    dom.btnRunModeAi.addEventListener("click", () => {
+  if (dom.btnRunTop) {
+    dom.btnRunTop.addEventListener("click", () => {
       void executeRunLiveTest("ai");
     });
   }

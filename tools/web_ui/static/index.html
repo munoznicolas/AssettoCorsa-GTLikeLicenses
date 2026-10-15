@@ -142,9 +142,9 @@
                   type="button"
                   id="btn-run-live"
                   class="btn btn-primary"
-                  title="Launch this test live in Assetto Corsa"
+                  title="Launch this test in Assetto Corsa with AI autopilot demo"
                 >
-                  <span>🏎️ Live Run Test</span>
+                  <span>🤖 Watch AI Demo</span>
                 </button>
                 <button
                   type="submit"
@@ -772,65 +772,6 @@
         </div>
       </div>
 
-      <!-- Modal for Live Run Test in Assetto Corsa -->
-      <div id="run-modal" class="modal" style="display: none">
-        <div class="modal-content" style="max-width: 520px;">
-          <div class="modal-header">
-            <h3 id="run-modal-title">🏎️ Live Run Test</h3>
-            <button id="run-modal-close" class="modal-close-btn">&times;</button>
-          </div>
-          <div class="modal-body">
-            <div id="run-modal-active-banner" style="display: none; margin-bottom: 1rem; padding: 10px 12px; border-radius: 6px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35);">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                  <strong style="color: #ef4444; font-size: 13px;">⚠️ Assetto Corsa is Running</strong>
-                  <div id="run-modal-active-desc" style="font-size: 11px; color: #fca5a5; margin-top: 2px;">Active session in progress</div>
-                </div>
-                <button type="button" id="btn-modal-stop-ac" class="btn btn-sm" style="background: #dc2626; color: white; border: none; padding: 5px 12px; font-size: 11px; border-radius: 4px; cursor: pointer;">
-                  ⏹️ Terminate AC
-                </button>
-              </div>
-            </div>
-
-            <div id="run-modal-desc" style="margin-bottom: 1.25rem; color: #cbd5e1; font-size: 13px;">
-              Launch this test directly into Assetto Corsa (<code style="color: #38bdf8;">acs.exe</code>).
-            </div>
-            
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-              <button type="button" id="btn-run-mode-play" class="btn btn-primary" style="justify-content: flex-start; padding: 12px 16px; border-radius: 6px;">
-                <div style="text-align: left;">
-                  <strong style="display: block; font-size: 14px;">🎮 Play in Assetto Corsa (Driver Control)</strong>
-                  <span style="font-size: 11px; opacity: 0.85;">Interactive session with countdown sequence, 3D timing gates, and player inputs.</span>
-                </div>
-              </button>
-
-              <button type="button" id="btn-run-mode-ai" class="btn btn-accent" style="justify-content: flex-start; padding: 12px 16px; border-radius: 6px;">
-                <div style="text-align: left;">
-                  <strong style="display: block; font-size: 14px;">🤖 Watch AI Autopilot Demo</strong>
-                  <span style="font-size: 11px; opacity: 0.85;">Spawns the test with 95% AI autopilot tracking the optimal racing line.</span>
-                </div>
-              </button>
-            </div>
-
-            <div style="margin-top: 14px; font-size: 12px; color: #94a3b8;">
-              <label class="checkbox-label" style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
-                <input type="checkbox" id="check-run-sync" checked />
-                <span>Auto-sync latest files to Assetto Corsa before launch</span>
-              </label>
-            </div>
-
-            <div id="run-modal-queue-section" style="display: none; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <span style="font-size: 12px; font-weight: 600; color: #94a3b8;">Queued Runs (<span id="queue-count-num">0</span>)</span>
-              </div>
-              <div id="run-modal-queue-list" style="display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto;"></div>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" id="run-modal-cancel" class="btn btn-secondary">Cancel</button>
-          </div>
-        </div>
-      </div>
 
       <!-- Modal for Batch Recording Missing Telemetry -->
       <div id="telemetry-batch-modal" class="modal" style="display: none">

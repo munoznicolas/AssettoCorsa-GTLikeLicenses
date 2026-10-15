@@ -1141,9 +1141,6 @@ function setupStartModeListeners() {
   dom.btnStopAc?.addEventListener("click", () => {
     void cancelActiveACSession();
   });
-  dom.btnModalStopAc?.addEventListener("click", () => {
-    void cancelActiveACSession();
-  });
 }
 
 /**

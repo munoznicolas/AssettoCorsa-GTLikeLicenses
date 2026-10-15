@@ -15,7 +15,6 @@ import {
 } from "./js/test-editor.js";
 import {
   pollQueueStatus,
-  closeRunModal,
   setupQueueEventListeners,
 } from "./js/queue-runner.js";
 import { setupReferenceViewListeners } from "./js/reference-view.js";
@@ -112,7 +111,6 @@ function setupGlobalEventListeners() {
 
   // Outside Click Close for Modals
   window.addEventListener("click", (e) => {
-    if (e.target === dom.runModal) closeRunModal();
     if (e.target === dom.logModal) closeModal();
   });
 }

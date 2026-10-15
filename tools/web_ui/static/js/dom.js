@@ -33,21 +33,6 @@ export function initDom() {
   dom.btnRebuild = document.getElementById("btn-rebuild");
   dom.btnSync = document.getElementById("btn-sync");
 
-  // Run Modal Elements
-  dom.runModal = document.getElementById("run-modal");
-  dom.runModalTitle = document.getElementById("run-modal-title");
-  dom.runModalDesc = document.getElementById("run-modal-desc");
-  dom.runModalClose = document.getElementById("run-modal-close");
-  dom.runModalCancel = document.getElementById("run-modal-cancel");
-  dom.runModalActiveBanner = document.getElementById("run-modal-active-banner");
-  dom.runModalActiveDesc = document.getElementById("run-modal-active-desc");
-  dom.btnModalStopAc = document.getElementById("btn-modal-stop-ac");
-  dom.runModalQueueSection = document.getElementById("run-modal-queue-section");
-  dom.runModalQueueList = document.getElementById("run-modal-queue-list");
-  dom.queueCountNum = document.getElementById("queue-count-num");
-  dom.btnRunModePlay = document.getElementById("btn-run-mode-play");
-  dom.btnRunModeAi = document.getElementById("btn-run-mode-ai");
-  dom.checkRunSync = document.getElementById("check-run-sync");
 
   // Form Elements
   dom.form = document.getElementById("test-form");
