@@ -123,6 +123,9 @@ function TelemetryLogger:logCountdownTick(car, currentStep)
   ))
 end
 
+TelemetryLogger.MAX_SAMPLES = 4000
+TelemetryLogger.SAVE_INTERVAL_SEC = 1.0
+
 ---Samples vehicle kinematics and outputs to data/telemetry_eval.json for automated testing loops.
 ---@param car table? @Assetto Corsa car state (ac.getCar)
 ---@param sessionTime number
@@ -137,10 +140,15 @@ function TelemetryLogger:recordSample(car, sessionTime, dt, state, countdownTime
   if not self.samples then
     self.samples = {}
     self.sampleTimer = 0
+    self.saveTimer = 0
   end
   self.sampleTimer = (self.sampleTimer or 0) + dt
+  self.saveTimer = (self.saveTimer or 0) + dt
   if self.sampleTimer >= 0.15 then
     self.sampleTimer = 0
+    if #self.samples >= TelemetryLogger.MAX_SAMPLES then
+      table.remove(self.samples, 1)
+    end
     table.insert(self.samples, {
       t = sessionTime,
       countdown = (state == "COUNTDOWN") and countdownTimer or 0,
@@ -157,7 +165,8 @@ function TelemetryLogger:recordSample(car, sessionTime, dt, state, countdownTime
       restartCount = restartCount or 0
     })
 
-    if io and io.save and JSON and JSON.stringify then
+    if self.saveTimer >= TelemetryLogger.SAVE_INTERVAL_SEC and io and io.save and JSON and JSON.stringify then
+      self.saveTimer = 0
       local dump = {
         test_id = testConfig and testConfig.test_id or "UNKNOWN",
         start_mode = testConfig and testConfig.start_mode or "STANDING",
@@ -174,11 +183,13 @@ function TelemetryLogger:recordSample(car, sessionTime, dt, state, countdownTime
   end
 end
 
----Resets timer state on session restart.
+---Resets timer state and sample buffer on session restart.
 function TelemetryLogger:reset()
   self.lastPeriodicLog = 0
   self.lastPostGoLog = 0
   self.sampleTimer = 0
+  self.saveTimer = 0
+  self.samples = {}
 end
 
 return TelemetryLogger

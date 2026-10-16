@@ -12,7 +12,9 @@ import argparse
 import json
 import mimetypes
 import os
+import re
 import sys
+import traceback
 import urllib.parse
 import webbrowser
 from http.server import HTTPServer, SimpleHTTPRequestHandler
@@ -20,6 +22,27 @@ from socketserver import ThreadingMixIn
 from typing import Any, Dict, Optional
 
 ERR_MISSING_TRACK_OR_CAR = "Missing track_id or car_id"
+MAX_JSON_PAYLOAD_BYTES = 2 * 1024 * 1024  # 2 MB max payload
+SAFE_ID_RE = re.compile(r"^[A-Za-z0-9_\-]+$")
+ALLOWED_HOSTS = {"127.0.0.1", "localhost", "[::1]"}
+
+
+def is_safe_identifier(val: Any, allow_empty: bool = False) -> bool:
+    if not isinstance(val, str):
+        return False
+    if val == "":
+        return allow_empty
+    return len(val) <= 128 and bool(SAFE_ID_RE.match(val))
+
+
+def is_safe_path_within(base_dir: str, target_path: str) -> bool:
+    try:
+        real_base = os.path.realpath(base_dir)
+        real_target = os.path.realpath(target_path)
+        return os.path.commonpath([real_base, real_target]) == real_base
+    except ValueError:
+        return False
+
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if REPO_ROOT not in sys.path:
@@ -64,24 +87,75 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
             return
         sys.stdout.write(f"[{self.log_date_time_string()}] {msg}\n")
 
+    def _is_trusted_origin(self, origin: str) -> bool:
+        try:
+            parsed = urllib.parse.urlparse(origin)
+            return parsed.scheme in ("http", "https") and (parsed.hostname or "").lower() in ALLOWED_HOSTS
+        except Exception:
+            return False
+
+    def _validate_request_security(self, is_post: bool = False) -> bool:
+        # 1. Host header check against DNS rebinding
+        host_header = self.headers.get("Host", "")
+        if host_header:
+            host_only = host_header.split(":")[0].strip().lower()
+            if host_only not in ALLOWED_HOSTS:
+                self.send_json_response({"success": False, "error": "Forbidden: Untrusted Host header"}, status=403)
+                return False
+
+        # 2. Origin header check against Cross-Origin / CSRF requests
+        origin = self.headers.get("Origin")
+        if origin and not self._is_trusted_origin(origin):
+            self.send_json_response({"success": False, "error": "Forbidden: Cross-origin request denied"}, status=403)
+            return False
+
+        # 3. Sec-Fetch-Site check for modern browsers
+        sec_fetch_site = self.headers.get("Sec-Fetch-Site", "").lower()
+        if sec_fetch_site and sec_fetch_site not in ("same-origin", "none"):
+            self.send_json_response({"success": False, "error": "Forbidden: Cross-site request denied"}, status=403)
+            return False
+
+        # 4. Require application/json on POST requests to enforce CORS preflight
+        if is_post:
+            ctype = self.headers.get("Content-Type", "").lower()
+            if not ctype.startswith("application/json"):
+                self.send_json_response(
+                    {"success": False, "error": "Unsupported Media Type: Expected application/json"},
+                    status=415,
+                )
+                return False
+
+        return True
+
     def end_headers(self) -> None:
         self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
         self.send_header("Pragma", "no-cache")
         self.send_header("Expires", "0")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("X-Frame-Options", "DENY")
         super().end_headers()
 
     def send_json_response(self, data: Any, status: int = 200) -> None:
-        body = json.dumps(data, indent=2).encode("utf-8")
+        body = json.dumps(data, indent=2, allow_nan=False).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
-        self.send_header("Access-Control-Allow-Origin", "*")
+        origin = self.headers.get("Origin")
+        if origin and self._is_trusted_origin(origin):
+            self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Vary", "Origin")
         self.end_headers()
         self.wfile.write(body)
 
     def do_OPTIONS(self) -> None:
-        self.send_response(200)
-        self.send_header("Access-Control-Allow-Origin", "*")
+        origin = self.headers.get("Origin")
+        if origin and not self._is_trusted_origin(origin):
+            self.send_error(403, "Forbidden: Cross-origin preflight denied")
+            return
+        self.send_response(204)
+        if origin:
+            self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Vary", "Origin")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
@@ -89,8 +163,11 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
     def _serve_file_from_base(
         self, path: str, prefix: str, base_dir: str, not_found_msg: str, default_mime: str = "application/octet-stream"
     ) -> None:
-        rel_path = path[len(prefix):]
-        full_path = os.path.join(base_dir, rel_path)
+        raw_rel = urllib.parse.unquote(path[len(prefix):]).lstrip("/\\")
+        full_path = os.path.realpath(os.path.join(base_dir, raw_rel))
+        if not is_safe_path_within(base_dir, full_path):
+            self.send_error(403, "Forbidden: Path traversal rejected")
+            return
         if os.path.isfile(full_path):
             mime, _ = mimetypes.guess_type(full_path)
             with open(full_path, "rb") as f:
@@ -104,10 +181,13 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
         self.send_error(404, not_found_msg)
 
     def _serve_preview_image(self, test_id: str) -> None:
+        if not is_safe_identifier(test_id):
+            self.send_error(400, "Invalid test_id format")
+            return
         from tools.generate_test_previews import build_test_to_event_path_map, get_preview_path_for_test
         preview_map = build_test_to_event_path_map()
         preview_file = preview_map.get(test_id) or get_preview_path_for_test(test_id)
-        if preview_file and os.path.isfile(preview_file):
+        if preview_file and is_safe_path_within(REPO_ROOT, preview_file) and os.path.isfile(preview_file):
             with open(preview_file, "rb") as f:
                 content = f.read()
             self.send_response(200)
@@ -169,6 +249,9 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
         if not track_id:
             self.send_json_response({"success": False, "error": "Missing track_id parameter"}, status=400)
             return
+        if not is_safe_identifier(track_id) or not is_safe_identifier(layout, allow_empty=True):
+            self.send_json_response({"success": False, "error": "Invalid track_id or layout format"}, status=400)
+            return
 
         try:
             data = get_track_spline_data(track_id, layout)
@@ -193,6 +276,13 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
 
         if not track_id or not car_id:
             self.send_json_response({"success": False, "error": ERR_MISSING_TRACK_OR_CAR}, status=400)
+            return
+        if (
+            not is_safe_identifier(track_id)
+            or not is_safe_identifier(car_id)
+            or not is_safe_identifier(track_layout, allow_empty=True)
+        ):
+            self.send_json_response({"success": False, "error": "Invalid identifier format"}, status=400)
             return
 
         try:
@@ -227,6 +317,9 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
 
     def _handle_get_job(self, path: str) -> None:
         job_id = path[len("/api/job/"):]
+        if not is_safe_identifier(job_id):
+            self.send_json_response({"success": False, "error": "Invalid job_id format"}, status=400)
+            return
         try:
             from tools.web_ui.runner import queue_mgr
             job = queue_mgr.get_job(job_id)
@@ -241,6 +334,9 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
         test_id = query.get("test_id", [""])[0]
         if not test_id:
             self.send_json_response({"success": False, "error": "Missing test_id"}, status=400)
+            return
+        if not is_safe_identifier(test_id):
+            self.send_json_response({"success": False, "error": "Invalid test_id format"}, status=400)
             return
         self._serve_preview_image(test_id)
 
@@ -266,6 +362,9 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
         return False
 
     def do_GET(self) -> None:
+        if not self._validate_request_security(is_post=False):
+            return
+
         parsed_url = urllib.parse.urlparse(self.path)
         path = parsed_url.path
         query = urllib.parse.parse_qs(parsed_url.query)
@@ -293,12 +392,28 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
         super().do_GET()
 
     def _read_json_payload(self) -> Optional[Dict[str, Any]]:
-        content_length = int(self.headers.get("Content-Length", 0))
-        body = self.rfile.read(content_length)
+        try:
+            content_length = int(self.headers.get("Content-Length", 0))
+        except ValueError:
+            self.send_json_response({"success": False, "error": "Invalid Content-Length header"}, status=400)
+            return None
+
+        if content_length < 0 or content_length > MAX_JSON_PAYLOAD_BYTES:
+            self.send_json_response(
+                {"success": False, "error": f"Payload too large (max {MAX_JSON_PAYLOAD_BYTES} bytes)"},
+                status=413,
+            )
+            return None
+
+        body = self.rfile.read(content_length) if content_length > 0 else b""
         if not body:
             return {}
         try:
-            return json.loads(body.decode("utf-8"))
+            parsed = json.loads(body.decode("utf-8"))
+            if not isinstance(parsed, dict):
+                self.send_json_response({"success": False, "error": "Expected JSON object payload"}, status=400)
+                return None
+            return parsed
         except Exception as e:
             self.send_json_response({"success": False, "error": f"Invalid JSON payload: {e}"}, status=400)
             return None
@@ -311,10 +426,17 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
         finish_s = float(payload.get("finish_s", 1.0))
         start_mode = payload.get("start_mode", "ROLLING")
         with_stop_box = bool(payload.get("with_stop_box", False))
-        countdown_sec = float(payload.get("countdown_sec", 3.0))
+        countdown_sec = max(0.5, min(15.0, float(payload.get("countdown_sec", 3.0))))
 
         if not track_id or not car_id:
             self.send_json_response({"success": False, "error": ERR_MISSING_TRACK_OR_CAR}, status=400)
+            return
+        if (
+            not is_safe_identifier(track_id)
+            or not is_safe_identifier(car_id)
+            or not is_safe_identifier(track_layout, allow_empty=True)
+        ):
+            self.send_json_response({"success": False, "error": "Invalid identifier format"}, status=400)
             return
 
         try:
@@ -340,10 +462,17 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
         finish_s = float(payload.get("finish_s", 1.0))
         start_mode = payload.get("start_mode", "ROLLING")
         with_stop_box = bool(payload.get("with_stop_box", False))
-        countdown_sec = float(payload.get("countdown_sec", 3.0))
+        countdown_sec = max(0.5, min(15.0, float(payload.get("countdown_sec", 3.0))))
 
         if not track_id or not car_id:
             self.send_json_response({"success": False, "error": ERR_MISSING_TRACK_OR_CAR}, status=400)
+            return
+        if (
+            not is_safe_identifier(track_id)
+            or not is_safe_identifier(car_id)
+            or not is_safe_identifier(track_layout, allow_empty=True)
+        ):
+            self.send_json_response({"success": False, "error": "Invalid identifier format"}, status=400)
             return
 
         try:
@@ -366,10 +495,13 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
         mode = payload.get("mode", "play")
         sync_first = bool(payload.get("sync_first", True))
         test_data = payload.get("test_data")
-        timeout = int(payload.get("timeout", 8))
+        timeout = max(1, min(120, int(payload.get("timeout", 8))))
 
         if not test_id:
             self.send_json_response({"success": False, "error": "Missing test_id"}, status=400)
+            return
+        if not is_safe_identifier(test_id):
+            self.send_json_response({"success": False, "error": "Invalid test_id format"}, status=400)
             return
 
         try:
@@ -382,16 +514,15 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
             )
             self.send_json_response(res)
         except Exception as e:
-            import traceback
-            self.send_json_response({
-                "success": False,
-                "error": str(e),
-                "traceback": traceback.format_exc(),
-            }, status=500)
+            sys.stderr.write(f"[ERROR] /api/run_test failed:\n{traceback.format_exc()}\n")
+            self.send_json_response({"success": False, "error": str(e)}, status=500)
 
     def _handle_post_queue_cancel(self, payload: Dict[str, Any]) -> None:
         job_id = payload.get("job_id")
         cancel_all = bool(payload.get("cancel_all", False))
+        if job_id is not None and not is_safe_identifier(str(job_id)):
+            self.send_json_response({"success": False, "error": "Invalid job_id format"}, status=400)
+            return
         try:
             from tools.web_ui.runner import queue_mgr
             if cancel_all or not job_id:
@@ -436,29 +567,24 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
         if not test_id:
             self.send_json_response({"success": False, "error": "Missing test_id"}, status=400)
             return
+        if not is_safe_identifier(test_id):
+            self.send_json_response({"success": False, "error": "Invalid test_id format"}, status=400)
+            return
 
         try:
             res = build_test_miniature(test_id=test_id, test_data=test_data)
             self.send_json_response(res)
         except Exception as e:
-            import traceback
-            self.send_json_response({
-                "success": False,
-                "error": str(e),
-                "traceback": traceback.format_exc(),
-            }, status=500)
+            sys.stderr.write(f"[ERROR] /api/generate_miniature failed:\n{traceback.format_exc()}\n")
+            self.send_json_response({"success": False, "error": str(e)}, status=500)
 
     def _handle_post_generate(self, _payload: Dict[str, Any]) -> None:
         try:
             report = generate_and_validate()
             self.send_json_response(report)
         except Exception as e:
-            import traceback
-            self.send_json_response({
-                "success": False,
-                "error": str(e),
-                "traceback": traceback.format_exc(),
-            }, status=500)
+            sys.stderr.write(f"[ERROR] /api/generate failed:\n{traceback.format_exc()}\n")
+            self.send_json_response({"success": False, "error": str(e)}, status=500)
 
     def _handle_post_sync(self, _payload: Dict[str, Any]) -> None:
         try:
@@ -480,6 +606,9 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
             self.send_json_response({"success": False, "error": str(e)}, status=500)
 
     def do_POST(self) -> None:
+        if not self._validate_request_security(is_post=True):
+            return
+
         payload = self._read_json_payload()
         if payload is None:
             return

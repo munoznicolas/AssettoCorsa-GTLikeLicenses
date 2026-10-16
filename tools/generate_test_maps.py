@@ -193,8 +193,16 @@ def generate_single_map(
         t["spawn"] = geom["spawn"]
         t["timing"] = geom["timing"]
 
-    os.makedirs(out_dir, exist_ok=True)
-    dest_file = os.path.join(out_dir, f"{test_id}.svg")
+    import re
+    safe_test_id = re.sub(r"[^A-Za-z0-9_\-]", "", str(test_id))
+    if not safe_test_id:
+        return None
+
+    real_out_dir = os.path.realpath(out_dir)
+    os.makedirs(real_out_dir, exist_ok=True)
+    dest_file = os.path.realpath(os.path.join(real_out_dir, f"{safe_test_id}.svg"))
+    if os.path.commonpath([real_out_dir, dest_file]) != real_out_dir:
+        return None
     with open(dest_file, "w", encoding="utf-8") as fh:
         fh.write(build(t, wps))
 

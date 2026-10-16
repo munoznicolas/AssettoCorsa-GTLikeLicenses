@@ -247,15 +247,16 @@ def generate_interactive_html(
     """Generates a standalone, self-contained interactive HTML circuit map."""
     os.makedirs(os.path.dirname(os.path.abspath(output_html_path)), exist_ok=True)
 
-    tracks_json_str = json.dumps(tracks_payload)
-    default_params_json_str = json.dumps(default_params)
+    tracks_json_str = json.dumps(tracks_payload).replace("</", r"<\/")
+    default_params_json_str = json.dumps(default_params).replace("</", r"<\/")
+    safe_initial_key = str(initial_track_key).replace("\\", "\\\\").replace('"', '\\"').replace("</", r"<\/")
 
     with open(TEMPLATE_PATH, "r", encoding="utf-8") as f:
         template = f.read()
 
     rendered = (
         template
-        .replace("__INITIAL_TRACK_KEY__", initial_track_key)
+        .replace("__INITIAL_TRACK_KEY__", safe_initial_key)
         .replace("__TRACKS_JSON__", tracks_json_str)
         .replace("__DEFAULT_PARAMS_JSON__", default_params_json_str)
     )

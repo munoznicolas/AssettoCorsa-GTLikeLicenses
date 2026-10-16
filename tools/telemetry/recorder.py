@@ -376,14 +376,30 @@ class TelemetryProfile:
 
 
 
+def _sanitize_profile_token(val: str) -> str:
+    import re
+    cleaned = re.sub(r"[^A-Za-z0-9_\-]", "", str(val or ""))
+    if not cleaned:
+        raise ValueError(f"Invalid telemetry profile identifier: {val!r}")
+    return cleaned
+
+
 def profile_filename(track_id: str, layout: str, car_id: str, ai_level: int = 100) -> str:
     """Standardized profile cache filename."""
-    tag = f"{track_id}__{layout}" if layout else track_id
-    return f"{tag}__{car_id}__ai{ai_level}.json"
+    safe_track = _sanitize_profile_token(track_id)
+    safe_car = _sanitize_profile_token(car_id)
+    safe_layout = _sanitize_profile_token(layout) if layout else ""
+    tag = f"{safe_track}__{safe_layout}" if safe_layout else safe_track
+    return f"{tag}__{safe_car}__ai{int(ai_level)}.json"
 
 
 def load_telemetry_profile(track_id: str, layout: str, car_id: str, ai_level: int = 100) -> Optional[TelemetryProfile]:
     """Loads a cached profile from disk if available."""
+    try:
+        real_profiles_dir = os.path.realpath(PROFILES_DIR)
+    except Exception:
+        return None
+
     levels_to_try = [ai_level]
     if 100 not in levels_to_try:
         levels_to_try.append(100)
@@ -392,9 +408,12 @@ def load_telemetry_profile(track_id: str, layout: str, car_id: str, ai_level: in
 
     path = None
     for lvl in levels_to_try:
-        fname = profile_filename(track_id, layout, car_id, lvl)
-        p = os.path.join(PROFILES_DIR, fname)
-        if os.path.isfile(p):
+        try:
+            fname = profile_filename(track_id, layout, car_id, lvl)
+        except ValueError:
+            return None
+        p = os.path.realpath(os.path.join(real_profiles_dir, fname))
+        if os.path.commonpath([real_profiles_dir, p]) == real_profiles_dir and os.path.isfile(p):
             path = p
             break
 
@@ -426,9 +445,12 @@ def load_telemetry_profile(track_id: str, layout: str, car_id: str, ai_level: in
 
 def save_telemetry_profile(profile: TelemetryProfile) -> str:
     """Saves a profile to data/telemetry_profiles/."""
-    os.makedirs(PROFILES_DIR, exist_ok=True)
+    real_profiles_dir = os.path.realpath(PROFILES_DIR)
+    os.makedirs(real_profiles_dir, exist_ok=True)
     fname = profile_filename(profile.track_id, profile.track_layout, profile.car_id, profile.ai_level)
-    path = os.path.join(PROFILES_DIR, fname)
+    path = os.path.realpath(os.path.join(real_profiles_dir, fname))
+    if os.path.commonpath([real_profiles_dir, path]) != real_profiles_dir:
+        raise ValueError(f"Refusing to write telemetry profile outside {real_profiles_dir}")
     with open(path, "w", encoding="utf-8") as f:
         json.dump(profile.to_dict(), f, indent=2)
     return path

@@ -719,7 +719,8 @@ export function renderRefTableOnly() {
 
   list.forEach((t) => {
     const row = document.createElement("tr");
-    const layoutClass = `layout-${t.drivetrain_layout || "FR"}`;
+    const safeLayout = escapeHtml(t.drivetrain_layout || "FR");
+    const layoutClass = `layout-${safeLayout}`;
     const gameClass = t.game === "AC Mod" ? "tag-game tag-game-ac" : "tag-game";
     row.innerHTML = `
       <td><span class="tag-code">${escapeHtml(t.code)}</span></td>
@@ -727,9 +728,9 @@ export function renderRefTableOnly() {
       <td>${escapeHtml(t.license)}</td>
       <td><strong>${escapeHtml(t.title || t.test)}</strong></td>
       <td>${escapeHtml(t.car)}</td>
-      <td><span class="tag-hp">${t.hp ? t.hp + " HP" : "N/A"}</span></td>
-      <td><span class="tag-pw">${t.pw_kg_hp ? t.pw_kg_hp : "N/A"}</span></td>
-      <td><span class="tag-layout ${layoutClass}">${escapeHtml(t.drivetrain_layout || "FR")}</span></td>
+      <td><span class="tag-hp">${t.hp ? escapeHtml(t.hp) + " HP" : "N/A"}</span></td>
+      <td><span class="tag-pw">${t.pw_kg_hp ? escapeHtml(t.pw_kg_hp) : "N/A"}</span></td>
+      <td><span class="tag-layout ${layoutClass}">${safeLayout}</span></td>
       <td>${escapeHtml(t.track)}</td>
       <td style="color: #fbbf24; font-family: var(--font-mono); font-weight: 600;">${escapeHtml(t.gold)}</td>
       <td style="color: #cbd5e1; font-family: var(--font-mono);">${escapeHtml(t.silver)}</td>

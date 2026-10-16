@@ -225,31 +225,44 @@ def generate_single_preview(
         t["spawn"] = geom["spawn"]
         t["timing"] = geom["timing"]
 
-    dest_file = get_preview_path_for_test(test_id, tier=t.get("tier"))
+    import re
+    safe_test_id = re.sub(r"[^A-Za-z0-9_\-]", "", str(test_id))
+    if not safe_test_id:
+        return None
+
+    dest_file = get_preview_path_for_test(safe_test_id, tier=t.get("tier"))
     if not dest_file:
         return None
 
-    os.makedirs(os.path.dirname(dest_file), exist_ok=True)
+    real_career_root = os.path.realpath(CAREER_ROOT)
+    real_dest_file = os.path.realpath(dest_file)
+    if os.path.commonpath([real_career_root, real_dest_file]) != real_career_root:
+        return None
+
+    os.makedirs(os.path.dirname(real_dest_file), exist_ok=True)
     img = render(t, wps)
-    img.save(dest_file)
+    img.save(real_dest_file)
 
     # Mirror to assets/previews/tests/<TEST_ID>.png if directory exists
-    alt_dir = os.path.join(REPO_ROOT, "assets", "previews", "tests")
+    alt_dir = os.path.realpath(os.path.join(REPO_ROOT, "assets", "previews", "tests"))
     if os.path.isdir(alt_dir):
-        img.save(os.path.join(alt_dir, f"{test_id}.png"))
+        alt_target = os.path.realpath(os.path.join(alt_dir, f"{safe_test_id}.png"))
+        if os.path.commonpath([alt_dir, alt_target]) == alt_dir:
+            img.save(alt_target)
 
     # Mirror directly to local Assetto Corsa install directory if it exists
     if ac_root and os.path.isdir(ac_root):
-        rel_to_repo = os.path.relpath(dest_file, REPO_ROOT)
-        ac_dest = os.path.join(ac_root, rel_to_repo)
-        if os.path.isdir(os.path.dirname(ac_dest)):
+        rel_to_repo = os.path.relpath(real_dest_file, REPO_ROOT)
+        ac_dest = os.path.realpath(os.path.join(ac_root, rel_to_repo))
+        real_ac_root = os.path.realpath(ac_root)
+        if os.path.commonpath([real_ac_root, ac_dest]) == real_ac_root and os.path.isdir(os.path.dirname(ac_dest)):
             try:
                 import shutil
-                shutil.copyfile(dest_file, ac_dest)
+                shutil.copyfile(real_dest_file, ac_dest)
             except Exception:
                 pass
 
-    return dest_file
+    return real_dest_file
 
 
 def main():

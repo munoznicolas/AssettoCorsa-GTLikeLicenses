@@ -93,12 +93,19 @@ class StopBoxDefinition:
 class SplineParser:
     """Parser and query engine for Assetto Corsa binary AI splines."""
 
+    MAX_WAYPOINTS = 100_000
+
     def __init__(self, filepath: str):
         self.filepath = filepath
         self.waypoints: List[SplineWaypoint] = []
         self.total_length: float = 0.0
         self.version: int = 0
         self._parse()
+
+    @staticmethod
+    def _safe_float(val: Any, default: float = 0.0) -> float:
+        f = float(val)
+        return f if math.isfinite(f) else default
 
     def _parse(self) -> None:
         if not os.path.isfile(self.filepath):
@@ -112,7 +119,7 @@ class SplineParser:
             header, count, u1, u2 = struct.unpack("<4i", f.read(16))
             self.version = header
 
-            if count <= 0 or 16 + count * 20 > filesize:
+            if count <= 0 or count > self.MAX_WAYPOINTS or 16 + count * 20 > filesize:
                 raise ValueError(
                     f"Corrupt or incompatible .ai header in {self.filepath}: "
                     f"point_count={count}, filesize={filesize}"
@@ -136,19 +143,20 @@ class SplineParser:
                     for _ in range(count)
                 ]
 
+        sf = self._safe_float
         # Construct waypoint objects
         for i in range(count):
             pt = ideal_raw[i]
-            x, y, z, dist, pt_id = pt
+            x, y, z, dist, pt_id = sf(pt[0]), sf(pt[1]), sf(pt[2]), sf(pt[3]), pt[4]
 
             if has_details:
                 det = detail_raw[i]
-                w_left = float(det[6])
-                w_right = float(det[7])
-                norm = (float(det[10]), float(det[11]), float(det[12]))
-                fwd = (float(det[14]), float(det[15]), float(det[16]))
-                spd = float(det[1])
-                rad = float(det[5])
+                w_left = sf(det[6], 6.0)
+                w_right = sf(det[7], 6.0)
+                norm = (sf(det[10], 0.0), sf(det[11], 1.0), sf(det[12], 0.0))
+                fwd = (sf(det[14], 0.0), sf(det[15], 0.0), sf(det[16], 1.0))
+                spd = sf(det[1], 30.0)
+                rad = sf(det[5], 1000.0)
             else:
                 # Fallback approximations if details are omitted
                 w_left = 6.0
@@ -158,9 +166,9 @@ class SplineParser:
                 rad = 1000.0
                 if i < count - 1:
                     next_pt = ideal_raw[i + 1]
-                    dx = next_pt[0] - x
-                    dy = next_pt[1] - y
-                    dz = next_pt[2] - z
+                    dx = sf(next_pt[0]) - x
+                    dy = sf(next_pt[1]) - y
+                    dz = sf(next_pt[2]) - z
                     length = math.sqrt(dx * dx + dy * dy + dz * dz) or 1.0
                     fwd = (dx / length, dy / length, dz / length)
                 else:
@@ -168,14 +176,14 @@ class SplineParser:
 
             # Sanitize forward vector
             flen = math.sqrt(fwd[0]**2 + fwd[1]**2 + fwd[2]**2)
-            if flen > 1e-4:
+            if math.isfinite(flen) and flen > 1e-4:
                 fwd = (fwd[0] / flen, fwd[1] / flen, fwd[2] / flen)
             else:
                 fwd = (0.0, 0.0, 1.0)
 
             # Sanitize normal vector
             nlen = math.sqrt(norm[0]**2 + norm[1]**2 + norm[2]**2)
-            if nlen > 1e-4:
+            if math.isfinite(nlen) and nlen > 1e-4:
                 norm = (norm[0] / nlen, norm[1] / nlen, norm[2] / nlen)
             else:
                 norm = (0.0, 1.0, 0.0)
@@ -188,10 +196,10 @@ class SplineParser:
 
             wp = SplineWaypoint(
                 index=i,
-                x=float(x),
-                y=float(y),
-                z=float(z),
-                distance=float(dist),
+                x=x,
+                y=y,
+                z=z,
+                distance=dist,
                 wall_left=w_left,
                 wall_right=w_right,
                 normal=norm,
@@ -326,13 +334,27 @@ def find_spline_file(
     ac_root: str = DEFAULT_AC_ROOT
 ) -> Optional[str]:
     """Locates fast_lane.ai or ideal_line.ai inside the Assetto Corsa track directory."""
-    track_base = os.path.join(ac_root, "content", "tracks", track_id)
+    import re
+    if not track_id or not re.match(r"^[A-Za-z0-9_\-]+$", str(track_id)):
+        return None
+    if layout and not re.match(r"^[A-Za-z0-9_\-]+$", str(layout)):
+        return None
+
+    tracks_root = os.path.realpath(os.path.join(ac_root, "content", "tracks"))
+    track_base = os.path.realpath(os.path.join(tracks_root, track_id))
+    try:
+        if os.path.commonpath([tracks_root, track_base]) != tracks_root:
+            return None
+    except ValueError:
+        return None
     if not os.path.isdir(track_base):
         return None
 
     candidate_subdirs = []
     if layout:
-        candidate_subdirs.append(os.path.join(track_base, layout))
+        lay_dir = os.path.realpath(os.path.join(track_base, layout))
+        if os.path.commonpath([track_base, lay_dir]) == track_base:
+            candidate_subdirs.append(lay_dir)
     candidate_subdirs.append(track_base)
 
     filename_candidates = [
@@ -344,8 +366,8 @@ def find_spline_file(
 
     for subdir in candidate_subdirs:
         for rel_file in filename_candidates:
-            p = os.path.join(subdir, rel_file)
-            if os.path.isfile(p):
+            p = os.path.realpath(os.path.join(subdir, rel_file))
+            if os.path.commonpath([track_base, p]) == track_base and os.path.isfile(p):
                 return p
 
     return None

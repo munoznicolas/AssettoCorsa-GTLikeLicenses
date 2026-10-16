@@ -56,13 +56,29 @@ RACE_INI_PATH = os.path.join(CFG_DIR, "race.ini")
 LOG_TXT_PATH = os.path.join(LOGS_DIR, "log.txt")
 
 
+def _sanitize_ini_value(val: Any) -> str:
+    """Strips newlines, carriage returns, and null bytes to prevent INI key/section injection."""
+    s = str(val if val is not None else "")
+    return s.replace("\r", "").replace("\n", " ").replace("\x00", "").strip()
+
+
 def find_car_skin(car_id: str, ac_root: str = DEFAULT_AC_ROOT) -> str:
     """Finds the first valid skin directory for a given car."""
-    skins_dir = os.path.join(ac_root, "content", "cars", car_id, "skins")
+    import re
+    safe_car = re.sub(r"[^A-Za-z0-9_\-]", "", str(car_id or ""))
+    if not safe_car:
+        return "0_default"
+    cars_base = os.path.realpath(os.path.join(ac_root, "content", "cars"))
+    skins_dir = os.path.realpath(os.path.join(cars_base, safe_car, "skins"))
+    try:
+        if os.path.commonpath([cars_base, skins_dir]) != cars_base:
+            return "0_default"
+    except ValueError:
+        return "0_default"
     if os.path.isdir(skins_dir):
         skins = sorted(os.listdir(skins_dir))
         if skins:
-            return skins[0]
+            return _sanitize_ini_value(skins[0])
     return "0_default"
 
 
@@ -74,21 +90,24 @@ def generate_race_ini(
     restart_at_time: Optional[float] = None,
 ) -> str:
     """Synthesizes a valid Assetto Corsa race.ini string for a given test configuration."""
-    car_id = test_data["car_id"]
-    track_id = test_data["track_id"]
-    track_layout = test_data.get("track_layout", "")
-    test_id = test_data.get("test_id", "TEST")
+    car_id = _sanitize_ini_value(test_data["car_id"])
+    track_id = _sanitize_ini_value(test_data["track_id"])
+    track_layout = _sanitize_ini_value(test_data.get("track_layout", ""))
+    test_id = _sanitize_ini_value(test_data.get("test_id", "TEST"))
     skin = find_car_skin(car_id, ac_root)
 
-    restart_line = f"RESTART_AT_TIME={restart_at_time:.2f}\n" if restart_at_time else ""
+    restart_line = f"RESTART_AT_TIME={float(restart_at_time):.2f}\n" if restart_at_time else ""
 
     is_telemetry = (test_id == "AI_TELEMETRY_RECORDER")
     if is_telemetry:
         ai_level = 100
-    session_name = test_data.get("session_name", "Hotlap" if is_telemetry else f"GT License Trial: {test_id}")
-    session_type = test_data.get("session_type", 4 if is_telemetry else 1)
-    duration_min = test_data.get("duration_minutes", 0 if is_telemetry else 5)
-    spawn_set = test_data.get("spawn_set", "HOTLAP_START" if is_telemetry else "PIT")
+    session_name = _sanitize_ini_value(
+        test_data.get("session_name", "Hotlap" if is_telemetry else f"GT License Trial: {test_id}")
+    )
+    session_type = int(test_data.get("session_type", 4 if is_telemetry else 1))
+    duration_min = int(test_data.get("duration_minutes", 0 if is_telemetry else 5))
+    spawn_set = _sanitize_ini_value(test_data.get("spawn_set", "HOTLAP_START" if is_telemetry else "PIT"))
+    ai_level_int = int(ai_level)
 
     ini_content = f"""[RACE]
 TRACK={track_id}
@@ -96,7 +115,7 @@ CONFIG_TRACK={track_layout}
 MODEL={car_id}
 MODEL_CONFIG=
 CARS=1
-AI_LEVEL={ai_level}
+AI_LEVEL={ai_level_int}
 FIXED_SETUP=0
 PENALTIES=1
 AUTO_START_SESSION=1

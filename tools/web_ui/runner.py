@@ -209,6 +209,8 @@ class ACQueueManager:
     Thread-safe FIFO execution queue and lifecycle orchestrator for Assetto Corsa runs.
     """
 
+    MAX_STORED_JOBS = 100
+
     def __init__(self, ac_root: str = DEFAULT_AC_ROOT):
         self.ac_root = ac_root
         self._queue: queue.Queue = queue.Queue()
@@ -218,6 +220,17 @@ class ACQueueManager:
         self._lock = threading.Lock()
         self._worker_thread = threading.Thread(target=self._worker_loop, daemon=True)
         self._worker_thread.start()
+
+    def _prune_old_jobs_locked(self) -> None:
+        if len(self._jobs) <= self.MAX_STORED_JOBS:
+            return
+        removable = [
+            jid
+            for jid, j in sorted(self._jobs.items(), key=lambda kv: kv[1].created_at)
+            if j.status not in ("queued", "running")
+        ]
+        for jid in removable[: max(0, len(self._jobs) - self.MAX_STORED_JOBS)]:
+            self._jobs.pop(jid, None)
 
     def enqueue_job(
         self,
@@ -237,6 +250,7 @@ class ACQueueManager:
         )
 
         with self._lock:
+            self._prune_old_jobs_locked()
             self._jobs[job_id] = job
             self._queue.put(job)
 
@@ -334,6 +348,9 @@ class ACQueueManager:
                 with self._lock:
                     self._active_job = None
                     self._recent_completed.append(job.to_dict())
+                    if len(self._recent_completed) > 25:
+                        self._recent_completed = self._recent_completed[-25:]
+                    self._prune_old_jobs_locked()
                 self._queue.task_done()
 
     def _stage_test_configuration(self, test_data: Dict[str, Any]) -> None:
@@ -342,28 +359,32 @@ class ACQueueManager:
         without altering the repository's permanent catalog files.
         Ensures complete 3D spatial parameters (spawn.position, timing gates) are synthesized.
         """
+        import re
         test_data = ensure_complete_test_data(test_data, self.ac_root, REPO_ROOT)
 
-        gt_mode_base = os.path.join(self.ac_root, "extension", "lua", "new-modes", "gt-license")
-        test_id = test_data.get("test_id", "")
+        gt_mode_base = os.path.realpath(os.path.join(self.ac_root, "extension", "lua", "new-modes", "gt-license"))
+        raw_test_id = str(test_data.get("test_id", "TEST"))
+        safe_test_id = re.sub(r"[^A-Za-z0-9_\-]", "", raw_test_id) or "TEST"
         tier = test_data.get("tier", "National B")
         tier_folder = TIER_FOLDER_MAP.get(tier, "national_b")
 
         # Normalize test filename (e.g. B-1 -> test_b01.json)
         from tools.testing.eval_loop import find_test_file_by_id
-        src_path = find_test_file_by_id(test_id, REPO_ROOT)
-        filename = os.path.basename(src_path) if src_path else f"test_{test_id.lower().replace('-', '')}.json"
+        src_path = find_test_file_by_id(safe_test_id, REPO_ROOT)
+        filename = os.path.basename(src_path) if src_path else f"test_{safe_test_id.lower().replace('-', '')}.json"
 
         # Targets in Assetto Corsa
         stage_targets = [
-            os.path.join(gt_mode_base, "data", "tests", tier_folder, filename),
-            os.path.join(gt_mode_base, "data", "active_test.json"),
-            os.path.join(gt_mode_base, "active_test.json"),
+            os.path.realpath(os.path.join(gt_mode_base, "data", "tests", tier_folder, filename)),
+            os.path.realpath(os.path.join(gt_mode_base, "data", "active_test.json")),
+            os.path.realpath(os.path.join(gt_mode_base, "active_test.json")),
         ]
 
         test_json_str = json.dumps(test_data, indent=2)
         for target in stage_targets:
             try:
+                if os.path.commonpath([gt_mode_base, target]) != gt_mode_base:
+                    raise ValueError(f"Refusing to stage file outside gt-license base: {target}")
                 os.makedirs(os.path.dirname(target), exist_ok=True)
                 with open(target, "w", encoding="utf-8") as f:
                     f.write(test_json_str)
@@ -435,8 +456,13 @@ class ACQueueManager:
 
     def _run_eval(self, job: ACJob, params: Dict[str, Any]) -> None:
         """Executes the automated 8s evaluation audit loop."""
-        test_id = job.test_id
-        timeout = int(params.get("timeout", 8))
+        import re
+        test_id = str(job.test_id)
+        if not re.match(r"^[A-Za-z0-9_\-]+$", test_id):
+            job.status = "failed"
+            job.error = f"Invalid test_id format: {test_id}"
+            return
+        timeout = max(1, min(120, int(params.get("timeout", 8))))
         test_data = params.get("test_data")
         sync_first = bool(params.get("sync_first", True))
 

@@ -284,9 +284,9 @@ export function renderLicenseTabs() {
     const btn = document.createElement("button");
     btn.className = `license-tab ${idx === state.activeTierIndex ? "active" : ""}`;
     btn.innerHTML = `
-      <img class="tab-badge-img" src="/assets/career_ui/${tier.badge_asset}" alt="${tier.name}">
-      <span>${tier.tier_name}</span>
-      <span class="tab-count">${tier.tests.length}</span>
+      <img class="tab-badge-img" src="/assets/career_ui/${escapeHtml(tier.badge_asset)}" alt="${escapeHtml(tier.name)}">
+      <span>${escapeHtml(tier.tier_name)}</span>
+      <span class="tab-count">${Number(tier.tests.length) || 0}</span>
     `;
     btn.addEventListener("click", () => selectTier(idx));
     dom.tabsContainer.appendChild(btn);
@@ -339,33 +339,33 @@ export function renderTestList() {
     const item = document.createElement("div");
     item.className = `test-item ${idx === state.activeTestIndex ? "active" : ""}`;
 
-    const modeClass = (test.start_mode || "standing").toLowerCase();
+    const modeClass = escapeHtml((test.start_mode || "standing").toLowerCase());
     const isFullLap = isFullLapTest(test);
     const lapTypeLabel = isFullLap ? "Full Lap" : "Sector";
 
     const previewUrl =
       test.preview_image ||
       (activeTier.folder
-        ? `/content/career/${activeTier.folder}/event${idx + 1}/preview.png`
+        ? `/content/career/${encodeURIComponent(activeTier.folder)}/event${idx + 1}/preview.png`
         : `/api/test_preview?test_id=${encodeURIComponent(test.test_id)}`);
 
     item.innerHTML = `
       <div class="test-item-thumb">
-        <img src="${previewUrl}?t=${state.cacheBuster}" 
-             alt="${test.test_id}" 
+        <img src="${escapeHtml(previewUrl)}?t=${encodeURIComponent(state.cacheBuster)}" 
+             alt="${escapeHtml(test.test_id)}" 
              loading="lazy" 
              onerror="this.parentElement.style.opacity='0.25'; this.style.display='none'">
       </div>
       <div class="test-item-body">
         <div class="test-item-top">
-          <span class="test-item-id">${test.test_id}</span>
-          <span class="test-item-mode ${modeClass}">${test.start_mode}</span>
+          <span class="test-item-id">${escapeHtml(test.test_id)}</span>
+          <span class="test-item-mode ${modeClass}">${escapeHtml(test.start_mode)}</span>
         </div>
         <div class="test-item-title">${escapeHtml(test.title)}</div>
         <div class="test-item-meta">
           <span>🏁 ${lapTypeLabel}</span>
           <span>📍 ${escapeHtml(test.track_id)}</span>
-          <span>🥇 ${test.targets?.gold_seconds !== undefined ? `${test.targets.gold_seconds.toFixed(2)}s` : ""}</span>
+          <span>🥇 ${test.targets?.gold_seconds !== undefined ? `${Number(test.targets.gold_seconds).toFixed(2)}s` : ""}</span>
         </div>
       </div>
     `;
