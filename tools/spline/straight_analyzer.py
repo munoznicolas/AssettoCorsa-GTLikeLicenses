@@ -14,11 +14,11 @@ Kinematic Model:
 import math
 import os
 import sys
-from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.insert(0, os.path.join(REPO_ROOT, "tools"))
+if os.path.join(REPO_ROOT, "tools") not in sys.path:
+    sys.path.insert(0, os.path.join(REPO_ROOT, "tools"))
 
 from extract_spline_coords import (
     DEFAULT_AC_ROOT,
@@ -33,87 +33,12 @@ from record_ai_telemetry import (
     estimate_gear_and_rpm,
     load_telemetry_profile,
 )
-
-
-@dataclass
-class StraightSegment:
-    """Represents a contiguous straight segment along the track spline."""
-    segment_id: int
-    start_distance_m: float
-    end_distance_m: float
-    length_m: float
-    start_progress: float
-    end_progress: float
-    start_waypoint_idx: int
-    end_waypoint_idx: int
-    waypoint_count: int
-    max_steer_deg: float
-    avg_steer_deg: float
-    min_radius_m: float
-    avg_radius_m: float
-    max_heading_dev_deg: float
-    compass_heading_deg: float
-    compass_direction: str
-    avg_ai_speed_kmh: float
-    min_ai_speed_kmh: float
-    max_ai_speed_kmh: float
-    wraps_lap: bool
-    start_pos: List[float] = field(default_factory=list)
-    end_pos: List[float] = field(default_factory=list)
-
-    def to_dict(self) -> Dict[str, Any]:
-        return asdict(self)
-
-
-@dataclass
-class RollingStartCandidate:
-    """Candidate rolling start test placement within a straight segment."""
-    candidate_id: str
-    segment_id: int
-    rank: int
-    score: float
-    placement_type: str  # "exit_corner_approach" or "entry_full_straight"
-    target_speed_kmh: float  # Ground-truth 95% AI handover speed
-    spawn_speed_kmh: float   # 95% AI speed at countdown spawn
-    engaged_gear: int        # 95% AI engaged transmission gear at handover
-    engine_rpm: int          # 95% AI engine RPM at handover
-    countdown_sec: float
-    countdown_distance_m: float
-    post_go_sec: float
-    post_go_margin_m: float
-    start_gate_distance_m: float
-    start_gate_progress: float
-    spawn_distance_m: float
-    spawn_progress: float
-    spawn_offset_m: float
-    spawn_pos: List[float]
-    spawn_forward: List[float]
-    start_gate_p1: List[float]
-    start_gate_p2: List[float]
-    gate_width_m: float
-    max_countdown_steer_deg: float
-    description: str
-    test_config_snippet: Dict[str, Any]
-
-    def to_dict(self) -> Dict[str, Any]:
-        return asdict(self)
-
-
-def compass_heading_to_label(deg: float) -> str:
-    """Converts a heading angle in [0, 360) to 16-point compass direction."""
-    deg = deg % 360.0
-    labels = [
-        "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
-        "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"
-    ]
-    idx = int((deg + 11.25) / 22.5) % 16
-    return labels[idx]
-
-
-def angle_diff_deg(a: float, b: float) -> float:
-    """Computes minimum angular difference in degrees between two angles in [0, 360)."""
-    diff = (a - b + 180.0) % 360.0 - 180.0
-    return abs(diff)
+from tools.spline.models import (
+    RollingStartCandidate,
+    StraightSegment,
+    angle_diff_deg,
+    compass_heading_to_label,
+)
 
 
 class TrackStraightAnalyzer:
@@ -162,14 +87,15 @@ class TrackStraightAnalyzer:
             for w in self.waypoints:
                 spd = max(40.0, w.speed_ms * 3.6 if hasattr(w, "speed_ms") and w.speed_ms > 0 else 70.0)
                 g, r = estimate_gear_and_rpm(spd)
-                samples.append(TelemetrySample(
-                    distance_m=w.distance,
-                    speed_kmh=round(spd, 1),
-                    gear=g,
-                    rpm=r,
-                    throttle=1.0,
-                    brake=0.0
-                ))
+                samples.append(
+                    TelemetrySample(
+                        progress=round(w.distance / self.total_length, 4) if self.total_length > 0 else 0.0,
+                        distance_m=w.distance,
+                        speed_kmh=round(spd, 1),
+                        gear=g,
+                        rpm=r,
+                    )
+                )
         return TelemetryProfile(
             track_id=track_id,
             track_layout=layout,
@@ -209,34 +135,29 @@ class TrackStraightAnalyzer:
 
         n = self.num_waypoints
         steer_angles = [self.compute_steering_angle_deg(w.radius) for w in self.waypoints]
-        
-        # Horizontal yaw heading in degrees [0, 360)
+
         headings = [
             (math.degrees(math.atan2(w.forward[0], w.forward[2])) + 360.0) % 360.0
             for w in self.waypoints
         ]
 
-        # 1. Identify raw straight waypoints
         is_straight = [sa <= max_steer_deg for sa in steer_angles]
 
-        # 2. Extract contiguous runs
         raw_runs: List[Tuple[int, int]] = []
         start_idx: Optional[int] = None
         for i in range(n):
             if is_straight[i]:
                 if start_idx is None:
                     start_idx = i
-            else:
-                if start_idx is not None:
-                    raw_runs.append((start_idx, i - 1))
-                    start_idx = None
+            elif start_idx is not None:
+                raw_runs.append((start_idx, i - 1))
+                start_idx = None
         if start_idx is not None:
             raw_runs.append((start_idx, n - 1))
 
         if not raw_runs:
             return []
 
-        # 3. Bridge small noise gaps (e.g. curb hops or discrete spline jitter)
         bridged_runs: List[Tuple[int, int]] = []
         curr_start, curr_end = raw_runs[0]
 
@@ -246,14 +167,12 @@ class TrackStraightAnalyzer:
             gap_max_steer = max(steer_angles[curr_end + 1 : next_start]) if next_start > curr_end + 1 else 0.0
 
             if 0 < gap_dist <= bridge_gap_m and h_diff <= max_heading_dev_deg and gap_max_steer <= 5.0:
-                # Merge across small gap
                 curr_end = next_end
             else:
                 bridged_runs.append((curr_start, curr_end))
                 curr_start, curr_end = next_start, next_end
         bridged_runs.append((curr_start, curr_end))
 
-        # 4. Handle circular loop wrap-around across start/finish line (s = total -> 0)
         final_runs: List[Dict[str, Any]] = []
         wraps_first_last = False
 
@@ -261,7 +180,6 @@ class TrackStraightAnalyzer:
             first_start, first_end = bridged_runs[0]
             last_start, last_end = bridged_runs[-1]
 
-            # Check if first starts near 0 and last ends near end
             gap_to_zero = self.waypoints[first_start].distance
             gap_to_end = self.total_length - self.waypoints[last_end].distance
             wrap_gap = gap_to_zero + gap_to_end
@@ -269,9 +187,10 @@ class TrackStraightAnalyzer:
 
             if wrap_gap <= bridge_gap_m and wrap_h_diff <= max_heading_dev_deg:
                 wraps_first_last = True
-                # The segment starts at last_start, wraps over 0, and ends at first_end
                 wrapped_indices = list(range(last_start, n)) + list(range(0, first_end + 1))
-                wrapped_length = (self.total_length - self.waypoints[last_start].distance) + self.waypoints[first_end].distance
+                wrapped_length = (
+                    self.total_length - self.waypoints[last_start].distance
+                ) + self.waypoints[first_end].distance
 
                 if wrapped_length >= min_length_m:
                     final_runs.append({
@@ -284,7 +203,6 @@ class TrackStraightAnalyzer:
                         "wraps_lap": True,
                     })
 
-                # Process remaining middle runs
                 for s_idx, e_idx in bridged_runs[1:-1]:
                     l_dist = self.waypoints[e_idx].distance - self.waypoints[s_idx].distance
                     if l_dist >= min_length_m:
@@ -312,7 +230,6 @@ class TrackStraightAnalyzer:
                         "wraps_lap": False,
                     })
 
-        # 5. Build StraightSegment objects and calculate telemetry statistics
         segments: List[StraightSegment] = []
         for seg_idx, run in enumerate(final_runs, start=1):
             indices = run["indices"]
@@ -322,19 +239,18 @@ class TrackStraightAnalyzer:
             seg_speeds = [w.speed_ms * 3.6 for w in seg_wps]
             seg_headings = [headings[i] for i in indices]
 
-            # Compute robust circular median heading of segment waypoints
-            seg_headings_clean = [h for h in seg_headings if angle_diff_deg(h, seg_headings[len(seg_headings) // 2]) < 90.0]
+            seg_headings_clean = [
+                h for h in seg_headings if angle_diff_deg(h, seg_headings[len(seg_headings) // 2]) < 90.0
+            ]
             if seg_headings_clean:
                 sorted_clean = sorted(seg_headings_clean)
                 ref_heading = sorted_clean[len(sorted_clean) // 2]
             else:
                 ref_heading = seg_headings[0]
 
-            # Heading deviations along the segment relative to reference heading
             h_devs = [angle_diff_deg(h, ref_heading) for h in seg_headings_clean]
             max_h_dev = max(h_devs) if h_devs else 0.0
 
-            # Filter out segments that gently arc beyond heading tolerance
             if max_h_dev > max_heading_dev_deg * 2.0:
                 continue
 
@@ -346,35 +262,34 @@ class TrackStraightAnalyzer:
             end_dist = run["end_dist"]
             seg_len = run["length"]
 
-            segment = StraightSegment(
-                segment_id=seg_idx,
-                start_distance_m=round(start_dist, 2),
-                end_distance_m=round(end_dist, 2),
-                length_m=round(seg_len, 2),
-                start_progress=round(start_dist / self.total_length, 4),
-                end_progress=round(end_dist / self.total_length, 4),
-                start_waypoint_idx=run["start_idx"],
-                end_waypoint_idx=run["end_idx"],
-                waypoint_count=len(indices),
-                max_steer_deg=round(max(seg_steers) if seg_steers else 0.0, 2),
-                avg_steer_deg=round(sum(seg_steers) / len(seg_steers) if seg_steers else 0.0, 2),
-                min_radius_m=round(min(seg_radii) if seg_radii else 99999.0, 1),
-                avg_radius_m=round(sum(seg_radii) / len(seg_radii) if seg_radii else 99999.0, 1),
-                max_heading_dev_deg=round(max_h_dev, 2),
-                compass_heading_deg=round(chord_heading, 1),
-                compass_direction=compass_heading_to_label(chord_heading),
-                avg_ai_speed_kmh=round(sum(seg_speeds) / len(seg_speeds) if seg_speeds else 0.0, 1),
-                min_ai_speed_kmh=round(min(seg_speeds) if seg_speeds else 0.0, 1),
-                max_ai_speed_kmh=round(max(seg_speeds) if seg_speeds else 0.0, 1),
-                wraps_lap=run["wraps_lap"],
-                start_pos=[round(start_wp.x, 2), round(start_wp.y, 2), round(start_wp.z, 2)],
-                end_pos=[round(end_wp.x, 2), round(end_wp.y, 2), round(end_wp.z, 2)],
+            segments.append(
+                StraightSegment(
+                    segment_id=seg_idx,
+                    start_distance_m=round(start_dist, 2),
+                    end_distance_m=round(end_dist, 2),
+                    length_m=round(seg_len, 2),
+                    start_progress=round(start_dist / self.total_length, 4),
+                    end_progress=round(end_dist / self.total_length, 4),
+                    start_waypoint_idx=run["start_idx"],
+                    end_waypoint_idx=run["end_idx"],
+                    waypoint_count=len(indices),
+                    max_steer_deg=round(max(seg_steers) if seg_steers else 0.0, 2),
+                    avg_steer_deg=round(sum(seg_steers) / len(seg_steers) if seg_steers else 0.0, 2),
+                    min_radius_m=round(min(seg_radii) if seg_radii else 99999.0, 1),
+                    avg_radius_m=round(sum(seg_radii) / len(seg_radii) if seg_radii else 99999.0, 1),
+                    max_heading_dev_deg=round(max_h_dev, 2),
+                    compass_heading_deg=round(chord_heading, 1),
+                    compass_direction=compass_heading_to_label(chord_heading),
+                    avg_ai_speed_kmh=round(sum(seg_speeds) / len(seg_speeds) if seg_speeds else 0.0, 1),
+                    min_ai_speed_kmh=round(min(seg_speeds) if seg_speeds else 0.0, 1),
+                    max_ai_speed_kmh=round(max(seg_speeds) if seg_speeds else 0.0, 1),
+                    wraps_lap=run["wraps_lap"],
+                    start_pos=[round(start_wp.x, 2), round(start_wp.y, 2), round(start_wp.z, 2)],
+                    end_pos=[round(end_wp.x, 2), round(end_wp.y, 2), round(end_wp.z, 2)],
+                )
             )
-            segments.append(segment)
 
-        # Sort by length descending
         segments.sort(key=lambda s: s.length_m, reverse=True)
-        # Re-number IDs in order
         for idx, seg in enumerate(segments, start=1):
             seg.segment_id = idx
 
@@ -397,7 +312,9 @@ class TrackStraightAnalyzer:
         for seg in segments:
             if target_speed_kmh is not None and target_speed_kmh > 0:
                 effective_sec = post_go_sec
-                effective_margin_m = (target_speed_kmh / 3.6) * post_go_sec if post_go_margin_m is None else post_go_margin_m
+                effective_margin_m = (
+                    (target_speed_kmh / 3.6) * post_go_sec if post_go_margin_m is None else post_go_margin_m
+                )
                 gate_dist = (seg.end_distance_m - effective_margin_m + self.total_length) % self.total_length
                 countdown_dist = (target_speed_kmh / 3.6) * countdown_sec
                 spawn_dist = (gate_dist - countdown_dist + self.total_length) % self.total_length
@@ -405,7 +322,6 @@ class TrackStraightAnalyzer:
                 spawn_spd = target_speed_kmh
                 engaged_gear, engine_rpm = estimate_gear_and_rpm(target_speed_kmh)
             else:
-                # 1. Start gate is placed post_go_sec before the corner entry
                 if post_go_margin_m is not None:
                     gate_dist = (seg.end_distance_m - post_go_margin_m + self.total_length) % self.total_length
                     effective_margin_m = post_go_margin_m
@@ -416,15 +332,12 @@ class TrackStraightAnalyzer:
                     gate_dist = self.telemetry.integrate_distance_backward(seg.end_distance_m, post_go_sec)
                     effective_margin_m = (seg.end_distance_m - gate_dist + self.total_length) % self.total_length
 
-                # 2. Spawn point is placed countdown_sec before the start gate
                 spawn_dist = self.telemetry.integrate_distance_backward(gate_dist, countdown_sec)
                 countdown_dist = (gate_dist - spawn_dist + self.total_length) % self.total_length
 
-                # Query ground-truth 95% AI telemetry at gate and spawn
                 handover_spd, engaged_gear, engine_rpm = self.telemetry.query_sample(gate_dist)
                 spawn_spd, _, _ = self.telemetry.query_sample(spawn_dist)
 
-            # Check segment length requirement
             min_required_len = countdown_dist + effective_margin_m
             if seg.length_m < min_required_len:
                 continue
@@ -432,7 +345,6 @@ class TrackStraightAnalyzer:
             spawn_pos, spawn_fwd, _, _ = self.parser.query_distance(spawn_dist)
             gate_def = self.parser.compute_gate(gate_dist)
 
-            # Straightness score (0 to 100)
             steer_penalty = min(50.0, seg.max_steer_deg * 15.0)
             length_bonus = min(30.0, seg.length_m / 10.0)
             heading_penalty = min(20.0, seg.max_heading_dev_deg * 5.0)
@@ -460,37 +372,37 @@ class TrackStraightAnalyzer:
                 f"leaving {effective_sec:.1f}s ({effective_margin_m:.0f}m) straight time before corner."
             )
 
-            cand = RollingStartCandidate(
-                candidate_id=f"SEG_{seg.segment_id}_CORNER",
-                segment_id=seg.segment_id,
-                rank=0,  # Assigned after sorting
-                score=score,
-                placement_type="exit_corner_approach",
-                target_speed_kmh=round(handover_spd, 1),
-                spawn_speed_kmh=round(spawn_spd, 1),
-                engaged_gear=engaged_gear,
-                engine_rpm=engine_rpm,
-                countdown_sec=round(countdown_sec, 1),
-                countdown_distance_m=round(countdown_dist, 1),
-                post_go_sec=round(effective_sec, 2),
-                post_go_margin_m=round(effective_margin_m, 1),
-                start_gate_distance_m=round(gate_dist, 2),
-                start_gate_progress=start_s,
-                spawn_distance_m=round(spawn_dist, 2),
-                spawn_progress=spawn_s,
-                spawn_offset_m=spawn_offset,
-                spawn_pos=[round(p, 3) for p in spawn_pos],
-                spawn_forward=[round(f, 4) for f in spawn_fwd],
-                start_gate_p1=[round(p, 3) for p in gate_def.p1],
-                start_gate_p2=[round(p, 3) for p in gate_def.p2],
-                gate_width_m=gate_def.width,
-                max_countdown_steer_deg=seg.max_steer_deg,
-                description=desc,
-                test_config_snippet=snippet,
+            candidates.append(
+                RollingStartCandidate(
+                    candidate_id=f"SEG_{seg.segment_id}_CORNER",
+                    segment_id=seg.segment_id,
+                    rank=0,
+                    score=score,
+                    placement_type="exit_corner_approach",
+                    target_speed_kmh=round(handover_spd, 1),
+                    spawn_speed_kmh=round(spawn_spd, 1),
+                    engaged_gear=engaged_gear,
+                    engine_rpm=engine_rpm,
+                    countdown_sec=round(countdown_sec, 1),
+                    countdown_distance_m=round(countdown_dist, 1),
+                    post_go_sec=round(effective_sec, 2),
+                    post_go_margin_m=round(effective_margin_m, 1),
+                    start_gate_distance_m=round(gate_dist, 2),
+                    start_gate_progress=start_s,
+                    spawn_distance_m=round(spawn_dist, 2),
+                    spawn_progress=spawn_s,
+                    spawn_offset_m=spawn_offset,
+                    spawn_pos=[round(p, 3) for p in spawn_pos],
+                    spawn_forward=[round(f, 4) for f in spawn_fwd],
+                    start_gate_p1=[round(p, 3) for p in gate_def.p1],
+                    start_gate_p2=[round(p, 3) for p in gate_def.p2],
+                    gate_width_m=gate_def.width,
+                    max_countdown_steer_deg=seg.max_steer_deg,
+                    description=desc,
+                    test_config_snippet=snippet,
+                )
             )
-            candidates.append(cand)
 
-        # Sort candidates by score descending
         candidates.sort(key=lambda c: c.score, reverse=True)
         for rank, cand in enumerate(candidates, start=1):
             cand.rank = rank
@@ -507,10 +419,7 @@ class TrackStraightAnalyzer:
         post_go_margin_m: Optional[float] = None,
     ) -> Dict[str, Any]:
         """Generates full serializable dictionary summary."""
-        straights = self.find_straight_segments(
-            max_steer_deg=max_steer_deg,
-            min_length_m=min_length_m,
-        )
+        straights = self.find_straight_segments(max_steer_deg=max_steer_deg, min_length_m=min_length_m)
         candidates = self.evaluate_rolling_candidates(
             segments=straights,
             countdown_sec=countdown_sec,

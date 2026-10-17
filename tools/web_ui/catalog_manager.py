@@ -5,14 +5,11 @@ Provides reading, modifying, persisting of tests, track/car discovery, spline qu
 and triggering content generation / validation / AC live sync.
 """
 
-import glob
 import importlib
 import json
-import math
 import os
-import re
 import sys
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if REPO_ROOT not in sys.path:
@@ -21,7 +18,64 @@ if os.path.join(REPO_ROOT, "tools") not in sys.path:
     sys.path.insert(0, os.path.join(REPO_ROOT, "tools"))
 
 from tools.content.catalog import SERIES_METADATA, TIER_FOLDER_MAP
-from tools.extract_spline_coords import DEFAULT_AC_ROOT, SplineParser, find_spline_file
+from tools.extract_spline_coords import DEFAULT_AC_ROOT
+from tools.web_ui.ac_discovery import (
+    CAR_LAYOUT_MAP,
+    KUNOS_BASE_CARS,
+    KUNOS_BASE_TRACKS,
+    KUNOS_CAR_IDS,
+    KUNOS_TRACK_IDS,
+    _determine_drivetrain,
+    _discover_track_layouts,
+    _read_car_ui_data,
+    _read_ui_name,
+    get_available_cars,
+    get_available_tracks,
+    get_track_spline_data,
+    is_kunos_car,
+    is_kunos_track,
+)
+from tools.web_ui.asset_relocator import (
+    _clean_stale_career_events,
+    _clean_stale_json_files,
+    _clean_stale_svg_maps,
+    _mirror_file_to_ac_if_present,
+    _parse_test_number,
+    _read_binary_if_exists,
+    _read_test_asset_bundle,
+    _relocate_tier_test_assets,
+    _remove_slot_assets,
+    _resolve_previous_test_ids,
+    _test_identity_signature,
+    _write_relocated_test_assets,
+    clean_stale_tests,
+)
+from tools.web_ui.physics_calculator import (
+    RUN_MODE_LABELS,
+    _calculate_standing_speed,
+    _collect_rolling_tests,
+    _extract_telemetry_combo,
+    _find_existing_recording_job,
+    _get_queued_telemetry_combos,
+    _is_tier_matching,
+    _resolve_combo_status,
+    _update_combo_entry,
+    build_test_miniature,
+    calculate_test_initial_speed,
+    calculate_test_targets_and_physics,
+    enqueue_missing_telemetry_jobs,
+    get_missing_telemetry_summary,
+    run_live_test,
+)
+from tools.web_ui.reference_catalog import (
+    CAR_SPECS_CACHE,
+    _build_reference_entry,
+    _derive_missing_specs,
+    _format_time_str,
+    _parse_ui_car_specs,
+    _resolve_car_specs,
+    get_ac_curriculum_reference_tests,
+)
 
 TIER_NATIONAL_B = "National B"
 TIER_NATIONAL_A = "National A"
@@ -235,284 +289,6 @@ def _normalize_test_definition(t: Dict[str, Any], prefix: str, idx: int) -> None
         _normalize_rolling_test(t, start_mode)
 
 
-def _test_identity_signature(t: Dict[str, Any]) -> Tuple[Any, ...]:
-    return (
-        str(t.get("title", "")).strip(),
-        str(t.get("track_id", "")).strip(),
-        str(t.get("track_layout", "")).strip(),
-        str(t.get("car_id", "")).strip(),
-        round(float(t.get("start_s", 0.0)), 4),
-        round(float(t.get("finish_s", 1.0)), 4),
-        str(t.get("start_mode", "STANDING")).strip().upper(),
-    )
-
-
-def _parse_test_number(test_id: Optional[str], prefix: str) -> Optional[int]:
-    if not test_id or not isinstance(test_id, str) or not test_id.startswith(prefix):
-        return None
-    try:
-        num = int(test_id[len(prefix):])
-        return num if num > 0 else None
-    except ValueError:
-        return None
-
-
-def _resolve_previous_test_ids(
-    tests: List[Dict[str, Any]],
-    old_tests: List[Dict[str, Any]],
-    prefix: str,
-) -> List[Optional[str]]:
-    has_explicit_prev = any(bool(t.get("previous_test_id")) for t in tests)
-    has_unrenumbered_ids = any(
-        str(t.get("test_id", "")).strip() != f"{prefix}{idx}"
-        for idx, t in enumerate(tests, start=1)
-    )
-    if has_explicit_prev or has_unrenumbered_ids:
-        resolved: List[Optional[str]] = []
-        for t in tests:
-            raw_prev = str(t.get("previous_test_id") or t.get("test_id") or "").strip()
-            resolved.append(raw_prev if _parse_test_number(raw_prev, prefix) is not None else None)
-        return resolved
-
-    old_sigs = [_test_identity_signature(ot) for ot in old_tests]
-    used_old: Set[int] = set()
-    resolved = []
-    for t in tests:
-        sig = _test_identity_signature(t)
-        matched_id: Optional[str] = None
-        for old_idx, old_sig in enumerate(old_sigs):
-            if old_idx not in used_old and old_sig == sig:
-                used_old.add(old_idx)
-                matched_id = str(old_tests[old_idx].get("test_id", "")).strip() or f"{prefix}{old_idx + 1}"
-                break
-        resolved.append(matched_id)
-    return resolved
-
-
-def _read_binary_if_exists(path: str) -> Optional[bytes]:
-    if os.path.isfile(path):
-        try:
-            with open(path, "rb") as f:
-                return f.read()
-        except OSError:
-            return None
-    return None
-
-
-def _read_test_asset_bundle(
-    series_folder: str,
-    tier_folder: str,
-    prefix_clean: str,
-    old_id: Optional[str],
-    old_num: Optional[int],
-) -> Dict[str, Any]:
-    if not old_id or old_num is None:
-        return {
-            "preview_bytes": None,
-            "alt_preview_bytes": None,
-            "svg_text": None,
-            "test_json": None,
-            "ghost_bytes": None,
-        }
-
-    career_preview = os.path.join(REPO_ROOT, "content", "career", series_folder, f"event{old_num}", "preview.png")
-    alt_preview = os.path.join(REPO_ROOT, "assets", "previews", "tests", f"{old_id}.png")
-    svg_path = os.path.join(REPO_ROOT, "docs", "test_maps", f"{old_id}.svg")
-    test_json_path = os.path.join(REPO_ROOT, "content", "tests", tier_folder, f"test_{prefix_clean}{old_num:02d}.json")
-    ghost_path = os.path.join(REPO_ROOT, "content", "tests", tier_folder, f"ghost_test_{prefix_clean}{old_num:02d}.json")
-
-    svg_text = None
-    if os.path.isfile(svg_path):
-        try:
-            with open(svg_path, "r", encoding="utf-8") as f:
-                svg_text = f.read()
-        except OSError:
-            svg_text = None
-
-    test_json = None
-    if os.path.isfile(test_json_path):
-        try:
-            with open(test_json_path, "r", encoding="utf-8") as f:
-                test_json = json.load(f)
-        except Exception:
-            test_json = None
-
-    return {
-        "preview_bytes": _read_binary_if_exists(career_preview),
-        "alt_preview_bytes": _read_binary_if_exists(alt_preview),
-        "svg_text": svg_text,
-        "test_json": test_json,
-        "ghost_bytes": _read_binary_if_exists(ghost_path),
-    }
-
-
-def _remove_slot_assets(
-    series_folder: str,
-    tier_folder: str,
-    prefix: str,
-    prefix_clean: str,
-    num: int,
-) -> None:
-    test_id = f"{prefix}{num}"
-    paths = [
-        os.path.join(REPO_ROOT, "content", "career", series_folder, f"event{num}", "preview.png"),
-        os.path.join(REPO_ROOT, "assets", "previews", "tests", f"{test_id}.png"),
-        os.path.join(REPO_ROOT, "docs", "test_maps", f"{test_id}.svg"),
-        os.path.join(REPO_ROOT, "content", "tests", tier_folder, f"test_{prefix_clean}{num:02d}.json"),
-        os.path.join(REPO_ROOT, "content", "tests", tier_folder, f"ghost_test_{prefix_clean}{num:02d}.json"),
-    ]
-    for p in paths:
-        if os.path.isfile(p):
-            try:
-                os.remove(p)
-            except OSError:
-                pass
-
-
-def _mirror_file_to_ac_if_present(repo_file: str, ac_root: str = DEFAULT_AC_ROOT) -> None:
-    if not ac_root or not os.path.isdir(ac_root) or not os.path.isfile(repo_file):
-        return
-    try:
-        rel_path = os.path.relpath(repo_file, REPO_ROOT)
-        ac_dest = os.path.realpath(os.path.join(ac_root, rel_path))
-        real_ac_root = os.path.realpath(ac_root)
-        if os.path.commonpath([real_ac_root, ac_dest]) == real_ac_root and os.path.isdir(os.path.dirname(ac_dest)):
-            import shutil
-            shutil.copyfile(repo_file, ac_dest)
-    except Exception:
-        pass
-
-
-def _write_relocated_test_assets(
-    series_folder: str,
-    tier_folder: str,
-    prefix_clean: str,
-    new_id: str,
-    new_num: int,
-    old_id: Optional[str],
-    t: Dict[str, Any],
-    bundle: Dict[str, Any],
-    ac_root: str = DEFAULT_AC_ROOT,
-) -> None:
-    from tools.content.generator import generate_single_career_event, generate_single_test_json
-    from tools.generate_test_maps import generate_single_map
-    from tools.generate_test_previews import generate_single_preview
-
-    # 1. Career preview.png
-    dest_preview = os.path.join(REPO_ROOT, "content", "career", series_folder, f"event{new_num}", "preview.png")
-    if bundle["preview_bytes"] is not None:
-        os.makedirs(os.path.dirname(dest_preview), exist_ok=True)
-        with open(dest_preview, "wb") as f:
-            f.write(bundle["preview_bytes"])
-        _mirror_file_to_ac_if_present(dest_preview, ac_root=ac_root)
-    else:
-        try:
-            generate_single_preview(new_id, test_data=t, ac_root=ac_root)
-        except Exception:
-            pass
-
-    # 2. Optional assets/previews/tests/<ID>.png
-    if bundle["alt_preview_bytes"] is not None:
-        alt_dir = os.path.join(REPO_ROOT, "assets", "previews", "tests")
-        if os.path.isdir(alt_dir):
-            with open(os.path.join(alt_dir, f"{new_id}.png"), "wb") as f:
-                f.write(bundle["alt_preview_bytes"])
-
-    # 3. Vector Map SVG
-    dest_svg = os.path.join(REPO_ROOT, "docs", "test_maps", f"{new_id}.svg")
-    if bundle["svg_text"] is not None:
-        os.makedirs(os.path.dirname(dest_svg), exist_ok=True)
-        svg_text = bundle["svg_text"]
-        if old_id:
-            svg_text = svg_text.replace(f"<title>{old_id}:", f"<title>{new_id}:", 1)
-        with open(dest_svg, "w", encoding="utf-8") as f:
-            f.write(svg_text)
-    else:
-        try:
-            generate_single_map(new_id, test_data=t, ac_root=ac_root)
-        except Exception:
-            pass
-
-    # 4. Test JSON & Ghost JSON
-    dest_test_json = os.path.join(REPO_ROOT, "content", "tests", tier_folder, f"test_{prefix_clean}{new_num:02d}.json")
-    if isinstance(bundle["test_json"], dict):
-        os.makedirs(os.path.dirname(dest_test_json), exist_ok=True)
-        updated_json = dict(bundle["test_json"])
-        updated_json["test_id"] = new_id
-        with open(dest_test_json, "w", encoding="utf-8") as f:
-            json.dump(updated_json, f, indent=2)
-    else:
-        try:
-            generate_single_test_json(t, ac_root=ac_root)
-        except Exception:
-            pass
-
-    if bundle["ghost_bytes"] is not None:
-        dest_ghost = os.path.join(
-            REPO_ROOT, "content", "tests", tier_folder, f"ghost_test_{prefix_clean}{new_num:02d}.json"
-        )
-        os.makedirs(os.path.dirname(dest_ghost), exist_ok=True)
-        with open(dest_ghost, "wb") as f:
-            f.write(bundle["ghost_bytes"])
-
-    # 5. Career event.ini
-    try:
-        event_ini = generate_single_career_event(t)
-        if event_ini:
-            _mirror_file_to_ac_if_present(event_ini, ac_root=ac_root)
-    except Exception:
-        pass
-
-
-def _relocate_tier_test_assets(
-    tier_name: str,
-    tests: List[Dict[str, Any]],
-    old_test_ids: List[Optional[str]],
-    old_count: int,
-) -> None:
-    meta = next((s for s in SERIES_METADATA if s["tier_name"] == tier_name), None)
-    if not meta:
-        return
-    prefix = meta["test_prefix"]
-    prefix_clean = prefix.rstrip("-").lower()
-    series_folder = meta["folder"]
-    tier_folder = TIER_FOLDER_MAP[tier_name]
-
-    moved_entries: List[Tuple[int, str, Optional[int], Optional[str], Dict[str, Any], Dict[str, Any]]] = []
-    affected_slots: Set[int] = set()
-
-    for idx, t in enumerate(tests, start=1):
-        new_id = f"{prefix}{idx}"
-        old_id = old_test_ids[idx - 1] if idx - 1 < len(old_test_ids) else None
-        old_num = _parse_test_number(old_id, prefix)
-        if old_num == idx:
-            continue
-        bundle = _read_test_asset_bundle(series_folder, tier_folder, prefix_clean, old_id, old_num)
-        moved_entries.append((idx, new_id, old_num, old_id, t, bundle))
-        affected_slots.add(idx)
-        if old_num is not None and 1 <= old_num <= len(tests):
-            affected_slots.add(old_num)
-
-    if moved_entries:
-        for slot_num in sorted(affected_slots):
-            _remove_slot_assets(series_folder, tier_folder, prefix, prefix_clean, slot_num)
-
-        for new_num, new_id, _old_num, old_id, t, bundle in moved_entries:
-            _write_relocated_test_assets(
-                series_folder=series_folder,
-                tier_folder=tier_folder,
-                prefix_clean=prefix_clean,
-                new_id=new_id,
-                new_num=new_num,
-                old_id=old_id,
-                t=t,
-                bundle=bundle,
-            )
-
-    if len(tests) < old_count:
-        clean_stale_tests()
-
-
 def _reload_tier_catalog_modules(tier_name: str) -> None:
     folder = TIER_FOLDER_MAP.get(tier_name)
     if folder:
@@ -565,352 +341,6 @@ TIER_NAME = "{tier_name}"
     _relocate_tier_test_assets(tier_name, tests, old_test_ids, len(old_tests))
 
     return file_path
-
-
-KUNOS_BASE_TRACKS = {
-    "drift",
-    "imola",
-    "magione",
-    "monza",
-    "mugello",
-    "spa",
-    "trento-bondone",
-    "vallelunga",
-}
-
-KUNOS_BASE_CARS = {
-    "abarth500",
-    "abarth500_s1",
-    "alfa_romeo_giulietta_qv",
-    "alfa_romeo_giulietta_qv_le",
-    "bmw_1m",
-    "bmw_1m_s3",
-    "bmw_m3_e30",
-    "bmw_m3_e30_drift",
-    "bmw_m3_e30_dtm",
-    "bmw_m3_e30_gra",
-    "bmw_m3_e30_s1",
-    "bmw_m3_e92",
-    "bmw_m3_e92_drift",
-    "bmw_m3_e92_s1",
-    "bmw_m3_gt2",
-    "bmw_z4",
-    "bmw_z4_drift",
-    "bmw_z4_gt3",
-    "bmw_z4_s1",
-    "ferrari_312t",
-    "ferrari_458",
-    "ferrari_458_gt2",
-    "ferrari_458_s3",
-    "ferrari_f40",
-    "ferrari_f40_s3",
-    "ferrari_laferrari",
-    "ktm_x_bow_r",
-    "lotus_2_eleven",
-    "lotus_2_eleven_gt4",
-    "lotus_98t",
-    "lotus_elise_sc",
-    "lotus_elise_sc_s1",
-    "lotus_elise_sc_s2",
-    "lotus_evora_gtc",
-    "lotus_evora_gte",
-    "lotus_evora_gte_carbon",
-    "lotus_evora_gx",
-    "lotus_evora_s",
-    "lotus_evora_s_s2",
-    "lotus_exige_240",
-    "lotus_exige_240_s3",
-    "lotus_exige_s",
-    "lotus_exige_s_roadster",
-    "lotus_exige_scura",
-    "lotus_exige_v6_cup",
-    "lotus_exos_125",
-    "lotus_exos_125_s1",
-    "mclaren_mp412c",
-    "mclaren_mp412c_gt3",
-    "mercedes_sls",
-    "mercedes_sls_gt3",
-    "pagani_huayra",
-    "pagani_zonda_r",
-    "ruf_yellowbird",
-    "scuderia_glickenhaus_scg003",
-    "shelby_cobra_427sc",
-    "tatuusfa01",
-}
-
-
-def is_kunos_track(track_id: str) -> bool:
-    """Checks whether a track was created by Kunos Simulazioni."""
-    return track_id.startswith("ks_") or track_id in KUNOS_BASE_TRACKS
-
-
-def is_kunos_car(car_id: str) -> bool:
-    """Checks whether a car was created by Kunos Simulazioni."""
-    return car_id.startswith("ks_") or car_id in KUNOS_BASE_CARS
-
-
-def _read_ui_name(json_path: str, default: str) -> str:
-    """Safely reads the display name from a ui_track.json file."""
-    if os.path.isfile(json_path):
-        try:
-            with open(json_path, "r", encoding="utf-8", errors="ignore") as f:
-                u = json.loads(f.read(), strict=False)
-                return u.get("name", default)
-        except Exception:
-            pass
-    return default
-
-
-def _discover_track_layouts(t_path: str, t_id: str, ac_root: str) -> List[Dict[str, Any]]:
-    """Discovers default and sub-folder layouts for a track directory."""
-    layouts = []
-    def_spline = find_spline_file(t_id, "", ac_root)
-    if def_spline:
-        layouts.append({
-            "layout_id": "",
-            "name": "Default Layout",
-            "spline_file": def_spline,
-        })
-
-    for sub in sorted(os.listdir(t_path)):
-        sub_path = os.path.join(t_path, sub)
-        if not os.path.isdir(sub_path):
-            continue
-        sub_spline = find_spline_file(t_id, sub, ac_root)
-        if sub_spline and sub_spline != def_spline:
-            sub_ui = os.path.join(t_path, "ui", sub, "ui_track.json")
-            layouts.append({
-                "layout_id": sub,
-                "name": _read_ui_name(sub_ui, sub),
-                "spline_file": sub_spline,
-            })
-    return layouts
-
-
-def get_available_tracks(ac_root: str = DEFAULT_AC_ROOT, kunos_only: bool = True) -> List[Dict[str, Any]]:
-    """Discovers all tracks and layouts that have valid AI splines, filtered to Kunos content."""
-    tracks_dir = os.path.join(ac_root, "content", "tracks")
-    if not os.path.isdir(tracks_dir):
-        return []
-
-    tracks_list = []
-    for t_id in sorted(os.listdir(tracks_dir)):
-        t_path = os.path.join(tracks_dir, t_id)
-        if not os.path.isdir(t_path):
-            continue
-
-        if kunos_only and not is_kunos_track(t_id):
-            continue
-
-        track_name = _read_ui_name(os.path.join(t_path, "ui", "ui_track.json"), t_id)
-        layouts = _discover_track_layouts(t_path, t_id, ac_root)
-        if layouts:
-            tracks_list.append({
-                "track_id": t_id,
-                "name": track_name,
-                "layouts": layouts,
-            })
-
-    return tracks_list
-
-
-CAR_LAYOUT_MAP: Dict[str, str] = {
-    "abarth500": "FF", "alfa_romeo_giulietta_qv": "FF", "ks_alfa_mito_qv": "FF",
-    "ks_audi_a1s1": "FAWD", "ks_audi_sport_quattro": "FAWD", "ks_toyota_celica_st185": "FAWD",
-    "ks_nissan_gtr": "FAWD", "ks_alfa_romeo_155_v6": "FAWD",
-    "ks_lamborghini_huracan_performante": "MAWD", "ks_porsche_919_hybrid_2016": "MAWD", "ks_toyota_ts040": "MAWD",
-    "ks_porsche_911_gt3_r_2016": "RR", "ks_porsche_911_gt3_rs": "RR", "ks_porsche_911_rsr_2017": "RR",
-    "ferrari_458": "MR", "ferrari_laferrari": "MR", "ks_alfa_romeo_4c": "MR", "ks_audi_r8_lms_2016": "MR",
-    "ks_ferrari_488_gt3": "MR", "ks_ferrari_488_gtb": "MR", "ks_ferrari_f2004": "MR", "ks_ford_gt40": "MR",
-    "ks_mazda_787b": "MR", "ks_mclaren_650_gt3": "MR", "ks_mclaren_p1": "MR", "ks_mercedes_c9": "MR",
-    "ks_porsche_718_cayman_s": "MR", "ks_porsche_962c_shorttail": "MR", "ks_porsche_cayman_gt4_clubsport": "MR",
-    "lotus_2_eleven": "MR", "lotus_elise_sc": "MR", "lotus_exige_240": "MR", "pagani_zonda_r": "MR",
-}
-
-
-def _read_car_ui_data(c_path: str, c_id: str) -> Tuple[str, str, List[str]]:
-    """Safely extracts name, brand, and tags from ui_car.json."""
-    ui_file = os.path.join(c_path, "ui", "ui_car.json")
-    if not os.path.isfile(ui_file):
-        return c_id, "", []
-    try:
-        with open(ui_file, "r", encoding="utf-8", errors="ignore") as f:
-            u = json.loads(f.read(), strict=False)
-            car_name = u.get("name", c_id)
-            brand = u.get("brand", "")
-            raw_tags = u.get("tags", [])
-            tags = [str(t).strip() for t in raw_tags if str(t).strip()] if isinstance(raw_tags, list) else []
-            return car_name, brand, tags
-    except Exception:
-        return c_id, "", []
-
-
-def _determine_drivetrain(c_id: str, tags: List[str]) -> str:
-    """Determines authoritative drivetrain (FWD, RWD, AWD) from tags or layout mapping."""
-    lower_tags = {t.lower() for t in tags}
-    if any(t in lower_tags for t in ("awd", "4wd", "mawd", "fawd")):
-        return "AWD"
-    if "fwd" in lower_tags or "ff" in lower_tags:
-        return "FWD"
-    if "rwd" in lower_tags or any(t in lower_tags for t in ("fr", "mr", "rr")):
-        return "RWD"
-
-    layout = CAR_LAYOUT_MAP.get(c_id, "FR")
-    if layout in ("FAWD", "MAWD", "AWD"):
-        return "AWD"
-    if layout in ("FF", "FWD"):
-        return "FWD"
-    return "RWD"
-
-
-def get_available_cars(ac_root: str = DEFAULT_AC_ROOT, kunos_only: bool = True) -> List[Dict[str, Any]]:
-    """Discovers all cars in AC with their display names, tags, and drivetrain, filtered to Kunos content."""
-    cars_dir = os.path.join(ac_root, "content", "cars")
-    if not os.path.isdir(cars_dir):
-        return []
-
-    cars_list = []
-    for c_id in sorted(os.listdir(cars_dir)):
-        c_path = os.path.join(cars_dir, c_id)
-        if not os.path.isdir(c_path):
-            continue
-
-        if kunos_only and not is_kunos_car(c_id):
-            continue
-
-        car_name, brand, tags = _read_car_ui_data(c_path, c_id)
-        drivetrain = _determine_drivetrain(c_id, tags)
-
-        cars_list.append({
-            "car_id": c_id,
-            "name": car_name,
-            "brand": brand,
-            "tags": tags,
-            "drivetrain": drivetrain,
-        })
-    return cars_list
-
-
-def get_track_spline_data(track_id: str, layout: str = "", ac_root: str = DEFAULT_AC_ROOT) -> Optional[Dict[str, Any]]:
-    """Extracts downsampled centerline points for 2D map preview."""
-    spline_file = find_spline_file(track_id, layout, ac_root)
-    if not spline_file:
-        return None
-
-    try:
-        parser = SplineParser(spline_file)
-    except Exception as e:
-        return {"error": str(e)}
-
-    total_len = parser.total_length
-    count = len(parser.waypoints)
-    if count == 0:
-        return None
-
-    # Downsample to ~250 points for smooth, lightweight canvas/svg rendering
-    step = max(1, count // 250)
-    samples = []
-    xs = []
-    zs = []
-
-    for wp in parser.waypoints[::step]:
-        # Top-down coordinates: x = wp.x, y = -wp.z
-        xs.append(wp.x)
-        zs.append(-wp.z)
-        samples.append({
-            "x": round(wp.x, 2),
-            "y": round(-wp.z, 2),
-            "s": round(wp.distance / total_len if total_len > 0 else 0.0, 4),
-            "dist": round(wp.distance, 1),
-        })
-
-    # Close loop if circuit
-    if count > 2 and (
-        (parser.waypoints[0].x - parser.waypoints[-1].x)**2 +
-        (parser.waypoints[0].z - parser.waypoints[-1].z)**2
-    )**0.5 < 50.0:
-        samples.append(samples[0])
-
-    min_x, max_x = min(xs), max(xs)
-    min_y, max_y = min(zs), max(zs)
-
-    return {
-        "track_id": track_id,
-        "track_layout": layout,
-        "total_length_m": round(total_len, 2),
-        "point_count": len(samples),
-        "bounds": {
-            "min_x": round(min_x, 2),
-            "max_x": round(max_x, 2),
-            "min_y": round(min_y, 2),
-            "max_y": round(max_y, 2),
-            "width": round(max_x - min_x, 2),
-            "height": round(max_y - min_y, 2),
-        },
-        "points": samples,
-    }
-
-
-def _clean_stale_json_files(test_catalog: List[Dict[str, Any]]) -> None:
-    valid_files = set()
-    for tdef in test_catalog:
-        tier_dir = os.path.join(REPO_ROOT, "content", "tests", TIER_FOLDER_MAP[tdef["tier"]])
-        prefix, num_str = tdef["test_id"].split("-")
-        num = int(num_str)
-        valid_files.add(os.path.normpath(os.path.join(tier_dir, f"test_{prefix.lower()}{num:02d}.json")))
-        valid_files.add(os.path.normpath(os.path.join(tier_dir, f"ghost_test_{prefix.lower()}{num:02d}.json")))
-
-    tests_root = os.path.join(REPO_ROOT, "content", "tests")
-    for t_folder in TIER_FOLDER_MAP.values():
-        dir_path = os.path.join(tests_root, t_folder)
-        if not os.path.isdir(dir_path):
-            continue
-        for f in glob.glob(os.path.join(dir_path, "*.json")):
-            if os.path.normpath(f) not in valid_files:
-                try:
-                    os.remove(f)
-                except OSError:
-                    pass
-
-
-def _clean_stale_career_events(test_catalog: List[Dict[str, Any]]) -> None:
-    import shutil
-    career_root = os.path.join(REPO_ROOT, "content", "career")
-    for s_meta in SERIES_METADATA:
-        series_dir = os.path.join(career_root, s_meta["folder"])
-        if not os.path.isdir(series_dir):
-            continue
-        tier_tests = [t for t in test_catalog if t["tier"] == s_meta["tier_name"]]
-        max_events = len(tier_tests)
-        for event_dir in glob.glob(os.path.join(series_dir, "event*")):
-            m = re.match(r"event(\d+)$", os.path.basename(event_dir))
-            if m and int(m.group(1)) > max_events:
-                try:
-                    shutil.rmtree(event_dir)
-                except OSError:
-                    pass
-
-
-def _clean_stale_svg_maps(valid_test_ids: set) -> None:
-    maps_dir = os.path.join(REPO_ROOT, "docs", "test_maps")
-    if not os.path.isdir(maps_dir):
-        return
-    for svg_file in glob.glob(os.path.join(maps_dir, "*.svg")):
-        tid = os.path.splitext(os.path.basename(svg_file))[0]
-        if tid not in valid_test_ids:
-            try:
-                os.remove(svg_file)
-            except OSError:
-                pass
-
-
-def clean_stale_tests() -> None:
-    """Removes any generated test JSONs that are no longer in the catalog."""
-    from tools.content.catalog import TEST_CATALOG
-
-    _clean_stale_json_files(TEST_CATALOG)
-    _clean_stale_career_events(TEST_CATALOG)
-    _clean_stale_svg_maps({tdef["test_id"] for tdef in TEST_CATALOG})
 
 
 def generate_and_validate(ac_root: str = DEFAULT_AC_ROOT) -> Dict[str, Any]:
@@ -987,594 +417,74 @@ def generate_and_validate(ac_root: str = DEFAULT_AC_ROOT) -> Dict[str, Any]:
     }
 
 
-CAR_SPECS_CACHE: Dict[str, Tuple[int, int, float, str]] = {
-    "ferrari_laferrari": (963, 1255, 1.30, "MR"),
-    "ks_ferrari_f2004": (865, 605, 0.70, "MR"),
-    "ks_toyota_ts040": (1000, 870, 0.87, "MAWD"),
-}
-
-
-def _format_time_str(s: Optional[float]) -> str:
-    """Formats seconds into human-readable gold/silver/bronze target display."""
-    if s is None:
-        return "N/A"
-    if s < 60:
-        return f"{s:.3f}s"
-    m = int(s // 60)
-    sec_part = s % 60
-    return f"{m}:{sec_part:06.3f}"
-
-
-def _parse_ui_car_specs(
-    ui_path: str,
-    default_name: str,
-) -> Tuple[str, Optional[int], Optional[int], Optional[float]]:
-    """Extracts car display name, hp, weight, and pwratio from ui_car.json."""
-    if not os.path.isfile(ui_path):
-        return default_name, None, None, None
-
-    try:
-        with open(ui_path, "r", encoding="utf-8", errors="ignore") as f:
-            d = json.loads(f.read(), strict=False)
-            name = d.get("name", default_name)
-            specs = d.get("specs", {})
-
-            bhp_m = re.search(r"(\d+)", specs.get("bhp", ""))
-            hp = int(bhp_m.group(1)) if bhp_m else None
-
-            wt_m = re.search(r"(\d+)", specs.get("weight", ""))
-            wt = int(wt_m.group(1)) if wt_m else None
-
-            pw_m = re.search(r"([\d.]+)", specs.get("pwratio", ""))
-            pw = float(pw_m.group(1)) if pw_m else None
-
-            return name, hp, wt, pw
-    except Exception:
-        return default_name, None, None, None
-
-
-def _derive_missing_specs(
-    hp: Optional[int],
-    wt: Optional[int],
-    pw: Optional[float],
-) -> Tuple[Optional[int], Optional[float]]:
-    """Derives weight or power-to-weight ratio if one is missing and the other is available."""
-    if hp:
-        if wt and not pw:
-            pw = round(wt / hp, 2)
-        elif pw and not wt:
-            wt = round(hp * pw)
-    return wt, pw
-
-
-def _resolve_car_specs(
-    car_id: str,
-    default_name: str,
-    ac_cars_dir: str,
-) -> Tuple[str, int, Optional[int], Optional[float]]:
-    """Resolves car display name, horsepower, weight, and power-to-weight ratio."""
-    if car_id in CAR_SPECS_CACHE:
-        hp, wt, pw, _ = CAR_SPECS_CACHE[car_id]
-        car_display_name = default_name
-    else:
-        ui_path = os.path.join(ac_cars_dir, car_id, "ui", "ui_car.json")
-        car_display_name, hp, wt, pw = _parse_ui_car_specs(ui_path, default_name)
-
-    wt, pw = _derive_missing_specs(hp, wt, pw)
-    return car_display_name, hp or 200, wt, pw
-
-
-def _build_reference_entry(
-    test: Dict[str, Any],
-    tier_name: str,
-    progression: int,
-    track_map: Dict[str, str],
-    car_name_map: Dict[str, str],
-    ac_cars_dir: str,
-) -> Dict[str, Any]:
-    """Constructs a single reference test entry."""
-    car_id = test.get("car_id", "")
-    default_name = car_name_map.get(car_id, car_id)
-    car_display_name, hp, wt, pw = _resolve_car_specs(car_id, default_name, ac_cars_dir)
-
-    layout = CAR_LAYOUT_MAP.get(car_id, "FR")
-    track_id = test.get("track_id", "")
-    track_name = track_map.get(track_id, track_id)
-    layout_id = test.get("track_layout", "")
-    if layout_id:
-        track_name += f" ({layout_id})"
-
-    targets = test.get("targets", {})
-    gold_sec = targets.get("gold_seconds")
-    silver_sec = targets.get("silver_seconds")
-    bronze_sec = targets.get("bronze_seconds")
-    t_code = test.get("test_id", f"T-{progression}")
-
-    return {
-        "id": f"AC_{test.get('test_id', progression)}",
-        "game": "AC Mod",
-        "license": tier_name,
-        "section": f"AC Mod {tier_name}",
-        "code": t_code,
-        "title": test.get("title", ""),
-        "test": f"{test.get('test_id', '')} - {test.get('title', '')}",
-        "car": car_display_name,
-        "car_id": car_id,
-        "hp": hp,
-        "weight_kg": wt,
-        "pw_kg_hp": pw,
-        "drivetrain_layout": layout,
-        "track": track_name,
-        "gold": _format_time_str(gold_sec),
-        "silver": _format_time_str(silver_sec),
-        "bronze": _format_time_str(bronze_sec),
-        "gold_seconds": gold_sec,
-        "silver_seconds": silver_sec,
-        "bronze_seconds": bronze_sec,
-        "target_type": "time",
-        "test_progression": progression,
-    }
-
-
-def get_ac_curriculum_reference_tests() -> List[Dict[str, Any]]:
-    """Converts the active 58 AC Mod career license tests into the standard reference format."""
-    ac_cars_dir = os.path.join(DEFAULT_AC_ROOT, "content", "cars")
-    tracks = get_available_tracks(kunos_only=False)
-    track_map = {t["track_id"]: t["name"] for t in tracks}
-    cars = get_available_cars(kunos_only=False)
-    car_name_map = {c["car_id"]: c["name"] for c in cars}
-
-    curriculum = load_curriculum()
-    ac_tests: List[Dict[str, Any]] = []
-    progression = 1
-
-    for tier in curriculum:
-        tier_name = tier["tier_name"]
-        for test in tier["tests"]:
-            entry = _build_reference_entry(
-                test,
-                tier_name,
-                progression,
-                track_map,
-                car_name_map,
-                ac_cars_dir,
-            )
-            ac_tests.append(entry)
-            progression += 1
-
-    return ac_tests
-
-
-def calculate_test_targets_and_physics(
-    track_id: str,
-    track_layout: str = "",
-    car_id: str = "ks_mazda_miata",
-    start_s: float = 0.0,
-    finish_s: float = 1.0,
-    start_mode: str = "ROLLING",
-    with_stop_box: bool = False,
-    countdown_sec: float = 3.0,
-) -> Dict[str, Any]:
-    """
-    Instantly computes authentic target times (Gold, Silver, Bronze) and launch/countdown physics
-    from cached telemetry profiles or synthesized track spline.
-    """
-    from tools.telemetry.recorder import get_or_calculate_targets
-    try:
-        res = get_or_calculate_targets(
-            track_id=track_id,
-            layout=track_layout,
-            car_id=car_id,
-            start_s=start_s,
-            finish_s=finish_s,
-            start_mode=start_mode,
-            with_stop_box=with_stop_box,
-            countdown_sec=countdown_sec,
-            allow_live_engine=False,
-        )
-        return res
-    except Exception as e:
-        return {
-            "success": False,
-            "error": str(e),
-            "targets": {"gold_seconds": 15.0, "silver_seconds": 18.0, "bronze_seconds": 22.0},
-        }
-
-
-def _calculate_standing_speed(
-    track_id: str,
-    track_layout: str,
-    car_id: str,
-    start_s: float,
-    finish_s: float,
-    start_mode: str,
-    with_stop_box: bool,
-) -> Dict[str, Any]:
-    """Calculates target parameters for standing start tests."""
-    from tools.telemetry.recorder import get_or_calculate_targets
-    try:
-        tg = get_or_calculate_targets(
-            track_id=track_id, layout=track_layout, car_id=car_id,
-            start_s=start_s, finish_s=finish_s, start_mode=start_mode, with_stop_box=with_stop_box,
-        )
-        return {
-            "success": True,
-            "status": "cached",
-            "speed_kmh": 0.0,
-            "spawn_offset_m": 0.0,
-            "gear": 1,
-            "rpm": 1000,
-            "source": tg.get("source", "standing_start"),
-            "targets": tg.get("targets", {}),
-            "sector_time_s": tg.get("sector_time_s", 0.0),
-            "sector_length_m": tg.get("sector_length_m", 0.0),
-        }
-    except Exception:
-        return {
-            "success": True,
-            "status": "cached",
-            "speed_kmh": 0.0,
-            "spawn_offset_m": 0.0,
-            "gear": 1,
-            "rpm": 1000,
-            "source": "standing_start",
-        }
-
-
-def _find_existing_recording_job(
-    queue_status: Dict[str, Any], track_id: str, car_id: str
-) -> Optional[Dict[str, Any]]:
-    """Checks whether a telemetry recording job for this track and car is already active or in queue."""
-    active_job = queue_status.get("active_job")
-    if active_job and active_job.get("type") == "record_telemetry":
-        p = active_job.get("params", {})
-        if p.get("track_id") == track_id and p.get("car_id") == car_id:
-            return {
-                "success": True,
-                "status": "queued",
-                "job_id": active_job["id"],
-                "message": f"Assetto Corsa is currently recording 100% AI telemetry for {car_id} at {track_id}...",
-            }
-
-    for qj in queue_status.get("queue", []):
-        if qj.get("type") == "record_telemetry":
-            p = qj.get("params", {})
-            if p.get("track_id") == track_id and p.get("car_id") == car_id:
-                return {
-                    "success": True,
-                    "status": "queued",
-                    "job_id": qj["id"],
-                    "message": f"100% AI Telemetry recording for {car_id} at {track_id} is already in queue...",
-                }
-    return None
-
-
-def calculate_test_initial_speed(
-    track_id: str,
-    track_layout: str = "",
-    car_id: str = "ks_mazda_miata",
-    start_s: float = 0.0,
-    finish_s: float = 1.0,
-    start_mode: str = "ROLLING",
-    with_stop_box: bool = False,
-    countdown_sec: float = 3.0,
-) -> Dict[str, Any]:
-    """
-    Calculates initial speed, spawn offset, gear, RPM, and target times for a test.
-    If cached telemetry profile exists, returns authentic physics immediately.
-    If not cached, enqueues an authentic full-lap recording in Assetto Corsa into the job runner.
-    """
-    if start_mode == "STANDING":
-        return _calculate_standing_speed(
-            track_id=track_id,
-            track_layout=track_layout,
-            car_id=car_id,
-            start_s=start_s,
-            finish_s=finish_s,
-            start_mode=start_mode,
-            with_stop_box=with_stop_box,
-        )
-
-    from tools.telemetry.recorder import load_telemetry_profile
-    from tools.web_ui.runner import queue_mgr
-
-    # 1. Check if an authentic telemetry profile is already cached
-    cached_profile = load_telemetry_profile(track_id, track_layout, car_id, ai_level=100)
-    if cached_profile:
-        physics = cached_profile.calculate_gate_physics(start_s, countdown_sec)
-        targets_info = cached_profile.calculate_sector_targets(start_s, finish_s, start_mode, with_stop_box)
-        physics["targets"] = targets_info
-        physics["sector_time_s"] = targets_info["sector_time_s"]
-        physics["sector_length_m"] = targets_info["sector_length_m"]
-        physics["success"] = True
-        physics["status"] = "cached"
-        return physics
-
-    # 2. Check if a recording job for this track and car is already active or queued
-    queue_status = queue_mgr.get_status()
-    existing_job = _find_existing_recording_job(queue_status, track_id, car_id)
-    if existing_job:
-        return existing_job
-
-    # 3. Automatically queue a full lap recording in Assetto Corsa
-    job = queue_mgr.enqueue_job(
-        job_type="record_telemetry",
-        test_id="TELEMETRY_REC",
-        title=f"Record 100% AI Telemetry: {car_id} @ {track_id}",
-        params={
-            "track_id": track_id,
-            "track_layout": track_layout,
-            "car_id": car_id,
-            "start_s": start_s,
-            "finish_s": finish_s,
-            "start_mode": start_mode,
-            "with_stop_box": with_stop_box,
-            "countdown_sec": countdown_sec,
-            "ai_level": 100,
-        },
-    )
-
-    return {
-        "success": True,
-        "status": "queued",
-        "job_id": job.id,
-        "message": f"No pre-recorded profile found for {car_id} at {track_id}. Enqueued authentic Assetto Corsa recording...",
-    }
-
-
-RUN_MODE_LABELS = {
-    "ai": "AI Demo",
-    "eval": "Audit Eval",
-}
-
-
-def run_live_test(
-    test_id: str,
-    mode: str = "play",
-    sync_first: bool = True,
-    test_data: Optional[Dict[str, Any]] = None,
-    timeout: int = 8,
-) -> Dict[str, Any]:
-    """
-    Enqueues a license test for execution in Assetto Corsa via the FIFO queue manager.
-    Modes:
-      - 'play': Interactive session with timing gates and driver control.
-      - 'ai': Simulation session with 95% AI autopilot.
-      - 'eval': Headless in-engine evaluation loop (8s audit).
-    """
-    from tools.web_ui.runner import queue_mgr
-
-    mode_label = RUN_MODE_LABELS.get(mode, "Driver Play")
-    job = queue_mgr.enqueue_job(
-        job_type=mode,
-        test_id=test_id,
-        title=f"Test [{test_id}] ({mode_label})",
-        params={
-            "mode": mode,
-            "sync_first": sync_first,
-            "test_data": test_data,
-            "timeout": timeout,
-        },
-    )
-
-    return {
-        "success": True,
-        "status": "queued",
-        "job_id": job.id,
-        "mode": mode,
-        "test_id": test_id,
-        "message": f"Test [{test_id}] ({mode_label}) enqueued for execution in Assetto Corsa.",
-    }
-
-
-def _extract_telemetry_combo(job_data: Optional[Dict[str, Any]]) -> Optional[Tuple[str, str, str]]:
-    """Extracts (track_id, track_layout, car_id) tuple if job is record_telemetry."""
-    if not job_data or job_data.get("type") != "record_telemetry":
-        return None
-    p = job_data.get("params", {})
-    return (p.get("track_id", ""), p.get("track_layout", ""), p.get("car_id", ""))
-
-
-def _get_queued_telemetry_combos(queue_status: Dict[str, Any]) -> Set[Tuple[str, str, str]]:
-    """Collects set of active or enqueued telemetry recording combos."""
-    queued_combos: Set[Tuple[str, str, str]] = set()
-    active_combo = _extract_telemetry_combo(queue_status.get("active_job"))
-    if active_combo:
-        queued_combos.add(active_combo)
-
-    for qj in queue_status.get("queue", []):
-        combo = _extract_telemetry_combo(qj)
-        if combo:
-            queued_combos.add(combo)
-    return queued_combos
-
-
-def _resolve_combo_status(is_cached: bool, is_queued: bool) -> str:
-    """Returns 'cached', 'queued', or 'missing' status for a telemetry combo."""
-    if is_cached:
-        return "cached"
-    if is_queued:
-        return "queued"
-    return "missing"
-
-
-def _is_tier_matching(tier_name: str, requested_tier: Optional[str]) -> bool:
-    """Checks whether tier matches filter (or filter is ALL/None)."""
-    if not requested_tier or requested_tier == "ALL":
-        return True
-    return tier_name.lower() == requested_tier.lower()
-
-
-def _collect_rolling_tests(
-    curriculum: List[Dict[str, Any]],
-    tier: Optional[str],
-    valid_modes: Set[str],
-) -> List[Tuple[Dict[str, Any], str]]:
-    """Gathers all rolling start tests matching tier filter and valid start modes."""
-    rolling_tests: List[Tuple[Dict[str, Any], str]] = []
-    for s in curriculum:
-        tier_name = s.get("tier_name", "")
-        if not _is_tier_matching(tier_name, tier):
-            continue
-
-        for t in s.get("tests", []):
-            if t.get("start_mode", "STANDING") not in valid_modes:
-                continue
-            if not t.get("track_id") or not t.get("car_id"):
-                continue
-            rolling_tests.append((t, tier_name))
-    return rolling_tests
-
-
-def _update_combo_entry(
-    combos_map: Dict[Tuple[str, str, str], Dict[str, Any]],
-    combo_key: Tuple[str, str, str],
-    test: Dict[str, Any],
-    tier_name: str,
-    is_cached: bool,
-    is_queued: bool,
-) -> None:
-    """Adds or updates combination entry in combos_map with test ID and tier."""
-    test_id = test.get("test_id", "")
-    if combo_key not in combos_map:
-        combos_map[combo_key] = {
-            "track_id": combo_key[0],
-            "track_layout": combo_key[1],
-            "car_id": combo_key[2],
-            "test_ids": [test_id],
-            "tiers": [tier_name],
-            "sample_test": test,
-            "is_cached": is_cached,
-            "is_queued": is_queued,
-            "status": _resolve_combo_status(is_cached, is_queued),
-        }
-        return
-
-    entry = combos_map[combo_key]
-    if test_id not in entry["test_ids"]:
-        entry["test_ids"].append(test_id)
-    if tier_name not in entry["tiers"]:
-        entry["tiers"].append(tier_name)
-
-
-def get_missing_telemetry_summary(
-    tier: Optional[str] = None,
-    include_flying: bool = True,
-) -> Dict[str, Any]:
-    """
-    Scans curriculum for rolling start tests that lack a recorded 100% AI telemetry profile
-    for their (track_id, track_layout, car_id) combination.
-    Groups results by unique combination to avoid duplicate Assetto Corsa recording sessions.
-    """
-    from tools.telemetry.recorder import load_telemetry_profile
-    from tools.web_ui.runner import queue_mgr
-
-    curriculum = load_curriculum()
-    valid_modes = {"ROLLING", "FLYING_LAP"} if include_flying else {"ROLLING"}
-    queued_combos = _get_queued_telemetry_combos(queue_mgr.get_status())
-
-    combos_map: Dict[Tuple[str, str, str], Dict[str, Any]] = {}
-    missing_tests: List[Dict[str, Any]] = []
-    rolling_tests = _collect_rolling_tests(curriculum, tier, valid_modes)
-
-    for t, tier_name in rolling_tests:
-        track_id = t.get("track_id", "")
-        layout = t.get("track_layout", "")
-        car_id = t.get("car_id", "")
-        combo_key = (track_id, layout, car_id)
-
-        profile = load_telemetry_profile(track_id, layout, car_id, ai_level=100)
-        is_cached = profile is not None
-        is_queued = combo_key in queued_combos
-
-        if not is_cached:
-            missing_tests.append({
-                "test_id": t.get("test_id", ""),
-                "tier": tier_name,
-                "title": t.get("title", ""),
-                "track_id": track_id,
-                "track_layout": layout,
-                "car_id": car_id,
-                "start_mode": t.get("start_mode", "STANDING"),
-            })
-
-        _update_combo_entry(combos_map, combo_key, t, tier_name, is_cached, is_queued)
-
-    unique_missing_combos = [c for c in combos_map.values() if not c["is_cached"]]
-
-    return {
-        "success": True,
-        "tier": tier or "ALL",
-        "include_flying": include_flying,
-        "total_rolling_tests": len(rolling_tests),
-        "missing_tests_count": len(missing_tests),
-        "unique_combos_count": len(unique_missing_combos),
-        "unique_missing_combos": unique_missing_combos,
-        "all_combos": list(combos_map.values()),
-    }
-
-
-def enqueue_missing_telemetry_jobs(
-    tier: Optional[str] = None,
-    include_flying: bool = True,
-) -> Dict[str, Any]:
-    """
-    Enqueues live in-engine telemetry recording sessions into queue_mgr
-    for all unique track+car combinations currently missing telemetry.
-    """
-    from tools.web_ui.runner import queue_mgr
-
-    summary = get_missing_telemetry_summary(tier=tier, include_flying=include_flying)
-    missing_combos = [c for c in summary["unique_missing_combos"] if not c["is_queued"]]
-
-    enqueued_jobs = []
-    for c in missing_combos:
-        st = c.get("sample_test", {})
-        track_id = c["track_id"]
-        layout = c["track_layout"]
-        car_id = c["car_id"]
-        test_ids_str = ", ".join(c["test_ids"])
-
-        job = queue_mgr.enqueue_job(
-            job_type="record_telemetry",
-            test_id=c["test_ids"][0],
-            title=f"Record 100% AI Telemetry: {car_id} @ {track_id} ({test_ids_str})",
-            params={
-                "track_id": track_id,
-                "track_layout": layout,
-                "car_id": car_id,
-                "start_s": float(st.get("start_s", 0.0)),
-                "finish_s": float(st.get("finish_s", 1.0)),
-                "start_mode": st.get("start_mode", "ROLLING"),
-                "with_stop_box": bool(st.get("with_stop_box", False)),
-                "countdown_sec": 3.0,
-                "ai_level": 100,
-            },
-        )
-        enqueued_jobs.append({
-            "job_id": job.id,
-            "track_id": track_id,
-            "track_layout": layout,
-            "car_id": car_id,
-            "test_ids": c["test_ids"],
-        })
-
-    return {
-        "success": True,
-        "enqueued_count": len(enqueued_jobs),
-        "already_queued_count": len(summary["unique_missing_combos"]) - len(missing_combos),
-        "total_missing_combos": len(summary["unique_missing_combos"]),
-        "jobs": enqueued_jobs,
-        "message": f"Successfully enqueued {len(enqueued_jobs)} AI telemetry recording session(s) in Assetto Corsa queue runner.",
-    }
-
-
-def build_test_miniature(
-    test_id: str,
-    test_data: Optional[Dict[str, Any]] = None,
-    ac_root: str = DEFAULT_AC_ROOT,
-) -> Dict[str, Any]:
-    """Fires off the Track Miniature Builder for a specific test."""
-    from tools.content.generator import generate_single_miniature
-    return generate_single_miniature(test_id=test_id, test_data=test_data, ac_root=ac_root)
-
+__all__ = [
+    "CAR_LAYOUT_MAP",
+    "CAR_SPECS_CACHE",
+    "KUNOS_BASE_CARS",
+    "KUNOS_BASE_TRACKS",
+    "KUNOS_CAR_IDS",
+    "KUNOS_TRACK_IDS",
+    "RUN_MODE_LABELS",
+    "TIER_DOCS",
+    "TIER_FILE_MAP",
+    "TIER_INTERNATIONAL_A",
+    "TIER_INTERNATIONAL_B",
+    "TIER_NATIONAL_A",
+    "TIER_NATIONAL_B",
+    "TIER_SUPER_LICENSE",
+    "TIER_VAR_MAP",
+    "_build_reference_entry",
+    "_calculate_standing_speed",
+    "_clean_stale_career_events",
+    "_clean_stale_json_files",
+    "_clean_stale_svg_maps",
+    "_collect_rolling_tests",
+    "_derive_missing_specs",
+    "_determine_drivetrain",
+    "_discover_track_layouts",
+    "_enrich_test_from_saved_cfg",
+    "_extract_telemetry_combo",
+    "_find_existing_recording_job",
+    "_format_time_str",
+    "_get_queued_telemetry_combos",
+    "_is_tier_matching",
+    "_load_series_tests",
+    "_mirror_file_to_ac_if_present",
+    "_normalize_rolling_test",
+    "_normalize_standing_test",
+    "_normalize_test_definition",
+    "_parse_test_number",
+    "_parse_ui_car_specs",
+    "_read_binary_if_exists",
+    "_read_car_ui_data",
+    "_read_test_asset_bundle",
+    "_read_ui_name",
+    "_reload_tier_catalog_modules",
+    "_relocate_tier_test_assets",
+    "_remove_slot_assets",
+    "_resolve_car_specs",
+    "_resolve_combo_status",
+    "_resolve_previous_test_ids",
+    "_resolve_rolling_physics",
+    "_test_identity_signature",
+    "_update_combo_entry",
+    "_write_relocated_test_assets",
+    "build_test_miniature",
+    "calculate_test_initial_speed",
+    "calculate_test_targets_and_physics",
+    "clean_stale_tests",
+    "enqueue_missing_telemetry_jobs",
+    "format_test_dict",
+    "generate_and_validate",
+    "get_ac_curriculum_reference_tests",
+    "get_available_cars",
+    "get_available_tracks",
+    "get_catalog_module_path",
+    "get_missing_telemetry_summary",
+    "get_track_spline_data",
+    "is_kunos_car",
+    "is_kunos_track",
+    "load_curriculum",
+    "run_live_test",
+    "save_tier_catalog",
+]

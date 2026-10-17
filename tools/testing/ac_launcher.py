@@ -25,61 +25,23 @@ import os
 import subprocess
 import sys
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
+
+from tools.testing.log_auditor import (
+    ALT_USER_DOCS_AC,
+    CFG_DIR,
+    DEFAULT_AC_ROOT,
+    LOG_TXT_PATH,
+    LOGS_DIR,
+    RACE_INI_PATH,
+    USER_DOCS_AC,
+    _sanitize_ini_value,
+    audit_log,
+    find_car_skin,
+    get_user_documents_dir,
+)
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-DEFAULT_AC_ROOT = r"D:\SteamLibrary\steamapps\common\assettocorsa"
-
-
-def get_user_documents_dir() -> str:
-    """Dynamically resolves the active Windows Personal/Documents directory from Registry or env."""
-    if sys.platform == "win32":
-        try:
-            import winreg
-
-            sub_key = r"Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders"
-            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub_key) as key:
-                val, _ = winreg.QueryValueEx(key, "Personal")
-                val = os.path.expandvars(val)
-                if os.path.isdir(val):
-                    return val
-        except Exception:
-            pass
-    return os.path.join(os.path.expanduser("~"), "Documents")
-
-
-USER_DOCS_AC = os.path.join(get_user_documents_dir(), "Assetto Corsa")
-ALT_USER_DOCS_AC = os.path.join(os.path.expanduser("~"), "Documents", "Assetto Corsa")
-CFG_DIR = os.path.join(USER_DOCS_AC, "cfg")
-LOGS_DIR = os.path.join(USER_DOCS_AC, "logs")
-RACE_INI_PATH = os.path.join(CFG_DIR, "race.ini")
-LOG_TXT_PATH = os.path.join(LOGS_DIR, "log.txt")
-
-
-def _sanitize_ini_value(val: Any) -> str:
-    """Strips newlines, carriage returns, and null bytes to prevent INI key/section injection."""
-    s = str(val if val is not None else "")
-    return s.replace("\r", "").replace("\n", " ").replace("\x00", "").strip()
-
-
-def find_car_skin(car_id: str, ac_root: str = DEFAULT_AC_ROOT) -> str:
-    """Finds the first valid skin directory for a given car."""
-    import re
-    safe_car = re.sub(r"[^A-Za-z0-9_\-]", "", str(car_id or ""))
-    if not safe_car:
-        return "0_default"
-    cars_base = os.path.realpath(os.path.join(ac_root, "content", "cars"))
-    skins_dir = os.path.realpath(os.path.join(cars_base, safe_car, "skins"))
-    try:
-        if os.path.commonpath([cars_base, skins_dir]) != cars_base:
-            return "0_default"
-    except ValueError:
-        return "0_default"
-    if os.path.isdir(skins_dir):
-        skins = sorted(os.listdir(skins_dir))
-        if skins:
-            return _sanitize_ini_value(skins[0])
-    return "0_default"
 
 
 def generate_race_ini(
@@ -98,7 +60,7 @@ def generate_race_ini(
 
     restart_line = f"RESTART_AT_TIME={float(restart_at_time):.2f}\n" if restart_at_time else ""
 
-    is_telemetry = (test_id == "AI_TELEMETRY_RECORDER")
+    is_telemetry = test_id == "AI_TELEMETRY_RECORDER"
     if is_telemetry:
         ai_level = 100
     session_name = _sanitize_ini_value(
@@ -166,73 +128,6 @@ AI_TEST_MODE={1 if ai_test_mode else 0}
     return ini_content
 
 
-def audit_log(
-    log_path: str,
-    car_id: str,
-    track_id: str,
-) -> Tuple[bool, List[str], List[str]]:
-    """Audits Assetto Corsa log.txt for initialization milestones and fatal error signatures."""
-    # Also check fallback log paths if primary doesn't exist
-    candidates = [
-        log_path,
-        os.path.join(ALT_USER_DOCS_AC, "logs", "log.txt"),
-    ]
-    target_path = None
-    for c in candidates:
-        if os.path.isfile(c):
-            target_path = c
-            break
-
-    if not target_path:
-        return False, [], ["Log file does not exist"]
-
-    passed_milestones = []
-    detected_errors = []
-
-    fatal_keywords = [
-        "FATAL ERROR",
-        "ACCESS VIOLATION",
-        "ATTEMPT TO INDEX A NIL VALUE",
-        "EXCEPTION_ACCESS_VIOLATION",
-    ]
-
-    try:
-        with open(target_path, "r", encoding="utf-8", errors="replace") as f:
-            lines = f.readlines()
-
-        content_upper = "".join(lines).upper()
-
-        # Check milestones
-        if "PHYSICS" in content_upper or "FMOD" in content_upper or "DIRECTX" in content_upper:
-            passed_milestones.append("Engine subsystem initialized")
-        if car_id.upper() in content_upper:
-            passed_milestones.append(f"Car data referenced ({car_id})")
-        if track_id.upper() in content_upper:
-            passed_milestones.append(f"Track data referenced ({track_id})")
-
-        # Check fatal keywords (avoid matching benign CrashGuard)
-        for line in lines:
-            line_upper = line.upper()
-            if "CRASHGUARD" in line_upper:
-                continue
-            if "CRASH" in line_upper and "CRASHGUARD" not in line_upper:
-                detected_errors.append(line.strip())
-                continue
-            for kw in fatal_keywords:
-                if kw in line_upper:
-                    # Filter out benign warning mentions
-                    if "CANNOT OPEN FILE" in kw and ("SKIN.INI" in line_upper or "CAMERA" in line_upper):
-                        continue
-                    detected_errors.append(line.strip())
-                    break
-
-    except Exception as e:
-        detected_errors.append(f"Error reading log file: {e}")
-
-    success = (len(detected_errors) == 0)
-    return success, passed_milestones, detected_errors
-
-
 def run_launch_test(
     test_json_path: str,
     ac_root: str = DEFAULT_AC_ROOT,
@@ -254,7 +149,6 @@ def run_launch_test(
     track_id = test_data["track_id"]
     track_layout = test_data.get("track_layout", "")
 
-    # Validate asset files on disk
     car_path = os.path.join(ac_root, "content", "cars", car_id)
     track_path = os.path.join(ac_root, "content", "tracks", track_id)
     acs_exe_path = os.path.join(ac_root, "acs.exe")
@@ -276,7 +170,6 @@ def run_launch_test(
             "dry_run": dry_run,
         }
 
-    # Generate race.ini
     race_ini_str = generate_race_ini(
         test_data,
         ac_root=ac_root,
@@ -286,7 +179,6 @@ def run_launch_test(
     )
 
     if dry_run:
-        # In dry-run mode, verify race.ini validity and asset paths without launching
         return {
             "test_id": test_id,
             "title": title,
@@ -298,8 +190,6 @@ def run_launch_test(
             "ini_bytes": len(race_ini_str),
         }
 
-    # Live Launch Mode
-    # Write race.ini to primary user documents cfg, alternate user documents cfg, and AC install cfg
     target_race_paths = [
         RACE_INI_PATH,
         os.path.join(ALT_USER_DOCS_AC, "cfg", "race.ini"),
@@ -314,7 +204,6 @@ def run_launch_test(
         except Exception:
             pass
 
-    # Clear old log.txt if present
     for lp in [LOG_TXT_PATH, os.path.join(ALT_USER_DOCS_AC, "logs", "log.txt")]:
         if os.path.isfile(lp):
             try:
@@ -346,7 +235,7 @@ def run_launch_test(
             poll_res = proc.poll()
             if poll_res is not None:
                 exit_code = poll_res
-                crashed = (exit_code != 0)
+                crashed = exit_code != 0
                 break
             time.sleep(0.5)
 
@@ -360,7 +249,6 @@ def run_launch_test(
         }
     finally:
         if proc and proc.poll() is None and not watch:
-            # Terminate only if not in interactive watch mode
             try:
                 proc.terminate()
                 proc.wait(timeout=3)
@@ -371,15 +259,17 @@ def run_launch_test(
                 except Exception:
                     pass
 
-            # Ensure any lingering acs.exe children on Windows are stopped
             if sys.platform == "win32":
                 try:
-                    subprocess.run(["taskkill", "/f", "/im", "acs.exe"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    subprocess.run(
+                        ["taskkill", "/f", "/im", "acs.exe"],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                    )
                 except Exception:
                     pass
 
-    # Audit log
-    audit_ok, milestones, errors = audit_log(LOG_TXT_PATH, car_id, track_id)
+    _, milestones, errors = audit_log(LOG_TXT_PATH, car_id, track_id)
 
     if crashed:
         status = "FAILED"
@@ -421,37 +311,17 @@ def main():
 
     args = parser.parse_args()
 
-    test_files = []
     if args.test:
         test_files = [args.test]
     elif args.tier:
-        pattern = os.path.join(
-            REPO_ROOT,
-            "content",
-            "tests",
-            args.tier,
-            "*.json",
-        )
+        pattern = os.path.join(REPO_ROOT, "content", "tests", args.tier, "*.json")
         test_files = sorted([f for f in glob.glob(pattern) if "ghost_" not in os.path.basename(f)])
     elif args.all:
-        pattern = os.path.join(
-            REPO_ROOT,
-            "content",
-            "tests",
-            "*",
-            "*.json",
-        )
+        pattern = os.path.join(REPO_ROOT, "content", "tests", "*", "*.json")
         test_files = sorted([f for f in glob.glob(pattern) if "ghost_" not in os.path.basename(f)])
     else:
-        # Default to dry-run all
         args.dry_run = True
-        pattern = os.path.join(
-            REPO_ROOT,
-            "content",
-            "tests",
-            "*",
-            "*.json",
-        )
+        pattern = os.path.join(REPO_ROOT, "content", "tests", "*", "*.json")
         test_files = sorted([f for f in glob.glob(pattern) if "ghost_" not in os.path.basename(f)])
 
     if not test_files:

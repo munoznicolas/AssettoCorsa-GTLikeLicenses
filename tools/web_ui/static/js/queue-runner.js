@@ -6,32 +6,39 @@
 import { state } from "./state.js";
 import { dom } from "./dom.js";
 import { api } from "./api.js";
-import { showToast, openModal, escapeHtml } from "./ui-utils.js";
+import { showToast, openModal } from "./ui-utils.js";
 import { saveFormIntoActiveTest } from "./test-editor.js";
+import {
+  openMissingTelemetryModal,
+  closeMissingTelemetryModal,
+  loadMissingTelemetryData,
+  executeQueueMissingTelemetry,
+} from "./queue/telemetry-modal.js";
+
+export {
+  openMissingTelemetryModal,
+  closeMissingTelemetryModal,
+  getTelemetryStatusBadge,
+  renderTelemetryComboRow,
+  updateMissingTelemetryUI,
+  loadMissingTelemetryData,
+  executeQueueMissingTelemetry,
+} from "./queue/telemetry-modal.js";
 
 let pendingTelemetryJobId = null;
 let pendingTelemetryTestId = null;
 let queuePollTimer = null;
 
-/**
- * Retrieve the active test object from state if present.
- */
 function getActiveTest() {
   return state.curriculum[state.activeTierIndex]?.tests?.[state.activeTestIndex] ?? null;
 }
 
-/**
- * Determine start mode based on UI radio buttons.
- */
 function getSelectedStartMode() {
   if (dom.radioStanding?.checked) return "STANDING";
   if (dom.radioRolling?.checked) return "ROLLING";
   return "FLYING_LAP";
 }
 
-/**
- * Reset test spawn parameters for standing start mode.
- */
 function resetStandingMode(test) {
   if (!test) return;
   test.speed = 0.0;
@@ -46,9 +53,6 @@ function resetStandingMode(test) {
   }
 }
 
-/**
- * Apply AI telemetry speed, gear, rpm, and offset data to a test object.
- */
 function applySpeedDataToTest(test, data) {
   if (!test) return;
   test.speed = data.speed_kmh;
@@ -63,18 +67,12 @@ function applySpeedDataToTest(test, data) {
   if (data.rpm !== undefined) test.spawn.initial_rpm = data.rpm;
 }
 
-/**
- * Set the auto-calculate speed button state.
- */
 function setSpeedButtonLoading(isLoading) {
   if (!dom.btnCalcSpeed) return;
   dom.btnCalcSpeed.disabled = isLoading;
   dom.btnCalcSpeed.innerText = isLoading ? "⏳ Checking Cache..." : "⚡ Auto-Calculate from Game Engine";
 }
 
-/**
- * Handle cached AI speed calculation response.
- */
 function handleCachedSpeedResult(data, isManualClick) {
   const test = getActiveTest();
   applySpeedDataToTest(test, data);
@@ -105,9 +103,6 @@ function handleCachedSpeedResult(data, isManualClick) {
   }
 }
 
-/**
- * Handle background queued AI speed recording job response.
- */
 function handleQueuedSpeedJob(data) {
   pendingTelemetryJobId = data.job_id;
   pendingTelemetryTestId = getActiveTest()?.test_id ?? null;
@@ -170,9 +165,6 @@ export async function fetchAndApplyAISpeed(isManualClick = true) {
   }
 }
 
-/**
- * Handle completed background telemetry recording job.
- */
 function handleCompletedTelemetryJob(job) {
   const curTest = getActiveTest();
   if (curTest && curTest.test_id === pendingTelemetryTestId && job.result) {
@@ -193,9 +185,6 @@ function handleCompletedTelemetryJob(job) {
   pendingTelemetryTestId = null;
 }
 
-/**
- * Check pending telemetry recording job if active.
- */
 async function checkPendingTelemetryJob() {
   if (!pendingTelemetryJobId) return;
 
@@ -215,7 +204,6 @@ async function checkPendingTelemetryJob() {
 
 /**
  * Poll runner process queue and monitor background jobs.
- * Automatically backs off when queue and AC process are idle to eliminate polling spam.
  */
 export async function pollQueueStatus() {
   clearTimeout(queuePollTimer);
@@ -233,19 +221,10 @@ export async function pollQueueStatus() {
     console.debug("Queue poll error:", err);
   } finally {
     clearTimeout(queuePollTimer);
-    if (isBusy) {
-      // Actively poll while AC simulation is running or jobs are queued in background
-      queuePollTimer = setTimeout(pollQueueStatus, 2500);
-    } else {
-      // Idle: do not poll continuously. Relaxed fallback heartbeat (60s)
-      queuePollTimer = setTimeout(pollQueueStatus, 60000);
-    }
+    queuePollTimer = setTimeout(pollQueueStatus, isBusy ? 2500 : 60000);
   }
 }
 
-/**
- * Update UI for active Assetto Corsa simulation process.
- */
 function updateAcProcessUI(data) {
   const isRunning = Boolean(data.is_ac_running);
   if (dom.btnStopAc) {
@@ -253,9 +232,6 @@ function updateAcProcessUI(data) {
   }
 }
 
-/**
- * Update UI for queued simulations count.
- */
 function updateQueueListUI(data) {
   const qLen = data.queue_length || 0;
   if (dom.runQueueBadge) {
@@ -267,17 +243,11 @@ function updateQueueListUI(data) {
   }
 }
 
-/**
- * Update UI elements to reflect AC running state and queued simulations.
- */
 export function updateQueueUI(data) {
   updateAcProcessUI(data);
   updateQueueListUI(data);
 }
 
-/**
- * Terminate active simulation or clear queue.
- */
 export async function cancelActiveACSession() {
   try {
     const data = await api.cancelQueueJob({ cancelAll: true });
@@ -288,9 +258,6 @@ export async function cancelActiveACSession() {
   }
 }
 
-/**
- * Display AI speed handover status bar.
- */
 export function showAISpeedStatus(text) {
   if (dom.aiSpeedBadge && dom.aiSpeedText) {
     dom.aiSpeedText.innerText = text;
@@ -298,30 +265,18 @@ export function showAISpeedStatus(text) {
   }
 }
 
-/**
- * Hide AI speed handover status bar.
- */
 export function hideAISpeedStatus() {
   if (dom.aiSpeedBadge) {
     dom.aiSpeedBadge.style.display = "none";
   }
 }
 
-/**
- * Direct launch of Assetto Corsa live session (AI Autopilot Demo).
- */
 export function openRunModal() {
   void executeRunLiveTest("ai");
 }
 
-/**
- * Close modal shim for backwards compatibility.
- */
 export function closeRunModal() {}
 
-/**
- * Set modal status badge text, color, and log text during evaluation.
- */
 function setModalEvalStatus(badgeText, color, logText) {
   if (dom.modalStatusBadge) {
     dom.modalStatusBadge.textContent = badgeText;
@@ -332,10 +287,6 @@ function setModalEvalStatus(badgeText, color, logText) {
   }
 }
 
-/**
- * Process job completion status for in-engine evaluation.
- * @returns {boolean} True if job is finished (completed, failed, cancelled)
- */
 function handleEvalJobStatus(job) {
   if (job.status === "completed") {
     setModalEvalStatus("EVAL PASSED", "#10b981", job.result?.log || job.log || "Evaluation passed with zero errors.");
@@ -350,22 +301,16 @@ function handleEvalJobStatus(job) {
   return false;
 }
 
-/**
- * Monitor background evaluation job until finished or timed out.
- */
 function monitorEvalJob(evalJobId) {
   setModalEvalStatus("AUDITING (AC RUNNING)...", "#38bdf8", "Launching Assetto Corsa and monitoring in-engine evaluation loop...");
   if (dom.modalStatusBadge) dom.modalStatusBadge.className = "badge badge-lg";
 
   const startTime = Date.now();
-
   const pollEval = async () => {
     try {
       const jData = await api.getJob(evalJobId);
       const job = jData?.success ? jData.job : null;
-      if (job && handleEvalJobStatus(job)) {
-        return;
-      }
+      if (job && handleEvalJobStatus(job)) return;
     } catch (e) {
       console.debug("Eval poll error:", e);
     }
@@ -377,7 +322,6 @@ function monitorEvalJob(evalJobId) {
       dom.modalStatusBadge.style.color = "#ef4444";
     }
   };
-
   setTimeout(pollEval, 1200);
 }
 
@@ -391,9 +335,7 @@ export async function executeRunLiveTest(mode = "ai") {
     showToast("No active test selected.", "warning");
     return;
   }
-  const syncFirst = true;
 
-  // Save current form inputs into the in-memory test object
   saveFormIntoActiveTest();
 
   if (mode === "eval") {
@@ -409,7 +351,7 @@ export async function executeRunLiveTest(mode = "ai") {
     const data = await api.runLiveTest({
       test_id: test.test_id,
       mode: mode,
-      sync_first: syncFirst,
+      sync_first: true,
       test_data: test,
       timeout: 8,
     });
@@ -431,206 +373,19 @@ export async function executeRunLiveTest(mode = "ai") {
   }
 }
 
-/**
- * Open the missing telemetry batch runner modal.
- */
-export async function openMissingTelemetryModal() {
-  if (dom.telemetryBatchModal) {
-    dom.telemetryBatchModal.style.display = "flex";
-  }
-  // Default to current active tier if valid, or "ALL"
-  const currentTier = state.curriculum[state.activeTierIndex]?.tier_name;
-  if (dom.selectTelemetryTier && currentTier) {
-    const opts = Array.from(dom.selectTelemetryTier.options).map(o => o.value);
-    if (opts.includes(currentTier)) {
-      dom.selectTelemetryTier.value = currentTier;
-    }
-  }
-  await loadMissingTelemetryData();
-}
-
-/**
- * Close the missing telemetry batch runner modal.
- */
-export function closeMissingTelemetryModal() {
-  if (dom.telemetryBatchModal) {
-    dom.telemetryBatchModal.style.display = "none";
-  }
-}
-
-/**
- * Render HTML for a telemetry combo status badge.
- */
-function getTelemetryStatusBadge(combo) {
-  if (combo.is_cached) {
-    return `<span class="badge" style="background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4);">✓ Recorded</span>`;
-  }
-  if (combo.is_queued) {
-    return `<span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4);">⏳ In Queue</span>`;
-  }
-  return `<span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4);">⚠️ Missing</span>`;
-}
-
-/**
- * Render a single telemetry combo table row.
- */
-function renderTelemetryComboRow(combo) {
-  const statusBadge = getTelemetryStatusBadge(combo);
-  const layoutLabel = combo.track_layout
-    ? escapeHtml(combo.track_layout)
-    : `<span style="color: #64748b; font-style: italic;">Default</span>`;
-
-  const testTags = (combo.test_ids || []).map(id =>
-    `<span class="tag-code" style="font-size: 10px; margin-right: 4px; padding: 1px 5px; background: rgba(255,255,255,0.08); border-radius: 3px;">${escapeHtml(id)}</span>`
-  ).join("");
-
-  return `
-    <tr style="${combo.is_cached ? 'opacity: 0.6;' : ''}">
-      <td style="font-weight: 500; color: #f8fafc;">${escapeHtml(combo.track_id)}</td>
-      <td>${layoutLabel}</td>
-      <td style="color: #38bdf8; font-family: monospace;">${escapeHtml(combo.car_id)}</td>
-      <td>${testTags}</td>
-      <td>${statusBadge}</td>
-    </tr>
-  `;
-}
-
-/**
- * Update UI controls and summary text for missing telemetry data.
- */
-function updateMissingTelemetryUI(tier, data) {
-  const missingCount = data.missing_tests_count || 0;
-  const uniqueCombosCount = data.unique_combos_count || 0;
-
-  if (dom.telemetrySummaryText) {
-    dom.telemetrySummaryText.innerHTML = missingCount > 0
-      ? `Found <strong style="color: #fbbf24;">${missingCount} rolling start tests</strong> across <strong style="color: #38bdf8;">${uniqueCombosCount} unique track+car combinations</strong> lacking telemetry profiles in <strong>${escapeHtml(tier)}</strong>.`
-      : `<span style="color: #4ade80;">🏁 All rolling start tests in <strong>${escapeHtml(tier)}</strong> already have authentic telemetry recorded!</span>`;
-  }
-
-  if (dom.btnTelemetryEnqueue) {
-    dom.btnTelemetryEnqueue.disabled = uniqueCombosCount === 0;
-    dom.btnTelemetryEnqueue.innerHTML = uniqueCombosCount > 0
-      ? `<span>▶ Run Telemetry for Missing Combos (${uniqueCombosCount} Jobs)</span>`
-      : "<span>✓ All Telemetry Recorded</span>";
-  }
-
-  if (dom.telemetryQueueInfo) {
-    dom.telemetryQueueInfo.textContent = `Total in scope: ${data.total_rolling_tests || 0} rolling tests`;
-  }
-}
-
-/**
- * Fetch and render missing telemetry combinations table and summary.
- */
-export async function loadMissingTelemetryData() {
-  if (!dom.telemetryCombosTableBody) return;
-
-  const tier = dom.selectTelemetryTier?.value || "ALL";
-  const includeFlying = dom.checkIncludeFlying?.checked ?? true;
-
-  if (dom.telemetrySummaryText) {
-    dom.telemetrySummaryText.innerHTML = "⏳ Scanning curriculum tests for missing telemetry profiles...";
-  }
-  if (dom.btnTelemetryEnqueue) {
-    dom.btnTelemetryEnqueue.disabled = true;
-    dom.btnTelemetryEnqueue.innerHTML = "<span>⏳ Scanning...</span>";
-  }
-
-  try {
-    const data = await api.getMissingTelemetry(tier, includeFlying);
-    if (!data?.success) {
-      if (dom.telemetrySummaryText) {
-        dom.telemetrySummaryText.innerHTML = `<span style="color: #ef4444;">Error scanning tests: ${escapeHtml(data?.error || "Unknown error")}</span>`;
-      }
-      return;
-    }
-
-    updateMissingTelemetryUI(tier, data);
-
-    const combos = data.all_combos || [];
-    if (combos.length === 0) {
-      dom.telemetryCombosTableBody.innerHTML = `
-        <tr>
-          <td colspan="5" style="text-align: center; color: #94a3b8; padding: 20px;">
-            No rolling start tests found for the selected filter.
-          </td>
-        </tr>
-      `;
-      return;
-    }
-
-    dom.telemetryCombosTableBody.innerHTML = combos.map(renderTelemetryComboRow).join("");
-
-  } catch (err) {
-    if (dom.telemetrySummaryText) {
-      dom.telemetrySummaryText.innerHTML = `<span style="color: #ef4444;">Failed to load telemetry status: ${escapeHtml(err.message)}</span>`;
-    }
-  }
-}
-
-/**
- * Execute batch enqueuing of missing telemetry recordings.
- */
-export async function executeQueueMissingTelemetry() {
-  const tier = dom.selectTelemetryTier?.value || "ALL";
-  const includeFlying = dom.checkIncludeFlying?.checked ?? true;
-
-  if (dom.btnTelemetryEnqueue) {
-    dom.btnTelemetryEnqueue.disabled = true;
-    dom.btnTelemetryEnqueue.innerHTML = "<span>⏳ Enqueuing recordings...</span>";
-  }
-
-  try {
-    const res = await api.queueMissingTelemetry(tier, includeFlying);
-    if (res?.success) {
-      showToast(res.message || `Enqueued ${res.enqueued_count} telemetry recording session(s)!`, "success");
-      void pollQueueStatus();
-      await loadMissingTelemetryData();
-    } else {
-      showToast(res?.error || "Failed to enqueue telemetry recordings", "error");
-      if (dom.btnTelemetryEnqueue) dom.btnTelemetryEnqueue.disabled = false;
-    }
-  } catch (err) {
-    showToast(`Error: ${err.message}`, "error");
-    if (dom.btnTelemetryEnqueue) dom.btnTelemetryEnqueue.disabled = false;
-  }
-}
-
-/**
- * Attach listeners for run modal and queue controls.
- */
 export function setupQueueEventListeners() {
-  if (dom.btnRunLive) {
-    dom.btnRunLive.addEventListener("click", () => {
-      void executeRunLiveTest("ai");
-    });
-  }
-  if (dom.btnRunTop) {
-    dom.btnRunTop.addEventListener("click", () => {
-      void executeRunLiveTest("ai");
-    });
-  }
+  dom.btnRunLive?.addEventListener("click", () => void executeRunLiveTest("ai"));
+  dom.btnRunTop?.addEventListener("click", () => void executeRunLiveTest("ai"));
 
-  // Missing Telemetry Batch Controls
-  if (dom.btnRunMissingTelemetry) dom.btnRunMissingTelemetry.addEventListener("click", openMissingTelemetryModal);
-  if (dom.telemetryModalClose) dom.telemetryModalClose.addEventListener("click", closeMissingTelemetryModal);
-  if (dom.btnTelemetryCancel) dom.btnTelemetryCancel.addEventListener("click", closeMissingTelemetryModal);
-  if (dom.selectTelemetryTier) dom.selectTelemetryTier.addEventListener("change", () => {
-    void loadMissingTelemetryData();
-  });
-  if (dom.checkIncludeFlying) dom.checkIncludeFlying.addEventListener("change", () => {
-    void loadMissingTelemetryData();
-  });
-  if (dom.btnTelemetryEnqueue) dom.btnTelemetryEnqueue.addEventListener("click", () => {
-    void executeQueueMissingTelemetry();
-  });
+  dom.btnRunMissingTelemetry?.addEventListener("click", openMissingTelemetryModal);
+  dom.telemetryModalClose?.addEventListener("click", closeMissingTelemetryModal);
+  dom.btnTelemetryCancel?.addEventListener("click", closeMissingTelemetryModal);
+  dom.selectTelemetryTier?.addEventListener("change", () => void loadMissingTelemetryData());
+  dom.checkIncludeFlying?.addEventListener("change", () => void loadMissingTelemetryData());
+  dom.btnTelemetryEnqueue?.addEventListener("click", () => void executeQueueMissingTelemetry());
 
-  // Refresh queue status immediately when user switches back to this browser tab
   window.addEventListener("focus", () => void pollQueueStatus());
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") {
-      void pollQueueStatus();
-    }
+    if (document.visibilityState === "visible") void pollQueueStatus();
   });
 }
