@@ -1,51 +1,51 @@
 {
   "test_id": "IB-9",
   "tier": "International B",
-  "title": "Heavyweight Digital AWD Traction",
-  "description": "Managing 1,720 kg curb weight through the tight Schumacher-S and Kumho chicane complexes.",
-  "lesson_objective": "Harnessing ATTESA E-TS all-wheel drive vectoring on chicane direction changes.",
-  "car_id": "ks_nissan_gtr",
-  "track_id": "ks_nurburgring",
-  "track_layout": "layout_gp_a",
+  "title": "Active Aerodynamics at 230 km/h",
+  "description": "Fast Turn 3 long right sweeper: trust ALA downforce, stabilize lateral load, carry immense speed.",
+  "lesson_objective": "Trusting active aerodynamic balance through long sustained lateral corners.",
+  "car_id": "ks_lamborghini_huracan_performante",
+  "track_id": "ks_barcelona",
+  "track_layout": "layout_gp",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      -232.114,
-      50.43,
-      39.146
+      1.639,
+      -24.811,
+      380.602
     ],
     "forward_vector": [
-      -0.8602,
-      -0.0115,
-      0.5099
+      -0.5315,
+      -0.0121,
+      0.847
     ],
-    "initial_speed_kmh": 111.4,
+    "initial_speed_kmh": 98.7,
     "gear": 3,
-    "rpm": 4323
+    "rpm": 4811
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -312.253,
-        48.226,
-        57.947
+        -44.304,
+        -25.74,
+        440.194
       ],
       "p2": [
-        -314.009,
-        48.226,
-        69.817
+        -34.228,
+        -25.74,
+        446.71
       ]
     },
     "finish_gate": {
       "p1": [
-        -203.221,
-        47.198,
-        -697.989
+        -458.974,
+        -12.959,
+        473.928
       ],
       "p2": [
-        -213.591,
-        47.198,
-        -704.029
+        -470.488,
+        -12.959,
+        477.306
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 27.6,
-    "silver_seconds": 29.5,
-    "bronze_seconds": 32.3
+    "gold_seconds": 19.3,
+    "silver_seconds": 20.7,
+    "bronze_seconds": 22.6
   }
 }

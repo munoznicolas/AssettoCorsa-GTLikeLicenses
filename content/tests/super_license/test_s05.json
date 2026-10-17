@@ -1,49 +1,51 @@
 {
   "test_id": "S-5",
   "tier": "Super License",
-  "title": "V12 AWD Supercar Lap: Brands Hatch GP (GT6 S-4)",
-  "description": "740 bhp V12 naturally aspirated fury coupled with all-wheel drive stability on a historic natural amphitheater.",
-  "lesson_objective": "Managing high vehicle mass and extreme horsepower through narrow undulating bends.",
-  "car_id": "ks_lamborghini_aventador_sv",
-  "track_id": "ks_brands_hatch",
-  "track_layout": "gp",
+  "title": "Applied Hot Lap: N\u00fcrburgring GP (GT5 S-3)",
+  "description": "Front-mid 6.2L AMG V8 naturally aspirated balance: thread the Mercedes Arena and high-speed chicane.",
+  "lesson_objective": "Precision high-speed throttle modulation in an iconic gullwing supercar.",
+  "car_id": "mercedes_sls",
+  "track_id": "ks_nurburgring",
+  "track_layout": "layout_gp_a",
   "start_mode": "FLYING_LAP",
   "spawn": {
     "position": [
-      -189.593,
-      -7.532,
-      -367.02
+      -4.601,
+      64.843,
+      -898.368
     ],
     "forward_vector": [
-      0.9125,
-      -0.0344,
-      -0.4077
+      -0.0423,
+      -0.0113,
+      0.999
     ],
-    "initial_speed_kmh": 150.0
+    "initial_speed_kmh": 179.6,
+    "gear": 5,
+    "rpm": 5333
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -135.389,
-        -7.661,
-        -384.185
+        -10.878,
+        63.954,
+        -763.308
       ],
       "p2": [
-        -140.019,
-        -7.661,
-        -395.255
+        1.122,
+        63.954,
+        -763.372
       ]
     },
     "finish_gate": {
       "p1": [
-        -140.479,
-        -7.755,
-        -382.047
+        -10.916,
+        63.988,
+        -769.921
       ],
       "p2": [
-        -145.149,
-        -7.755,
-        -393.101
+        1.084,
+        63.988,
+        -769.999
       ]
     }
   },
@@ -54,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 94.5,
-    "silver_seconds": 96.0,
-    "bronze_seconds": 99.0
+    "gold_seconds": 132.9,
+    "silver_seconds": 142.4,
+    "bronze_seconds": 156.0
   }
 }

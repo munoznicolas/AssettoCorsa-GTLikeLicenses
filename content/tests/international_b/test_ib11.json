@@ -1,51 +1,51 @@
 {
   "test_id": "IB-11",
   "tier": "International B",
-  "title": "Blind Crest Downhill Esses: Casanova-Savelli",
-  "description": "Right-hand crest into plunging left off-camber descent at Mugello: settle chassis before load shift.",
-  "lesson_objective": "Managing high-speed lateral load shifts with simultaneous elevation drops.",
-  "car_id": "ks_alfa_giulia_qv",
-  "track_id": "mugello",
+  "title": "High-Speed Parabolica Exit Momentum",
+  "description": "Brake progressively into Curva Alboreto (Parabolica), hug early apex, let car drift to exit curb.",
+  "lesson_objective": "Maximizing corner exit speed onto a 1-kilometer main straightaway.",
+  "car_id": "ks_ferrari_488_gtb",
+  "track_id": "monza",
   "track_layout": "",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      -480.023,
-      31.232,
-      -276.15
+      73.661,
+      -8.307,
+      358.418
     ],
     "forward_vector": [
-      0.9966,
-      0.0161,
-      0.0813
+      -0.0919,
+      -0.0054,
+      0.9957
     ],
     "initial_speed_kmh": 110.0,
-    "gear": 4,
-    "rpm": 3848
+    "gear": 3,
+    "rpm": 4768
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -391.29,
-        31.173,
-        -253.335
+        58.865,
+        -8.823,
+        449.096
       ],
       "p2": [
-        -388.668,
-        31.173,
-        -265.045
+        70.807,
+        -8.823,
+        450.282
       ]
     },
     "finish_gate": {
       "p1": [
-        492.247,
-        -9.51,
-        -60.933
+        -166.689,
+        -6.548,
+        65.14
       ],
       "p2": [
-        489.727,
-        -9.51,
-        -72.665
+        -178.625,
+        -6.548,
+        63.896
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 21.0,
-    "silver_seconds": 22.5,
-    "bronze_seconds": 24.6
+    "gold_seconds": 18.2,
+    "silver_seconds": 19.5,
+    "bronze_seconds": 21.3
   }
 }

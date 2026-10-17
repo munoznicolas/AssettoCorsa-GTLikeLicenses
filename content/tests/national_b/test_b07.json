@@ -1,49 +1,51 @@
 {
   "test_id": "B-7",
   "tier": "National B",
-  "title": "Slalom Rhythm & Transient Agility",
-  "description": "Steering cadence and throttle feathering in 2nd gear through staggered cones without sliding.",
-  "lesson_objective": "Weight transfer control in a mid-engine roadster.",
-  "car_id": "lotus_elise_sc",
-  "track_id": "drift",
-  "track_layout": "karting",
-  "start_mode": "STANDING",
+  "title": "Blind Compression Corner Entry",
+  "description": "Downhill compression turn-in over a blind crest and soaking vertical compression at the bottom.",
+  "lesson_objective": "Committing to blind crest turn-in and elevation drop at Paddock Hill Bend.",
+  "car_id": "ks_mazda_mx5_nd",
+  "track_id": "ks_brands_hatch",
+  "track_layout": "indy",
+  "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      -6.85,
-      0.225,
-      135.324
+      -290.644,
+      -4.375,
+      -315.899
     ],
     "forward_vector": [
-      -0.8579,
-      -0.0,
-      0.5138
+      0.8773,
+      -0.0336,
+      -0.4787
     ],
-    "initial_speed_kmh": 0.0
+    "initial_speed_kmh": 216.4,
+    "gear": 6,
+    "rpm": 5622
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -9.933,
-        0.225,
-        130.177
+        -137.453,
+        -7.8,
+        -382.009
       ],
       "p2": [
-        -3.767,
-        0.225,
-        140.471
+        -142.167,
+        -7.8,
+        -393.045
       ]
     },
     "finish_gate": {
       "p1": [
-        -52.951,
-        0.226,
-        -73.136
+        154.848,
+        -12.938,
+        -241.64
       ],
       "p2": [
-        -44.751,
-        0.226,
-        -81.896
+        166.82,
+        -12.938,
+        -240.81
       ]
     }
   },
@@ -54,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 17.2,
-    "silver_seconds": 18.5,
-    "bronze_seconds": 20.2
+    "gold_seconds": 11.0,
+    "silver_seconds": 11.8,
+    "bronze_seconds": 12.9
   }
 }

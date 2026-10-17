@@ -1,49 +1,49 @@
 {
   "test_id": "S-11",
   "tier": "Super License",
-  "title": "1,000 Horsepower Hybrid Attack: Red Bull Ring",
-  "description": "V8 hybrid acceleration out of Remus hairpin; maximum energy deployment through Turn 6 & 7.",
-  "lesson_objective": "Harvesting and deploying supercapacitor hybrid power across short sprint laps.",
-  "car_id": "ks_toyota_ts040",
-  "track_id": "ks_red_bull_ring",
-  "track_layout": "layout_gp",
+  "title": "Modern Hybrid Prototype Mastery: Spa-Francorchamps",
+  "description": "All-wheel drive hybrid electric boost out of Bus Stop and Eau Rouge; 1000 hp sustained.",
+  "lesson_objective": "LMP1-H energy recovery management, MGU-K all-wheel drive exit traction.",
+  "car_id": "ks_porsche_919_hybrid_2016",
+  "track_id": "spa",
+  "track_layout": "",
   "start_mode": "FLYING_LAP",
   "spawn": {
     "position": [
-      292.192,
-      -11.878,
-      304.574
+      -201.393,
+      17.667,
+      -562.26
     ],
     "forward_vector": [
-      -0.9607,
-      0.0016,
-      0.2775
+      -0.5609,
+      0.02,
+      -0.8276
     ],
-    "initial_speed_kmh": 170.0
+    "initial_speed_kmh": 180.0
   },
   "timing": {
     "start_gate": {
       "p1": [
-        231.437,
-        -11.851,
-        315.787
+        -236.381,
+        19.053,
+        -625.079
       ],
       "p2": [
-        234.663,
-        -11.851,
-        327.345
+        -246.335,
+        19.053,
+        -618.375
       ]
     },
     "finish_gate": {
       "p1": [
-        237.038,
-        -11.863,
-        314.219
+        -231.566,
+        18.9,
+        -617.899
       ],
       "p2": [
-        240.292,
-        -11.863,
-        325.769
+        -241.55,
+        18.9,
+        -611.243
       ]
     }
   },
@@ -54,8 +54,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 78.5,
-    "silver_seconds": 84.0,
-    "bronze_seconds": 92.0
+    "gold_seconds": 110.2,
+    "silver_seconds": 118.0,
+    "bronze_seconds": 129.2
   }
 }

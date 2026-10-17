@@ -1,49 +1,49 @@
 {
   "test_id": "S-7",
   "tier": "Super License",
-  "title": "High-Velocity Temple of Speed: Monza GP",
-  "description": "370+ km/h down Monza straights; braking with high turbo boost and vintage ground effects.",
-  "lesson_objective": "Group C twin-turbo V8 top speed and minimal downforce braking.",
-  "car_id": "ks_mercedes_c9",
-  "track_id": "monza",
+  "title": "High-Downforce Aerodynamic Flow: Mugello",
+  "description": "Zero driving assists; connecting Casanova-Savelli and Arrabbiata 1 & 2 into one high-g rhythm.",
+  "lesson_objective": "Naturally aspirated V12 track special full circuit flow.",
+  "car_id": "pagani_zonda_r",
+  "track_id": "mugello",
   "track_layout": "",
   "start_mode": "FLYING_LAP",
   "spawn": {
     "position": [
-      -210.788,
-      -8.745,
-      485.44
+      6.537,
+      -0.129,
+      25.551
     ],
     "forward_vector": [
-      0.0289,
-      0.0046,
-      -0.9996
+      -0.9999,
+      0.0124,
+      -0.0037
     ],
-    "initial_speed_kmh": 180.0
+    "initial_speed_kmh": 170.0
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -200.943,
-        -8.408,
-        414.415
+        -54.98,
+        0.574,
+        19.215
       ],
       "p2": [
-        -212.915,
-        -8.408,
-        413.591
+        -55.152,
+        0.574,
+        31.213
       ]
     },
     "finish_gate": {
       "p1": [
-        -201.449,
-        -8.442,
-        421.714
+        -48.2,
+        0.494,
+        19.303
       ],
       "p2": [
-        -213.419,
-        -8.442,
-        420.876
+        -48.328,
+        0.494,
+        31.303
       ]
     }
   },
@@ -54,8 +54,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 89.2,
-    "silver_seconds": 95.5,
-    "bronze_seconds": 104.5
+    "gold_seconds": 99.8,
+    "silver_seconds": 107.0,
+    "bronze_seconds": 117.2
   }
 }

@@ -1,49 +1,51 @@
 {
   "test_id": "S-3",
   "tier": "Super License",
-  "title": "Applied Hot Lap: N\u00fcrburgring GP (GT5 S-3)",
-  "description": "Front-mid 6.2L AMG V8 naturally aspirated balance: thread the Mercedes Arena and high-speed chicane.",
-  "lesson_objective": "Precision high-speed throttle modulation in an iconic gullwing supercar.",
-  "car_id": "mercedes_sls",
-  "track_id": "ks_nurburgring",
-  "track_layout": "layout_gp_a",
+  "title": "Supercar Hot Lap: Laguna Seca",
+  "description": "Managing explosive hybrid torque out of Andretti Hairpin and the blind Corkscrew drop.",
+  "lesson_objective": "Full unassisted hot lap in a 963 bhp hybrid hypercar.",
+  "car_id": "ferrari_laferrari",
+  "track_id": "ks_laguna_seca",
+  "track_layout": "",
   "start_mode": "FLYING_LAP",
   "spawn": {
     "position": [
-      -5.356,
-      64.303,
-      -824.882
+      -275.17,
+      -12.016,
+      -275.935
     ],
     "forward_vector": [
-      0.007,
-      -0.0063,
-      1.0
+      -0.5639,
+      0.0023,
+      0.8259
     ],
-    "initial_speed_kmh": 150.0
+    "initial_speed_kmh": 59.2,
+    "gear": 2,
+    "rpm": 4630
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -10.878,
-        63.954,
-        -763.308
+        -307.451,
+        -10.721,
+        -237.286
       ],
       "p2": [
-        1.122,
-        63.954,
-        -763.372
+        -297.295,
+        -10.721,
+        -230.894
       ]
     },
     "finish_gate": {
       "p1": [
-        -10.916,
-        63.988,
-        -769.921
+        -304.73,
+        -10.924,
+        -241.604
       ],
       "p2": [
-        1.084,
-        63.988,
-        -769.999
+        -294.584,
+        -10.924,
+        -235.196
       ]
     }
   },
@@ -54,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 100.0,
-    "silver_seconds": 108.0,
-    "bronze_seconds": 120.0
+    "gold_seconds": 226.5,
+    "silver_seconds": 242.7,
+    "bronze_seconds": 265.8
   }
 }

@@ -1,49 +1,51 @@
 {
   "test_id": "S-4",
   "tier": "Super License",
-  "title": "Lightweight Time Attack: Silverstone GP (GT6 S-3)",
-  "description": "Exploit pure mechanical downforce and lightweight 790 kg chassis through Maggotts-Becketts and Stowe.",
-  "lesson_objective": "Cornering commitment and high apex speeds in an ultra-lightweight track weapon.",
-  "car_id": "ks_pagani_huayra_bc",
-  "track_id": "ks_silverstone",
+  "title": "British Heritage Time Attack: Brands Hatch GP",
+  "description": "Active aero and DRS deployment through narrow, barrier-lined woodland curves.",
+  "lesson_objective": "Full lap time attack in a 916 bhp hypercar around Brands Hatch GP.",
+  "car_id": "ks_mclaren_p1",
+  "track_id": "ks_brands_hatch",
   "track_layout": "gp",
   "start_mode": "FLYING_LAP",
   "spawn": {
     "position": [
-      -418.148,
-      -6.51,
-      278.208
+      -310.56,
+      -3.41,
+      -307.323
     ],
     "forward_vector": [
-      0.5888,
-      0.0078,
-      -0.8082
+      0.8396,
+      -0.0322,
+      -0.5422
     ],
-    "initial_speed_kmh": 140.0
+    "initial_speed_kmh": 249.2,
+    "gear": 5,
+    "rpm": 7326
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -380.56,
-        -5.99,
-        236.502
+        -135.389,
+        -7.661,
+        -384.185
       ],
       "p2": [
-        -390.338,
-        -5.99,
-        229.546
+        -140.019,
+        -7.661,
+        -395.255
       ]
     },
     "finish_gate": {
       "p1": [
-        -384.385,
-        -6.064,
-        241.875
+        -140.479,
+        -7.755,
+        -382.047
       ],
       "p2": [
-        -394.153,
-        -6.064,
-        234.905
+        -145.149,
+        -7.755,
+        -393.101
       ]
     }
   },
@@ -54,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 57.3,
-    "silver_seconds": 58.5,
-    "bronze_seconds": 64.0
+    "gold_seconds": 83.8,
+    "silver_seconds": 89.8,
+    "bronze_seconds": 98.4
   }
 }

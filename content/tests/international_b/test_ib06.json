@@ -1,51 +1,51 @@
 {
   "test_id": "IB-6",
   "tier": "International B",
-  "title": "Active Aerodynamics at 230 km/h",
-  "description": "Fast Turn 3 long right sweeper: trust ALA downforce, stabilize lateral load, carry immense speed.",
-  "lesson_objective": "Trusting active aerodynamic balance through long sustained lateral corners.",
-  "car_id": "ks_lamborghini_huracan_performante",
-  "track_id": "ks_barcelona",
-  "track_layout": "layout_gp",
+  "title": "Big Displacement V8 Torque Modulation",
+  "description": "Steep uphill braking into Turn 1, rolling through Turn 2 Andretti Hairpin without spinning rears.",
+  "lesson_objective": "Managing instantaneous naturally aspirated V8 torque off-idle.",
+  "car_id": "ks_corvette_c7_stingray",
+  "track_id": "ks_laguna_seca",
+  "track_layout": "",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      1.639,
-      -24.811,
-      380.602
+      -145.173,
+      -10.25,
+      -461.001
     ],
     "forward_vector": [
-      -0.5315,
-      -0.0121,
-      0.847
+      -0.7374,
+      -0.0092,
+      0.6754
     ],
-    "initial_speed_kmh": 98.7,
+    "initial_speed_kmh": 80.0,
     "gear": 3,
-    "rpm": 4811
+    "rpm": 3242
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -44.304,
-        -25.74,
-        440.194
+        -189.717,
+        -11.035,
+        -410.924
       ],
       "p2": [
-        -34.228,
-        -25.74,
-        446.71
+        -179.803,
+        -11.035,
+        -404.164
       ]
     },
     "finish_gate": {
       "p1": [
-        -458.974,
-        -12.959,
-        473.928
+        -337.255,
+        -15.189,
+        10.205
       ],
       "p2": [
-        -470.488,
-        -12.959,
-        477.306
+        -349.155,
+        -15.189,
+        8.661
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 19.3,
-    "silver_seconds": 20.7,
-    "bronze_seconds": 22.6
+    "gold_seconds": 24.3,
+    "silver_seconds": 26.0,
+    "bronze_seconds": 28.5
   }
 }

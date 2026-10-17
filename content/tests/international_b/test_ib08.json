@@ -1,51 +1,51 @@
 {
   "test_id": "IB-8",
   "tier": "International B",
-  "title": "High-Speed Chicane Precision: Ascari",
-  "description": "Braking from 230 km/h into Variante Ascari, clipping left, right, and exit curbs in one fluid arc.",
-  "lesson_objective": "Precision high-speed direction changes across kerb complexes.",
-  "car_id": "bmw_m3_e92_s1",
-  "track_id": "monza",
-  "track_layout": "",
+  "title": "Heavyweight Digital AWD Traction",
+  "description": "Managing 1,720 kg curb weight through the tight Schumacher-S and Kumho chicane complexes.",
+  "lesson_objective": "Harnessing ATTESA E-TS all-wheel drive vectoring on chicane direction changes.",
+  "car_id": "ks_nissan_gtr",
+  "track_id": "ks_nurburgring",
+  "track_layout": "layout_gp_a",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      196.499,
-      -4.427,
-      -307.546
+      -232.114,
+      50.43,
+      39.146
     ],
     "forward_vector": [
-      -0.3236,
-      -0.0052,
-      0.9462
+      -0.8602,
+      -0.0115,
+      0.5099
     ],
-    "initial_speed_kmh": 95.8,
+    "initial_speed_kmh": 111.4,
     "gear": 3,
-    "rpm": 4531
+    "rpm": 4323
   },
   "timing": {
     "start_gate": {
       "p1": [
-        184.545,
-        -4.813,
-        -233.901
+        -312.253,
+        48.226,
+        57.947
       ],
       "p2": [
-        196.353,
-        -4.813,
-        -231.763
+        -314.009,
+        48.226,
+        69.817
       ]
     },
     "finish_gate": {
       "p1": [
-        64.494,
-        -8.503,
-        391.827
+        -203.221,
+        47.198,
+        -697.989
       ],
       "p2": [
-        76.44,
-        -8.503,
-        392.965
+        -213.591,
+        47.198,
+        -704.029
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 22.0,
-    "silver_seconds": 23.5,
-    "bronze_seconds": 25.8
+    "gold_seconds": 27.6,
+    "silver_seconds": 29.5,
+    "bronze_seconds": 32.3
   }
 }

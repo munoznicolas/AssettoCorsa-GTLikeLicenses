@@ -427,17 +427,28 @@ async function saveDraggedTestOrder() {
   saveFormIntoActiveTest();
   const selectedTest = activeTier.tests[state.activeTestIndex];
   const originalIds = new Map(
-    previousOrder.map((test) => [test, { test_id: test.test_id, preview_image: test.preview_image }])
+    previousOrder.map((test) => [
+      test,
+      {
+        test_id: test.test_id,
+        previous_test_id: test.previous_test_id,
+        preview_image: test.preview_image,
+      },
+    ])
   );
 
   activeTier.tests.splice(0, activeTier.tests.length, ...reorderedTests);
-  renumberTierTests(activeTier);
+  renumberTierTests(activeTier, { updatePreviewPaths: false });
   state.activeTestIndex = activeTier.tests.indexOf(selectedTest);
   suppressTestClickUntil = Date.now() + 300;
   renderTestList();
 
   try {
     await saveCurrentTier();
+    renumberTierTests(activeTier, { updatePreviewPaths: true });
+    for (const test of activeTier.tests) {
+      delete test.previous_test_id;
+    }
     state.cacheBuster = Date.now();
     renderTestList();
     await loadTestIntoForm(state.activeTestIndex);
@@ -447,6 +458,11 @@ async function saveDraggedTestOrder() {
     for (const test of previousOrder) {
       const original = originalIds.get(test);
       test.test_id = original.test_id;
+      if (original.previous_test_id === undefined) {
+        delete test.previous_test_id;
+      } else {
+        test.previous_test_id = original.previous_test_id;
+      }
       if (original.preview_image === undefined) {
         delete test.preview_image;
       } else {
@@ -760,13 +776,16 @@ export function validateTargets() {
 /**
  * Renumber test IDs and preview image paths sequentially within a tier.
  */
-export function renumberTierTests(tier) {
+export function renumberTierTests(tier, { updatePreviewPaths = true } = {}) {
   if (!tier?.tests) return;
   const prefix = tier.test_prefix || "T-";
   tier.tests.forEach((t, i) => {
     const num = i + 1;
+    if (t.previous_test_id === undefined && t.test_id) {
+      t.previous_test_id = t.test_id;
+    }
     t.test_id = `${prefix}${num}`;
-    if (tier.folder) {
+    if (updatePreviewPaths && tier.folder) {
       t.preview_image = `/content/career/${tier.folder}/event${num}/preview.png`;
     }
   });
@@ -898,6 +917,9 @@ export async function saveCurrentTier() {
   if (!data.success) {
     throw new Error(data.error || "Save failed");
   }
+  for (const test of activeTier.tests) {
+    delete test.previous_test_id;
+  }
   return data;
 }
 
@@ -912,6 +934,7 @@ function handleAddTest() {
 
   const newTest = {
     test_id: `${prefix}${count}`,
+    previous_test_id: null,
     tier: activeTier.tier_name,
     title: `Test ${count}: New Sector Challenge`,
     description: "Execute the prescribed driving line cleanly with zero track limit infractions.",
@@ -967,6 +990,7 @@ async function handleDeleteTest() {
 
   try {
     await saveCurrentTier();
+    state.cacheBuster = Date.now();
     renderLicenseTabs();
     renderTestList();
     await loadTestIntoForm(newIdx);
@@ -1314,3 +1338,4 @@ export function setupEditorEventListeners() {
     void handleFormSubmit(e);
   });
 }
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               

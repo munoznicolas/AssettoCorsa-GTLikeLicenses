@@ -1,49 +1,49 @@
 {
   "test_id": "S-9",
   "tier": "Super License",
-  "title": "Undulating Perfection: Imola GP",
-  "description": "Porsche ground-effects prototype attacking Piratella, Acque Minerali, and Variante Alta curbs.",
-  "lesson_objective": "Group C ground effect venturi tunnel suction through undulations.",
-  "car_id": "ks_porsche_962c_shorttail",
-  "track_id": "imola",
-  "track_layout": "",
+  "title": "The 4-Rotor Symphony: Silverstone GP",
+  "description": "High-revving naturally aspirated R26B rotary engine screaming through Maggotts and Becketts.",
+  "lesson_objective": "High-RPM rotary powerband discipline and analog Group C precision.",
+  "car_id": "ks_mazda_787b",
+  "track_id": "ks_silverstone",
+  "track_layout": "gp",
   "start_mode": "FLYING_LAP",
   "spawn": {
     "position": [
-      269.545,
-      -85.229,
-      -388.355
+      -421.087,
+      -6.55,
+      282.252
     ],
     "forward_vector": [
-      -1.0,
-      0.004,
-      0.0014
+      0.5859,
+      0.008,
+      -0.8104
     ],
-    "initial_speed_kmh": 165.0
+    "initial_speed_kmh": 160.0
   },
   "timing": {
     "start_gate": {
       "p1": [
-        208.239,
-        -85.014,
-        -395.675
+        -380.56,
+        -5.99,
+        236.502
       ],
       "p2": [
-        207.675,
-        -85.014,
-        -383.689
+        -390.338,
+        -5.99,
+        229.546
       ]
     },
     "finish_gate": {
       "p1": [
-        214.695,
-        -85.036,
-        -395.379
+        -384.385,
+        -6.064,
+        241.875
       ],
       "p2": [
-        214.177,
-        -85.036,
-        -383.391
+        -394.153,
+        -6.064,
+        234.905
       ]
     }
   },
@@ -54,8 +54,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 95.5,
-    "silver_seconds": 102.2,
-    "bronze_seconds": 111.9
+    "gold_seconds": 96.0,
+    "silver_seconds": 102.8,
+    "bronze_seconds": 112.5
   }
 }

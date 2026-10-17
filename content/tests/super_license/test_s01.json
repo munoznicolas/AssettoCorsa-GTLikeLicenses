@@ -1,49 +1,51 @@
 {
   "test_id": "S-1",
   "tier": "Super License",
-  "title": "Supercar Hot Lap: Laguna Seca",
-  "description": "Managing explosive hybrid torque out of Andretti Hairpin and the blind Corkscrew drop.",
-  "lesson_objective": "Full unassisted hot lap in a 963 bhp hybrid hypercar.",
-  "car_id": "ferrari_laferrari",
-  "track_id": "ks_laguna_seca",
-  "track_layout": "",
+  "title": "Formula 1 V10 Apex Velocity: Barcelona GP",
+  "description": "19,000 RPM 3.0L V10 F1 car: 4.5+ lateral g through Turn 3 and Campsa. Blistering reaction times.",
+  "lesson_objective": "Peak downforce commitment and sub-second decision making in a championship F1 car.",
+  "car_id": "ks_ferrari_f2004",
+  "track_id": "ks_barcelona",
+  "track_layout": "layout_gp",
   "start_mode": "FLYING_LAP",
   "spawn": {
     "position": [
-      -268.634,
-      -12.028,
-      -285.516
+      483.914,
+      -15.81,
+      -378.898
     ],
     "forward_vector": [
-      -0.5636,
-      0.002,
-      0.8261
+      -0.3048,
+      -0.0066,
+      0.9524
     ],
-    "initial_speed_kmh": 160.0
+    "initial_speed_kmh": 279.7,
+    "gear": 7,
+    "rpm": 16873
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -307.451,
-        -10.721,
-        -237.286
+        364.312,
+        -18.539,
+        -197.42
       ],
       "p2": [
-        -297.295,
-        -10.721,
-        -230.894
+        374.374,
+        -18.539,
+        -190.882
       ]
     },
     "finish_gate": {
       "p1": [
-        -304.73,
-        -10.924,
-        -241.604
+        367.714,
+        -18.501,
+        -202.648
       ],
       "p2": [
-        -294.584,
-        -10.924,
-        -235.196
+        377.76,
+        -18.501,
+        -196.084
       ]
     }
   },
@@ -54,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 80.5,
-    "silver_seconds": 86.3,
-    "bronze_seconds": 94.5
+    "gold_seconds": 81.3,
+    "silver_seconds": 87.1,
+    "bronze_seconds": 95.4
   }
 }

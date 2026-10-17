@@ -1,49 +1,51 @@
 {
   "test_id": "S-12",
   "tier": "Super License",
-  "title": "Formula 1 V10 Apex Velocity: Barcelona GP",
-  "description": "19,000 RPM 3.0L V10 F1 car: 4.5+ lateral g through Turn 3 and Campsa. Blistering reaction times.",
-  "lesson_objective": "Peak downforce commitment and sub-second decision making in a championship F1 car.",
-  "car_id": "ks_ferrari_f2004",
-  "track_id": "ks_barcelona",
+  "title": "1,000 Horsepower Hybrid Attack: Red Bull Ring",
+  "description": "V8 hybrid acceleration out of Remus hairpin; maximum energy deployment through Turn 6 & 7.",
+  "lesson_objective": "Harvesting and deploying supercapacitor hybrid power across short sprint laps.",
+  "car_id": "ks_toyota_ts040",
+  "track_id": "ks_red_bull_ring",
   "track_layout": "layout_gp",
   "start_mode": "FLYING_LAP",
   "spawn": {
     "position": [
-      411.931,
-      -17.72,
-      -257.84
+      433.449,
+      -11.06,
+      263.647
     ],
     "forward_vector": [
-      -0.5721,
-      -0.0176,
-      0.82
+      -0.9626,
+      -0.0143,
+      0.2707
     ],
-    "initial_speed_kmh": 200.0
+    "initial_speed_kmh": 259.4,
+    "gear": 6,
+    "rpm": 7060
   },
   "timing": {
     "start_gate": {
       "p1": [
-        364.312,
-        -18.539,
-        -197.42
+        231.437,
+        -11.851,
+        315.787
       ],
       "p2": [
-        374.374,
-        -18.539,
-        -190.882
+        234.663,
+        -11.851,
+        327.345
       ]
     },
     "finish_gate": {
       "p1": [
-        367.714,
-        -18.501,
-        -202.648
+        237.038,
+        -11.863,
+        314.219
       ],
       "p2": [
-        377.76,
-        -18.501,
-        -196.084
+        240.292,
+        -11.863,
+        325.769
       ]
     }
   },
@@ -54,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 74.0,
-    "silver_seconds": 79.2,
-    "bronze_seconds": 86.7
+    "gold_seconds": 76.6,
+    "silver_seconds": 82.0,
+    "bronze_seconds": 89.9
   }
 }

@@ -1,51 +1,51 @@
 {
   "test_id": "B-6",
   "tier": "National B",
-  "title": "Threshold Braking from 190 km/h into Chicane",
-  "description": "Heavy straight-line braking at the 150m board down to 60 km/h and hopping the curb cleanly.",
-  "lesson_objective": "High-speed threshold braking and curb hopping through Prima Variante.",
-  "car_id": "bmw_m3_e30",
-  "track_id": "monza",
-  "track_layout": "",
+  "title": "Low-Speed Weight Transfer & Transition",
+  "description": "Trail-brake into Brooklands and smoothly transfer lateral load into the looping Luffield radius.",
+  "lesson_objective": "Managing classic live-axle rear-wheel drive chassis dynamics.",
+  "car_id": "ks_toyota_ae86",
+  "track_id": "ks_silverstone",
+  "track_layout": "national",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      -212.184,
-      -9.202,
-      569.418
+      -30.8,
+      2.797,
+      -553.214
     ],
     "forward_vector": [
-      -0.0009,
-      0.0057,
-      -1.0
+      -0.7562,
+      -0.0104,
+      -0.6542
     ],
-    "initial_speed_kmh": 185.0,
-    "gear": 5,
-    "rpm": 5900
+    "initial_speed_kmh": 80.0,
+    "gear": 3,
+    "rpm": 3825
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -200.943,
-        -8.408,
-        414.415
+        -78.362,
+        1.954,
+        -600.462
       ],
       "p2": [
-        -212.915,
-        -8.408,
-        413.591
+        -85.87,
+        1.954,
+        -591.1
       ]
     },
     "finish_gate": {
       "p1": [
-        -97.177,
-        -1.684,
-        -772.976
+        -281.387,
+        -0.873,
+        -708.613
       ],
       "p2": [
-        -109.155,
-        -1.684,
-        -773.698
+        -290.709,
+        -0.873,
+        -716.171
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 53.4,
-    "silver_seconds": 57.2,
-    "bronze_seconds": 62.6
+    "gold_seconds": 10.1,
+    "silver_seconds": 10.9,
+    "bronze_seconds": 11.9
   }
 }

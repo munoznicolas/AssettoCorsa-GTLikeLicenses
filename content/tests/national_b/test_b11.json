@@ -1,51 +1,49 @@
 {
   "test_id": "B-11",
   "tier": "National B",
-  "title": "S-Bend Line Straightening",
-  "description": "Sacrificing entry speed in Turn 2 to straighten the line and maximize exit speed up Hugenholtz.",
-  "lesson_objective": "Line straightening across linked corners in a classic rear-wheel drive coupe.",
-  "car_id": "ks_ford_escort_mk1",
-  "track_id": "ks_zandvoort",
-  "track_layout": "",
-  "start_mode": "ROLLING",
+  "title": "Slalom Rhythm & Transient Agility",
+  "description": "Steering cadence and throttle feathering in 2nd gear through staggered cones without sliding.",
+  "lesson_objective": "Weight transfer control in a mid-engine roadster.",
+  "car_id": "lotus_elise_sc",
+  "track_id": "drift",
+  "track_layout": "karting",
+  "start_mode": "STANDING",
   "spawn": {
     "position": [
-      245.076,
-      2.575,
-      142.647
+      30.859,
+      0.226,
+      113.096
     ],
     "forward_vector": [
-      -0.0207,
-      0.0004,
-      0.9998
+      -0.8748,
+      -0.0,
+      0.4844
     ],
-    "initial_speed_kmh": 80.0,
-    "gear": 3,
-    "rpm": 3825
+    "initial_speed_kmh": 0.0
   },
   "timing": {
     "start_gate": {
       "p1": [
-        237.695,
-        2.573,
-        209.21
+        27.952,
+        0.226,
+        107.847
       ],
       "p2": [
-        249.693,
-        2.573,
-        209.446
+        33.766,
+        0.226,
+        118.345
       ]
     },
     "finish_gate": {
       "p1": [
-        118.672,
-        5.699,
-        -13.366
+        -74.873,
+        0.227,
+        60.275
       ],
       "p2": [
-        126.538,
-        5.699,
-        -4.302
+        -85.587,
+        0.227,
+        65.679
       ]
     }
   },
@@ -56,8 +54,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 40.7,
-    "silver_seconds": 43.6,
-    "bronze_seconds": 47.7
+    "gold_seconds": 12.9,
+    "silver_seconds": 13.9,
+    "bronze_seconds": 15.2
   }
 }

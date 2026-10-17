@@ -1,49 +1,49 @@
 {
   "test_id": "S-6",
   "tier": "Super License",
-  "title": "High-Downforce Aerodynamic Flow: Mugello",
-  "description": "Zero driving assists; connecting Casanova-Savelli and Arrabbiata 1 & 2 into one high-g rhythm.",
-  "lesson_objective": "Naturally aspirated V12 track special full circuit flow.",
-  "car_id": "pagani_zonda_r",
-  "track_id": "mugello",
-  "track_layout": "",
+  "title": "Lightweight Time Attack: Silverstone GP (GT6 S-3)",
+  "description": "Exploit pure mechanical downforce and lightweight 790 kg chassis through Maggotts-Becketts and Stowe.",
+  "lesson_objective": "Cornering commitment and high apex speeds in an ultra-lightweight track weapon.",
+  "car_id": "ks_pagani_huayra_bc",
+  "track_id": "ks_silverstone",
+  "track_layout": "gp",
   "start_mode": "FLYING_LAP",
   "spawn": {
     "position": [
-      6.537,
-      -0.129,
-      25.551
+      -418.148,
+      -6.51,
+      278.208
     ],
     "forward_vector": [
-      -0.9999,
-      0.0124,
-      -0.0037
+      0.5888,
+      0.0078,
+      -0.8082
     ],
-    "initial_speed_kmh": 170.0
+    "initial_speed_kmh": 140.0
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -54.98,
-        0.574,
-        19.215
+        -380.56,
+        -5.99,
+        236.502
       ],
       "p2": [
-        -55.152,
-        0.574,
-        31.213
+        -390.338,
+        -5.99,
+        229.546
       ]
     },
     "finish_gate": {
       "p1": [
-        -48.2,
-        0.494,
-        19.303
+        -384.385,
+        -6.064,
+        241.875
       ],
       "p2": [
-        -48.328,
-        0.494,
-        31.303
+        -394.153,
+        -6.064,
+        234.905
       ]
     }
   },
@@ -54,8 +54,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 99.8,
-    "silver_seconds": 107.0,
-    "bronze_seconds": 117.2
+    "gold_seconds": 57.3,
+    "silver_seconds": 58.5,
+    "bronze_seconds": 64.0
   }
 }

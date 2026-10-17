@@ -1,51 +1,51 @@
 {
   "test_id": "IB-13",
   "tier": "International B",
-  "title": "Historic High-Speed Drifting: Stowe & Club",
-  "description": "Bias-ply tires and big-block 7.0L V8: use throttle steer through Stowe and Club corners.",
-  "lesson_objective": "Managing high slip angles and mechanical chassis balance on historic layouts.",
-  "car_id": "shelby_cobra_427sc",
-  "track_id": "ks_silverstone1967",
+  "title": "Blind Crest Downhill Esses: Casanova-Savelli",
+  "description": "Right-hand crest into plunging left off-camber descent at Mugello: settle chassis before load shift.",
+  "lesson_objective": "Managing high-speed lateral load shifts with simultaneous elevation drops.",
+  "car_id": "ks_alfa_giulia_qv",
+  "track_id": "mugello",
   "track_layout": "",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      200.116,
-      -2.218,
-      503.477
+      -501.789,
+      30.733,
+      -276.229
     ],
     "forward_vector": [
-      -0.449,
-      -0.0038,
-      0.8935
+      0.996,
+      0.0267,
+      -0.0854
     ],
-    "initial_speed_kmh": 120.0,
+    "initial_speed_kmh": 156.9,
     "gear": 3,
-    "rpm": 3816
+    "rpm": 6388
   },
   "timing": {
     "start_gate": {
       "p1": [
-        150.594,
-        -3.028,
-        590.557
+        -391.29,
+        31.173,
+        -253.335
       ],
       "p2": [
-        161.378,
-        -3.028,
-        595.819
+        -388.668,
+        31.173,
+        -265.045
       ]
     },
     "finish_gate": {
       "p1": [
-        -432.26,
-        -6.664,
-        306.453
+        492.247,
+        -9.51,
+        -60.933
       ],
       "p2": [
-        -441.534,
-        -6.664,
-        298.837
+        489.727,
+        -9.51,
+        -72.665
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 43.1,
-    "silver_seconds": 46.1,
-    "bronze_seconds": 50.5
+    "gold_seconds": 24.8,
+    "silver_seconds": 26.6,
+    "bronze_seconds": 29.2
   }
 }

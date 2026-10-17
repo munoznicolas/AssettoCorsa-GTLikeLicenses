@@ -1,51 +1,51 @@
 {
   "test_id": "B-8",
   "tier": "National B",
-  "title": "Blind Compression Corner Entry",
-  "description": "Downhill compression turn-in over a blind crest and soaking vertical compression at the bottom.",
-  "lesson_objective": "Committing to blind crest turn-in and elevation drop at Paddock Hill Bend.",
-  "car_id": "ks_mazda_mx5_nd",
-  "track_id": "ks_brands_hatch",
-  "track_layout": "indy",
+  "title": "High-Speed Carousel Feathering",
+  "description": "Balancing the car on the edge of adhesion through a long tightening carousel turn.",
+  "lesson_objective": "Throttle modulation through the Mercedes Arena carousel.",
+  "car_id": "ks_toyota_gt86",
+  "track_id": "ks_nurburgring",
+  "track_layout": "layout_sprint_a",
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      -208.125,
-      -6.983,
-      -356.203
+      -203.128,
+      55.278,
+      -817.054
     ],
     "forward_vector": [
-      0.9076,
-      -0.0323,
-      -0.4186
+      0.151,
+      0.0617,
+      -0.9866
     ],
-    "initial_speed_kmh": 90.0,
-    "gear": 3,
-    "rpm": 4475
+    "initial_speed_kmh": 65.0,
+    "gear": 2,
+    "rpm": 5125
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -137.627,
-        -7.803,
-        -381.935
+        -178.682,
+        58.072,
+        -864.622
       ],
       "p2": [
-        -142.345,
-        -7.803,
-        -392.969
+        -189.288,
+        58.072,
+        -870.234
       ]
     },
     "finish_gate": {
       "p1": [
-        157.722,
-        -18.521,
-        -289.994
+        -10.652,
+        63.962,
+        -764.071
       ],
       "p2": [
-        169.716,
-        -18.521,
-        -289.642
+        1.348,
+        63.962,
+        -764.059
       ]
     }
   },
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 10.0,
-    "silver_seconds": 10.8,
-    "bronze_seconds": 11.8
+    "gold_seconds": 35.8,
+    "silver_seconds": 38.4,
+    "bronze_seconds": 42.1
   }
 }

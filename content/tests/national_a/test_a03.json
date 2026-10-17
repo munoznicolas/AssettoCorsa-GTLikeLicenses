@@ -10,18 +10,18 @@
   "start_mode": "ROLLING",
   "spawn": {
     "position": [
-      -91.332,
-      -6.578,
-      -406.381
+      -186.198,
+      -7.783,
+      -366.371
     ],
     "forward_vector": [
-      0.9422,
-      0.0268,
-      -0.3341
+      0.9058,
+      -0.0326,
+      -0.4225
     ],
-    "initial_speed_kmh": 65.0,
-    "gear": 2,
-    "rpm": 4200
+    "initial_speed_kmh": 185.8,
+    "gear": 5,
+    "rpm": 6556
   },
   "timing": {
     "start_gate": {
@@ -56,8 +56,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 14.5,
-    "silver_seconds": 15.2,
-    "bronze_seconds": 18.0
+    "gold_seconds": 19.1,
+    "silver_seconds": 20.4,
+    "bronze_seconds": 22.4
   }
 }
