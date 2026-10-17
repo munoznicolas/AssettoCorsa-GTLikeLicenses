@@ -268,12 +268,29 @@ body {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   padding: 10px 12px;
-  cursor: pointer;
+  cursor: grab;
   transition: all 0.15s ease;
   position: relative;
   display: flex;
   gap: 12px;
   align-items: center;
+}
+
+.test-item:active {
+  cursor: grabbing;
+}
+
+.test-item.dragging {
+  opacity: 0.45;
+}
+
+.test-item-drag-handle {
+  width: 8px;
+  height: 16px;
+  background-image: radial-gradient(circle, var(--text-muted) 1px, transparent 1.5px);
+  background-size: 4px 4px;
+  flex-shrink: 0;
+  user-select: none;
 }
 
 .test-item:hover {

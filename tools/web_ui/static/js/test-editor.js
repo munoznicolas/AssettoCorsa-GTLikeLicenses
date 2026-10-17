@@ -20,6 +20,11 @@ import {
   hideAISpeedStatus,
 } from "./queue-runner.js";
 
+let draggedTestItem = null;
+let testOrderChangedDuringDrag = false;
+let testDropHandled = false;
+let suppressTestClickUntil = 0;
+
 /**
  * Filter tracks by search query across id, name, and layout names.
  */
@@ -338,6 +343,9 @@ export function renderTestList() {
   activeTier.tests.forEach((test, idx) => {
     const item = document.createElement("div");
     item.className = `test-item ${idx === state.activeTestIndex ? "active" : ""}`;
+    item.draggable = true;
+    item.dataset.testIndex = String(idx);
+    item.title = "Drag to reorder tests";
 
     const modeClass = escapeHtml((test.start_mode || "standing").toLowerCase());
     const isFullLap = isFullLapTest(test);
@@ -350,6 +358,7 @@ export function renderTestList() {
         : `/api/test_preview?test_id=${encodeURIComponent(test.test_id)}`);
 
     item.innerHTML = `
+      <span class="test-item-drag-handle" aria-hidden="true"></span>
       <div class="test-item-thumb">
         <img src="${escapeHtml(previewUrl)}?t=${encodeURIComponent(state.cacheBuster)}" 
              alt="${escapeHtml(test.test_id)}" 
@@ -371,10 +380,84 @@ export function renderTestList() {
     `;
 
     item.addEventListener("click", () => {
+      if (Date.now() < suppressTestClickUntil) return;
       void loadTestIntoForm(idx);
+    });
+    item.addEventListener("dragstart", (event) => {
+      draggedTestItem = item;
+      testOrderChangedDuringDrag = false;
+      testDropHandled = false;
+      item.classList.add("dragging");
+      if (event.dataTransfer) {
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("text/plain", String(idx));
+      }
+    });
+    item.addEventListener("dragend", () => {
+      item.classList.remove("dragging");
+      if (testOrderChangedDuringDrag && !testDropHandled) renderTestList();
+      draggedTestItem = null;
+      testOrderChangedDuringDrag = false;
+      testDropHandled = false;
     });
     dom.testList.appendChild(item);
   });
+}
+
+/**
+ * Persist the visual order of test cards as the active tier's new test order.
+ */
+async function saveDraggedTestOrder() {
+  const activeTier = state.curriculum[state.activeTierIndex];
+  if (!activeTier?.tests || !draggedTestItem) return;
+
+  const previousOrder = activeTier.tests.slice();
+  const reorderedTests = Array.from(dom.testList.querySelectorAll(".test-item")).map(
+    (item) => previousOrder[Number(item.dataset.testIndex)]
+  );
+  if (
+    reorderedTests.length !== previousOrder.length ||
+    reorderedTests.some((test) => !test) ||
+    reorderedTests.every((test, index) => test === previousOrder[index])
+  ) {
+    renderTestList();
+    return;
+  }
+
+  saveFormIntoActiveTest();
+  const selectedTest = activeTier.tests[state.activeTestIndex];
+  const originalIds = new Map(
+    previousOrder.map((test) => [test, { test_id: test.test_id, preview_image: test.preview_image }])
+  );
+
+  activeTier.tests.splice(0, activeTier.tests.length, ...reorderedTests);
+  renumberTierTests(activeTier);
+  state.activeTestIndex = activeTier.tests.indexOf(selectedTest);
+  suppressTestClickUntil = Date.now() + 300;
+  renderTestList();
+
+  try {
+    await saveCurrentTier();
+    state.cacheBuster = Date.now();
+    renderTestList();
+    await loadTestIntoForm(state.activeTestIndex);
+    showToast(`Tests reordered and renumbered in ${activeTier.tier_name}.`);
+  } catch (err) {
+    activeTier.tests.splice(0, activeTier.tests.length, ...previousOrder);
+    for (const test of previousOrder) {
+      const original = originalIds.get(test);
+      test.test_id = original.test_id;
+      if (original.preview_image === undefined) {
+        delete test.preview_image;
+      } else {
+        test.preview_image = original.preview_image;
+      }
+    }
+    state.activeTestIndex = activeTier.tests.indexOf(selectedTest);
+    renderTestList();
+    await loadTestIntoForm(state.activeTestIndex);
+    showToast(`Could not save test order: ${err.message}`, "error");
+  }
 }
 
 /**
@@ -1176,6 +1259,41 @@ function setupStartModeListeners() {
 export function setupEditorEventListeners() {
   setTrackCanvasPositionCallback((startS, finishS) => {
     setSpatialPositions(startS, finishS);
+  });
+
+  dom.testList?.addEventListener("dragover", (event) => {
+    if (!draggedTestItem) return;
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+
+    const targetItem = event.target instanceof Element
+      ? event.target.closest(".test-item")
+      : null;
+    if (!targetItem) {
+      if (event.target === dom.testList && draggedTestItem.nextSibling) {
+        dom.testList.appendChild(draggedTestItem);
+        testOrderChangedDuringDrag = true;
+      }
+      return;
+    }
+    if (targetItem === draggedTestItem) return;
+
+    const bounds = targetItem.getBoundingClientRect();
+    const insertAfter = event.clientY > bounds.top + bounds.height / 2;
+    const referenceNode = insertAfter ? targetItem.nextSibling : targetItem;
+    if (referenceNode !== draggedTestItem) {
+      dom.testList.insertBefore(draggedTestItem, referenceNode);
+      testOrderChangedDuringDrag = true;
+    }
+  });
+  dom.testList?.addEventListener("drop", (event) => {
+    if (!draggedTestItem) return;
+    event.preventDefault();
+    event.stopPropagation();
+    testDropHandled = true;
+    if (testOrderChangedDuringDrag) void saveDraggedTestOrder();
+    else renderTestList();
+    testOrderChangedDuringDrag = false;
   });
 
   dom.btnAddTest?.addEventListener("click", handleAddTest);
