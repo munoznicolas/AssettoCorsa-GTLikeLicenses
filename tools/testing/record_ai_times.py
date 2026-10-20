@@ -117,11 +117,11 @@ def main():
     if args.test:
         test_files = [args.test]
     elif args.tier:
-        pattern = os.path.join(REPO_ROOT, "content", "tests", args.tier, "*.json")
-        test_files = sorted([f for f in glob.glob(pattern) if "ghost_" not in os.path.basename(f)])
+        pattern = os.path.join(REPO_ROOT, "content", "tests", args.tier, "test_*.json")
+        test_files = sorted(glob.glob(pattern))
     else:
-        pattern = os.path.join(REPO_ROOT, "content", "tests", "*", "*.json")
-        test_files = sorted([f for f in glob.glob(pattern) if "ghost_" not in os.path.basename(f)])
+        pattern = os.path.join(REPO_ROOT, "content", "tests", "*", "test_*.json")
+        test_files = sorted(glob.glob(pattern))
         
     results = []
     

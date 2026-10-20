@@ -123,8 +123,6 @@ class TestUIModules(unittest.TestCase):
         """Verifies modular widget contracts in lua/ui/screens and common."""
         screens_dir = REPO_ROOT / "lua" / "ui" / "screens"
         self.assertTrue((screens_dir / "timer_widget.lua").is_file())
-        self.assertFalse((screens_dir / "gt_banner_widget.lua").exists())
-        self.assertFalse((screens_dir / "gt_ghost_widget.lua").exists())
         self.assertTrue((screens_dir / "modal_overlays.lua").is_file())
 
         overlay_file = screens_dir / "modal_overlays.lua"
@@ -158,8 +156,6 @@ class TestUIModules(unittest.TestCase):
             "FUNCTION_MAIN = timerHUD",
         ]:
             self.assertIn(req, manifest_text)
-        self.assertNotIn("ID = banner", manifest_text)
-        self.assertNotIn("ID = ghost", manifest_text)
 
         # Screens
         screens_dir = app_dir / "screens"
@@ -173,19 +169,16 @@ class TestUIModules(unittest.TestCase):
         ]
         for s in required_screens:
             self.assertTrue((screens_dir / s).is_file(), f"Missing app screen: {s}")
-        self.assertFalse((screens_dir / "banner_screen.lua").exists())
-        self.assertFalse((screens_dir / "ghost_screen.lua").exists())
 
         # Icons
         icons_dir = app_dir / "icons"
         self.assertTrue(icons_dir.is_dir(), "icons directory missing in gt_license app")
-        for icon in ["timer.png", "ghost.png", "settings.png"]:
+        for icon in ["timer.png", "settings.png"]:
             p = icons_dir / icon
             self.assertTrue(p.is_file(), f"Missing icon: {icon}")
             with Image.open(str(p)) as im:
                 self.assertEqual(im.format, "PNG")
                 self.assertEqual(im.size, (128, 128))
-        self.assertFalse((icons_dir / "banner.png").exists())
 
 
 if __name__ == "__main__":

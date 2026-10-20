@@ -9,7 +9,7 @@ import re
 import sys
 from typing import Any, List, Tuple
 
-DEFAULT_AC_ROOT = r"D:\SteamLibrary\steamapps\common\assettocorsa"
+from tools.spline.models import DEFAULT_AC_ROOT
 
 
 def get_user_documents_dir() -> str:

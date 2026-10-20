@@ -4,7 +4,6 @@ create_app_icons.py
 Generates clean 128x128 RGBA icons for the GT License AC Lua App windows:
 - icons/settings.png
 - icons/timer.png
-- icons/ghost.png
 - icons/speedo.png
 - icon.png (Main App Icon)
 """
@@ -34,26 +33,6 @@ def create_timer_icon(path: Path):
     d.ellipse([60, 64, 68, 72], fill=(255, 215, 0, 255))
     im.save(path)
 
-
-
-def create_ghost_icon(path: Path):
-    im = Image.new("RGBA", (128, 128), (0, 0, 0, 0))
-    d = ImageDraw.Draw(im)
-    # Stylized ghost car silhouette / Pacman ghost shape
-    # Ghost dome head
-    d.pieslice([24, 20, 104, 100], 180, 360, fill=(100, 200, 255, 220), outline=(255, 255, 255, 240))
-    # Body
-    d.rectangle([24, 60, 104, 96], fill=(100, 200, 255, 220))
-    d.line([(24, 60), (24, 96)], fill=(255, 255, 255, 240), width=3)
-    d.line([(104, 60), (104, 96)], fill=(255, 255, 255, 240), width=3)
-    # Bottom wavy ruffles
-    d.polygon([(24, 96), (37, 86), (51, 96), (64, 86), (77, 96), (91, 86), (104, 96)], fill=(100, 200, 255, 220), outline=(255, 255, 255, 240))
-    # Eyes
-    d.ellipse([42, 48, 56, 64], fill=(255, 255, 255, 255))
-    d.ellipse([72, 48, 86, 64], fill=(255, 255, 255, 255))
-    d.ellipse([48, 54, 56, 64], fill=(0, 100, 220, 255))
-    d.ellipse([78, 54, 86, 64], fill=(0, 100, 220, 255))
-    im.save(path)
 
 
 def create_speedo_icon(path: Path):
@@ -98,7 +77,6 @@ def main():
     APP_ROOT_DIR.mkdir(parents=True, exist_ok=True)
 
     create_timer_icon(APP_ICONS_DIR / "timer.png")
-    create_ghost_icon(APP_ICONS_DIR / "ghost.png")
     create_settings_icon(APP_ICONS_DIR / "settings.png")
 
     # Main App icon

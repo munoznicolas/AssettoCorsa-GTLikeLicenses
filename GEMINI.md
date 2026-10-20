@@ -1,14 +1,13 @@
 # Assetto Corsa GT-Like Licenses - Development Guidelines & Rules
 
 ## Project Overview
-Assetto Corsa GT-Like Licenses is a Gran Turismo-style license test mod for Assetto Corsa. It implements 58 driving school tests across 5 tiers (National B, National A, International B, International A, Super License), complete with 3D start/finish gates, rolling/standing countdown sequences, out-in-out trajectories, telemetry adjudication, medal awards, and Content Manager career mode integration.
+Assetto Corsa GT-Like Licenses is a Gran Turismo-style license test mod for Assetto Corsa. It implements driving school tests across 5 progressive tiers (National B, National A, International B, International A, Super License), complete with 3D start/finish gates, rolling/standing countdown sequences, out-in-out trajectories, telemetry adjudication, medal awards, and Content Manager career mode integration.
 
 ### Core Environment Paths
-- **Repository Root**: `d:\Repositories\AssettoCorsa-GTLikeLicenses`
-- **Assetto Corsa Install**: `D:\SteamLibrary\steamapps\common\assettocorsa`
-- **AC Documents / Configs**: `D:\Users\Nico\OneDrive\Documents\Assetto Corsa`
-- **CSP Target Mode Directory**: `D:\SteamLibrary\steamapps\common\assettocorsa\extension\lua\new-modes\gt-license\`
-- **Official CSP SDK Definition**: `D:\SteamLibrary\steamapps\common\assettocorsa\extension\internal\lua-sdk\ac_new_modes\lib.lua`
+- **Assetto Corsa Install (`<AC_ROOT>`)**: Resolved via `AC_ROOT` environment variable or auto-discovered from Steam library folders.
+- **AC Documents / Configs (`<AC_DOCS>`)**: `%USERPROFILE%\Documents\Assetto Corsa` (or OneDrive Documents equivalent).
+- **CSP Target Mode Directory**: `<AC_ROOT>\extension\lua\new-modes\gt-license\`
+- **Official CSP SDK Definition**: `<AC_ROOT>\extension\internal\lua-sdk\ac_new_modes\lib.lua`
 
 ---
 
@@ -42,7 +41,7 @@ The mod runs inside CSP's **New Modes** extension subsystem (`extension/lua/new-
   - `script.update(dt)`: Main simulation frame update.
   - `script.draw3D()`: 3D render hook (for gates, markers, trajectory ribbon).
   - `script.drawUI()`: 2D ImGui/HUD render hook.
-* **Top-Level Instantiation**: The master engine (`GTLicenseEngine.new()`) must be instantiated immediately at the top level when running under CSP (`if script ~= nil`). Never defer instantiation to a callback that CSP won't call.
+* **Top-Level Instantiation**: The master engine (`LicenseEngine.new()`) must be instantiated immediately at the top level when running under CSP (`if script ~= nil`). Never defer instantiation to a callback that CSP won't call.
 * **Dynamic Test Configuration Loading & Path Resolution**:
   - The Lua engine dynamically queries `ac.INIConfig.raceConfig()`.
   - It extracts the active test code from `[GTLICENSE] TEST_ID`, `[RACE] TEST_ID`, `[SESSION_0] NAME`, or `[EVENT] NAME` (e.g. `B-3: Out-In-Out Hairpin Trajectory` $\rightarrow$ `B-3`).
@@ -58,19 +57,19 @@ The mod runs inside CSP's **New Modes** extension subsystem (`extension/lua/new-
   - **Live Update Frame Spawn**: Because `ac.getCar(0)` is not fully initialized during initial script bytecode compilation, re-assert `setupSpawn` on the first frame of `script.update(dt)`.
   - **Native AI Autopilot Rolling Start Architecture**:
     - Instead of synthetic velocity overrides, rolling starts are driven by Assetto Corsa's native AI autopilot following the official racing line (`fast_lane.ai` / ideal spline).
-    - **Spawn Placement & Kinetic Energy**: On initial spawn (`setupSpawn`), teleport vehicle rigid body once with $-\vec{fwd}$ orientation, then impart initial linear velocity and wheel rotation via `GTPhysicsHooks.applyRollingVelocity`.
+    - **Spawn Placement & Kinetic Energy**: On initial spawn (`setupSpawn`), teleport vehicle rigid body once with $-\vec{fwd}$ orientation, then impart initial linear velocity and wheel rotation via `PhysicsHooks.applyRollingVelocity`.
     - **AI Autopilot Engagement**:
       - `physics.setCarAutopilot(true, false)` takes over driver inputs for car 0.
       - `physics.setAITopSpeed(carIndex, speedKmh)` caps AI maximum velocity to the exact target rolling speed.
       - `physics.setAILevel(carIndex, 1.0)`, `physics.setAIAggression(carIndex, 0.0)`, `physics.setAICaution(carIndex, 0.1)` ensure smooth, non-aggressive racing line tracking.
       - `physics.setAISplineAbsoluteOffset(carIndex, 0.0, false)` locks the AI directly onto the ideal racing line.
       - User control locks and forced pedals are completely released (`physics.lockUserControlsFor(0)`, `physics.forceUserBrakesFor(0, 0)`) so the native AI has unrestricted throttle, steering, and braking control.
-    - **Countdown Maintenance**: During `COUNTDOWN`, call `GTPhysicsHooks.maintainAIRolling(0, speedKmh, forwardVector, dt)` to continuously preserve AI top speed and zero spline offset. Fall back to linear velocity maintenance if `ac.hasTrackSpline() == false`.
+    - **Countdown Maintenance**: During `COUNTDOWN`, call `PhysicsHooks.maintainAIRolling(0, speedKmh, forwardVector, dt)` to continuously preserve AI top speed and zero spline offset. Fall back to linear velocity maintenance if `ac.hasTrackSpline() == false`.
     - **Seamless Handover on "GO!"**:
       - `physics.setCarAutopilot(false)` deactivates autopilot and instantly returns full control to the player.
       - `physics.setAITopSpeed(carIndex, 999999.0)` removes the AI top speed ceiling so the player can accelerate without restriction.
-      - `GTPhysicsHooks.unlockControls(carIndex, targetGear)` asserts gear (`physics.engageGear`) and RPM (`physics.setEngineRPM`) directly, bypassing `physics.lockUserGearboxFor(0, false)`.
-      - Maintain a $0.5\text{s}$ guard window in `RUNNING` state inside `GTLicenseEngine:update(dt)` to re-assert `targetGear` if controller initialization or clutch slip drops it to neutral.
+      - `PhysicsHooks.unlockControls(carIndex, targetGear)` asserts gear (`physics.engageGear`) and RPM (`physics.setEngineRPM`) directly, bypassing `physics.lockUserGearboxFor(0, false)`.
+      - Maintain a $0.5\text{s}$ guard window in `RUNNING` state inside `LicenseEngine:update(dt)` to re-assert `targetGear` if controller initialization or clutch slip drops it to neutral.
     - **Spawn Distance Calibration**: Set $\text{spawn\_offset} = v_{\text{mps}} \times t_{\text{countdown}}$ (e.g. $58.3\text{m}$ for $70\text{ km/h}$ over $3.0\text{s}$) so the car rolls up to the start gate right as the countdown reaches "GO!".
     - On "GO!", mark `self.adjudicator.hasPassedStartGate = true` for rolling start tests to ensure finish gate crossing registers cleanly.
 * **Authoritative Track Limits Adjudication**:
@@ -82,13 +81,13 @@ The mod runs inside CSP's **New Modes** extension subsystem (`extension/lua/new-
 
 ## 3. Developer Tooling & Verification Workflow
 
-Always follow this 4-step cycle when making modifications:
+Always follow this cycle when making modifications:
 
 1. **Regenerate Content & Career**:
    ```powershell
    python tools/generate_all_content.py
    ```
-   Generates all 58 test JSONs calibrated from AI splines and 5 Content Manager career series.
+   Generates all test JSONs calibrated from AI splines and Content Manager career series.
 
 2. **Live Sync to Assetto Corsa**:
    ```powershell
@@ -119,9 +118,9 @@ Always follow this 4-step cycle when making modifications:
 ## 4. Crash & Diagnostic Runbook
 
 When diagnosing launch issues or crashes:
-- **CSP Log**: `D:\Users\Nico\OneDrive\Documents\Assetto Corsa\logs\custom_shaders_patch.log`
-- **AC Game Log**: `D:\Users\Nico\OneDrive\Documents\Assetto Corsa\logs\log.txt`
-- **Crash Dumps**: `D:\Users\Nico\OneDrive\Documents\Assetto Corsa\logs\crash_*.report` (contains zipped `log.txt`, `custom_shaders_patch.log`, and `race.ini`)
+- **CSP Log**: `<AC_DOCS>\logs\custom_shaders_patch.log`
+- **AC Game Log**: `<AC_DOCS>\logs\log.txt`
+- **Crash Dumps**: `<AC_DOCS>\logs\crash_*.report` (contains zipped `log.txt`, `custom_shaders_patch.log`, and `race.ini`)
 - **Key Crash Signatures**:
   - `Can’t launch the race: invalid race configuration (require_track Line: 141)`:
     Check `race.ini` for lowercase `track=` instead of `TRACK=`, or spaces around `=` (`TRACK = `).
@@ -133,4 +132,3 @@ When diagnosing launch issues or crashes:
     `lockUserGearboxFor(0, false)` was triggered, resetting engaged gear. Ensure `unlockControls` asserts `targetGear` and the 0.5s `RUNNING` guard window is active.
   - `Tires leaving marks on track / suspension extended into droop during countdown`:
     Never use synthetic `physics.setCarVelocity` or `forceUserThrottleFor(..., 0.0)` frame-by-frame during rolling countdown. Overwriting `vel.y` erases gravitational acceleration ($g = -9.81\text{ m/s}^2$), causing the chassis to float with unweighted suspension droop (chassis drops ~60mm at GO!), while zero throttle forces drivetrain engine braking against the road at 40%+ slip ratio (skid marks). Always use native AI autopilot (`physics.setCarAutopilot(true, false)` with `physics.setAITopSpeed`) to drive the car naturally on the spline.
-

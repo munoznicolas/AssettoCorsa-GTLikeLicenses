@@ -19,8 +19,10 @@ logs/
 *.dmp
 *.log
 
-# Distribution & release artifacts
+# Distribution, output & release artifacts
 release/
+output/
+scratch*
 *.zip
 dist/
 build/

@@ -18,7 +18,7 @@ if os.path.join(REPO_ROOT, "tools") not in sys.path:
     sys.path.insert(0, os.path.join(REPO_ROOT, "tools"))
 
 from tools.content.catalog import SERIES_METADATA, TIER_FOLDER_MAP
-from tools.extract_spline_coords import DEFAULT_AC_ROOT
+from tools.spline.parser import DEFAULT_AC_ROOT
 
 
 def _test_identity_signature(t: Dict[str, Any]) -> Tuple[Any, ...]:
@@ -98,14 +98,12 @@ def _read_test_asset_bundle(
             "alt_preview_bytes": None,
             "svg_text": None,
             "test_json": None,
-            "ghost_bytes": None,
         }
 
     career_preview = os.path.join(REPO_ROOT, "content", "career", series_folder, f"event{old_num}", "preview.png")
     alt_preview = os.path.join(REPO_ROOT, "assets", "previews", "tests", f"{old_id}.png")
     svg_path = os.path.join(REPO_ROOT, "docs", "test_maps", f"{old_id}.svg")
     test_json_path = os.path.join(REPO_ROOT, "content", "tests", tier_folder, f"test_{prefix_clean}{old_num:02d}.json")
-    ghost_path = os.path.join(REPO_ROOT, "content", "tests", tier_folder, f"ghost_test_{prefix_clean}{old_num:02d}.json")
 
     svg_text = None
     if os.path.isfile(svg_path):
@@ -128,7 +126,6 @@ def _read_test_asset_bundle(
         "alt_preview_bytes": _read_binary_if_exists(alt_preview),
         "svg_text": svg_text,
         "test_json": test_json,
-        "ghost_bytes": _read_binary_if_exists(ghost_path),
     }
 
 
@@ -145,7 +142,6 @@ def _remove_slot_assets(
         os.path.join(REPO_ROOT, "assets", "previews", "tests", f"{test_id}.png"),
         os.path.join(REPO_ROOT, "docs", "test_maps", f"{test_id}.svg"),
         os.path.join(REPO_ROOT, "content", "tests", tier_folder, f"test_{prefix_clean}{num:02d}.json"),
-        os.path.join(REPO_ROOT, "content", "tests", tier_folder, f"ghost_test_{prefix_clean}{num:02d}.json"),
     ]
     for p in paths:
         if os.path.isfile(p):
@@ -181,8 +177,8 @@ def _write_relocated_test_assets(
     ac_root: str = DEFAULT_AC_ROOT,
 ) -> None:
     from tools.content.generator import generate_single_career_event, generate_single_test_json
-    from tools.generate_test_maps import generate_single_map
-    from tools.generate_test_previews import generate_single_preview
+    from tools.assets.test_map_generator import generate_single_map
+    from tools.assets.preview_generator import generate_single_preview
 
     # 1. Career preview.png
     dest_preview = os.path.join(REPO_ROOT, "content", "career", series_folder, f"event{new_num}", "preview.png")
@@ -219,7 +215,7 @@ def _write_relocated_test_assets(
         except Exception:
             pass
 
-    # 4. Test JSON & Ghost JSON
+    # 4. Test JSON
     dest_test_json = os.path.join(REPO_ROOT, "content", "tests", tier_folder, f"test_{prefix_clean}{new_num:02d}.json")
     if isinstance(bundle["test_json"], dict):
         os.makedirs(os.path.dirname(dest_test_json), exist_ok=True)
@@ -232,14 +228,6 @@ def _write_relocated_test_assets(
             generate_single_test_json(t, ac_root=ac_root)
         except Exception:
             pass
-
-    if bundle["ghost_bytes"] is not None:
-        dest_ghost = os.path.join(
-            REPO_ROOT, "content", "tests", tier_folder, f"ghost_test_{prefix_clean}{new_num:02d}.json"
-        )
-        os.makedirs(os.path.dirname(dest_ghost), exist_ok=True)
-        with open(dest_ghost, "wb") as f:
-            f.write(bundle["ghost_bytes"])
 
     # 5. Career event.ini
     try:
@@ -306,7 +294,6 @@ def _clean_stale_json_files(test_catalog: List[Dict[str, Any]]) -> None:
         prefix, num_str = tdef["test_id"].split("-")
         num = int(num_str)
         valid_files.add(os.path.normpath(os.path.join(tier_dir, f"test_{prefix.lower()}{num:02d}.json")))
-        valid_files.add(os.path.normpath(os.path.join(tier_dir, f"ghost_test_{prefix.lower()}{num:02d}.json")))
 
     tests_root = os.path.join(REPO_ROOT, "content", "tests")
     for t_folder in TIER_FOLDER_MAP.values():

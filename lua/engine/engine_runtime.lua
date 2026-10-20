@@ -356,10 +356,6 @@ function EngineRuntime.attachMethods(LicenseEngine)
       return 0
     end
   end
-
-  function LicenseEngine:getGhostState()
-    return nil
-  end
 end
 
 ---Handles external UI restart/exit requests, automated test restarts, and terminal ESC key exits.

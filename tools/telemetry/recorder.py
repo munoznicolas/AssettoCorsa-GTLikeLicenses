@@ -23,10 +23,10 @@ import time
 from typing import Any, Dict, List, Optional, Tuple
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-if os.path.join(REPO_ROOT, "tools") not in sys.path:
-    sys.path.insert(0, os.path.join(REPO_ROOT, "tools"))
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
 
-from extract_spline_coords import DEFAULT_AC_ROOT, SplineParser, find_spline_file
+from tools.spline.parser import DEFAULT_AC_ROOT, SplineParser, find_spline_file
 from tools.telemetry.profile import (
     ERR_MISSING_CAR_ID,
     ERR_MISSING_TRACK_ID,

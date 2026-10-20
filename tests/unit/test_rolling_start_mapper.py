@@ -11,14 +11,15 @@ import sys
 import unittest
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.insert(0, os.path.join(REPO_ROOT, "tools"))
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
 
-from extract_spline_coords import (
+from tools.spline.parser import (
     DEFAULT_AC_ROOT,
     SplineParser,
     find_spline_file,
 )
-from track_straight_analyzer import (
+from tools.spline.straight_analyzer import (
     RollingStartCandidate,
     StraightSegment,
     TrackStraightAnalyzer,

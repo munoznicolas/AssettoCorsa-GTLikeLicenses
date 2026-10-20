@@ -17,16 +17,16 @@ import sys
 from typing import Any, Dict, List, Optional, Tuple
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-if os.path.join(REPO_ROOT, "tools") not in sys.path:
-    sys.path.insert(0, os.path.join(REPO_ROOT, "tools"))
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
 
-from extract_spline_coords import (
+from tools.spline.parser import (
     DEFAULT_AC_ROOT,
     SplineParser,
     SplineWaypoint,
     find_spline_file,
 )
-from record_ai_telemetry import (
+from tools.telemetry.recorder import (
     TelemetryProfile,
     TelemetrySample,
     calibrate_from_spline,

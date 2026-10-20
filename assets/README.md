@@ -26,10 +26,15 @@ assets/
 │   ├── series_ib_badge.png
 │   ├── series_ia_badge.png
 │   └── series_s_badge.png
-└── fonts/                       # TrueType typography for CSP DirectWrite
-    ├── Polymath-Regular.ttf
-    ├── Polymath-Bold.ttf
-    ├── GranTurismo-Bold.ttf
-    └── GranTurismo-Italic.ttf
+└── fonts/                       # Single source of truth TrueType typography for CSP DirectWrite
+    ├── arkitech_bold.ttf
+    ├── arkitech_light.ttf
+    ├── arkitech_medium.ttf
+    ├── gt7-MyFont Black.ttf
+    ├── gt7-MyFont Bold.ttf
+    ├── gt7-MyFont Light.ttf
+    ├── gt7-MyFont Medium.ttf
+    ├── gt7-MyFont Regular.ttf
+    ├── gt7-MyTimingFont.ttf
+    └── gt7-MyTimingFontOutline.ttf
 ```
-

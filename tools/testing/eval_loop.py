@@ -21,8 +21,7 @@ import json
 import os
 import subprocess
 import sys
-import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SYNC_TOOL = os.path.join(REPO_ROOT, "tools", "sync_to_ac.py")
@@ -34,7 +33,7 @@ def find_test_file_by_id(test_id: str, repo_root: str = REPO_ROOT) -> Optional[s
     tests_dir = os.path.join(repo_root, "content", "tests")
     for root, _, files in os.walk(tests_dir):
         for f in files:
-            if f.endswith(".json") and not f.startswith("ghost_"):
+            if f.startswith("test_") and f.endswith(".json"):
                 path = os.path.join(root, f)
                 try:
                     with open(path, "r", encoding="utf-8") as fp:
@@ -78,7 +77,7 @@ def evaluate_starting_conditions(test_path: str, launch_output: str) -> Dict[str
         "velocity_applied": False,
         "zero_crash_signatures": True,
         "overall_status": "FAILED",
-        "details": []
+        "details": [],
     }
 
     try:
@@ -130,7 +129,7 @@ def main():
         test_path = os.path.join(REPO_ROOT, "content", "tests", "national_b", "test_b03.json")
 
     print("=" * 80)
-    print(f" GT LICENSES - ITERATIVE TEST & EVALUATION LOOP")
+    print(" GT LICENSES - ITERATIVE TEST & EVALUATION LOOP")
     print(f" Target Test: {test_path}")
     print(f" Mode: {'DRY RUN' if args.dry_run else 'LIVE IN-ENGINE EXECUTION'}")
     print("=" * 80)

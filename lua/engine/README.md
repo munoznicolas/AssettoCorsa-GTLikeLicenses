@@ -1,23 +1,26 @@
 # CSP Lua Simulation Engine Subsystem (`lua/engine/`)
 
 ## Overview
-This subsystem runs inside Assetto Corsa Custom Shaders Patch (CSP) New Modes (`gt-license`). It coordinates the lifecycle state machine, rigid-body physics teleportation, rolling start AI autopilot tracking, track limits adjudication, ghost playback, and session resets.
+This subsystem runs inside Assetto Corsa Custom Shaders Patch (CSP) New Modes (`gt-license`). It coordinates the lifecycle state machine, rigid-body physics teleportation, rolling start AI autopilot tracking, track limits adjudication, and session resets.
 
 ---
 
 ## Directory & File Structure
 ```
 lua/engine/
-├── gt_license_engine.lua        # Master scenario state machine coordinator & lifecycle hooks
-├── gt_config_loader.lua         # Dynamic test JSON & race.ini resolver via CSP FolderID
-├── gt_results.lua               # Target time adjudication & medal calculation (Gold/Silver/Bronze)
-├── gt_physics_hooks.lua         # Rigid-body teleportation, orientation vectors, & AI autopilot
-├── gt_adjudicator.lua           # Gate ray-crossing math & 4-wheel track limits adjudication
-├── gt_ghost_manager.lua         # 60Hz Ghost & Pacer car telemetry interpolation & state
-├── gt_ai_coordinator.lua        # Native AI racing line lock & pace coordination
-├── gt_session_reset.lua         # Standing/rolling restart triggers & crash debounce
-├── gt_utils.lua                 # Vector math, JSON parsing, & package search paths
-└── README.md                    # This agent reference guide
+├── license_engine.lua           # Master scenario state machine coordinator
+├── engine_runtime.lua           # Runtime frame hooks, input handling, and state transitions
+├── config_loader.lua            # Dynamic test JSON & race.ini resolver via CSP FolderID
+├── results.lua                  # Target time adjudication & medal calculation (Gold/Silver/Bronze)
+├── physics_hooks.lua            # Rigid-body teleportation, orientation vectors, & AI autopilot
+├── rolling_start.lua            # Rolling start countdown & handover logic
+├── adjudicator.lua              # Gate ray-crossing math & 4-wheel track limits adjudication
+├── ai_coordinator.lua           # Native AI racing line lock & pace coordination
+├── session_reset.lua            # Standing/rolling restart triggers & crash debounce
+├── shared_state.lua             # Zero-copy shared state memory sync with HUD app
+├── telemetry_logger.lua         # Telemetry evaluation logger
+├── utils.lua                    # Vector math, JSON parsing, & package search paths
+└── README.md                    # This reference guide
 ```
 
 ---
@@ -41,7 +44,7 @@ lua/engine/
 ---
 
 ## Critical CSP Rules & Gotchas
-1. **No `script.init()` Hook**: Top-level engine must be instantiated immediately at module load time (`GTLicenseEngine.new()`).
+1. **No `script.init()` Hook**: Top-level engine must be instantiated immediately at module load time (`LicenseEngine.new()`).
 2. **Coordinate Orientation Inversion**: In `physics.setCarPosition(carIndex, pos, orientation)`, pass $-\vec{fwd}$ to orient headlights forward. Passing $+\vec{fwd}$ faces the vehicle backwards.
 3. **AI Autopilot Rolling Starts**:
    - `physics.setCarAutopilot(true, false)` takes over driver inputs during countdown.
@@ -50,4 +53,3 @@ lua/engine/
 4. **Track Limits**: Adjudicate using `car.wheels[i].surfaceValidTrack` from `ac.StateWheel` (debounce 2 consecutive frames). Never rely solely on `car.wheelsOutside`.
 5. **No Synthetic Velocity Overrides or Forced Zero Throttle**:
    Never call `physics.setCarVelocity` or `physics.forceUserThrottleFor(..., 0.0)` on every frame during countdown. Clamping vertical velocity ($v_y$) nullifies gravity ($g = -9.81\text{ m/s}^2$), lifting the vehicle into unweighted suspension droop (~60mm extension), while zero throttle causes internal drivetrain resistance to drag driven wheels at 40%+ slip, producing constant rubber skid marks. Always let native AI autopilot (`physics.setCarAutopilot(true, false)` + `physics.setAITopSpeed`) drive the car smoothly along the spline.
-

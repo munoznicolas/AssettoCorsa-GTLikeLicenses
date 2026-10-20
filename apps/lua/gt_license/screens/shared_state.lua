@@ -31,10 +31,6 @@ local function buildLayout()
         gear              = ac.StructItem.int32(),
         rpm               = ac.StructItem.float(),
         medalAchieved     = ac.StructItem.string(16),
-        ghostDelta        = ac.StructItem.double(),
-        ghostActive       = ac.StructItem.boolean(),
-        ghostMode         = ac.StructItem.int32(),
-        ghostOSD          = ac.StructItem.string(64),
         requestRestart    = ac.StructItem.boolean(),
         requestNext       = ac.StructItem.boolean(),
         requestExit       = ac.StructItem.boolean(),
@@ -84,12 +80,6 @@ function SharedStateClient.get()
             speedKmh        = tonumber(c.speedKmh) or 0.0,
             gear            = tonumber(c.gear) or 0,
             medalAchieved   = tostring(c.medalAchieved or ""),
-            ghostState      = {
-                active      = c.ghostActive == true,
-                delta       = tonumber(c.ghostDelta) or 0.0,
-                mode        = tonumber(c.ghostMode) or 1,
-                osd_message = tostring(c.ghostOSD or ""),
-            },
             rawConnection   = c,
         }
     end
@@ -115,7 +105,6 @@ function SharedStateClient.get()
         speedKmh        = speed,
         gear            = gear,
         medalAchieved   = "",
-        ghostState      = nil,
         rawConnection   = nil,
     }
 end

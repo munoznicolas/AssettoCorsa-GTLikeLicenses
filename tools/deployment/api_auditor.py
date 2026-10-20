@@ -2,8 +2,8 @@
 """
 audit_csp_api.py
 Audits all CSP Lua API function calls in lua/engine/ and lua/ui/
-against the official CSP SDK definition file:
-D:\\SteamLibrary\\steamapps\\common\\assettocorsa\\extension\\internal\\lua-sdk\\ac_new_modes\\lib.lua
+against the official CSP SDK definition files:
+<AC_ROOT>/extension/internal/lua-sdk/ac_new_modes/lib.lua
 """
 
 import os
@@ -11,8 +11,13 @@ import re
 import sys
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-SDK_LIB_PATH = r"D:\SteamLibrary\steamapps\common\assettocorsa\extension\internal\lua-sdk\ac_new_modes\lib.lua"
-SDK_APP_PATH = r"D:\SteamLibrary\steamapps\common\assettocorsa\extension\internal\lua-sdk\ac_apps\lib.lua"
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
+
+from tools.spline.models import DEFAULT_AC_ROOT
+
+SDK_LIB_PATH = os.path.join(DEFAULT_AC_ROOT, "extension", "internal", "lua-sdk", "ac_new_modes", "lib.lua")
+SDK_APP_PATH = os.path.join(DEFAULT_AC_ROOT, "extension", "internal", "lua-sdk", "ac_apps", "lib.lua")
 
 # Regex patterns to capture function calls / property accesses on globals: ac.*, physics.*, ui.*, render.*
 API_PATTERN = re.compile(r'\b(ac|physics|ui|render|dwrite|JSON|io)\.([a-zA-Z0-9_]+)\b')
@@ -99,13 +104,9 @@ def main():
     valid_symbols = []
 
     for symbol, occurrences in sorted(repo_calls.items()):
-        # Check exact or partial match in SDK
-        namespace, name = symbol.split(".")
-
-        # Check if namespace exists in SDK
+        # Check if symbol exists in SDK
         is_in_sdk = symbol in sdk_symbols or symbol in known_safe
 
-        # Fuzzy check: regex search name in SDK content
         if not is_in_sdk:
             missing_symbols.append((symbol, occurrences))
         else:

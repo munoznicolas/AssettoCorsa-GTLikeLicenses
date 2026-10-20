@@ -169,7 +169,7 @@ class DesignerRequestHandler(DesignerAPIMixin, SimpleHTTPRequestHandler):
         if not is_safe_identifier(test_id):
             self.send_error(400, "Invalid test_id format")
             return
-        from tools.generate_test_previews import build_test_to_event_path_map, get_preview_path_for_test
+        from tools.assets.preview_generator import build_test_to_event_path_map, get_preview_path_for_test
         preview_map = build_test_to_event_path_map()
         preview_file = preview_map.get(test_id) or get_preview_path_for_test(test_id)
         if preview_file and is_safe_path_within(REPO_ROOT, preview_file) and os.path.isfile(preview_file):

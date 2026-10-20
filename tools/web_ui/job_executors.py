@@ -95,7 +95,7 @@ def ensure_complete_test_data(
 
     # 1. Synthesize 3D spatial parameters from track AI spline
     try:
-        from tools.extract_spline_coords import SplineParser, find_spline_file, generate_test_parameters
+        from tools.spline.parser import SplineParser, find_spline_file, generate_test_parameters
 
         spline_file = find_spline_file(track_id, layout, ac_root)
         if spline_file and os.path.isfile(spline_file):

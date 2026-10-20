@@ -13,10 +13,10 @@ import os
 import sys
 from typing import Dict, Optional
 
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, REPO_ROOT)
 from tools.spline.parser import SplineParser, find_spline_file  # noqa: E402
-from tools.generate_track_svgs import pts_str  # noqa: E402
+from tools.assets.track_svg_generator import pts_str  # noqa: E402
 
 OUT_DIR = os.path.join(REPO_ROOT, "docs", "test_maps")
 

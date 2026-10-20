@@ -2,7 +2,7 @@
 
 ## Overview
 
-`gt_license` is an official Assetto Corsa Lua UI App providing customizable, movable Gran Turismo 7 replica HUD widgets for the GT-Like Licenses mod. It integrates natively with Assetto Corsa's app sidebar and window management system.
+`gt_license` is an Assetto Corsa Lua UI App providing customizable, movable Gran Turismo 7 replica HUD widgets for the GT-Like Licenses mod. It integrates natively with Assetto Corsa's app sidebar and window management system.
 
 ## Directory Structure
 
@@ -13,28 +13,21 @@ apps/lua/gt_license/
 ├── icon.png                 # Main app icon (128x128 RGBA)
 ├── icons/                   # Per-window sidebar icons (128x128 RGBA)
 │   ├── timer.png            # Stopwatch window icon
-│   ├── ghost.png            # Ghost / Pace Car delta icon
+│   ├── speedo.png           # Speedometer window icon
 │   └── settings.png         # Configuration dialog icon
 ├── screens/                 # Modular screen window scripts
 │   ├── theme.lua            # GT7 DirectWrite typography & color palettes
 │   ├── settings.lua         # Persistent configuration manager (settings.ini)
 │   ├── shared_state.lua     # Zero-copy inter-process shared state client
 │   ├── timer_screen.lua     # Callback: script.timerHUD(dt)
-│   ├── ghost_screen.lua     # Callback: script.ghostHUD(dt)
+│   ├── speedo_screen.lua    # Callback: script.speedoHUD(dt)
 │   └── config_screen.lua    # Callback: script.configHUD(dt)
-├── settings/                # Settings INI files
-│   ├── default_settings.ini # Factory defaults
-│   └── settings.ini         # User customized configuration
-└── fonts/                   # Bundled GT7 DirectWrite fonts
+└── settings/                # Settings INI files
+    ├── default_settings.ini # Factory defaults
+    └── settings.ini         # User customized configuration
 ```
 
-## Window Catalog & Callbacks
-
-| Window ID | Window Name       | Callback               | Default Dimensions | Flags                                                                |
-| :-------- | :---------------- | :--------------------- | :----------------- | :------------------------------------------------------------------- |
-| `config`  | GT License Config | `script.configHUD(dt)` | 380 x 280          | `SETTINGS`                                                           |
-| `timer`   | GT License Timer  | `script.timerHUD(dt)`  | 270 x 70           | `NO_BACKGROUND,NO_COLLAPSE,NO_SCROLLBAR,NO_SCROLL_WITH_MOUSE,FADING` |
-| `ghost`   | GT License Ghost  | `script.ghostHUD(dt)`  | 260 x 50           | `NO_BACKGROUND,NO_COLLAPSE,NO_SCROLLBAR,NO_SCROLL_WITH_MOUSE,FADING` |
+*(Note: TrueType fonts from `assets/fonts/` are bundled into `apps/lua/gt_license/fonts/` automatically during `sync_to_ac.py` and `build_cm_package.py`.)*
 
 ## Movable Windows & Individual Scaling
 
@@ -43,7 +36,7 @@ apps/lua/gt_license/
 - **Individual Widget Scaling**:
   Each widget features a resize handle in the bottom-right corner. Dragging the handle scales the widget's fonts, badges, and layout individually.
 - **Authentic Gran Turismo Defaults**:
-  Widgets initialize at default positions replicating Gran Turismo 7 (Stopwatch top-right, Ghost delta below stopwatch).
+  Widgets initialize at default positions replicating Gran Turismo 7.
 
 ## Inter-Process Communication
 

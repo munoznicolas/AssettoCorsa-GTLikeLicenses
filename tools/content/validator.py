@@ -47,10 +47,7 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fi
 DEFAULT_SCHEMA_PATH = os.path.join(REPO_ROOT, "schema", "test_definition.schema.json")
 DEFAULT_TESTS_DIR = os.path.join(REPO_ROOT, "content", "tests")
 DEFAULT_CAREER_DIR = os.path.join(REPO_ROOT, "content", "career")
-DEFAULT_AC_ROOT = os.environ.get(
-    "AC_ROOT",
-    r"D:\SteamLibrary\steamapps\common\assettocorsa",
-)
+from tools.spline.models import DEFAULT_AC_ROOT
 
 
 class CurriculumValidator(ValidationRulesMixin):

@@ -13,10 +13,10 @@ from typing import Dict, Optional
 
 from PIL import Image, ImageDraw
 
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, REPO_ROOT)
 from tools.spline.parser import SplineParser, find_spline_file  # noqa: E402
-from tools.generate_test_maps import sector_indices  # noqa: E402
+from tools.assets.test_map_generator import sector_indices  # noqa: E402
 
 CAREER_ROOT = os.path.join(REPO_ROOT, "content", "career")
 W, H, SS = 1024, 576, 2          # output size, supersampling factor

@@ -14,7 +14,7 @@ if REPO_ROOT not in sys.path:
 if os.path.join(REPO_ROOT, "tools") not in sys.path:
     sys.path.insert(0, os.path.join(REPO_ROOT, "tools"))
 
-from tools.extract_spline_coords import DEFAULT_AC_ROOT, SplineParser, find_spline_file
+from tools.spline.parser import DEFAULT_AC_ROOT, SplineParser, find_spline_file
 
 KUNOS_BASE_TRACKS = {
     "drift",

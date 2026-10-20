@@ -17,7 +17,7 @@ This skill guides the automated testing and validation of driving license scenar
 Activate this workflow when:
 * Testing any license scenario (e.g. `B-1`, `B-3`, `A-5`, `IB-10`).
 * Debugging in-engine session crashes (`Can't launch the race: invalid race configuration`).
-* Validating that rolling start conditions (spawn position, 70 km/h initial speed) are satisfied.
+* Validating that rolling start conditions (spawn position, target initial speed) are satisfied.
 * Syncing updated Lua scripts or curriculum content to the Assetto Corsa directory.
 
 ---
@@ -44,12 +44,12 @@ python tools/generate_all_content.py
 # 2. Sync all repository assets and Lua code to Assetto Corsa install
 python tools/sync_to_ac.py
 
-# 3. Lint all 58 test definitions against JSON schema
+# 3. Lint all test definitions against JSON schema
 python tools/validate_curriculum.py --all
 ```
 
 ### 3. CSP Lua API Symbol Audit
-Verifies that all Lua functions exist in the official CSP SDK at `assettocorsa/extension/internal/lua-sdk/ac_new_modes/lib.lua`:
+Verifies that all Lua functions exist in the official CSP SDK at `<AC_ROOT>/extension/internal/lua-sdk/ac_new_modes/lib.lua`:
 ```powershell
 python tools/audit_csp_api.py
 ```
@@ -62,11 +62,11 @@ When troubleshooting crashes or anomalies:
 
 1. **Check CSP Log**:
    ```powershell
-   Get-Content "D:\Users\Nico\OneDrive\Documents\Assetto Corsa\logs\custom_shaders_patch.log" -Tail 30
+   Get-Content "$env:USERPROFILE\Documents\Assetto Corsa\logs\custom_shaders_patch.log" -Tail 30
    ```
 2. **Check Game Engine Log**:
    ```powershell
-   Get-Content "D:\Users\Nico\OneDrive\Documents\Assetto Corsa\logs\log.txt" -Tail 30
+   Get-Content "$env:USERPROFILE\Documents\Assetto Corsa\logs\log.txt" -Tail 30
    ```
 3. **Common Signatures**:
    * `Can’t launch the race: invalid race configuration (require_track Line: 141)`:
@@ -75,4 +75,3 @@ When troubleshooting crashes or anomalies:
      `race.ini` is missing `__CM_CUSTOM_MODE=gt-license` in `[RACE]`.
    * `Car stationary at grid slot #1 with 0 km/h`:
      Engine coordinator was not instantiated at top level or `testConfig` was not loaded dynamically.
-

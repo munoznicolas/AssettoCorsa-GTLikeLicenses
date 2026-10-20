@@ -26,7 +26,7 @@ from tools.content.catalog import (
     TEST_CATALOG,
     TIER_FOLDER_MAP,
 )
-from tools.extract_spline_coords import (
+from tools.spline.parser import (
     DEFAULT_AC_ROOT,
     SplineParser,
     find_spline_file,
@@ -213,8 +213,8 @@ def generate_career() -> None:
 def generate_miniatures(ac_root: str = DEFAULT_AC_ROOT) -> int:
     """Generates track miniature previews directly in career events and vector maps (SVG)."""
     print(f"\n[3/4] Generating track miniature previews (PNG) in career folders and vector maps (SVG)...")
-    from tools.generate_test_previews import generate_previews
-    from tools.generate_test_maps import generate_maps
+    from tools.assets.preview_generator import generate_previews
+    from tools.assets.test_map_generator import generate_maps
 
     preview_count = generate_previews(ac_root=ac_root)
     generate_maps(ac_root=ac_root)
@@ -385,8 +385,8 @@ def generate_single_miniature(
     Builds the track miniature preview (PNG) and vector map (SVG) for a specific test.
     Also syncs the single test JSON and career event definition if test parameters are provided.
     """
-    from tools.generate_test_previews import generate_single_preview
-    from tools.generate_test_maps import generate_single_map
+    from tools.assets.preview_generator import generate_single_preview
+    from tools.assets.test_map_generator import generate_single_map
 
     tdef = dict(test_data) if test_data else None
     if not tdef:

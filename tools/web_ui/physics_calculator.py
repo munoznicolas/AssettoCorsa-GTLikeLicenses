@@ -14,7 +14,7 @@ if REPO_ROOT not in sys.path:
 if os.path.join(REPO_ROOT, "tools") not in sys.path:
     sys.path.insert(0, os.path.join(REPO_ROOT, "tools"))
 
-from tools.extract_spline_coords import DEFAULT_AC_ROOT
+from tools.spline.parser import DEFAULT_AC_ROOT
 
 
 def calculate_test_targets_and_physics(

@@ -6,9 +6,9 @@ This directory houses native Assetto Corsa UI applications implemented via Custo
 
 ## App Catalog
 
-| Application        | Path                                                                                                       | Description                                                                                     |
-| :----------------- | :--------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------- |
-| **GT License HUD** | [`apps/lua/gt_license`](file:///d:/Repositories/AssettoCorsa-GTLikeLicenses/apps/lua/gt_license/README.md) | Gran Turismo 7 replica HUD widgets (Stopwatch, Target Deltas, Top Banner, Ghost Delta, Config). |
+| Application        | Path                                             | Description                                                                                     |
+| :----------------- | :----------------------------------------------- | :---------------------------------------------------------------------------------------------- |
+| **GT License HUD** | [`apps/lua/gt_license`](lua/gt_license/README.md) | Gran Turismo 7 replica HUD widgets (Stopwatch, Target Deltas, Speedometer, Config).             |
 
 ## Integration with CSP New Modes
 

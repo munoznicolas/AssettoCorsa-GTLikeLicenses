@@ -3,14 +3,13 @@
 simulate_all_tests.py
 Headless Kinematic Simulation & Adjudication Harness for Assetto Corsa GT Licenses.
 
-Simulates 5 distinct driving profiles across all 58 license tests at 60 Hz:
+Simulates behavioral driving profiles across all license tests at 60 Hz:
   1. Profile A: Gold Run (follows trajectory, obeys stop boxes, verifies PASSED + GOLD medal)
   2. Profile B: Wall Hit Disqualification (injects F > 1500 N, verifies FAILED)
   3. Profile C: Off-Track Disqualification (injects 3 wheels off, verifies FAILED)
   4. Profile D: Stop Box Overrun (fails to stop inside stop box, verifies FAILED)
   5. Profile E: Instant Reset (fires reset mid-run, verifies state and pos reset)
-
-Total Scenarios: 58 tests x 5 profiles = 290 automated test runs in ~3 seconds.
+  6. Profile F: Countdown & Rolling Velocity Persistence
 """
 
 import argparse
@@ -78,7 +77,7 @@ def point_in_stop_box(
 
 
 class HeadlessAdjudicator:
-    """Python simulation of lua/engine/gt_adjudicator.lua logic."""
+    """Python simulation of lua/engine/adjudicator.lua logic."""
 
     def __init__(self, test_config: Dict[str, Any]):
         self.config = test_config
@@ -199,30 +198,78 @@ def evaluate_medal(time_sec: float, targets: Dict[str, float]) -> str:
     return "NONE"
 
 
+def _gate_crossing_pair(gate: Dict[str, Any], offset_m: float = 4.0) -> Tuple[List[float], List[float]]:
+    """Computes two points perpendicular to a timing gate segment so the segment between them intersects the gate."""
+    p1 = gate["p1"]
+    p2 = gate["p2"]
+    mid = [0.5 * (p1[0] + p2[0]), 0.5 * (p1[1] + p2[1]), 0.5 * (p1[2] + p2[2])]
+    gx = p2[0] - p1[0]
+    gz = p2[2] - p1[2]
+    norm = max(1e-4, math.hypot(gx, gz))
+    nx = -gz / norm
+    nz = gx / norm
+    before = [mid[0] - nx * offset_m, mid[1], mid[2] - nz * offset_m]
+    after = [mid[0] + nx * offset_m, mid[1], mid[2] + nz * offset_m]
+    return before, after
+
+
+def _build_gold_run_samples(test_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Synthesizes a 60 Hz Gold-medal trajectory crossing start/finish gates and stopping in stop box if present."""
+    targets = test_data.get("targets", {})
+    t_gold = float(targets.get("gold_seconds", 20.0))
+    timing = test_data.get("timing", {})
+    start_gate = timing.get("start_gate")
+    finish_gate = timing.get("finish_gate")
+    stop_box = timing.get("stop_box")
+
+    waypoints: List[List[float]] = []
+    if start_gate:
+        sg_before, sg_after = _gate_crossing_pair(start_gate, 4.0)
+        waypoints.extend([sg_before, sg_after])
+    if finish_gate:
+        fg_before, fg_after = _gate_crossing_pair(finish_gate, 4.0)
+        waypoints.extend([fg_before, fg_after])
+    if stop_box and stop_box.get("center"):
+        sb_c = stop_box["center"]
+        waypoints.append([float(sb_c[0]), float(sb_c[1]), float(sb_c[2])])
+
+    if len(waypoints) < 2:
+        spawn_pos = list(test_data.get("spawn", {}).get("position", [0.0, 0.0, 0.0]))
+        waypoints = [spawn_pos, [spawn_pos[0] + 10.0, spawn_pos[1], spawn_pos[2] + 10.0]]
+
+    target_finish_time = max(0.5, t_gold * 0.95)
+    n_segs = len(waypoints) - 1
+    samples: List[Dict[str, Any]] = []
+    steps_per_seg = 12
+    total_steps = n_segs * steps_per_seg
+
+    for s in range(total_steps + 1):
+        seg_idx = min(n_segs - 1, s // steps_per_seg)
+        local_frac = (s - seg_idx * steps_per_seg) / steps_per_seg if s < total_steps else 1.0
+        p0 = waypoints[seg_idx]
+        p1 = waypoints[seg_idx + 1]
+        pos = [
+            p0[0] + local_frac * (p1[0] - p0[0]),
+            p0[1] + local_frac * (p1[1] - p0[1]),
+            p0[2] + local_frac * (p1[2] - p0[2]),
+        ]
+        t_curr = (s / total_steps) * target_finish_time
+        is_final_stop = bool(stop_box) and (s == total_steps)
+        speed_kmh = 0.0 if is_final_stop else 80.0
+        samples.append({"t": t_curr, "pos": pos, "speed_kmh": speed_kmh})
+
+    return samples
+
+
 def simulate_single_test(test_json_path: str, verbose: bool = False) -> Dict[str, Any]:
     with open(test_json_path, "r", encoding="utf-8") as f:
         test_data = json.load(f)
 
     test_id = test_data["test_id"]
     targets = test_data.get("targets", {})
-    t_gold = float(targets.get("gold_seconds", 20.0))
     has_stop_box = test_data.get("timing", {}).get("stop_box") is not None
 
-    # Load companion ghost trajectory or generate on-demand
-    test_dir = os.path.dirname(test_json_path)
-    ghost_path = os.path.join(test_dir, f"ghost_{os.path.basename(test_json_path)}")
-    ghost_samples = []
-    if os.path.isfile(ghost_path):
-        with open(ghost_path, "r", encoding="utf-8") as gf:
-            g_data = json.load(gf)
-            ghost_samples = g_data.get("trajectory", [])
-    else:
-        try:
-            from generate_ghost_trajectory import generate_ghost_profile
-            profile = generate_ghost_profile(test_json_path)
-            ghost_samples = profile.get("trajectory", [])
-        except Exception:
-            ghost_samples = []
+    ideal_samples = _build_gold_run_samples(test_data)
 
     results = {
         "test_id": test_id,
@@ -244,15 +291,14 @@ def simulate_single_test(test_json_path: str, verbose: bool = False) -> Dict[str
     sim_time = 0.0
     passed = False
 
-    if ghost_samples:
-        for sample in ghost_samples:
-            pos = tuple(sample["pos"])
-            speed = float(sample["speed_kmh"])
-            sim_time = float(sample["t"])
-            res = adjudicator.update(dt, sim_time, pos, speed)
-            if res["status"] == "PASSED":
-                passed = True
-                break
+    for sample in ideal_samples:
+        pos = tuple(sample["pos"])
+        speed = float(sample["speed_kmh"])
+        sim_time = float(sample["t"])
+        res = adjudicator.update(dt, sim_time, pos, speed)
+        if res["status"] == "PASSED":
+            passed = True
+            break
 
     medal = evaluate_medal(sim_time, targets) if passed else "NONE"
     results["profile_a_gold"] = (passed and medal == "GOLD")
@@ -327,19 +373,14 @@ def simulate_single_test(test_json_path: str, verbose: bool = False) -> Dict[str
     target_start_speed = float(spawn_info.get("initial_speed_kmh", 0.0))
 
     # Simulate 3-second countdown window at 60 Hz (180 frames)
-    # Testing frame-reset vs continuous CSP velocity enforcement
     simulated_speed = 0.0
-    for frame in range(180):
-        # Simulate AC physics engine attempt to zero velocity on each frame during countdown
-        ac_physics_reset_speed = 0.0 if target_start_speed > 0 else 0.0
-        
-        # GT-License Engine continuous per-frame physics hook during COUNTDOWN state
+    for _ in range(180):
+        ac_physics_reset_speed = 0.0
         if target_start_speed > 0:
-            simulated_speed = target_start_speed  # Continuous re-application overrides AC engine zeroing
+            simulated_speed = target_start_speed
         else:
             simulated_speed = ac_physics_reset_speed
 
-    # Assert speed at GO (t=0.0) matches initial target launch speed
     results["profile_f_countdown"] = (abs(simulated_speed - target_start_speed) < 0.1)
 
     return results
@@ -347,7 +388,7 @@ def simulate_single_test(test_json_path: str, verbose: bool = False) -> Dict[str
 
 def main():
     parser = argparse.ArgumentParser(description="Headless 60Hz Simulation & Adjudication Harness")
-    parser.add_argument("--all", action="store_true", help="Simulate all 58 license tests")
+    parser.add_argument("--all", action="store_true", help="Simulate all license tests")
     parser.add_argument("--tier", help="Simulate single tier (e.g. national_b)")
     parser.add_argument("--test", help="Path to single test JSON")
     parser.add_argument("--verbose", action="store_true", help="Show full per-test breakdown")

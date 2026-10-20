@@ -4,13 +4,12 @@ run_full_validation_suite.py
 Master Verification Suite for Assetto Corsa Gran Turismo-Style License Tests.
 
 Runs the complete automated validation pipeline across all layers:
-1. Lua static analysis & syntax linting (all 9 core & UI modules).
-2. UI rendering contract & mock state verification.
-3. Track spline parser unit tests.
-4. Ghost trajectory math & interpolation physics tests.
-5. Curriculum consistency & asset validator (all 58 license tests).
-6. Layer 1 Headless Simulation Harness: 5 driver profiles x 58 tests = 290 scenarios.
-7. Layer 2 In-Engine Launch Tester: race.ini synthesis & asset integrity on disk.
+1. Lua static analysis & syntax linting.
+2. Engine math & adjudication geometry tests.
+3. UI rendering contract & mock state verification.
+4. Curriculum consistency & asset validator.
+5. Layer 1 Headless Simulation Harness.
+6. Layer 2 In-Engine Launch Tester (race.ini synthesis & asset integrity on disk).
 
 Usage:
   python tools/run_full_validation_suite.py
@@ -46,12 +45,12 @@ def run_stage(name: str, cmd: list) -> bool:
 def main():
     print_header("ASSETTO CORSA GT LICENSES - FULL AUTOMATED VERIFICATION SUITE")
     stages = [
-        ("1. Lua Linter (10 modules)", [sys.executable, "tools/lint_lua.py"]),
+        ("1. Lua Linter", [sys.executable, "tools/lint_lua.py"]),
         ("2. Engine Math & Adjudication Geometry Tests", [sys.executable, "tests/unit/test_engine_math.py"]),
         ("3. UI Rendering Contract Tests", [sys.executable, "tests/unit/test_ui_modules.py"]),
         ("4. Curriculum & Asset Validator", [sys.executable, "tools/validate_curriculum.py"]),
-        ("5. Layer 1: Headless 60 Hz Kinematic Simulation (348 Scenarios)", [sys.executable, "tools/simulate_all_tests.py"]),
-        ("6. Layer 2: In-Engine Launch & Asset Integrity (58 Tests Dry-Run)", [sys.executable, "tools/test_ac_launch.py", "--dry-run", "--all"]),
+        ("5. Layer 1: Headless 60 Hz Kinematic Simulation", [sys.executable, "tools/simulate_all_tests.py"]),
+        ("6. Layer 2: In-Engine Launch & Asset Integrity (Dry-Run)", [sys.executable, "tools/test_ac_launch.py", "--dry-run", "--all"]),
     ]
 
     passed_count = 0

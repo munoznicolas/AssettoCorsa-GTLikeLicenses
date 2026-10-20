@@ -15,7 +15,7 @@ if REPO_ROOT not in sys.path:
 if os.path.join(REPO_ROOT, "tools") not in sys.path:
     sys.path.insert(0, os.path.join(REPO_ROOT, "tools"))
 
-from tools.extract_spline_coords import DEFAULT_AC_ROOT
+from tools.spline.parser import DEFAULT_AC_ROOT
 from tools.web_ui.ac_discovery import CAR_LAYOUT_MAP, get_available_cars, get_available_tracks
 
 CAR_SPECS_CACHE: Dict[str, Tuple[int, int, float, str]] = {

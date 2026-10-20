@@ -27,7 +27,7 @@ from tools.content.catalog import (
     TIER_FOLDER_MAP,
 )
 from tools.content.generator import generate_career, generate_miniatures, generate_tests, main
-from tools.extract_spline_coords import DEFAULT_AC_ROOT
+from tools.spline.parser import DEFAULT_AC_ROOT
 
 __all__ = [
     "TEST_CATALOG",

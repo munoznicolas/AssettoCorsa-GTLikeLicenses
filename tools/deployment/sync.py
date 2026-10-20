@@ -4,7 +4,7 @@ sync_to_ac.py
 Assetto Corsa Live Directory Auto-Sync Tool
 
 Synchronizes repository files (Lua engine, UI scripts, test definitions, assets, career series)
-directly into the local Assetto Corsa installation directory (e.g. D:\\SteamLibrary\\steamapps\\common\\assettocorsa).
+directly into the local Assetto Corsa installation directory.
 
 Usage:
   python tools/sync_to_ac.py [--ac-root PATH] [--dry-run]
@@ -17,7 +17,10 @@ import sys
 from typing import List, Tuple
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-DEFAULT_AC_ROOT = r"D:\SteamLibrary\steamapps\common\assettocorsa"
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
+
+from tools.spline.models import DEFAULT_AC_ROOT
 
 DEFAULT_MANIFEST_INI = """[ABOUT]
 NAME = Gran Turismo Licenses
@@ -73,7 +76,7 @@ def build_sync_mappings(repo_root: str, ac_root: str) -> List[Tuple[str, str]]:
         for root, _, files in os.walk(ui_src):
             for f in files:
                 if f.endswith(".lua"):
-                    src = os.path.join(root, f)
+                    src = os.path.join(repo_root, "lua", "ui", os.path.relpath(os.path.join(root, f), ui_src))
                     rel = os.path.relpath(src, ui_src)
                     dst = os.path.join(gt_mode_base, "ui", rel)
                     mappings.append((src, dst))
@@ -94,20 +97,26 @@ def build_sync_mappings(repo_root: str, ac_root: str) -> List[Tuple[str, str]]:
     if os.path.isdir(assets_src):
         for root, _, files in os.walk(assets_src):
             for f in files:
+                if f.endswith(".md"):
+                    continue
                 src = os.path.join(root, f)
                 rel = os.path.relpath(src, assets_src)
                 dst = os.path.join(gt_mode_base, "assets", rel)
                 mappings.append((src, dst))
-                # Expose fonts directly at mode root (gt_mode_base/fonts) for seamless DWrite font loading
+                # Expose fonts directly at mode root and HUD app root for seamless DWrite font loading
                 if "fonts" in root.lower() and f.endswith(".ttf"):
                     dst_root_font = os.path.join(gt_mode_base, "fonts", f)
                     mappings.append((src, dst_root_font))
+                    dst_app_font = os.path.join(ac_root, "apps", "lua", "gt_license", "fonts", f)
+                    mappings.append((src, dst_app_font))
 
     # 5. Career Series
     career_src = os.path.join(repo_root, "content", "career")
     if os.path.isdir(career_src):
         for root, _, files in os.walk(career_src):
             for f in files:
+                if f.endswith(".md"):
+                    continue
                 src = os.path.join(root, f)
                 rel = os.path.relpath(src, career_src)
                 dst = os.path.join(ac_root, "content", "career", rel)
@@ -118,6 +127,8 @@ def build_sync_mappings(repo_root: str, ac_root: str) -> List[Tuple[str, str]]:
     if os.path.isdir(app_src):
         for root, _, files in os.walk(app_src):
             for f in files:
+                if f.endswith(".md"):
+                    continue
                 src = os.path.join(root, f)
                 rel = os.path.relpath(src, app_src)
                 dst = os.path.join(ac_root, "apps", "lua", "gt_license", rel)
@@ -137,7 +148,7 @@ def main():
 
     if not os.path.isdir(ac_root) and not args.dry_run:
         print(f"[WARNING] Target AC root directory does not exist: {ac_root}")
-        print("Set --ac-root to your Assetto Corsa installation path or create the folder.")
+        print("Set --ac-root or AC_ROOT environment variable to your Assetto Corsa installation path.")
 
     gt_mode_base = os.path.join(ac_root, "extension", "lua", "new-modes", "gt-license")
     mappings = build_sync_mappings(REPO_ROOT, ac_root)
@@ -159,7 +170,7 @@ def main():
             try:
                 shutil.copy2(src, dst)
                 copied_count += 1
-            except OSError as ex:
+            except OSError:
                 if os.path.exists(dst) and os.path.getsize(src) == os.path.getsize(dst):
                     pass
                 else:

@@ -9,10 +9,24 @@ import os
 import re
 from typing import Any, Dict, List, Optional, Tuple
 
-DEFAULT_AC_ROOT = os.environ.get(
-    "AC_ROOT",
-    r"D:\SteamLibrary\steamapps\common\assettocorsa",
-)
+def _discover_default_ac_root() -> str:
+    """Resolves Assetto Corsa root directory via AC_ROOT env var or common Steam library paths."""
+    env_root = os.environ.get("AC_ROOT")
+    if env_root and os.path.isdir(env_root):
+        return env_root
+    candidates = [
+        r"D:\SteamLibrary\steamapps\common\assettocorsa",
+        r"C:\Program Files (x86)\Steam\steamapps\common\assettocorsa",
+        r"C:\SteamLibrary\steamapps\common\assettocorsa",
+        r"E:\SteamLibrary\steamapps\common\assettocorsa",
+    ]
+    for path in candidates:
+        if os.path.isdir(path):
+            return path
+    return env_root or candidates[0]
+
+
+DEFAULT_AC_ROOT = _discover_default_ac_root()
 
 
 @dataclass

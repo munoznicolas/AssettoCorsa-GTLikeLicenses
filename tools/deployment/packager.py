@@ -4,7 +4,7 @@ build_cm_package.py
 Assetto Corsa Content Manager (CM) Distribution Packaging Tool
 
 Bundles the repository into a Content Manager compatible drag-and-drop zip archive
-at release/AssettoCorsa_GT_Licenses.zip according to docs/07_directory_structure_and_packaging_spec.md.
+at release/AssettoCorsa_GT_Licenses.zip.
 
 Archive Topology:
   extension/
@@ -14,14 +14,16 @@ Archive Topology:
           manifest.ini
           scenario.lua
           engine/
-            gt_license_engine.lua
-            gt_physics_hooks.lua
-            gt_adjudicator.lua
-            gt_session_reset.lua
+            license_engine.lua
+            physics_hooks.lua
+            adjudicator.lua
+            session_reset.lua
+            ...
           ui/
             license_hud.lua
             render_gates.lua
             audio_manager.lua
+            ...
           data/
             tests/
               national_b/
@@ -32,6 +34,10 @@ Archive Topology:
           assets/
             audio/
             textures/
+          fonts/
+  apps/
+    lua/
+      gt_license/
   content/
     career/
       series_gt_license_b/
@@ -43,12 +49,10 @@ Archive Topology:
 
 import argparse
 import os
-import shutil
 import subprocess
 import sys
-import tempfile
 import zipfile
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DEFAULT_OUTPUT_ZIP = os.path.join(REPO_ROOT, "release", "AssettoCorsa_GT_Licenses.zip")
@@ -138,12 +142,12 @@ class CMPackageBuilder:
         if os.path.isdir(ui_src):
             self._add_directory_tree(ui_src, f"{gt_mode_base}/ui")
 
-        # 4. Content Tests (58 Test JSON files)
+        # 4. Content Tests (Test JSON files)
         tests_src = os.path.join(self.repo_root, "content", "tests")
         if os.path.isdir(tests_src):
             self._add_directory_tree(tests_src, f"{gt_mode_base}/data/tests")
 
-        # 5. Media Assets (Audio & Textures)
+        # 5. Media Assets (Audio, Textures, Fonts)
         audio_src = os.path.join(self.repo_root, "assets", "audio")
         if os.path.isdir(audio_src):
             self._add_directory_tree(audio_src, f"{gt_mode_base}/assets/audio")
@@ -151,6 +155,11 @@ class CMPackageBuilder:
         textures_src = os.path.join(self.repo_root, "assets", "textures")
         if os.path.isdir(textures_src):
             self._add_directory_tree(textures_src, f"{gt_mode_base}/assets/textures")
+
+        fonts_src = os.path.join(self.repo_root, "assets", "fonts")
+        if os.path.isdir(fonts_src):
+            self._add_directory_tree(fonts_src, f"{gt_mode_base}/fonts")
+            self._add_directory_tree(fonts_src, "apps/lua/gt_license/fonts")
 
         # 6. Content Manager Career Series
         career_src = os.path.join(self.repo_root, "content", "career")
@@ -171,8 +180,8 @@ class CMPackageBuilder:
         """Recursively registers all files in source_dir under dest_prefix."""
         for root, _, filenames in os.walk(source_dir):
             for fname in sorted(filenames):
-                # Skip version control, temporary or hidden files
-                if fname.startswith(".") or fname.endswith(".tmp") or fname.endswith(".pyc"):
+                # Skip version control, markdown docs, temporary or hidden files
+                if fname.startswith(".") or fname.endswith(".tmp") or fname.endswith(".pyc") or fname.endswith(".md"):
                     continue
                 full_path = os.path.join(root, fname)
                 rel_path = os.path.relpath(full_path, source_dir).replace("\\", "/")
