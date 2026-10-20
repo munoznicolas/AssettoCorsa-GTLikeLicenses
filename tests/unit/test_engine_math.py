@@ -13,89 +13,13 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fi
 sys.path.insert(0, REPO_ROOT)
 
 
-def ccw(ax, az, bx, bz, cx, cz):
-    return ((cz - az) * (bx - ax)) > ((bz - az) * (cx - ax))
-
-
-def segments_intersect_2d(p1, p2, p3, p4):
-    x1, z1 = p1[0], p1[2]
-    x2, z2 = p2[0], p2[2]
-    x3, z3 = p3[0], p3[2]
-    x4, z4 = p4[0], p4[2]
-
-    a = ccw(x1, z1, x3, z3, x4, z4)
-    b = ccw(x2, z2, x3, z3, x4, z4)
-    c = ccw(x1, z1, x2, z2, x3, z3)
-    d = ccw(x1, z1, x2, z2, x4, z4)
-
-    return (a != b) and (c != d)
-
-
-def is_inside_stop_box(pos, stop_box):
-    px, py, pz = pos[0], pos[1], pos[2]
-    cx, cy, cz = stop_box["center"][0], stop_box["center"][1], stop_box["center"][2]
-    sx, sy, sz = stop_box["size"][0], stop_box["size"][1], stop_box["size"][2]
-
-    if abs(py - cy) > (sy * 0.5 + 4.0):
-        return False, 0.0, 0.0
-
-    dx = px - cx
-    dz = pz - cz
-
-    rot_rad = -math.radians(stop_box.get("rotation_deg", 0))
-    cos_r = math.cos(rot_rad)
-    sin_r = math.sin(rot_rad)
-
-    local_x = dx * cos_r - dz * sin_r
-    local_z = dx * sin_r + dz * cos_r
-
-    half_x = sx * 0.5
-    half_z = sz * 0.5
-
-    is_inside = (abs(local_x) <= half_x) and (abs(local_z) <= half_z)
-    return is_inside, local_x, local_z
-
-
-def evaluate_medal(session_time, targets):
-    gold = targets.get("gold_seconds", 999.0)
-    silver = targets.get("silver_seconds", 999.0)
-    bronze = targets.get("bronze_seconds", 999.0)
-
-    if session_time <= gold:
-        return "GOLD"
-    elif session_time <= silver:
-        return "SILVER"
-    elif session_time <= bronze:
-        return "BRONZE"
-    else:
-        return "NONE"
-
-
-def check_off_track(car, max_wheels_off=2, consecutive_frames=0):
-    if not car:
-        return False, consecutive_frames, None
-
-    wheels_out = 0
-    wheels = car.get("wheels")
-    if wheels is not None:
-        for i in range(4):
-            if i in wheels and wheels[i].get("surfaceValidTrack") is False:
-                wheels_out += 1
-            elif (i + 1) in wheels and 0 not in wheels and wheels[i + 1].get("surfaceValidTrack") is False:
-                wheels_out += 1
-
-    native_out = car.get("wheelsOutside", 0)
-    if native_out > wheels_out:
-        wheels_out = native_out
-
-    if wheels_out > max_wheels_off:
-        consecutive_frames += 1
-        if consecutive_frames >= 2:
-            return True, consecutive_frames, f"Off Track: Exceeded Track Limits ({wheels_out} wheels off)"
-    else:
-        consecutive_frames = 0
-
-    return False, consecutive_frames, None
+from tools.content.simulator import (
+    ccw,
+    check_off_track,
+    evaluate_medal,
+    is_inside_stop_box,
+    segments_intersect_2d,
+)
 
 
 class TestEngineMath(unittest.TestCase):
@@ -336,8 +260,20 @@ class TestEngineMath(unittest.TestCase):
         self.assertIn("LicenseEngine.isBrakingState(self.state)", engine_code)
         self.assertIn("function LicenseEngine:exitSession()", engine_code)
         self.assertIn("onExit = function() self:exitSession() end", engine_code)
+        self.assertIn("self.targetStartingRPM = targetRPM", engine_code)
+        self.assertIn("self.sessionReset:update(dt, LicenseEngine.isBrakingState(self.state))", engine_code)
         self.assertIn("PhysicsHooks.applyControlledBraking = PhysicsHooks.applyFailureBraking", hooks_code)
         self.assertIn("PhysicsHooks.releaseControlledBraking = PhysicsHooks.releaseFailureBraking", hooks_code)
+        self.assertIn("function PhysicsHooks.unlockControls(carIndex, targetGear, targetRPM)", hooks_code)
+        self.assertIn("function PhysicsHooks.stopAIRolling(carIndex, targetGear, targetRPM)", hooks_code)
+
+        reset_path = os.path.join(REPO_ROOT, "lua", "engine", "session_reset.lua")
+        self.assertTrue(os.path.isfile(reset_path))
+        with open(reset_path, "r", encoding="utf-8") as f:
+            reset_code = f.read()
+        self.assertIn("function SessionReset:isRestartRequested(isTerminalState)", reset_code)
+        self.assertIn("function SessionReset:update(dt, isTerminalState)", reset_code)
+        self.assertNotIn("GamepadButton.X", reset_code)
 
 
 if __name__ == "__main__":

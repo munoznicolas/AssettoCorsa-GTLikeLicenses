@@ -7,55 +7,25 @@
 --              physics hooks and adjudication.
 -- ==============================================================================
 
-local function safeRequire(name)
-  local ok, mod = pcall(require, name)
-  if ok then return mod end
-  ok, mod = pcall(require, "engine/" .. name)
-  if ok then return mod end
-  ok, mod = pcall(require, "lua/engine/" .. name)
-  if ok then return mod end
-  error(string.format("license_engine: Failed to require '%s': %s", name, tostring(mod)))
+local okUtils, Utils = pcall(require, "engine/utils")
+if not okUtils or not Utils then
+  Utils = require("utils")
 end
 
-local PhysicsHooks  = safeRequire("physics_hooks")
-local Adjudicator   = safeRequire("adjudicator")
-local SessionReset  = safeRequire("session_reset")
-local ConfigLoader  = safeRequire("config_loader")
-local Results       = safeRequire("results")
-local EngineRuntime = safeRequire("engine_runtime")
+local PhysicsHooks    = Utils.safeRequire("physics_hooks", true)
+local Adjudicator     = Utils.safeRequire("adjudicator", true)
+local SessionReset    = Utils.safeRequire("session_reset", true)
+local ConfigLoader    = Utils.safeRequire("config_loader", true)
+local Results         = Utils.safeRequire("results", true)
+local EngineRuntime   = Utils.safeRequire("engine_runtime", true)
 
-local function tryRequireEngine(name)
-  local ok, mod = pcall(require, name)
-  if ok then return mod end
-  ok, mod = pcall(require, "engine/" .. name)
-  if ok then return mod end
-  ok, mod = pcall(require, "lua/engine/" .. name)
-  if ok then return mod end
-  return nil
-end
+local AICoordinator   = Utils.safeRequire("ai_coordinator", false)
+local TelemetryLogger = Utils.safeRequire("telemetry_logger", false)
 
-local AICoordinator   = tryRequireEngine("ai_coordinator")
-local TelemetryLogger = tryRequireEngine("telemetry_logger")
-
-local function tryRequireUI(name)
-  local ok, mod = pcall(require, name)
-  if ok then return mod end
-  ok, mod = pcall(require, "ui/" .. name)
-  if ok then return mod end
-  ok, mod = pcall(require, "lua/ui/" .. name)
-  if ok then return mod end
-  return nil
-end
-
-local GTLicenseHUD   = tryRequireUI("license_hud") or tryRequireUI("gt_license_hud")
-local GTRenderGates  = tryRequireUI("render_gates") or tryRequireUI("gt_render_gates")
-local GTAudioManager = tryRequireUI("audio_manager") or tryRequireUI("gt_audio_manager")
-
-local LicenseShared = nil
-pcall(function() LicenseShared = require("engine/shared_state") end)
-if not LicenseShared then
-  pcall(function() LicenseShared = require("shared_state") end)
-end
+local GTLicenseHUD    = Utils.safeRequire("license_hud", false)
+local GTRenderGates   = Utils.safeRequire("render_gates", false)
+local GTAudioManager  = Utils.safeRequire("audio_manager", false)
+local LicenseShared   = Utils.safeRequire("shared_state", false)
 
 local LicenseEngine = {}
 
@@ -278,6 +248,7 @@ function LicenseEngine:startCountdown()
     targetRPM = isStanding and 1000 or 3500
   end
   self.targetStartingGear = targetGear
+  self.targetStartingRPM = targetRPM
   local spawnOk, spawnErr = PhysicsHooks.setupSpawn(self.testConfig, 0)
   if not spawnOk and ac and ac.log then
     ac.log(string.format("[GTLicense] WARNING: Initial setupSpawn noted: %s", tostring(spawnErr)))
@@ -352,7 +323,7 @@ function LicenseEngine:update(dt)
     return
   end
 
-  self.sessionReset:update(dt)
+  self.sessionReset:update(dt, LicenseEngine.isBrakingState(self.state))
   local car = ac and ac.getCar and ac.getCar(0)
 
   if not self.spawnInitialized and car then

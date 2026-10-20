@@ -99,30 +99,12 @@ local cachedStopBoxHatch1 = nil
 local cachedStopBoxHatch2 = nil
 local cachedGuideLine = nil
 
-local function safeRequire(name)
-    local ok, mod = pcall(require, name)
-    if ok then return mod end
-    ok, mod = pcall(require, "engine/" .. name)
-    if ok then return mod end
-    ok, mod = pcall(require, "lua/engine/" .. name)
-    if ok then return mod end
-    return nil
+local okUtils, Utils = pcall(require, "engine/utils")
+if not okUtils or not Utils then
+    Utils = require("utils")
 end
 
-local Utils = safeRequire("utils") or safeRequire("gt_utils")
-
---- Helper to safely convert array {x, y, z} or vec3 into a vec3 object
-local function toVec3(p)
-    if Utils and Utils.toVec3 then return Utils.toVec3(p) end
-    if not p then return vec3(0, 0, 0) end
-    if type(p.x) == "number" and type(p.y) == "number" and type(p.z) == "number" then
-        return vec3(p.x, p.y, p.z)
-    end
-    if type(p[1]) == "number" and type(p[2]) == "number" and type(p[3]) == "number" then
-        return vec3(p[1], p[2], p[3])
-    end
-    return vec3(0, 0, 0)
-end
+local toVec3 = Utils.toVec3
 
 --- Calculate 4 ground corners of an oriented stop box
 local function computeStopBoxCorners(center, size, rotationDeg)
@@ -148,39 +130,6 @@ local function computeStopBoxCorners(center, size, rotationDeg)
         corners[i] = vec3(cx + rx, cy, cz + rz)
     end
     return corners
-end
-
---- Accurate 2D Rotated Oriented Bounding Box containment test (matching Adjudicator.isInsideStopBox)
-local function isCarInsideBox(carPos, center, size, rotDeg)
-    if not carPos or not center or not size then return false end
-    local px = carPos.x or carPos[1]
-    local py = carPos.y or carPos[2]
-    local pz = carPos.z or carPos[3]
-    local cx = center.x or center[1]
-    local cy = center.y or center[2]
-    local cz = center.z or center[3]
-    local sx = size.x or size[1] or 4.5
-    local sy = size.y or size[2] or 2.0
-    local sz = size.z or size[3] or size.y or size[2] or 14.0
-
-    -- Height containment check (+- 4.0m vertical window)
-    if math.abs(py - cy) > (sy * 0.5 + 4.0) then
-        return false
-    end
-
-    -- Translation relative to box center
-    local dx = px - cx
-    local dz = pz - cz
-
-    -- 2D rotation around Y axis
-    local rad = math.rad(-(rotDeg or 0))
-    local cosR = math.cos(rad)
-    local sinR = math.sin(rad)
-
-    local localX = dx * cosR - dz * sinR
-    local localZ = dx * sinR + dz * cosR
-
-    return (math.abs(localX) <= sx * 0.5) and (math.abs(localZ) <= sz * 0.5)
 end
 
 --- Initialize or update gate geometries from active test configuration
@@ -358,12 +307,9 @@ function GTRenderGates.drawStopBox(pulse, carPos, carSpeedKmh, isDisqualified)
 
     if carPos and currentConfig and currentConfig.timing and currentConfig.timing.stop_box then
         local sb = currentConfig.timing.stop_box
-        local center = toVec3(sb.center)
-        local size = sb.size or { 4.5, 14.0, 1.0 }
-        local rot = sb.rotation_deg or 0
 
         -- Authoritative 2D rotated OBB containment check matching physics adjudication
-        if isCarInsideBox(carPos, center, size, rot) then
+        if Utils.isInsideStopBox(carPos, sb) then
             isInside = true
             if (carSpeedKmh or 0) < 0.5 then
                 boxColor = rgbm(0.1, 1.0, 0.3, 0.95) -- Success green!

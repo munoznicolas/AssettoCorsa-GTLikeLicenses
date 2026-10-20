@@ -6,24 +6,10 @@
 --              dynamic ac.FolderID anchors, and provides authoritative fallbacks.
 -- ==============================================================================
 
-local function safeRequire(name)
-  local ok, mod = pcall(require, name)
-  if ok then return mod end
-  ok, mod = pcall(require, "engine/" .. name)
-  if ok then return mod end
-  ok, mod = pcall(require, "lua/engine/" .. name)
-  if ok then return mod end
-  local legacy = name:match("^gt_(.+)$") or ("gt_" .. name)
-  ok, mod = pcall(require, legacy)
-  if ok then return mod end
-  ok, mod = pcall(require, "engine/" .. legacy)
-  if ok then return mod end
-  ok, mod = pcall(require, "lua/engine/" .. legacy)
-  if ok then return mod end
-  error(string.format("config_loader: Failed to require '%s': %s", name, tostring(mod)))
+local okUtils, Utils = pcall(require, "engine/utils")
+if not okUtils or not Utils then
+  Utils = require("utils")
 end
-
-local Utils = safeRequire("utils")
 
 local ConfigLoader = {}
 

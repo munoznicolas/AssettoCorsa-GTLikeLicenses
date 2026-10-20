@@ -6,6 +6,11 @@
 --              auto-retry countdown timers, and event listener dispatching.
 -- ==============================================================================
 
+local okUtils, Utils = pcall(require, "engine/utils")
+if not okUtils or not Utils then
+  Utils = require("utils")
+end
+
 local SessionReset = {}
 SessionReset.__index = SessionReset
 
@@ -76,32 +81,32 @@ function SessionReset:executeReset(reason)
 end
 
 ---Checks if user has requested a session restart via keyboard or controller.
+---During active driving (isTerminalState == false/nil), only the dedicated R key triggers a reset
+---so Space (handbrake), Enter, or Gamepad A/X (shift/handbrake) cannot abort a live run.
+---On terminal modal screens (FAILED, PASSED, RESULTS), modal confirmation keys are also accepted.
+---@param isTerminalState boolean? @True when session is in FAILED, PASSED, or RESULTS state
 ---@return boolean
-function SessionReset:isRestartRequested()
-  -- 1. Check primary configured restart key
-  if self.restartKey then
-    if ac and ac.isKeyPressed and ac.isKeyPressed(self.restartKey) then return true end
-    if ui and ui.keyboardButtonPressed and ui.keyboardButtonPressed(self.restartKey) then return true end
+function SessionReset:isRestartRequested(isTerminalState)
+  -- 1. Primary configured restart key (default 'R') is always active
+  local rKey = self.restartKey or ((ui and ui.KeyIndex and ui.KeyIndex.R) or 82)
+  if Utils.isKeyPressed(rKey) then
+    return true
+  end
+  if ui and ui.KeyIndex and ui.KeyIndex.R and Utils.isKeyPressed(ui.KeyIndex.R) then
+    return true
   end
 
-  -- 2. Check standard retry keys: R, Space, Return (Enter)
-  if ac and ac.isKeyPressed and ui and ui.KeyIndex then
-    if ui.KeyIndex.R and ac.isKeyPressed(ui.KeyIndex.R) then return true end
-    if ui.KeyIndex.Space and ac.isKeyPressed(ui.KeyIndex.Space) then return true end
-    if ui.KeyIndex.Return and ac.isKeyPressed(ui.KeyIndex.Return) then return true end
-  end
+  -- 2. Modal confirmation keys (Space, Return, Gamepad A / Start) only on terminal overlays
+  if isTerminalState then
+    if ui and ui.KeyIndex then
+      if ui.KeyIndex.Space and Utils.isKeyPressed(ui.KeyIndex.Space) then return true end
+      if ui.KeyIndex.Return and Utils.isKeyPressed(ui.KeyIndex.Return) then return true end
+    end
 
-  if ui and ui.keyboardButtonPressed and ui.KeyIndex then
-    if ui.KeyIndex.R and ui.keyboardButtonPressed(ui.KeyIndex.R) then return true end
-    if ui.KeyIndex.Space and ui.keyboardButtonPressed(ui.KeyIndex.Space) then return true end
-    if ui.KeyIndex.Return and ui.keyboardButtonPressed(ui.KeyIndex.Return) then return true end
-  end
-
-  -- 3. Check Gamepad buttons: A, Start, X
-  if ac and ac.isGamepadButtonPressed and ac.GamepadButton then
-    if ac.GamepadButton.A and ac.isGamepadButtonPressed(0, ac.GamepadButton.A) then return true end
-    if ac.GamepadButton.Start and ac.isGamepadButtonPressed(0, ac.GamepadButton.Start) then return true end
-    if ac.GamepadButton.X and ac.isGamepadButtonPressed(0, ac.GamepadButton.X) then return true end
+    if ac and ac.isGamepadButtonPressed and ac.GamepadButton then
+      if ac.GamepadButton.A and ac.isGamepadButtonPressed(0, ac.GamepadButton.A) then return true end
+      if ac.GamepadButton.Start and ac.isGamepadButtonPressed(0, ac.GamepadButton.Start) then return true end
+    end
   end
 
   return false
@@ -109,10 +114,11 @@ end
 
 ---Per-frame update loop checking restart input keys and ticking auto-reset timer.
 ---@param dt number @Frame delta time in seconds
+---@param isTerminalState boolean? @True when session is in FAILED, PASSED, or RESULTS state
 ---@return boolean didReset @True if a reset was triggered this frame
-function SessionReset:update(dt)
-  -- 1. Check user input (R key, Space, Return, Gamepad buttons)
-  if self:isRestartRequested() then
+function SessionReset:update(dt, isTerminalState)
+  -- 1. Check user input (R key during active run; R, Space, Return, Gamepad A/Start on terminal overlays)
+  if self:isRestartRequested(isTerminalState) then
     self:executeReset("USER_INPUT")
     return true
   end

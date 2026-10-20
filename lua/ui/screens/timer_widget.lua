@@ -4,10 +4,7 @@
     Supports both fixed-screen placement and draggable AC Lua App window rendering.
 ]]
 
-local ok, Theme = pcall(require, "ui/common/ui_theme")
-if not ok or not Theme then
-    Theme = require("ui/common/gt_ui_theme")
-end
+local Theme = require("ui/common/ui_theme")
 
 local GTTimerWidget = {}
 

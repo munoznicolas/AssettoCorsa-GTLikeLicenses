@@ -5,74 +5,18 @@
 --              control, and fallback linear velocity stabilization.
 -- ==============================================================================
 
-local function safeRequire(name)
-  local ok, mod = pcall(require, name)
-  if ok then return mod end
-  ok, mod = pcall(require, "engine/" .. name)
-  if ok then return mod end
-  ok, mod = pcall(require, "lua/engine/" .. name)
-  if ok then return mod end
-  return nil
+local okUtils, Utils = pcall(require, "engine/utils")
+if not okUtils or not Utils then
+  Utils = require("utils")
 end
 
-local Utils = safeRequire("utils")
 local RollingStart = {}
 
-local toVec3 = Utils and Utils.toVec3 or function(v)
-  if v == nil then return vec3(0, 0, 0) end
-  if type(v) == 'cdata' or (type(v) == 'userdata') then return v end
-  if type(v) == 'table' then
-    if v.x ~= nil and v.y ~= nil and v.z ~= nil then
-      return vec3(tonumber(v.x) or 0, tonumber(v.y) or 0, tonumber(v.z) or 0)
-    elseif v[1] ~= nil and v[2] ~= nil and v[3] ~= nil then
-      return vec3(tonumber(v[1]) or 0, tonumber(v[2]) or 0, tonumber(v[3]) or 0)
-    end
-  end
-  return vec3(0, 0, 0)
-end
+local toVec3 = Utils.toVec3
+local safeNormalize = Utils.safeNormalize
 
-local safeNormalize = Utils and Utils.safeNormalize or function(dir)
-  local v = toVec3(dir)
-  local len = math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z)
-  if len > 0.0001 then return vec3(v.x / len, v.y / len, v.z / len) end
-  return vec3(0, 0, 1)
-end
-
----Estimates a realistic starting gear for rolling start velocity.
----@param speedKmh number
----@return integer gearIndex (1-based gear, 1 to 6)
-function RollingStart.estimateStartingGear(speedKmh)
-  if speedKmh <= 0 then
-    return 1
-  elseif speedKmh <= 45 then
-    return 1
-  elseif speedKmh <= 80 then
-    return 2
-  elseif speedKmh <= 125 then
-    return 3
-  elseif speedKmh <= 175 then
-    return 4
-  elseif speedKmh <= 230 then
-    return 5
-  else
-    return 6
-  end
-end
-
----Engages rolling start countdown physics along the straight sector line via native AI autopilot.
----Enables autopilot, caps AI speed to target rolling speed, and locks to the ideal racing line.
----@param carIndex integer? @0-based car index (default: 0)
----@param targetSpeedKmh number @Target rolling speed in km/h
----@param targetGear integer? @Target gear to engage and maintain
----@param targetRPM number? @Target engine RPM to maintain
----@param fallbackFwd table|vec3|number[]? @Forward vector
-function RollingStart.startAIRolling(carIndex, targetSpeedKmh, targetGear, targetRPM, fallbackFwd)
-  carIndex = carIndex or 0
-  targetSpeedKmh = tonumber(targetSpeedKmh) or 70.0
-  targetGear = (targetGear and targetGear > 0) and targetGear or RollingStart.estimateStartingGear(targetSpeedKmh)
-  targetRPM = (targetRPM and targetRPM > 0) and targetRPM or 3500
-
-  -- Ensure no forced pedal locks hold the car or starve AI throttle
+---Releases all user input and forced pedal locks (throttle, brakes, handbrake).
+function RollingStart.releaseUserLocks()
   if physics and physics.lockUserControlsFor then
     physics.lockUserControlsFor(0)
   end
@@ -88,6 +32,52 @@ function RollingStart.startAIRolling(carIndex, targetSpeedKmh, targetGear, targe
   if physics and physics.forceUserHandbrakeFor then
     physics.forceUserHandbrakeFor(0, 0)
   end
+end
+
+---Estimates a realistic starting gear for rolling start velocity when spawn.gear is omitted,
+---clamping against the vehicle's actual transmission gearCount when available.
+---@param speedKmh number
+---@param carIndex integer?
+---@return integer gearIndex (1-based gear)
+function RollingStart.estimateStartingGear(speedKmh, carIndex)
+  local gear = 1
+  if speedKmh <= 45 then
+    gear = 1
+  elseif speedKmh <= 80 then
+    gear = 2
+  elseif speedKmh <= 125 then
+    gear = 3
+  elseif speedKmh <= 175 then
+    gear = 4
+  elseif speedKmh <= 230 then
+    gear = 5
+  else
+    gear = 6
+  end
+
+  local car = ac and ac.getCar and ac.getCar(carIndex or 0)
+  local maxGears = car and tonumber(car.gearCount)
+  if maxGears and maxGears > 0 then
+    gear = math.min(gear, maxGears)
+  end
+  return gear
+end
+
+---Engages rolling start countdown physics along the straight sector line via native AI autopilot.
+---Enables autopilot, caps AI speed to target rolling speed, and locks to the ideal racing line.
+---@param carIndex integer? @0-based car index (default: 0)
+---@param targetSpeedKmh number @Target rolling speed in km/h
+---@param targetGear integer? @Target gear to engage and maintain
+---@param targetRPM number? @Target engine RPM to maintain
+---@param fallbackFwd table|vec3|number[]? @Forward vector
+function RollingStart.startAIRolling(carIndex, targetSpeedKmh, targetGear, targetRPM, fallbackFwd)
+  carIndex = carIndex or 0
+  targetSpeedKmh = tonumber(targetSpeedKmh) or 70.0
+  targetGear = (targetGear and targetGear > 0) and targetGear or RollingStart.estimateStartingGear(targetSpeedKmh, carIndex)
+  targetRPM = (targetRPM and targetRPM > 0) and targetRPM or 3500
+
+  -- Ensure no forced pedal locks hold the car or starve AI throttle
+  RollingStart.releaseUserLocks()
 
   -- Engage native AI autopilot for car 0
   if physics and physics.setCarAutopilot then

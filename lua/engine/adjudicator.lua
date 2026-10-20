@@ -10,6 +10,11 @@
 --              6. 2D line segment gate crossing detection (start/finish)
 -- ==============================================================================
 
+local okUtils, Utils = pcall(require, "engine/utils")
+if not okUtils or not Utils then
+  Utils = require("utils")
+end
+
 local Adjudicator = {}
 Adjudicator.__index = Adjudicator
 
@@ -83,76 +88,11 @@ local function getExtendedGate(gate, buffer)
   return p1, p2
 end
 
----2D Line-Segment Intersection test on the X-Z ground plane.
----Checks whether car trajectory from p1 to p2 crosses gate segment p3 to p4.
----@param p1 table|vec3 @Previous car position
----@param p2 table|vec3 @Current car position
----@param p3 table|vec3|number[] @Gate point 1
----@param p4 table|vec3|number[] @Gate point 2
----@return boolean intersects
-function Adjudicator.segmentsIntersect2D(p1, p2, p3, p4)
-  local x1, z1 = p1.x or p1[1], p1.z or p1[3]
-  local x2, z2 = p2.x or p2[1], p2.z or p2[3]
-  local x3, z3 = p3.x or p3[1], p3.z or p3[3]
-  local x4, z4 = p4.x or p4[1], p4.z or p4[3]
+---2D Line-Segment Intersection test on the X-Z ground plane (delegated to Utils).
+Adjudicator.segmentsIntersect2D = Utils.segmentsIntersect2D
 
-  local function ccw(ax, az, bx, bz, cx, cz)
-    return ((cz - az) * (bx - ax)) > ((bz - az) * (cx - ax))
-  end
-
-  local a = ccw(x1, z1, x3, z3, x4, z4)
-  local b = ccw(x2, z2, x3, z3, x4, z4)
-  local c = ccw(x1, z1, x2, z2, x3, z3)
-  local d = ccw(x1, z1, x2, z2, x4, z4)
-
-  return (a ~= b) and (c ~= d)
-end
-
----Tests whether a 3D position is spatially contained inside an Oriented Bounding Box (OBB).
----@param pos table|vec3 @Vehicle world position
----@param stopBox table @{ center=[x,y,z], size=[sx,sy,sz], rotation_deg=deg }
----@return boolean isInside, number localX, number localZ
-function Adjudicator.isInsideStopBox(pos, stopBox)
-  if not stopBox or not stopBox.center or not stopBox.size then
-    return false, 0, 0
-  end
-
-  local px = pos.x or pos[1]
-  local py = pos.y or pos[2]
-  local pz = pos.z or pos[3]
-
-  local cx = stopBox.center[1]
-  local cy = stopBox.center[2]
-  local cz = stopBox.center[3]
-
-  local sx = stopBox.size[1]
-  local sy = stopBox.size[2]
-  local sz = stopBox.size[3]
-
-  -- Height containment check (generous vertical window of +- 4m)
-  if math.abs(py - cy) > (sy * 0.5 + 4.0) then
-    return false, 0, 0
-  end
-
-  -- Translation relative to box center
-  local dx = px - cx
-  local dz = pz - cz
-
-  -- 2D rotation around Y axis
-  local rotDeg = stopBox.rotation_deg or 0
-  local rad = math.rad(-rotDeg)
-  local cosR = math.cos(rad)
-  local sinR = math.sin(rad)
-
-  local localX = dx * cosR - dz * sinR
-  local localZ = dx * sinR + dz * cosR
-
-  local halfX = sx * 0.5
-  local halfZ = sz * 0.5
-
-  local inside = (math.abs(localX) <= halfX) and (math.abs(localZ) <= halfZ)
-  return inside, localX, localZ
-end
+---Tests whether a 3D position is spatially contained inside an Oriented Bounding Box (delegated to Utils).
+Adjudicator.isInsideStopBox = Utils.isInsideStopBox
 
 ---Adjudicates track limits: debounces contact patch track valid status for 2 frames.
 ---@param car table|ac.CarState

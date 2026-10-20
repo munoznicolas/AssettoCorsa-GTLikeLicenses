@@ -5,32 +5,17 @@
 --              velocity vectors, and control locking during countdown sequences.
 -- ==============================================================================
 
-local function safeRequire(name)
-  local ok, mod = pcall(require, name)
-  if ok then return mod end
-  ok, mod = pcall(require, "engine/" .. name)
-  if ok then return mod end
-  ok, mod = pcall(require, "lua/engine/" .. name)
-  if ok then return mod end
-  return nil
+local okUtils, Utils = pcall(require, "engine/utils")
+if not okUtils or not Utils then
+  Utils = require("utils")
 end
 
-local Utils = safeRequire("utils")
-local RollingStart = safeRequire("rolling_start")
+local RollingStart = Utils.safeRequire("rolling_start", true)
 local PhysicsHooks = {}
 
-PhysicsHooks.toVec3 = (Utils and Utils.toVec3) or function(v)
-  if type(v) == 'table' then
-    return vec3(tonumber(v.x or v[1]) or 0, tonumber(v.y or v[2]) or 0, tonumber(v.z or v[3]) or 0)
-  end
-  return v or vec3(0, 0, 0)
-end
-
-local safeNormalize = (Utils and Utils.safeNormalize) or function(dir)
-  local v = PhysicsHooks.toVec3(dir)
-  local len = math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z)
-  return len > 0.0001 and vec3(v.x / len, v.y / len, v.z / len) or vec3(0, 0, 1)
-end
+PhysicsHooks.toVec3 = Utils.toVec3
+PhysicsHooks.releaseUserLocks = RollingStart.releaseUserLocks
+local safeNormalize = Utils.safeNormalize
 
 local lastGearEngageTime = {}
 PhysicsHooks.estimateStartingGear = RollingStart.estimateStartingGear
@@ -155,21 +140,7 @@ function PhysicsHooks.lockControls(durationSeconds, isStandingStart, targetGear,
   else
     -- Rolling start: Native AI autopilot handles vehicle driving.
     -- Ensure user locks and pedal forces are released so native AI can throttle and steer smoothly.
-    if physics and physics.lockUserControlsFor then
-      physics.lockUserControlsFor(0)
-    end
-    if physics and physics.setCarNoInput then
-      physics.setCarNoInput(false)
-    end
-    if physics and physics.forceUserThrottleFor then
-      physics.forceUserThrottleFor(0, 0)
-    end
-    if physics and physics.forceUserBrakesFor then
-      physics.forceUserBrakesFor(0, 0)
-    end
-    if physics and physics.forceUserHandbrakeFor then
-      physics.forceUserHandbrakeFor(0, 0)
-    end
+    PhysicsHooks.releaseUserLocks()
     if targetGear and targetGear > 0 then
       if physics and physics.engageGear then
         physics.engageGear(0, targetGear)
@@ -195,34 +166,22 @@ end
 ---Immediately unlocks all user inputs and releases forced brakes.
 ---@param carIndex integer? @0-based car index (default: 0)
 ---@param targetGear integer? @Optional gear to engage upon control release (e.g. 2 for rolling start)
-function PhysicsHooks.unlockControls(carIndex, targetGear)
+---@param targetRPM number? @Optional target RPM to preserve upon control release (defaults to 3500)
+function PhysicsHooks.unlockControls(carIndex, targetGear, targetRPM)
   carIndex = carIndex or 0
-  if physics and physics.lockUserControlsFor then
-    physics.lockUserControlsFor(0)
-  end
-  if physics and physics.setCarNoInput then
-    physics.setCarNoInput(false)
-  end
-  if physics and physics.forceUserThrottleFor then
-    physics.forceUserThrottleFor(0, 0)
-  end
-  if physics and physics.forceUserBrakesFor then
-    physics.forceUserBrakesFor(0, 0)
-  end
-  if physics and physics.forceUserHandbrakeFor then
-    physics.forceUserHandbrakeFor(0, 0)
-  end
+  PhysicsHooks.releaseUserLocks()
   PhysicsHooks.releaseSteeringOverride(carIndex)
   if physics and physics.setAIThrottleLimit then
     physics.setAIThrottleLimit(carIndex, 1.0)
   end
   -- Note: We deliberately bypass physics.lockUserGearboxFor(0, false) as it triggers AC starting line reset
   if targetGear and targetGear > 0 then
+    local rpm = (targetRPM and targetRPM > 0) and targetRPM or 3500
     if physics and physics.engageGear then
       physics.engageGear(carIndex, targetGear)
     end
     if physics and physics.setEngineRPM then
-      physics.setEngineRPM(carIndex, 3500)
+      physics.setEngineRPM(carIndex, rpm)
     end
     if ac and ac.overrideCarControls then
       local ctrl = ac.overrideCarControls(carIndex)
@@ -323,7 +282,8 @@ PhysicsHooks.smoothSplineOffsetDecay = RollingStart.smoothSplineOffsetDecay
 ---Disengages AI autopilot and seamlessly returns full control to the player at GO!
 ---@param carIndex integer? @0-based car index (default: 0)
 ---@param targetGear integer? @Optional gear to engage upon control release
-function PhysicsHooks.stopAIRolling(carIndex, targetGear)
+---@param targetRPM number? @Optional target RPM to preserve upon control release
+function PhysicsHooks.stopAIRolling(carIndex, targetGear, targetRPM)
   carIndex = carIndex or 0
 
   if physics and physics.setCarAutopilot then
@@ -338,10 +298,10 @@ function PhysicsHooks.stopAIRolling(carIndex, targetGear)
     physics.overrideSteering(carIndex, nan)
   end
 
-  PhysicsHooks.unlockControls(carIndex, targetGear)
+  PhysicsHooks.unlockControls(carIndex, targetGear, targetRPM)
 
   if ac and ac.log then
-    ac.log(string.format("[PhysicsHooks] stopAIRolling car=%d: autopilot=false, handover complete, gear=%d", carIndex, targetGear or 0))
+    ac.log(string.format("[PhysicsHooks] stopAIRolling car=%d: autopilot=false, handover complete, gear=%d, rpm=%d", carIndex, targetGear or 0, targetRPM or 3500))
   end
 end
 

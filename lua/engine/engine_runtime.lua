@@ -6,17 +6,12 @@
 --              for LicenseEngine.
 -- ==============================================================================
 
-local function safeRequire(name)
-  local ok, mod = pcall(require, name)
-  if ok then return mod end
-  ok, mod = pcall(require, "engine/" .. name)
-  if ok then return mod end
-  ok, mod = pcall(require, "lua/engine/" .. name)
-  if ok then return mod end
-  return nil
+local okUtils, Utils = pcall(require, "engine/utils")
+if not okUtils or not Utils then
+  Utils = require("utils")
 end
 
-local PhysicsHooks = safeRequire("physics_hooks")
+local PhysicsHooks = Utils.safeRequire("physics_hooks", true)
 
 local EngineRuntime = {}
 
@@ -79,21 +74,7 @@ function EngineRuntime.engageTelemetryRecorderAutopilot(engine)
   if engine.aiCoordinator then
     engine.aiCoordinator:initAutopilot(0, engine.aiLevel or 1.0, engine.isTelemetryRecorder)
   end
-  if physics and physics.lockUserControlsFor then
-    physics.lockUserControlsFor(0)
-  end
-  if physics and physics.setCarNoInput then
-    physics.setCarNoInput(false)
-  end
-  if physics and physics.forceUserThrottleFor then
-    physics.forceUserThrottleFor(0, 0)
-  end
-  if physics and physics.forceUserBrakesFor then
-    physics.forceUserBrakesFor(0, 0)
-  end
-  if physics and physics.forceUserHandbrakeFor then
-    physics.forceUserHandbrakeFor(0, 0)
-  end
+  PhysicsHooks.releaseUserLocks()
 end
 
 ---Handles first live simulation frame initialization of vehicle spawn or telemetry recorder.
@@ -177,22 +158,25 @@ function EngineRuntime.updateCountdown(engine, dt, car, runningState)
     local targetGear = engine.targetStartingGear
       or (engine.testConfig.spawn and engine.testConfig.spawn.gear and tonumber(engine.testConfig.spawn.gear) > 0 and tonumber(engine.testConfig.spawn.gear))
       or (isStanding and 1 or PhysicsHooks.estimateStartingGear(initSpeed))
+    local targetRPM = engine.targetStartingRPM
+      or (engine.testConfig.spawn and engine.testConfig.spawn.rpm and tonumber(engine.testConfig.spawn.rpm) > 0 and tonumber(engine.testConfig.spawn.rpm))
+      or (isStanding and 1000 or 3500)
 
     if engine.isAITestMode then
       if engine.aiCoordinator then
         engine.aiCoordinator:initAutopilot(0, engine.aiLevel or 0.95, false)
       end
-      PhysicsHooks.unlockControls(0, targetGear)
+      PhysicsHooks.unlockControls(0, targetGear, targetRPM)
       engine.isAIRollingActive = false
       if ac and ac.log then
         ac.log(string.format("[GTLicense] AI Test Mode ACTIVE: Autopilot maintained at %.0f%% AI level", (engine.aiLevel or 0.95) * 100))
       end
     else
       if engine.isAIRollingActive or initSpeed > 0 then
-        PhysicsHooks.stopAIRolling(0, targetGear)
+        PhysicsHooks.stopAIRolling(0, targetGear, targetRPM)
         engine.isAIRollingActive = false
       else
-        PhysicsHooks.unlockControls(0, targetGear)
+        PhysicsHooks.unlockControls(0, targetGear, targetRPM)
       end
     end
 
@@ -384,13 +368,8 @@ function EngineRuntime.checkSessionInterrupts(engine, STATE)
   end
 
   if engine.state == STATE.RESULTS or engine.state == STATE.PASSED or engine.state == STATE.FAILED then
-    local escPressed = false
-    if ui and ui.keyboardButtonPressed and ui.KeyIndex and ui.KeyIndex.Escape then
-      escPressed = ui.keyboardButtonPressed(ui.KeyIndex.Escape)
-    elseif ac and ac.isKeyPressed and ac.KeyIndex and ac.KeyIndex.Escape then
-      escPressed = ac.isKeyPressed(ac.KeyIndex.Escape)
-    end
-    if escPressed then
+    local escKey = (ui and ui.KeyIndex and ui.KeyIndex.Escape) or (ac and ac.KeyIndex and ac.KeyIndex.Escape) or 27
+    if Utils.isKeyPressed(escKey) then
       engine:exitSession()
       return true
     end

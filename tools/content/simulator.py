@@ -23,26 +23,58 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fi
 sys.path.insert(0, os.path.join(REPO_ROOT, "tools"))
 
 
+def ccw(ax: float, az: float, bx: float, bz: float, cx: float, cz: float) -> bool:
+    """Counter-clockwise orientation helper on X-Z plane (matching lua/engine/utils.lua)."""
+    return ((cz - az) * (bx - ax)) > ((bz - az) * (cx - ax))
+
+
 def segments_intersect_2d(
     p1: Tuple[float, float, float],
     p2: Tuple[float, float, float],
     p3: Tuple[float, float, float],
     p4: Tuple[float, float, float],
 ) -> bool:
-    """Evaluates 2D segment intersection in X-Z ground plane."""
+    """Evaluates 2D segment intersection in X-Z ground plane (matching lua/engine/utils.lua)."""
     x1, z1 = p1[0], p1[2]
     x2, z2 = p2[0], p2[2]
     x3, z3 = p3[0], p3[2]
     x4, z4 = p4[0], p4[2]
 
-    denom = (z4 - z3) * (x2 - x1) - (x4 - x3) * (z2 - z1)
-    if abs(denom) < 1e-6:
-        return False
+    a = ccw(x1, z1, x3, z3, x4, z4)
+    b = ccw(x2, z2, x3, z3, x4, z4)
+    c = ccw(x1, z1, x2, z2, x3, z3)
+    d = ccw(x1, z1, x2, z2, x4, z4)
 
-    ua = ((x4 - x3) * (z1 - z3) - (z4 - z3) * (x1 - x3)) / denom
-    ub = ((x2 - x1) * (z1 - z3) - (z2 - z1) * (x1 - x3)) / denom
+    return (a != b) and (c != d)
 
-    return 0.0 <= ua <= 1.0 and 0.0 <= ub <= 1.0
+
+def is_inside_stop_box(
+    pos: Tuple[float, float, float],
+    stop_box: Dict[str, Any],
+) -> Tuple[bool, float, float]:
+    """Evaluates 3D Oriented Bounding Box (OBB) containment (matching lua/engine/utils.lua)."""
+    px, py, pz = pos[0], pos[1], pos[2]
+    cx, cy, cz = stop_box["center"][0], stop_box["center"][1], stop_box["center"][2]
+    sx, sy, sz = stop_box["size"][0], stop_box["size"][1], stop_box["size"][2]
+
+    if abs(py - cy) > (sy * 0.5 + 4.0):
+        return False, 0.0, 0.0
+
+    dx = px - cx
+    dz = pz - cz
+
+    rot_rad = -math.radians(stop_box.get("rotation_deg", 0.0))
+    cos_r = math.cos(rot_rad)
+    sin_r = math.sin(rot_rad)
+
+    local_x = dx * cos_r - dz * sin_r
+    local_z = dx * sin_r + dz * cos_r
+
+    half_x = sx * 0.5
+    half_z = sz * 0.5
+
+    is_inside = (abs(local_x) <= half_x) and (abs(local_z) <= half_z)
+    return is_inside, local_x, local_z
 
 
 def point_in_stop_box(
@@ -51,29 +83,44 @@ def point_in_stop_box(
     size: Tuple[float, float, float],
     rotation_deg: float,
 ) -> bool:
-    """Evaluates 3D Oriented Bounding Box (OBB) containment."""
-    dx = pos[0] - center[0]
-    dy = pos[1] - center[1]
-    dz = pos[2] - center[2]
-
-    rad = math.radians(-rotation_deg)
-    cos_r = math.cos(rad)
-    sin_r = math.sin(rad)
-
-    # Local coordinates
-    local_x = dx * cos_r - dz * sin_r
-    local_z = dx * sin_r + dz * cos_r
-    local_y = dy
-
-    half_w = size[0] * 0.5
-    half_h = size[1] * 0.5
-    half_l = size[2] * 0.5
-
-    return (
-        abs(local_x) <= half_w
-        and abs(local_y) <= (half_h + 2.0)
-        and abs(local_z) <= half_l
+    """Convenience wrapper around is_inside_stop_box."""
+    inside, _, _ = is_inside_stop_box(
+        pos,
+        {"center": center, "size": size, "rotation_deg": rotation_deg},
     )
+    return inside
+
+
+def check_off_track(
+    car: Optional[Dict[str, Any]],
+    max_wheels_off: int = 2,
+    consecutive_frames: int = 0,
+) -> Tuple[bool, int, Optional[str]]:
+    """Adjudicates track limits with 2-frame debounce (matching lua/engine/adjudicator.lua)."""
+    if not car:
+        return False, consecutive_frames, None
+
+    wheels_out = 0
+    wheels = car.get("wheels")
+    if wheels is not None:
+        for i in range(4):
+            if i in wheels and wheels[i].get("surfaceValidTrack") is False:
+                wheels_out += 1
+            elif (i + 1) in wheels and 0 not in wheels and wheels[i + 1].get("surfaceValidTrack") is False:
+                wheels_out += 1
+
+    native_out = car.get("wheelsOutside", 0)
+    if native_out > wheels_out:
+        wheels_out = native_out
+
+    if wheels_out > max_wheels_off:
+        consecutive_frames += 1
+        if consecutive_frames >= 2:
+            return True, consecutive_frames, f"Off Track: Exceeded Track Limits ({wheels_out} wheels off)"
+    else:
+        consecutive_frames = 0
+
+    return False, consecutive_frames, None
 
 
 class HeadlessAdjudicator:
@@ -102,6 +149,7 @@ class HeadlessAdjudicator:
         self.stop_box_entry_time = None
         self.stop_box_completed = False
         self.prev_pos = None
+        self.consecutive_off_track_frames = 0
 
     def update(
         self,
@@ -129,11 +177,15 @@ class HeadlessAdjudicator:
             self.fail_reason = f"Collision force exceeded threshold ({int(collision_force)}N > {self.wall_threshold_n}N)"
             return {"status": self.status, "reason": self.fail_reason}
 
-        # 3. Off-track check
+        # 3. Off-track check (2-frame debounce matching lua/engine/adjudicator.lua)
         if wheels_outside > self.max_wheels_off:
-            self.status = "FAILED"
-            self.fail_reason = f"Exceeded maximum allowed wheels off track ({wheels_outside} > {self.max_wheels_off})"
-            return {"status": self.status, "reason": self.fail_reason}
+            self.consecutive_off_track_frames += 1
+            if self.consecutive_off_track_frames >= 2:
+                self.status = "FAILED"
+                self.fail_reason = f"Exceeded maximum allowed wheels off track ({wheels_outside} > {self.max_wheels_off})"
+                return {"status": self.status, "reason": self.fail_reason}
+        else:
+            self.consecutive_off_track_frames = 0
 
         # 4. Spin check
         if abs(yaw_angle_deg) > self.max_yaw_angle_deg:
@@ -315,13 +367,18 @@ def simulate_single_test(test_json_path: str, verbose: bool = False) -> Dict[str
     results["profile_b_wall"] = (res_b["status"] == "FAILED" and "Collision force" in str(res_b.get("reason")))
 
     # -------------------------------------------------------------------------
-    # Profile C: Off-Track Disqualification
+    # Profile C: Off-Track Disqualification (2-frame debounce verification)
     # -------------------------------------------------------------------------
     adjudicator.reset()
     for _ in range(10):
         adjudicator.update(dt, 0.2, spawn_pos, 50.0, wheels_outside=0)
-    res_c = adjudicator.update(dt, 0.3, spawn_pos, 50.0, wheels_outside=3)
-    results["profile_c_offtrack"] = (res_c["status"] == "FAILED" and "wheels off track" in str(res_c.get("reason")))
+    res_c1 = adjudicator.update(dt, 0.3, spawn_pos, 50.0, wheels_outside=3)
+    res_c2 = adjudicator.update(dt, 0.316, spawn_pos, 50.0, wheels_outside=3)
+    results["profile_c_offtrack"] = (
+        res_c1["status"] == "RUNNING"
+        and res_c2["status"] == "FAILED"
+        and "wheels off track" in str(res_c2.get("reason"))
+    )
 
     # -------------------------------------------------------------------------
     # Profile D: Stop Box Overrun Disqualification (for tests with stop box)

@@ -6,10 +6,7 @@
     3. Celebratory Results Screen with medal awards card and action buttons
 ]]
 
-local ok, Theme = pcall(require, "ui/common/ui_theme")
-if not ok or not Theme then
-    Theme = require("ui/common/gt_ui_theme")
-end
+local Theme = require("ui/common/ui_theme")
 
 local GTModalOverlays = {}
 
