@@ -91,6 +91,20 @@ def point_in_stop_box(
     return inside
 
 
+def _calculate_wheels_off(car: Dict[str, Any]) -> int:
+    """Calculates total wheels outside track based on contact surface and native telemetry."""
+    wheels = car.get("wheels")
+    if not wheels:
+        return car.get("wheelsOutside", 0)
+
+    indices = range(4) if 0 in wheels else range(1, 5)
+    wheels_out = sum(
+        1 for idx in indices
+        if wheels.get(idx, {}).get("surfaceValidTrack") is False
+    )
+    return max(wheels_out, car.get("wheelsOutside", 0))
+
+
 def check_off_track(
     car: Optional[Dict[str, Any]],
     max_wheels_off: int = 2,
@@ -100,25 +114,13 @@ def check_off_track(
     if not car:
         return False, consecutive_frames, None
 
-    wheels_out = 0
-    wheels = car.get("wheels")
-    if wheels is not None:
-        for i in range(4):
-            if i in wheels and wheels[i].get("surfaceValidTrack") is False:
-                wheels_out += 1
-            elif (i + 1) in wheels and 0 not in wheels and wheels[i + 1].get("surfaceValidTrack") is False:
-                wheels_out += 1
+    wheels_out = _calculate_wheels_off(car)
+    if wheels_out <= max_wheels_off:
+        return False, 0, None
 
-    native_out = car.get("wheelsOutside", 0)
-    if native_out > wheels_out:
-        wheels_out = native_out
-
-    if wheels_out > max_wheels_off:
-        consecutive_frames += 1
-        if consecutive_frames >= 2:
-            return True, consecutive_frames, f"Off Track: Exceeded Track Limits ({wheels_out} wheels off)"
-    else:
-        consecutive_frames = 0
+    consecutive_frames += 1
+    if consecutive_frames >= 2:
+        return True, consecutive_frames, f"Off Track: Exceeded Track Limits ({wheels_out} wheels off)"
 
     return False, consecutive_frames, None
 
@@ -151,9 +153,68 @@ class HeadlessAdjudicator:
         self.prev_pos = None
         self.consecutive_off_track_frames = 0
 
+    def _check_start_gate(self, curr_pos: Tuple[float, float, float]) -> None:
+        if not self.has_passed_start and self.prev_pos and self.start_gate:
+            p1 = tuple(self.start_gate["p1"])
+            p2 = tuple(self.start_gate["p2"])
+            if segments_intersect_2d(self.prev_pos, curr_pos, p1, p2):
+                self.has_passed_start = True
+
+    def _check_finish_gate(self, curr_pos: Tuple[float, float, float]) -> None:
+        if self.has_passed_start and not self.has_crossed_finish and self.prev_pos and self.finish_gate:
+            p1 = tuple(self.finish_gate["p1"])
+            p2 = tuple(self.finish_gate["p2"])
+            if segments_intersect_2d(self.prev_pos, curr_pos, p1, p2):
+                self.has_crossed_finish = True
+
+    def _check_violations(
+        self,
+        collision_force: float,
+        wheels_outside: int,
+        yaw_angle_deg: float,
+    ) -> Optional[str]:
+        if collision_force > self.wall_threshold_n:
+            return f"Collision force exceeded threshold ({int(collision_force)}N > {self.wall_threshold_n}N)"
+        if wheels_outside > self.max_wheels_off:
+            self.consecutive_off_track_frames += 1
+            if self.consecutive_off_track_frames >= 2:
+                return f"Exceeded maximum allowed wheels off track ({wheels_outside} > {self.max_wheels_off})"
+        else:
+            self.consecutive_off_track_frames = 0
+
+        if abs(yaw_angle_deg) > self.max_yaw_angle_deg:
+            return f"Vehicle spun out beyond {self.max_yaw_angle_deg} degrees"
+        return None
+
+    def _check_stop_box(
+        self,
+        session_time: float,
+        curr_pos: Tuple[float, float, float],
+        speed_kmh: float,
+    ) -> Optional[Tuple[str, Optional[str]]]:
+        if not self.stop_box:
+            return None
+        sb_center = tuple(self.stop_box["center"])
+        sb_size = tuple(self.stop_box["size"])
+        sb_rot = self.stop_box.get("rotation_deg", 0.0)
+
+        in_box = point_in_stop_box(curr_pos, sb_center, sb_size, sb_rot)
+        if in_box:
+            if self.stop_box_entry_time is None:
+                self.stop_box_entry_time = session_time
+            if speed_kmh <= 0.5:
+                self.stop_box_completed = True
+                return ("PASSED", None)
+            return None
+
+        if self.has_crossed_finish and self.stop_box_overshoot_fail:
+            d_finish = math.hypot(curr_pos[0] - sb_center[0], curr_pos[2] - sb_center[2])
+            if d_finish > sb_size[2] and speed_kmh > 5.0:
+                return ("FAILED", "Overran stop box without coming to a complete stop")
+        return None
+
     def update(
         self,
-        dt: float,
         session_time: float,
         curr_pos: Tuple[float, float, float],
         speed_kmh: float,
@@ -164,73 +225,24 @@ class HeadlessAdjudicator:
         if self.status != "RUNNING":
             return {"status": self.status, "reason": self.fail_reason}
 
-        # 1. Start gate detection
-        if not self.has_passed_start and self.prev_pos and self.start_gate:
-            p1 = tuple(self.start_gate["p1"])
-            p2 = tuple(self.start_gate["p2"])
-            if segments_intersect_2d(self.prev_pos, curr_pos, p1, p2):
-                self.has_passed_start = True
+        self._check_start_gate(curr_pos)
 
-        # 2. Collision threshold check
-        if collision_force > self.wall_threshold_n:
+        fail_reason = self._check_violations(collision_force, wheels_outside, yaw_angle_deg)
+        if fail_reason:
             self.status = "FAILED"
-            self.fail_reason = f"Collision force exceeded threshold ({int(collision_force)}N > {self.wall_threshold_n}N)"
+            self.fail_reason = fail_reason
             return {"status": self.status, "reason": self.fail_reason}
 
-        # 3. Off-track check (2-frame debounce matching lua/engine/adjudicator.lua)
-        if wheels_outside > self.max_wheels_off:
-            self.consecutive_off_track_frames += 1
-            if self.consecutive_off_track_frames >= 2:
-                self.status = "FAILED"
-                self.fail_reason = f"Exceeded maximum allowed wheels off track ({wheels_outside} > {self.max_wheels_off})"
-                return {"status": self.status, "reason": self.fail_reason}
-        else:
-            self.consecutive_off_track_frames = 0
+        self._check_finish_gate(curr_pos)
 
-        # 4. Spin check
-        if abs(yaw_angle_deg) > self.max_yaw_angle_deg:
-            self.status = "FAILED"
-            self.fail_reason = f"Vehicle spun out beyond {self.max_yaw_angle_deg} degrees"
-            return {"status": self.status, "reason": self.fail_reason}
-
-        # 5. Finish gate crossing (only checked after start gate passed)
-        if self.has_passed_start and not self.has_crossed_finish and self.prev_pos and self.finish_gate:
-            p1 = tuple(self.finish_gate["p1"])
-            p2 = tuple(self.finish_gate["p2"])
-            if segments_intersect_2d(self.prev_pos, curr_pos, p1, p2):
-                self.has_crossed_finish = True
-
-        # 6. Stop box adjudication
         if self.stop_box:
-            sb_center = tuple(self.stop_box["center"])
-            sb_size = tuple(self.stop_box["size"])
-            sb_rot = self.stop_box.get("rotation_deg", 0.0)
-
-            in_box = point_in_stop_box(curr_pos, sb_center, sb_size, sb_rot)
-
-            if in_box:
-                if self.stop_box_entry_time is None:
-                    self.stop_box_entry_time = session_time
-
-                # Check standstill (speed <= 0.5 km/h)
-                if speed_kmh <= 0.5:
-                    self.stop_box_completed = True
-                    self.status = "PASSED"
-                    return {"status": self.status}
-            else:
-                # If car was in box and left without stopping, or overran finish gate past stop box
-                if self.has_crossed_finish and self.stop_box_overshoot_fail:
-                    # Check if car has passed beyond stop box
-                    d_finish = math.hypot(curr_pos[0] - sb_center[0], curr_pos[2] - sb_center[2])
-                    if d_finish > sb_size[2] and speed_kmh > 5.0:
-                        self.status = "FAILED"
-                        self.fail_reason = "Overran stop box without coming to a complete stop"
-                        return {"status": self.status, "reason": self.fail_reason}
-        else:
-            # Standard sector test without stop box: finish gate crossing triggers pass
-            if self.has_crossed_finish:
-                self.status = "PASSED"
-                return {"status": self.status}
+            sb_result = self._check_stop_box(session_time, curr_pos, speed_kmh)
+            if sb_result:
+                self.status, self.fail_reason = sb_result
+                return {"status": self.status, "reason": self.fail_reason}
+        elif self.has_crossed_finish:
+            self.status = "PASSED"
+            return {"status": self.status}
 
         self.prev_pos = curr_pos
         return {"status": self.status}
@@ -313,33 +325,12 @@ def _build_gold_run_samples(test_data: Dict[str, Any]) -> List[Dict[str, Any]]:
     return samples
 
 
-def simulate_single_test(test_json_path: str, verbose: bool = False) -> Dict[str, Any]:
-    with open(test_json_path, "r", encoding="utf-8") as f:
-        test_data = json.load(f)
-
-    test_id = test_data["test_id"]
-    targets = test_data.get("targets", {})
-    has_stop_box = test_data.get("timing", {}).get("stop_box") is not None
-
-    ideal_samples = _build_gold_run_samples(test_data)
-
-    results = {
-        "test_id": test_id,
-        "title": test_data.get("title", ""),
-        "profile_a_gold": False,
-        "profile_b_wall": False,
-        "profile_c_offtrack": False,
-        "profile_d_stopbox": True,  # Default True if test has no stop box
-        "profile_e_reset": False,
-    }
-
-    adjudicator = HeadlessAdjudicator(test_data)
-
-    # -------------------------------------------------------------------------
-    # Profile A: Gold Medal Run
-    # -------------------------------------------------------------------------
+def _run_profile_a_gold(
+    adjudicator: HeadlessAdjudicator,
+    ideal_samples: List[Dict[str, Any]],
+    targets: Dict[str, Any],
+) -> bool:
     adjudicator.reset()
-    dt = 0.0166  # 60 Hz simulation
     sim_time = 0.0
     passed = False
 
@@ -347,100 +338,175 @@ def simulate_single_test(test_json_path: str, verbose: bool = False) -> Dict[str
         pos = tuple(sample["pos"])
         speed = float(sample["speed_kmh"])
         sim_time = float(sample["t"])
-        res = adjudicator.update(dt, sim_time, pos, speed)
+        res = adjudicator.update(sim_time, pos, speed)
         if res["status"] == "PASSED":
             passed = True
             break
 
     medal = evaluate_medal(sim_time, targets) if passed else "NONE"
-    results["profile_a_gold"] = (passed and medal == "GOLD")
+    return passed and medal == "GOLD"
 
-    # -------------------------------------------------------------------------
-    # Profile B: Barrier Impact Disqualification
-    # -------------------------------------------------------------------------
-    adjudicator.reset()
-    spawn_pos = tuple(test_data.get("spawn", {}).get("position", [0, 0, 0]))
-    # Run 10 frames normal, then inject 2500N impact
-    for _ in range(10):
-        adjudicator.update(dt, 0.2, spawn_pos, 50.0, collision_force=0.0)
-    res_b = adjudicator.update(dt, 0.3, spawn_pos, 50.0, collision_force=2500.0)
-    results["profile_b_wall"] = (res_b["status"] == "FAILED" and "Collision force" in str(res_b.get("reason")))
 
-    # -------------------------------------------------------------------------
-    # Profile C: Off-Track Disqualification (2-frame debounce verification)
-    # -------------------------------------------------------------------------
+def _run_profile_b_wall(
+    adjudicator: HeadlessAdjudicator,
+    spawn_pos: Tuple[float, float, float],
+) -> bool:
     adjudicator.reset()
     for _ in range(10):
-        adjudicator.update(dt, 0.2, spawn_pos, 50.0, wheels_outside=0)
-    res_c1 = adjudicator.update(dt, 0.3, spawn_pos, 50.0, wheels_outside=3)
-    res_c2 = adjudicator.update(dt, 0.316, spawn_pos, 50.0, wheels_outside=3)
-    results["profile_c_offtrack"] = (
+        adjudicator.update(0.2, spawn_pos, 50.0, collision_force=0.0)
+    res_b = adjudicator.update(0.3, spawn_pos, 50.0, collision_force=2500.0)
+    return res_b["status"] == "FAILED" and "Collision force" in str(res_b.get("reason"))
+
+
+def _run_profile_c_offtrack(
+    adjudicator: HeadlessAdjudicator,
+    spawn_pos: Tuple[float, float, float],
+) -> bool:
+    adjudicator.reset()
+    for _ in range(10):
+        adjudicator.update(0.2, spawn_pos, 50.0, wheels_outside=0)
+    res_c1 = adjudicator.update(0.3, spawn_pos, 50.0, wheels_outside=3)
+    res_c2 = adjudicator.update(0.316, spawn_pos, 50.0, wheels_outside=3)
+    return (
         res_c1["status"] == "RUNNING"
         and res_c2["status"] == "FAILED"
         and "wheels off track" in str(res_c2.get("reason"))
     )
 
-    # -------------------------------------------------------------------------
-    # Profile D: Stop Box Overrun Disqualification (for tests with stop box)
-    # -------------------------------------------------------------------------
-    if has_stop_box:
-        adjudicator.reset()
-        timing = test_data.get("timing", {})
-        finish_p1 = timing["finish_gate"]["p1"]
-        finish_p2 = timing["finish_gate"]["p2"]
-        sb_center = timing["stop_box"]["center"]
 
-        # 1. Pass start gate
-        start_p1 = timing["start_gate"]["p1"]
-        start_p2 = timing["start_gate"]["p2"]
-        sg_mid = (0.5 * (start_p1[0] + start_p2[0]), 0.5 * (start_p1[1] + start_p2[1]), 0.5 * (start_p1[2] + start_p2[2]))
-        adjudicator.update(dt, 0.1, (sg_mid[0] - 5, sg_mid[1], sg_mid[2] - 5), 50.0)
-        adjudicator.update(dt, 0.2, (sg_mid[0] + 5, sg_mid[1], sg_mid[2] + 5), 50.0)
-
-        # 2. Cross finish gate at high speed
-        fg_mid = (0.5 * (finish_p1[0] + finish_p2[0]), 0.5 * (finish_p1[1] + finish_p2[1]), 0.5 * (finish_p1[2] + finish_p2[2]))
-        adjudicator.update(dt, 1.0, (fg_mid[0] - 5, fg_mid[1], fg_mid[2] - 5), 90.0)
-        adjudicator.update(dt, 1.1, (fg_mid[0] + 5, fg_mid[1], fg_mid[2] + 5), 90.0)
-
-        # 3. Overshoot stop box at 90 km/h far past center
-        overshoot_pos = (sb_center[0] + 100.0, sb_center[1], sb_center[2] + 100.0)
-        res_d = adjudicator.update(dt, 2.0, overshoot_pos, 90.0)
-        results["profile_d_stopbox"] = (res_d["status"] == "FAILED" and "Overran stop box" in str(res_d.get("reason")))
-
-    # -------------------------------------------------------------------------
-    # Profile E: Instant Reset Synchronization
-    # -------------------------------------------------------------------------
+def _run_profile_d_stopbox(
+    adjudicator: HeadlessAdjudicator,
+    timing: Dict[str, Any],
+) -> bool:
     adjudicator.reset()
-    spawn_pos = tuple(test_data.get("spawn", {}).get("position", [0, 0, 0]))
-    adjudicator.update(dt, 5.0, (spawn_pos[0] + 50, spawn_pos[1], spawn_pos[2] + 50), 100.0)
-    # Trigger reset
+    finish_p1 = timing["finish_gate"]["p1"]
+    finish_p2 = timing["finish_gate"]["p2"]
+    sb_center = timing["stop_box"]["center"]
+
+    start_p1 = timing["start_gate"]["p1"]
+    start_p2 = timing["start_gate"]["p2"]
+    sg_mid = (0.5 * (start_p1[0] + start_p2[0]), 0.5 * (start_p1[1] + start_p2[1]), 0.5 * (start_p1[2] + start_p2[2]))
+    adjudicator.update(0.1, (sg_mid[0] - 5, sg_mid[1], sg_mid[2] - 5), 50.0)
+    adjudicator.update(0.2, (sg_mid[0] + 5, sg_mid[1], sg_mid[2] + 5), 50.0)
+
+    fg_mid = (0.5 * (finish_p1[0] + finish_p2[0]), 0.5 * (finish_p1[1] + finish_p2[1]), 0.5 * (finish_p1[2] + finish_p2[2]))
+    adjudicator.update(1.0, (fg_mid[0] - 5, fg_mid[1], fg_mid[2] - 5), 90.0)
+    adjudicator.update(1.1, (fg_mid[0] + 5, fg_mid[1], fg_mid[2] + 5), 90.0)
+
+    overshoot_pos = (sb_center[0] + 100.0, sb_center[1], sb_center[2] + 100.0)
+    res_d = adjudicator.update(2.0, overshoot_pos, 90.0)
+    return res_d["status"] == "FAILED" and "Overran stop box" in str(res_d.get("reason"))
+
+
+def _run_profile_e_reset(
+    adjudicator: HeadlessAdjudicator,
+    spawn_pos: Tuple[float, float, float],
+    start_mode: str,
+) -> bool:
     adjudicator.reset()
-    expected_has_passed_start = (test_data.get("start_mode") == "STANDING") or (adjudicator.start_gate is None)
-    results["profile_e_reset"] = (
+    adjudicator.update(5.0, (spawn_pos[0] + 50, spawn_pos[1], spawn_pos[2] + 50), 100.0)
+    adjudicator.reset()
+    expected_has_passed_start = (start_mode == "STANDING") or (adjudicator.start_gate is None)
+    return (
         adjudicator.status == "RUNNING"
         and adjudicator.has_passed_start == expected_has_passed_start
         and not adjudicator.has_crossed_finish
     )
 
-    # -------------------------------------------------------------------------
-    # Profile F: Countdown & Rolling Velocity Persistence
-    # -------------------------------------------------------------------------
-    adjudicator.reset()
-    spawn_info = test_data.get("spawn", {})
-    target_start_speed = float(spawn_info.get("initial_speed_kmh", 0.0))
 
-    # Simulate 3-second countdown window at 60 Hz (180 frames)
+def _run_profile_f_countdown(target_start_speed: float) -> bool:
     simulated_speed = 0.0
     for _ in range(180):
-        ac_physics_reset_speed = 0.0
         if target_start_speed > 0:
             simulated_speed = target_start_speed
         else:
-            simulated_speed = ac_physics_reset_speed
+            simulated_speed = 0.0
+    return abs(simulated_speed - target_start_speed) < 0.1
 
-    results["profile_f_countdown"] = (abs(simulated_speed - target_start_speed) < 0.1)
 
-    return results
+def simulate_single_test(test_json_path: str) -> Dict[str, Any]:
+    with open(test_json_path, "r", encoding="utf-8") as f:
+        test_data = json.load(f)
+
+    test_id = test_data["test_id"]
+    targets = test_data.get("targets", {})
+    timing = test_data.get("timing", {})
+    has_stop_box = timing.get("stop_box") is not None
+    spawn_pos = tuple(test_data.get("spawn", {}).get("position", [0, 0, 0]))
+    start_mode = test_data.get("start_mode", "STANDING")
+    target_start_speed = float(test_data.get("spawn", {}).get("initial_speed_kmh", 0.0))
+
+    ideal_samples = _build_gold_run_samples(test_data)
+    adjudicator = HeadlessAdjudicator(test_data)
+
+    prof_d = _run_profile_d_stopbox(adjudicator, timing) if has_stop_box else True
+
+    return {
+        "test_id": test_id,
+        "title": test_data.get("title", ""),
+        "profile_a_gold": _run_profile_a_gold(adjudicator, ideal_samples, targets),
+        "profile_b_wall": _run_profile_b_wall(adjudicator, spawn_pos),
+        "profile_c_offtrack": _run_profile_c_offtrack(adjudicator, spawn_pos),
+        "profile_d_stopbox": prof_d,
+        "profile_e_reset": _run_profile_e_reset(adjudicator, spawn_pos, start_mode),
+        "profile_f_countdown": _run_profile_f_countdown(target_start_speed),
+    }
+
+
+def _discover_test_files(tests_dir: str, args: argparse.Namespace) -> List[str]:
+    if args.test:
+        return [args.test]
+    if args.tier:
+        tdir = os.path.join(tests_dir, args.tier)
+        if os.path.isdir(tdir):
+            return [os.path.join(tdir, f) for f in sorted(os.listdir(tdir)) if f.startswith("test_") and f.endswith(".json")]
+        return []
+
+    test_files = []
+    for root, _, files in os.walk(tests_dir):
+        for f in sorted(files):
+            if f.startswith("test_") and f.endswith(".json"):
+                test_files.append(os.path.join(root, f))
+    return test_files
+
+
+def _format_test_result_line(res: Dict[str, Any], test_passed: bool) -> str:
+    status_tag = "[PASS]" if test_passed else "[FAIL]"
+    t_id = res["test_id"]
+    return (
+        f" {status_tag} {t_id:<5} | "
+        f"Gold: {'OK' if res['profile_a_gold'] else 'FAIL'} | "
+        f"Wall: {'OK' if res['profile_b_wall'] else 'FAIL'} | "
+        f"OffTrack: {'OK' if res['profile_c_offtrack'] else 'FAIL'} | "
+        f"StopBox: {'OK' if res['profile_d_stopbox'] else 'FAIL'} | "
+        f"Reset: {'OK' if res['profile_e_reset'] else 'FAIL'} | "
+        f"Countdown: {'OK' if res['profile_f_countdown'] else 'FAIL'}"
+    )
+
+
+def _execute_test_simulation(
+    test_files: List[str],
+    verbose: bool,
+) -> Tuple[int, List[str]]:
+    passed_scenarios = 0
+    failed_tests = []
+    for path in test_files:
+        res = simulate_single_test(path)
+        profiles = [
+            res["profile_a_gold"],
+            res["profile_b_wall"],
+            res["profile_c_offtrack"],
+            res["profile_d_stopbox"],
+            res["profile_e_reset"],
+            res["profile_f_countdown"],
+        ]
+        test_passed = all(profiles)
+        passed_scenarios += sum(1 for p in profiles if p)
+        if not test_passed:
+            failed_tests.append(res["test_id"])
+        if verbose or not test_passed:
+            print(_format_test_result_line(res, test_passed))
+    return passed_scenarios, failed_tests
 
 
 def main():
@@ -452,59 +518,18 @@ def main():
     args = parser.parse_args()
 
     tests_dir = os.path.join(REPO_ROOT, "content", "tests")
-    test_files = []
-
-    if args.test:
-        test_files.append(args.test)
-    elif args.tier:
-        tdir = os.path.join(tests_dir, args.tier)
-        if os.path.isdir(tdir):
-            test_files.extend(
-                [os.path.join(tdir, f) for f in sorted(os.listdir(tdir)) if f.startswith("test_") and f.endswith(".json")]
-            )
-    else:  # Default to all
-        for root, _, files in os.walk(tests_dir):
-            for f in sorted(files):
-                if f.startswith("test_") and f.endswith(".json"):
-                    test_files.append(os.path.join(root, f))
-
+    test_files = _discover_test_files(tests_dir, args)
     if not test_files:
         print("[ERROR] No test definitions found to simulate.", file=sys.stderr)
         sys.exit(1)
 
-    PROFILES_PER_TEST = 6
-    total_scenarios = len(test_files) * PROFILES_PER_TEST
-    passed_scenarios = 0
-    failed_tests = []
-
+    total_scenarios = len(test_files) * 6
     print("=" * 80)
     print(" ASSETTO CORSA GT LICENSES - HEADLESS SIMULATION & ADJUDICATION SUITE")
-    print(f" Executing {PROFILES_PER_TEST} Behavioral Profiles across {len(test_files)} tests ({total_scenarios} scenarios)...")
+    print(f" Executing 6 Behavioral Profiles across {len(test_files)} tests ({total_scenarios} scenarios)...")
     print("=" * 80)
 
-    for path in test_files:
-        res = simulate_single_test(path, verbose=args.verbose)
-        t_id = res["test_id"]
-
-        a = res["profile_a_gold"]
-        b = res["profile_b_wall"]
-        c = res["profile_c_offtrack"]
-        d = res["profile_d_stopbox"]
-        e = res["profile_e_reset"]
-        f = res["profile_f_countdown"]
-
-        test_passed = a and b and c and d and e and f
-        scenario_count = (1 if a else 0) + (1 if b else 0) + (1 if c else 0) + (1 if d else 0) + (1 if e else 0) + (1 if f else 0)
-        passed_scenarios += scenario_count
-
-        if test_passed:
-            status_tag = "[PASS]"
-        else:
-            status_tag = "[FAIL]"
-            failed_tests.append(t_id)
-
-        if args.verbose or not test_passed:
-            print(f" {status_tag} {t_id:<5} | Gold: {'OK' if a else 'FAIL'} | Wall: {'OK' if b else 'FAIL'} | OffTrack: {'OK' if c else 'FAIL'} | StopBox: {'OK' if d else 'FAIL'} | Reset: {'OK' if e else 'FAIL'} | Countdown: {'OK' if f else 'FAIL'}")
+    passed_scenarios, failed_tests = _execute_test_simulation(test_files, args.verbose)
 
     print("-" * 80)
     print(f"Total Scenarios Executed: {total_scenarios}")
