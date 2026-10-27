@@ -158,6 +158,16 @@ def build_static_site(out_dir: str = "dist_site", clean: bool = True) -> str:
     with open(os.path.join(api_dir, "missing_telemetry.json"), "w", encoding="utf-8") as f:
         json.dump(missing_summary, f, indent=2)
 
+    # Copy Pre-rendered Track Splines
+    splines_src = os.path.join(REPO_ROOT, "data", "splines")
+    splines_dst = os.path.join(api_dir, "splines")
+    if os.path.isdir(splines_src):
+        os.makedirs(splines_dst, exist_ok=True)
+        for f in os.listdir(splines_src):
+            if f.endswith(".json"):
+                shutil.copy2(os.path.join(splines_src, f), os.path.join(splines_dst, f))
+        print(f"  [OK] Bundled {len(os.listdir(splines_dst))} pre-rendered track splines into api/splines/")
+
     print("  [OK] Pre-rendered curriculum, tracks, cars, reference tests, and missing telemetry APIs")
 
     # 3. Copy Career Previews and Vector Maps

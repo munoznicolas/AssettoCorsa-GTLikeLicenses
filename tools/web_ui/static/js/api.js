@@ -11,6 +11,17 @@ export function resolveApiPath(endpoint) {
     Boolean(window.IS_STATIC_HOST);
 
   if (isStatic) {
+    const clean = endpoint.startsWith("/") ? endpoint.slice(1) : endpoint;
+
+    // Spline query endpoints: api/spline?track_id=...&layout=...
+    if (clean.startsWith("api/spline?") || clean === "api/spline") {
+      const url = new URL(clean, "http://dummy");
+      const trackId = url.searchParams.get("track_id") || "";
+      const layout = url.searchParams.get("layout") || "";
+      const key = layout ? `${trackId}__${layout}` : trackId;
+      return `./api/splines/${encodeURIComponent(key)}.json`;
+    }
+
     const staticMap = {
       "curriculum": "api/curriculum.json",
       "tracks": "api/tracks.json",
@@ -19,14 +30,14 @@ export function resolveApiPath(endpoint) {
       "telemetry/missing": "api/missing_telemetry.json",
     };
 
-    const clean = endpoint.startsWith("/") ? endpoint.slice(1) : endpoint;
     const base = clean.replace(/^api\//, "").split("?")[0];
     if (staticMap[base]) {
       return `./${staticMap[base]}`;
     }
   }
 
-  return endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+  const rel = endpoint.startsWith("/") ? endpoint.slice(1) : endpoint;
+  return `./${rel}`;
 }
 
 /**
@@ -78,8 +89,23 @@ export const api = {
    */
   async getSpline(trackId, layout = "") {
     const query = new URLSearchParams({ track_id: trackId, layout: layout || "" });
-    const res = await fetch(resolveApiPath(`api/spline?${query.toString()}`));
-    return await res.json();
+    try {
+      const res = await fetch(resolveApiPath(`api/spline?${query.toString()}`));
+      if (res.ok) {
+        return await res.json();
+      }
+      // If layout-specific file not found (e.g. 404), fallback to base track spline
+      if (layout) {
+        const fallbackQuery = new URLSearchParams({ track_id: trackId, layout: "" });
+        const fallbackRes = await fetch(resolveApiPath(`api/spline?${fallbackQuery.toString()}`));
+        if (fallbackRes.ok) {
+          return await fallbackRes.json();
+        }
+      }
+      return { success: false, error: "AI spline not found for this track layout" };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
   },
 
   /**
