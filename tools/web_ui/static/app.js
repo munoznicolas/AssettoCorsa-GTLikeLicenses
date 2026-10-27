@@ -78,55 +78,41 @@ function setupGlobalEventListeners() {
     });
   }
 
-  // Live Sync to Assetto Corsa Root (with friendly static host fallback)
+  // Live Sync to Assetto Corsa Root (hidden on static hosts, available in local dev server)
   if (dom.btnSync) {
     const isStatic =
       window.location.hostname.endsWith("github.io") ||
       window.location.protocol === "file:" ||
       Boolean(window.IS_STATIC_HOST);
 
-    dom.btnSync.addEventListener("click", async () => {
-      if (isStatic) {
-        openModal("Sync to Assetto Corsa", "Local Installation Notice");
-        if (dom.modalStatusBadge) {
-          dom.modalStatusBadge.textContent = "LOCAL STUDIO ONLY";
-          dom.modalStatusBadge.className = "badge badge-lg";
-          dom.modalStatusBadge.style.color = "#f59e0b";
-        }
-        if (dom.modalLogText) {
-          dom.modalLogText.textContent =
-            "Direct filesystem sync is available when running the developer studio locally via:\n\n" +
-            "  python tools/web_ui/server.py\n\n" +
-            "To install your changes from the web onto Assetto Corsa:\n" +
-            "  1. Click 'Export' in the top navbar to download AssettoCorsa_GT_License_Center.zip.\n" +
-            "  2. Drag and drop the downloaded ZIP directly into Content Manager to install!";
-        }
-        return;
-      }
-
-      openModal("Sync to Assetto Corsa", "Synchronizing files to local Assetto Corsa directory...");
-      try {
-        const data = await api.syncToAC();
-        if (data.success) {
-          if (dom.modalStatusBadge) {
-            dom.modalStatusBadge.textContent = "SYNC COMPLETE";
-            dom.modalStatusBadge.className = "badge badge-lg";
-            dom.modalStatusBadge.style.color = "#10b981";
+    if (isStatic) {
+      dom.btnSync.style.display = "none";
+    } else {
+      dom.btnSync.addEventListener("click", async () => {
+        openModal("Sync to Assetto Corsa", "Synchronizing files to local Assetto Corsa directory...");
+        try {
+          const data = await api.syncToAC();
+          if (data.success) {
+            if (dom.modalStatusBadge) {
+              dom.modalStatusBadge.textContent = "SYNC COMPLETE";
+              dom.modalStatusBadge.className = "badge badge-lg";
+              dom.modalStatusBadge.style.color = "#10b981";
+            }
+            if (dom.modalLogText) dom.modalLogText.textContent = data.message;
+          } else {
+            if (dom.modalStatusBadge) {
+              dom.modalStatusBadge.textContent = "SYNC FAILED";
+              dom.modalStatusBadge.className = "badge badge-lg";
+              dom.modalStatusBadge.style.color = "#ef4444";
+            }
+            if (dom.modalLogText) dom.modalLogText.textContent = data.error;
           }
-          if (dom.modalLogText) dom.modalLogText.textContent = data.message;
-        } else {
-          if (dom.modalStatusBadge) {
-            dom.modalStatusBadge.textContent = "SYNC FAILED";
-            dom.modalStatusBadge.className = "badge badge-lg";
-            dom.modalStatusBadge.style.color = "#ef4444";
-          }
-          if (dom.modalLogText) dom.modalLogText.textContent = data.error;
+        } catch (err) {
+          if (dom.modalStatusBadge) dom.modalStatusBadge.textContent = "NETWORK ERROR";
+          if (dom.modalLogText) dom.modalLogText.textContent = err.message;
         }
-      } catch (err) {
-        if (dom.modalStatusBadge) dom.modalStatusBadge.textContent = "NETWORK ERROR";
-        if (dom.modalLogText) dom.modalLogText.textContent = err.message;
-      }
-    });
+      });
+    }
   }
 
   // Modal Close Buttons
