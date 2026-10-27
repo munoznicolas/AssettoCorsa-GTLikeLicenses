@@ -4,6 +4,7 @@ Unit and integration tests for the Gold Ghost / Pace Car trajectory generator
 and runtime data contracts.
 """
 
+import json
 import os
 import sys
 import unittest
@@ -43,17 +44,21 @@ class TestGhostTrajectoryGenerator(unittest.TestCase):
     def test_trajectory_normalization(self):
         """Generated trajectory must finish at exactly T_gold seconds."""
         b1_path = os.path.join(REPO_ROOT, "content", "tests", "national_b", "test_b01.json")
+        with open(b1_path, "r", encoding="utf-8") as f:
+            b1_config = json.load(f)
+        expected_gold = b1_config["targets"]["gold_seconds"]
+
         profile = generate_ghost_profile(b1_path)
 
         self.assertEqual(profile["test_id"], "B-1")
-        self.assertEqual(profile["gold_time"], 11.2)
+        self.assertEqual(profile["gold_time"], expected_gold)
         samples = profile["trajectory"]
         self.assertGreater(len(samples), 10)
 
         # First sample t=0.0
         self.assertAlmostEqual(samples[0]["t"], 0.0, places=2)
-        # Last sample t=11.2
-        self.assertAlmostEqual(samples[-1]["t"], 11.2, places=2)
+        # Last sample t=T_gold
+        self.assertAlmostEqual(samples[-1]["t"], expected_gold, places=2)
 
         # Check velocities are bounded and physical
         for s in samples:
@@ -84,4 +89,3 @@ class TestGhostTrajectoryGenerator(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

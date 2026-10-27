@@ -870,6 +870,13 @@ function LicenseEngine:getGhostState()
   return nil
 end
 
+---CSP New Modes pre-session preparation stage hook.
+---@param dt number?
+---@return boolean
+function LicenseEngine:prepare(dt)
+  return true
+end
+
 -- ==============================================================================
 -- CSP Global Script Hooks Integration
 -- ==============================================================================
@@ -884,6 +891,12 @@ if script ~= nil then
   end
   if GTAudioManager and GTAudioManager.init then
     GTAudioManager.init()
+  end
+
+  function script.prepare(dt)
+    if activeEngine and activeEngine.prepare then
+      activeEngine:prepare(dt)
+    end
   end
 
   function script.init()
