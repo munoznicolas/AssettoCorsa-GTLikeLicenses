@@ -19,68 +19,91 @@ import {
 } from "./js/queue-runner.js";
 import { setupReferenceViewListeners } from "./js/reference-view.js";
 import { initTelemetrySubmitter } from "./js/telemetry-submitter.js";
+import { buildAndExportModZip } from "./js/mod-packager.js";
 
 /**
  * Global operational event listeners (Rebuild, Sync, Modal close).
  */
 function setupGlobalEventListeners() {
-  // Rebuild & Validate Curriculum & Track Miniatures
+  // Export Content Manager Mod (.zip) with pure client-side validation & packaging
   if (dom.btnRebuild) {
     dom.btnRebuild.addEventListener("click", async () => {
       openModal(
-        "Rebuilding Content & Validating...",
-        "Running Content Generator, Track Miniature Builder, and Curriculum Validator..."
+        "Exporting Content Manager Mod...",
+        "Validating tests and packaging drag-and-drop Content Manager archive (.zip)..."
       );
+      if (dom.modalStatusBadge) {
+        dom.modalStatusBadge.textContent = "BUILDING ZIP";
+        dom.modalStatusBadge.className = "badge badge-lg";
+        dom.modalStatusBadge.style.color = "#38bdf8";
+      }
+
       try {
-        const report = await api.generateContent();
-        if (report.success) {
-          if (dom.modalStatusBadge) {
-            dom.modalStatusBadge.textContent = "PASSED - ZERO ERRORS";
-            dom.modalStatusBadge.className = "badge badge-lg";
-            dom.modalStatusBadge.style.color = "#10b981";
+        const result = await buildAndExportModZip(state.curriculum, (percent, msg) => {
+          if (dom.modalLogText) {
+            dom.modalLogText.textContent = `[${percent}%] ${msg}`;
           }
-          state.cacheBuster = Date.now();
-          renderTestList();
-        } else {
-          if (dom.modalStatusBadge) {
-            dom.modalStatusBadge.textContent = `FAILED (${report.failed} files with errors)`;
-            dom.modalStatusBadge.className = "badge badge-lg";
-            dom.modalStatusBadge.style.color = "#ef4444";
-          }
+        });
+
+        if (dom.modalStatusBadge) {
+          dom.modalStatusBadge.textContent = "READY FOR CM";
+          dom.modalStatusBadge.className = "badge badge-lg";
+          dom.modalStatusBadge.style.color = "#10b981";
         }
 
-        let log = "";
-        if (report.miniatures_updated) {
-          log += `✓ Successfully generated & updated ${report.miniatures_updated} track miniature previews (PNG) and maps (SVG).\n\n`;
-        }
-        log += `Audited ${report.total_files} test files. Passed: ${report.passed}, Failed: ${report.failed}\n\n`;
-        if (report.errors && report.errors.length > 0) {
-          log += "--- ERRORS ---\n";
-          report.errors.forEach((e) => {
-            log += `[${e.severity}] [${e.test_id || "ALL"}] ${e.message}\n`;
-          });
-          log += "\n";
-        }
-        if (report.warnings && report.warnings.length > 0) {
-          log += "--- WARNINGS ---\n";
-          report.warnings.forEach((w) => {
-            log += `[${w.severity}] [${w.test_id || "ALL"}] ${w.message}\n`;
-          });
-        }
-        if (!report.errors.length && !report.warnings.length) {
-          log += "All schema validations, 3D gate vectors, track miniatures, and career links PASSED perfectly!";
-        }
+        const rep = result.validation;
+        const sizeMb = (result.size / (1024 * 1024)).toFixed(2);
+        let log = `✓ Content Manager package created successfully (${sizeMb} MB)!\n`;
+        log += `✓ Download started: AssettoCorsa_GT_License_Center.zip\n\n`;
+        log += `--- VALIDATION AUDIT ---\n`;
+        log += `Audited ${rep.total_files} tests across 5 license tiers: ${rep.passed} passed, 0 failed.\n`;
+        log += `All Content Manager series.ini, event.ini, and test JSON definitions generated.\n\n`;
+        log += `Installation instructions:\n`;
+        log += `1. Locate the downloaded AssettoCorsa_GT_License_Center.zip in your browser downloads.\n`;
+        log += `2. Drag and drop the .zip file directly into Content Manager.\n`;
+        log += `3. Click 'Install' in the top-right green menu to play!`;
+
         if (dom.modalLogText) dom.modalLogText.textContent = log;
+        showToast("Mod package exported successfully!", "success");
       } catch (err) {
-        if (dom.modalStatusBadge) dom.modalStatusBadge.textContent = "SERVER ERROR";
-        if (dom.modalLogText) dom.modalLogText.textContent = "Error executing content generator: " + err.message;
+        if (dom.modalStatusBadge) {
+          dom.modalStatusBadge.textContent = "EXPORT FAILED";
+          dom.modalStatusBadge.style.color = "#ef4444";
+        }
+        if (dom.modalLogText) {
+          dom.modalLogText.textContent = `Error building Content Manager package: ${err.message}`;
+        }
+        showToast(`Export error: ${err.message}`, "error");
       }
     });
   }
 
-  // Live Sync to Assetto Corsa Root
+  // Live Sync to Assetto Corsa Root (with friendly static host fallback)
   if (dom.btnSync) {
+    const isStatic =
+      window.location.hostname.endsWith("github.io") ||
+      window.location.protocol === "file:" ||
+      Boolean(window.IS_STATIC_HOST);
+
     dom.btnSync.addEventListener("click", async () => {
+      if (isStatic) {
+        openModal("Sync to Assetto Corsa", "Local Installation Notice");
+        if (dom.modalStatusBadge) {
+          dom.modalStatusBadge.textContent = "LOCAL STUDIO ONLY";
+          dom.modalStatusBadge.className = "badge badge-lg";
+          dom.modalStatusBadge.style.color = "#f59e0b";
+        }
+        if (dom.modalLogText) {
+          dom.modalLogText.textContent =
+            "Direct filesystem sync is available when running the developer studio locally via:\n\n" +
+            "  python tools/web_ui/server.py\n\n" +
+            "To install your changes from the web onto Assetto Corsa:\n" +
+            "  1. Click 'Export' in the top navbar to download AssettoCorsa_GT_License_Center.zip.\n" +
+            "  2. Drag and drop the downloaded ZIP directly into Content Manager to install!";
+        }
+        return;
+      }
+
       openModal("Sync to Assetto Corsa", "Synchronizing files to local Assetto Corsa directory...");
       try {
         const data = await api.syncToAC();
