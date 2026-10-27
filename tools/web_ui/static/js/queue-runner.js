@@ -811,9 +811,18 @@ export function executeExportSingleTelemetryScript() {
 
 export function setupQueueEventListeners() {
   if (dom.btnRunLive) {
-    dom.btnRunLive.addEventListener("click", () => {
-      void executeRunLiveTest("ai");
-    });
+    const isStatic =
+      window.location.hostname.endsWith("github.io") ||
+      window.location.protocol === "file:" ||
+      Boolean(window.IS_STATIC_HOST);
+
+    if (isStatic) {
+      dom.btnRunLive.style.display = "none";
+    } else {
+      dom.btnRunLive.addEventListener("click", () => {
+        void executeRunLiveTest("ai");
+      });
+    }
   }
   if (dom.btnRunTop) {
     dom.btnRunTop.addEventListener("click", () => {
