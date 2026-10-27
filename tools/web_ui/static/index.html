@@ -26,7 +26,7 @@
     <meta name="twitter:description" content="Design, inspect, and contribute Gran Turismo-style driving school license tests &amp; AI telemetry profiles for Assetto Corsa." />
     <meta name="twitter:image" content="og-image.svg" />
 
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="style.css?v=20261027c" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -112,6 +112,28 @@
       <div class="workspace">
         <!-- Left Column: Test List for Selected License -->
         <aside id="sidebar" class="sidebar">
+          <script>
+            try {
+              if (localStorage.getItem("gt_sidebar_collapsed") === "true") {
+                document.getElementById("sidebar")?.classList.add("collapsed");
+              }
+            } catch (e) {}
+            window.toggleSidebar = function() {
+              var sb = document.getElementById("sidebar");
+              if (!sb) return;
+              var c = sb.classList.toggle("collapsed");
+              var btn = document.getElementById("btn-toggle-sidebar");
+              if (btn) {
+                btn.title = c ? "Expand sidebar" : "Collapse sidebar";
+                btn.setAttribute("aria-label", c ? "Expand sidebar" : "Collapse sidebar");
+              }
+              var addBtn = document.getElementById("btn-add-test");
+              if (addBtn) {
+                addBtn.setAttribute("title", c ? "Add new test (+)" : "Add new test to this license");
+              }
+              try { localStorage.setItem("gt_sidebar_collapsed", c ? "true" : "false"); } catch(e) {}
+            };
+          </script>
           <div class="sidebar-header">
             <div class="tier-info">
               <h2 id="active-tier-title">National B</h2>
@@ -127,10 +149,12 @@
                 <span class="btn-icon" aria-hidden="true">+</span>
               </button>
               <button
+                type="button"
                 id="btn-toggle-sidebar"
                 class="btn btn-sm btn-secondary btn-icon-only"
                 title="Collapse sidebar"
                 aria-label="Collapse sidebar"
+                onclick="window.toggleSidebar &amp;&amp; window.toggleSidebar()"
               >
                 <svg class="sidebar-toggle-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="15 18 9 12 15 6"></polyline>
@@ -964,6 +988,6 @@
 
     <script src="chart.umd.min.js"></script>
     <script src="jszip.min.js"></script>
-    <script type="module" src="app.js"></script>
+    <script type="module" src="app.js?v=20261027c"></script>
   </body>
 </html>

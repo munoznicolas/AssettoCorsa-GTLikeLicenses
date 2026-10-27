@@ -294,6 +294,7 @@ body {
 .sidebar-toggle-icon {
   display: block;
   transition: transform 0.2s ease;
+  pointer-events: none;
 }
 
 .sidebar.collapsed .sidebar-toggle-icon {
