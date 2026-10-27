@@ -198,10 +198,13 @@ def build_static_site(out_dir: str = "dist_site", clean: bool = True) -> str:
                     if f.endswith((".png", ".jpg", ".svg")):
                         shutil.copy2(os.path.join(s_sub, f), os.path.join(d_sub, f))
         print("  [OK] Copied career UI badges and textures to assets/")
-        base_zip = os.path.join(assets_src, "base_package.zip")
-        if os.path.isfile(base_zip):
-            shutil.copy2(base_zip, os.path.join(assets_dst, "base_package.zip"))
-            print("  [OK] Bundled base_package.zip into assets/")
+        # Dynamically build and bundle the full Content Manager Mod ZIP archive
+        from tools.deployment.packager import CMPackageBuilder
+        base_zip_dest = os.path.join(assets_dst, "base_package.zip")
+        builder = CMPackageBuilder(repo_root=REPO_ROOT, output_zip=base_zip_dest)
+        builder.stage_files()
+        builder.build_package()
+        print(f"  [OK] Built and bundled base_package.zip into assets/ ({os.path.getsize(base_zip_dest)} bytes)")
 
     # 4. Copy Vector SVG Maps
     docs_maps = [("test_maps", os.path.join(REPO_ROOT, "docs", "test_maps")),
