@@ -175,6 +175,20 @@ def build_static_site(out_dir: str = "dist_site", clean: bool = True) -> str:
                     shutil.copy2(s_file, d_file)
         print("  [OK] Copied career preview badges and event miniatures")
 
+    # 3b. Copy UI Badges and Textures from assets/
+    assets_src = os.path.join(REPO_ROOT, "assets")
+    assets_dst = os.path.join(dist_path, "assets")
+    if os.path.isdir(assets_src):
+        for sub in ["career_ui", "textures"]:
+            s_sub = os.path.join(assets_src, sub)
+            d_sub = os.path.join(assets_dst, sub)
+            if os.path.isdir(s_sub):
+                os.makedirs(d_sub, exist_ok=True)
+                for f in os.listdir(s_sub):
+                    if f.endswith((".png", ".jpg", ".svg")):
+                        shutil.copy2(os.path.join(s_sub, f), os.path.join(d_sub, f))
+        print("  [OK] Copied career UI badges and textures to assets/")
+
     # 4. Copy Vector SVG Maps
     docs_maps = [("test_maps", os.path.join(REPO_ROOT, "docs", "test_maps")),
                  ("track_maps", os.path.join(REPO_ROOT, "docs", "track_maps"))]

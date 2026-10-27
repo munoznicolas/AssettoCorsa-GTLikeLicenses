@@ -284,7 +284,7 @@ export function renderLicenseTabs() {
     const btn = document.createElement("button");
     btn.className = `license-tab ${idx === state.activeTierIndex ? "active" : ""}`;
     btn.innerHTML = `
-      <img class="tab-badge-img" src="/assets/career_ui/${escapeHtml(tier.badge_asset)}" alt="${escapeHtml(tier.name)}">
+      <img class="tab-badge-img" src="./assets/career_ui/${escapeHtml(tier.badge_asset)}" alt="${escapeHtml(tier.tier_name)}">
       <span>${escapeHtml(tier.tier_name)}</span>
       <span class="tab-count">${Number(tier.tests.length) || 0}</span>
     `;
@@ -343,11 +343,12 @@ export function renderTestList() {
     const isFullLap = isFullLapTest(test);
     const lapTypeLabel = isFullLap ? "Full Lap" : "Sector";
 
-    const previewUrl =
+    const rawPreview =
       test.preview_image ||
       (activeTier.folder
         ? `./content/career/${encodeURIComponent(activeTier.folder)}/event${idx + 1}/preview.png`
         : `/api/test_preview?test_id=${encodeURIComponent(test.test_id)}`);
+    const previewUrl = rawPreview && rawPreview.startsWith("/") ? `.${rawPreview}` : rawPreview;
 
     item.innerHTML = `
       <div class="test-item-thumb">

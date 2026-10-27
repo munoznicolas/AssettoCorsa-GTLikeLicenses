@@ -92,7 +92,7 @@ def _load_series_tests(s_meta: Dict[str, Any]) -> List[Dict[str, Any]]:
     tests_data = []
     for idx, t in enumerate(tests, start=1):
         td = dict(t)
-        td["preview_image"] = f"/content/career/{s_meta['folder']}/event{idx}/preview.png"
+        td["preview_image"] = f"./content/career/{s_meta['folder']}/event{idx}/preview.png"
         _enrich_test_from_saved_cfg(td, folder)
         tests_data.append(td)
     return tests_data
