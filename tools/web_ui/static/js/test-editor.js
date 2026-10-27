@@ -355,7 +355,8 @@ export function renderTestList() {
         <img src="${escapeHtml(previewUrl)}?t=${encodeURIComponent(state.cacheBuster)}" 
              alt="${escapeHtml(test.test_id)}" 
              loading="lazy" 
-             onerror="this.parentElement.style.opacity='0.25'; this.style.display='none'">
+             onerror="this.style.display='none'">
+        <span class="test-item-stage-overlay">${escapeHtml(test.test_id)}</span>
       </div>
       <div class="test-item-body">
         <div class="test-item-top">
@@ -1174,7 +1175,43 @@ function setupStartModeListeners() {
 /**
  * Attach DOM listeners for all test editor controls.
  */
+/**
+ * Setup sidebar collapse/expand toggle and restore state from localStorage.
+ */
+export function initSidebarCollapse() {
+  if (!dom.sidebar || !dom.btnToggleSidebar) return;
+
+  const updateSidebarState = (isCollapsed) => {
+    if (isCollapsed) {
+      dom.sidebar.classList.add("collapsed");
+      dom.btnToggleSidebar.title = "Expand sidebar";
+      dom.btnToggleSidebar.setAttribute("aria-label", "Expand sidebar");
+      dom.btnAddTest?.setAttribute("title", "Add new test (+)");
+    } else {
+      dom.sidebar.classList.remove("collapsed");
+      dom.btnToggleSidebar.title = "Collapse sidebar";
+      dom.btnToggleSidebar.setAttribute("aria-label", "Collapse sidebar");
+      dom.btnAddTest?.setAttribute("title", "Add new test to this license");
+    }
+  };
+
+  const savedState = localStorage.getItem("gt_sidebar_collapsed") === "true";
+  updateSidebarState(savedState);
+
+  dom.btnToggleSidebar.addEventListener("click", () => {
+    const willCollapse = !dom.sidebar.classList.contains("collapsed");
+    updateSidebarState(willCollapse);
+    try {
+      localStorage.setItem("gt_sidebar_collapsed", willCollapse ? "true" : "false");
+    } catch {
+      // Ignore localStorage exceptions in restricted contexts
+    }
+  });
+}
+
 export function setupEditorEventListeners() {
+  initSidebarCollapse();
+
   setTrackCanvasPositionCallback((startS, finishS) => {
     setSpatialPositions(startS, finishS);
   });

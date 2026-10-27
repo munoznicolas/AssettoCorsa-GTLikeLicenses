@@ -222,6 +222,12 @@ body {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.sidebar.collapsed {
+  width: 104px;
 }
 
 .sidebar-header {
@@ -230,6 +236,68 @@ body {
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid var(--border-color);
+  min-height: 57px;
+  box-sizing: border-box;
+}
+
+.sidebar.collapsed .sidebar-header {
+  padding: 12px 6px;
+  justify-content: center;
+}
+
+.sidebar.collapsed .tier-info {
+  display: none;
+}
+
+.sidebar.collapsed .tier-description {
+  display: none;
+}
+
+.sidebar-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sidebar.collapsed .sidebar-header-actions {
+  justify-content: center;
+  width: 100%;
+}
+
+#btn-add-test .btn-icon {
+  display: none;
+}
+
+.sidebar.collapsed #btn-add-test {
+  padding: 6px 10px;
+}
+
+.sidebar.collapsed #btn-add-test .btn-text {
+  display: none;
+}
+
+.sidebar.collapsed #btn-add-test .btn-icon {
+  display: inline;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.btn-icon-only {
+  padding: 6px 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.sidebar-toggle-icon {
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.sidebar.collapsed .sidebar-toggle-icon {
+  transform: rotate(180deg);
 }
 
 .tier-info {
@@ -262,6 +330,12 @@ body {
   gap: 8px;
 }
 
+.sidebar.collapsed .test-list {
+  padding: 8px 6px;
+  align-items: center;
+  overflow-x: hidden;
+}
+
 /* Test Card in List */
 .test-item {
   background-color: var(--bg-card);
@@ -276,15 +350,31 @@ body {
   align-items: center;
 }
 
+.sidebar.collapsed .test-item {
+  padding: 5px;
+  gap: 0;
+  justify-content: center;
+  width: 88px;
+  box-sizing: border-box;
+}
+
 .test-item:hover {
   border-color: #3f4d61;
   transform: translateX(2px);
+}
+
+.sidebar.collapsed .test-item:hover {
+  transform: scale(1.02);
 }
 
 .test-item.active {
   border-color: var(--gt-red);
   background-color: #202733;
   box-shadow: 0 0 10px rgba(225, 29, 72, 0.15);
+}
+
+.sidebar.collapsed .test-item-body {
+  display: none;
 }
 
 .test-item-thumb {
@@ -298,6 +388,38 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+}
+
+/* Stage ID Badge overlaid on thumbnail in collapsed mode */
+.test-item-stage-overlay {
+  display: none;
+  position: absolute;
+  bottom: 2px;
+  left: 2px;
+  background: rgba(10, 15, 25, 0.88);
+  color: var(--accent-gold);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 1px 4px;
+  border-radius: 3px;
+  line-height: 1.1;
+  letter-spacing: 0.5px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.sidebar.collapsed .test-item-stage-overlay {
+  display: block;
+}
+
+.test-item.active .test-item-stage-overlay {
+  background: rgba(225, 29, 72, 0.92);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .test-item-thumb img {

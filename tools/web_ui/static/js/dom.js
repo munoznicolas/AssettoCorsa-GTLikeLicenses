@@ -18,6 +18,10 @@ export function initDom() {
   dom.refTierSelect = document.getElementById("ref-tier-select");
   dom.refTableBody = document.getElementById("ref-table-body");
 
+  // Sidebar & Navigation
+  dom.sidebar = document.getElementById("sidebar") || document.querySelector(".sidebar");
+  dom.btnToggleSidebar = document.getElementById("btn-toggle-sidebar");
+
   // Tier & Test List
   dom.testList = document.getElementById("test-list");
   dom.tierTitle = document.getElementById("active-tier-title");
