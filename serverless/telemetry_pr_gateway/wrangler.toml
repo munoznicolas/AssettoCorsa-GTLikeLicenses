@@ -3,7 +3,7 @@ main = "worker.js"
 compatibility_date = "2024-01-01"
 
 [vars]
-GITHUB_REPO = "nicolas-munoz/AssettoCorsa-GTLikeLicenses"
+GITHUB_REPO = "munoznicolas/ac-license-center"
 ALLOWED_ORIGIN = "*"
 
 # Set your GitHub Secret with:

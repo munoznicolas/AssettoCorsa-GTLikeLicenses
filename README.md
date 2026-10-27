@@ -1,4 +1,4 @@
-# Assetto Corsa: GT-Like License Tests Mod
+# Assetto Corsa: GT License Center
 
 An open-source driving school and license challenge framework for **Assetto Corsa**, inspired by the iconic license tests of **Gran Turismo 2, 4, and 5**.
 

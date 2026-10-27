@@ -8,7 +8,7 @@
  *
  * Environment Variables / Secrets required:
  *   - GITHUB_TOKEN: GitHub Personal Access Token or GitHub App Token with 'contents:write' and 'pull_requests:write'
- *   - GITHUB_REPO: Repository path, e.g. "nicolas-munoz/AssettoCorsa-GTLikeLicenses" (or owner/repo)
+ *   - GITHUB_REPO: Repository path, e.g. "munoznicolas/ac-license-center" (or owner/repo)
  *   - ALLOWED_ORIGIN: Allowed CORS Origin (default: "*")
  */
 
@@ -71,7 +71,7 @@ export default {
 
       // 3. GitHub API Credentials
       const githubToken = env.GITHUB_TOKEN;
-      const repo = env.GITHUB_REPO || "nicolas-munoz/AssettoCorsa-GTLikeLicenses";
+      const repo = env.GITHUB_REPO || "munoznicolas/ac-license-center";
       if (!githubToken) {
         return jsonResponse({ success: false, error: "Gateway configuration error: GITHUB_TOKEN secret is not set" }, 500, origin);
       }
