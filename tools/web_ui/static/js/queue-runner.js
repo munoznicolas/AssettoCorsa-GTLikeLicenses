@@ -500,7 +500,7 @@ function renderTelemetryComboRow(combo, idx) {
       <td>${statusBadge}</td>
       <td style="text-align: right;">
         <button type="button" class="btn btn-xs btn-download-row-script" data-combo-idx="${idx}" title="Download PowerShell runner script for this specific combination" style="font-size: 11px; padding: 2px 6px; border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; background: transparent; border-radius: 4px; cursor: pointer;">
-          📥 Script
+          Script
         </button>
       </td>
     </tr>
@@ -535,8 +535,8 @@ function updateMissingTelemetryUI(tier, data) {
     const totalCombos = (data.all_combos || []).length;
     dom.btnTelemetryExportScript.disabled = totalCombos === 0;
     dom.btnTelemetryExportScript.innerHTML = uniqueCombosCount > 0
-      ? `<span>📥 Download Script for Missing (${uniqueCombosCount} Jobs)</span>`
-      : `<span>📥 Download Recording Script (${totalCombos} Jobs)</span>`;
+      ? `<span>Download Script for Missing (${uniqueCombosCount} Jobs)</span>`
+      : `<span>Download Recording Script (${totalCombos} Jobs)</span>`;
   }
 }
 
