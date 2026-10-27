@@ -1,4 +1,35 @@
 /**
+ * Resolves API URL, automatically mapping to static pre-rendered JSON files
+ * when running on GitHub Pages or file protocol.
+ * @param {string} endpoint
+ * @returns {string}
+ */
+export function resolveApiPath(endpoint) {
+  const isStatic =
+    window.location.hostname.endsWith("github.io") ||
+    window.location.protocol === "file:" ||
+    Boolean(window.IS_STATIC_HOST);
+
+  if (isStatic) {
+    const staticMap = {
+      "curriculum": "api/curriculum.json",
+      "tracks": "api/tracks.json",
+      "cars": "api/cars.json",
+      "reference_tests": "api/reference_tests.json",
+      "telemetry/missing": "api/missing_telemetry.json",
+    };
+
+    const clean = endpoint.startsWith("/") ? endpoint.slice(1) : endpoint;
+    const base = clean.replace(/^api\//, "").split("?")[0];
+    if (staticMap[base]) {
+      return `./${staticMap[base]}`;
+    }
+  }
+
+  return endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+}
+
+/**
  * api.js
  * Central REST API client for Assetto Corsa GT-Like License Test Designer.
  */
@@ -8,7 +39,7 @@ export const api = {
    * Fetch curriculum test catalogs.
    */
   async getCurriculum() {
-    const res = await fetch("/api/curriculum");
+    const res = await fetch(resolveApiPath("api/curriculum"));
     return await res.json();
   },
 
@@ -29,7 +60,7 @@ export const api = {
    * @param {boolean} allTracks If true, includes third-party tracks.
    */
   async getTracks(allTracks = false) {
-    const res = await fetch(`/api/tracks${allTracks ? "?all=1" : ""}`);
+    const res = await fetch(resolveApiPath(`api/tracks${allTracks ? "?all=1" : ""}`));
     return await res.json();
   },
 
@@ -38,7 +69,7 @@ export const api = {
    * @param {boolean} allCars If true, includes third-party cars.
    */
   async getCars(allCars = false) {
-    const res = await fetch(`/api/cars${allCars ? "?all=1" : ""}`);
+    const res = await fetch(resolveApiPath(`api/cars${allCars ? "?all=1" : ""}`));
     return await res.json();
   },
 
@@ -47,7 +78,7 @@ export const api = {
    */
   async getSpline(trackId, layout = "") {
     const query = new URLSearchParams({ track_id: trackId, layout: layout || "" });
-    const res = await fetch(`/api/spline?${query.toString()}`);
+    const res = await fetch(resolveApiPath(`api/spline?${query.toString()}`));
     return await res.json();
   },
 
@@ -55,7 +86,7 @@ export const api = {
    * Fetch Gran Turismo reference curriculum test data.
    */
   async getReferenceTests() {
-    const res = await fetch("/api/reference_tests");
+    const res = await fetch(resolveApiPath("api/reference_tests"));
     return await res.json();
   },
 
@@ -111,7 +142,7 @@ export const api = {
       tier: tier || "ALL",
       include_flying: includeFlying ? "1" : "0",
     });
-    const res = await fetch(`/api/telemetry/missing?${query.toString()}`);
+    const res = await fetch(resolveApiPath(`api/telemetry/missing?${query.toString()}`));
     return await res.json();
   },
 
@@ -174,5 +205,27 @@ export const api = {
     const res = await fetch("/api/sync", { method: "POST" });
     return await res.json();
   },
-};
 
+  /**
+   * Submits a recorded telemetry JSON file and Google ID token to the serverless gateway to create a PR.
+   * @param {Object} params
+   * @param {string} params.googleToken - Google OAuth JWT
+   * @param {string} params.filename - e.g. "ks_brands_hatch__gp__lotus_elise_sc__ai100.json"
+   * @param {Object} params.telemetryData - Parsed telemetry JSON payload
+   * @param {string} [params.gatewayUrl] - Optional custom gateway URL
+   */
+  async submitTelemetryProfile({ googleToken, filename, telemetryData, gatewayUrl }) {
+    const defaultGateway = "https://ac-telemetry-pr-gateway.workers.dev/submit";
+    const url = gatewayUrl || localStorage.getItem("gt_pr_gateway_url") || defaultGateway;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        google_token: googleToken,
+        filename,
+        telemetry_data: telemetryData,
+      }),
+    });
+    return await res.json();
+  },
+};

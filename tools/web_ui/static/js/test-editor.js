@@ -346,7 +346,7 @@ export function renderTestList() {
     const previewUrl =
       test.preview_image ||
       (activeTier.folder
-        ? `/content/career/${encodeURIComponent(activeTier.folder)}/event${idx + 1}/preview.png`
+        ? `./content/career/${encodeURIComponent(activeTier.folder)}/event${idx + 1}/preview.png`
         : `/api/test_preview?test_id=${encodeURIComponent(test.test_id)}`);
 
     item.innerHTML = `
@@ -684,7 +684,7 @@ export function renumberTierTests(tier) {
     const num = i + 1;
     t.test_id = `${prefix}${num}`;
     if (tier.folder) {
-      t.preview_image = `/content/career/${tier.folder}/event${num}/preview.png`;
+      t.preview_image = `./content/career/${tier.folder}/event${num}/preview.png`;
     }
   });
 }
@@ -849,7 +849,7 @@ function handleAddTest() {
       silver_seconds: 16.5,
       bronze_seconds: 18.5,
     },
-    preview_image: `/content/career/${activeTier.folder}/event${count}/preview.png`,
+    preview_image: `./content/career/${activeTier.folder}/event${count}/preview.png`,
   };
 
   activeTier.tests.push(newTest);

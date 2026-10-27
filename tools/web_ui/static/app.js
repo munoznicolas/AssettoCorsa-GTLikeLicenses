@@ -18,6 +18,7 @@ import {
   setupQueueEventListeners,
 } from "./js/queue-runner.js";
 import { setupReferenceViewListeners } from "./js/reference-view.js";
+import { initTelemetrySubmitter } from "./js/telemetry-submitter.js";
 
 /**
  * Global operational event listeners (Rebuild, Sync, Modal close).
@@ -125,6 +126,7 @@ async function init() {
   setupQueueEventListeners();
   setupReferenceViewListeners();
   setupGlobalEventListeners();
+  initTelemetrySubmitter();
 
   await loadInitialData();
   pollQueueStatus();

@@ -1,0 +1,36 @@
+name: Validate Pull Request
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Validate Curriculum & Telemetry Profiles
+        run: |
+          python tools/validate_curriculum.py --all
+
+      - name: Run Kinematic Simulation & Adjudication Suite
+        run: |
+          python tools/simulate_all_tests.py
+
+      - name: Run Python Unit Test Suite
+        run: |
+          python -m unittest discover tests

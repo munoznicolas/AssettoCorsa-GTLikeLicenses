@@ -1,0 +1,10 @@
+name = "ac-telemetry-pr-gateway"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+GITHUB_REPO = "nicolas-munoz/AssettoCorsa-GTLikeLicenses"
+ALLOWED_ORIGIN = "*"
+
+# Set your GitHub Secret with:
+#   npx wrangler secret put GITHUB_TOKEN

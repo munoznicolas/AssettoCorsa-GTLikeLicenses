@@ -25,3 +25,5 @@ release/
 dist/
 build/
 *.egg-info/
+dist_site/
+_site/
