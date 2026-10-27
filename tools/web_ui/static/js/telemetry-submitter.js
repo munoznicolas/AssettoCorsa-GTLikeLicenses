@@ -317,7 +317,7 @@ async function executeSubmitPR() {
     statusDiv.style.background = "rgba(56, 189, 248, 0.1)";
     statusDiv.style.border = "1px solid rgba(56, 189, 248, 0.25)";
     statusDiv.style.color = "#38bdf8";
-    statusDiv.innerHTML = "<span>🚀 Authenticating & communicating with GitHub API...</span>";
+    statusDiv.innerHTML = "<span>Authenticating & communicating with GitHub API...</span>";
   }
 
   try {
@@ -356,7 +356,7 @@ async function executeSubmitPR() {
     showToast(`Error creating PR: ${err.message}`, "error");
     if (btnSubmit) {
       btnSubmit.disabled = false;
-      btnSubmit.innerHTML = "<span>🚀 Submit Pull Request</span>";
+      btnSubmit.innerHTML = "<span>Submit Pull Request</span>";
     }
   }
 }
