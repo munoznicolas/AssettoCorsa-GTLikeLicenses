@@ -458,6 +458,15 @@
               <div id="ai-speed-status-badge" class="mt-2" style="display: none; font-size: 11px; padding: 4px 8px; border-radius: 4px; background: #451a03; border: 1px solid #d97706; color: #fef3c7;">
                 <span id="ai-speed-status-text">Calculated from AI Telemetry</span>
               </div>
+              <button
+                type="button"
+                id="btn-export-single-telemetry-script"
+                class="btn btn-xs btn-secondary mt-1"
+                style="display: none; font-size: 11px; padding: 3px 8px; border-color: #38bdf8; color: #38bdf8; gap: 4px; align-items: center;"
+                title="Download a PowerShell runner script to record telemetry for this test's car and track in Assetto Corsa"
+              >
+                <span>📥 Download Telemetry Runner Script (.ps1)</span>
+              </button>
 
               <div class="mt-2" id="stop-box-row">
                 <label class="checkbox-label">
@@ -798,6 +807,7 @@
                     <th>Car Model</th>
                     <th>Tests Using Combo</th>
                     <th>Status</th>
+                    <th style="text-align: right; min-width: 80px;">Action</th>
                   </tr>
                 </thead>
                 <tbody id="telemetry-combos-table-body">
@@ -806,13 +816,16 @@
               </table>
             </div>
           </div>
-          <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
             <span id="telemetry-queue-info" style="font-size: 12px; color: #94a3b8;"></span>
-            <div style="display: flex; gap: 8px;">
-              <button type="button" id="btn-telemetry-cancel" class="btn btn-secondary">Close</button>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button type="button" id="btn-telemetry-export-script" class="btn btn-secondary" title="Export a PowerShell script to record telemetry on a local PC with Assetto Corsa" style="border-color: #38bdf8; color: #38bdf8;">
+                <span>📥 Download Local Runner Script (.ps1)</span>
+              </button>
               <button type="button" id="btn-telemetry-enqueue" class="btn btn-primary" style="background: #f59e0b; border-color: #d97706; color: #000; font-weight: 600;">
                 <span>▶ Run Telemetry for Missing Combos</span>
               </button>
+              <button type="button" id="btn-telemetry-cancel" class="btn btn-secondary">Close</button>
             </div>
           </div>
         </div>

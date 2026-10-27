@@ -104,6 +104,8 @@ export function initDom() {
   dom.telemetryQueueInfo = document.getElementById("telemetry-queue-info");
   dom.btnTelemetryCancel = document.getElementById("btn-telemetry-cancel");
   dom.btnTelemetryEnqueue = document.getElementById("btn-telemetry-enqueue");
+  dom.btnTelemetryExportScript = document.getElementById("btn-telemetry-export-script");
+  dom.btnExportSingleTelemetryScript = document.getElementById("btn-export-single-telemetry-script");
 
   return dom;
 }
