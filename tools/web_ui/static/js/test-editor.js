@@ -1007,7 +1007,7 @@ async function handleFormSubmit(e) {
   const originalHtml = submitBtn ? submitBtn.innerHTML : "";
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.innerHTML = `<span>⏳ Saving & Building Miniature...</span>`;
+    submitBtn.innerHTML = `<span>Saving & Building Miniature...</span>`;
   }
 
   try {
