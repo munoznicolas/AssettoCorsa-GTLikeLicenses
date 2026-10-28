@@ -1027,8 +1027,7 @@
       <div id="modal-tour-welcome" class="modal" style="display: none">
         <div class="modal-content" style="max-width: 580px;">
           <div class="modal-header">
-            <h3 style="font-family: 'Chakra Petch', sans-serif; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
-              <span>🏁</span>
+            <h3 style="font-family: 'Chakra Petch', sans-serif; letter-spacing: 0.5px;">
               <span>Welcome to GT License Center</span>
             </h3>
             <button id="modal-tour-close" class="modal-close-btn" aria-label="Close">&times;</button>
@@ -1038,33 +1037,23 @@
               Welcome! Learn how to design, calibrate, and test Gran Turismo-style license curriculum tests in Assetto Corsa. Choose a guided interactive tour below:
             </p>
             <div style="display: grid; gap: 14px;">
-              <div class="tour-select-card" style="padding: 16px; border-radius: 8px; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(56, 189, 248, 0.35); display: flex; flex-direction: column; gap: 8px;">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                  <h4 style="margin: 0; font-family: 'Chakra Petch', sans-serif; color: #38bdf8; font-size: 15px;">
-                    🛠️ Flow 1: Modifying an Existing Test
-                  </h4>
-                  <button type="button" id="btn-start-tour-edit" class="btn btn-sm btn-primary">
-                    Start Tour
-                  </button>
+              <button type="button" id="btn-start-tour-edit" class="tour-select-card tour-select-card-flow1">
+                <div class="tour-card-title flow1-title">
+                  Flow 1: Modifying an Existing Test
                 </div>
-                <p style="margin: 0; font-size: 12.5px; color: #cbd5e1; line-height: 1.45;">
+                <p class="tour-card-desc">
                   Walk through selecting tests, tuning track &amp; car specs, positioning start/finish gates on the spline, setting medal times, and syncing to AC.
                 </p>
-              </div>
+              </button>
 
-              <div class="tour-select-card" style="padding: 16px; border-radius: 8px; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(245, 158, 11, 0.35); display: flex; flex-direction: column; gap: 8px;">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                  <h4 style="margin: 0; font-family: 'Chakra Petch', sans-serif; color: #fbbf24; font-size: 15px;">
-                    ⚡ Flow 2: Telemetry for Missing Combos
-                  </h4>
-                  <button type="button" id="btn-start-tour-telemetry" class="btn btn-sm btn-warning">
-                    Start Tour
-                  </button>
+              <button type="button" id="btn-start-tour-telemetry" class="tour-select-card tour-select-card-flow2">
+                <div class="tour-card-title flow2-title">
+                  Flow 2: Telemetry for Missing Combos
                 </div>
-                <p style="margin: 0; font-size: 12.5px; color: #cbd5e1; line-height: 1.45;">
+                <p class="tour-card-desc">
                   Learn how to generate and execute an automated PowerShell runner script in Assetto Corsa to record AI telemetry for new car+track combinations.
                 </p>
-              </div>
+              </button>
             </div>
           </div>
           <div class="modal-footer" style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; padding: 14px 24px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
