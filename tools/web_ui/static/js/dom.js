@@ -37,6 +37,10 @@ export function initDom() {
   dom.btnRebuild = document.getElementById("btn-rebuild");
   dom.btnSync = document.getElementById("btn-sync");
   dom.btnThemeToggle = document.getElementById("btn-theme-toggle");
+  dom.btnExportJson = document.getElementById("btn-export-json");
+  dom.btnImportJson = document.getElementById("btn-import-json");
+  dom.inputImportJsonFile = document.getElementById("input-import-json-file");
+  dom.btnResetDefaults = document.getElementById("btn-reset-defaults");
 
   // Form Elements
   dom.form = document.getElementById("test-form");
@@ -110,6 +114,10 @@ export function initDom() {
   dom.btnTelemetryEnqueue = document.getElementById("btn-telemetry-enqueue");
   dom.btnTelemetryExportScript = document.getElementById("btn-telemetry-export-script");
   dom.btnExportSingleTelemetryScript = document.getElementById("btn-export-single-telemetry-script");
+  dom.telemetryMissingCard = document.getElementById("telemetry-missing-card");
+  dom.btnDownloadRecordScript = document.getElementById("btn-download-record-script");
+  dom.telemetryDropzoneEditor = document.getElementById("telemetry-dropzone-editor");
+  dom.inputEditorTelemetryFile = document.getElementById("input-editor-telemetry-file");
 
   return dom;
 }

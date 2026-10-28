@@ -18,7 +18,11 @@ import {
   cancelActiveACSession,
   showAISpeedStatus,
   hideAISpeedStatus,
+  executeExportSingleTelemetryScript,
 } from "./queue-runner.js";
+import { loadCurriculum, saveCurriculum } from "./curriculum-store.js";
+import { resolveTelemetryEngine, saveCustomTelemetryProfile } from "./telemetry-store.js";
+import { generateMiniatureDataUrl } from "./miniature-builder.js";
 
 /**
  * Filter tracks by search query across id, name, and layout names.
@@ -110,10 +114,10 @@ export async function loadInitialData() {
       populateCarDropdown();
     }
 
-    // 3. Fetch Curriculum
-    const curData = await api.getCurriculum();
-    if (curData.success) {
-      state.curriculum = curData.curriculum;
+    // 3. Load Curriculum (LocalStorage source of truth with bundled fallback)
+    const loadedCurriculum = await loadCurriculum();
+    if (loadedCurriculum && loadedCurriculum.length > 0) {
+      state.curriculum = loadedCurriculum;
       renderLicenseTabs();
       selectTier(0);
     }
@@ -604,21 +608,32 @@ export async function autoCalculateTargetsFromTelemetry(overrideStartS = null, o
   if (!trackId || !carId) return;
 
   try {
-    const res = await api.calculateTargets({
-      track_id: trackId,
-      track_layout: layout,
-      car_id: carId,
-      start_s: startS,
-      finish_s: finishS,
-      start_mode: startMode,
-      with_stop_box: withStopBox,
-    });
+    const telRes = await resolveTelemetryEngine(trackId, layout, carId);
+    if (telRes) {
+      const { engine, source } = telRes;
+      const countdownSec = Number(test.countdown_sec || 3.0);
+      const targets = engine.calculateSectorTargets(startS, finishS, startMode, withStopBox);
+      const physics = engine.calculateGatePhysics(startS, countdownSec);
 
-    if (res?.success && res.targets) {
-      applyCalculatedTargets(test, res, startMode);
+      applyCalculatedTargets(test, {
+        success: true,
+        source,
+        targets,
+        physics,
+        sector_time_s: targets.sector_time_s,
+        sector_length_m: targets.sector_length_m,
+      }, startMode);
+
+      if (dom.telemetryMissingCard) dom.telemetryMissingCard.style.display = "none";
+      if (dom.btnExportSingleTelemetryScript) dom.btnExportSingleTelemetryScript.style.display = "none";
+    } else {
+      // Telemetry not available for this track + car combination
+      if (dom.telemetryMissingCard) dom.telemetryMissingCard.style.display = "block";
+      if (dom.btnExportSingleTelemetryScript) dom.btnExportSingleTelemetryScript.style.display = "inline-flex";
+      showAISpeedStatus(`?? No telemetry profile for ${carId} @ ${trackId}. Upload profile below or record in AC.`);
     }
   } catch (err) {
-    console.warn("Auto-calculate targets error:", err);
+    console.warn("Client-side telemetry targets error:", err);
   }
 }
 
@@ -811,16 +826,8 @@ export function saveFormIntoActiveTest() {
  * Save active tier's test collection to server.
  */
 export async function saveCurrentTier() {
-  const activeTier = state.curriculum[state.activeTierIndex];
-  if (!activeTier) return;
-  if (isStaticHost()) {
-    return { success: true, static: true };
-  }
-  const data = await api.saveTier(activeTier.tier_name, activeTier.tests);
-  if (!data.success) {
-    throw new Error(data.error || "Save failed");
-  }
-  return data;
+  saveCurriculum(state.curriculum);
+  return { success: true, local: true };
 }
 
 /**
@@ -859,6 +866,7 @@ function handleAddTest() {
 
   activeTier.tests.push(newTest);
   renumberTierTests(activeTier);
+  saveCurriculum(state.curriculum);
   renderLicenseTabs();
   renderTestList();
   void loadTestIntoForm(activeTier.tests.length - 1);
@@ -887,22 +895,13 @@ async function handleDeleteTest() {
   const newIdx = Math.max(0, Math.min(state.activeTestIndex, activeTier.tests.length - 1));
   state.activeTestIndex = newIdx;
 
+  saveCurriculum(state.curriculum);
+
   // Immediately update UI state so test is removed on screen
   renderLicenseTabs();
   renderTestList();
   await loadTestIntoForm(newIdx);
-
-  // Persist to server if running with local backend
-  try {
-    const saveRes = await saveCurrentTier();
-    if (saveRes?.static) {
-      showToast(`Removed test ${deletedId}. Subsequent tests renumbered successfully.`);
-    } else {
-      showToast(`Removed test ${deletedId}. Subsequent tests renumbered successfully.`);
-    }
-  } catch (err) {
-    showToast(`Removed test ${deletedId} (in memory). Server save warning: ${err.message}`, "warning");
-  }
+  showToast(`Removed test ${deletedId}. Subsequent tests renumbered successfully.`);
 }
 
 /**
@@ -1022,28 +1021,26 @@ async function handleFormSubmit(e) {
   }
 
   try {
-    const saveRes = await saveCurrentTier();
-
-    // Fire off Track Miniature Builder for this particular test so it updates its image
-    if (testId && !isStaticHost() && !saveRes?.static) {
+    // Generate Miniature client-side using HTML5 Canvas
+    if (testId && state.currentSpline && activeTest) {
       try {
-        const minResult = await api.generateMiniature(testId, activeTest);
-        if (minResult && !minResult.success) {
-          console.warn("Track Miniature Builder reported warning:", minResult.error);
-        }
+        const miniatureDataUrl = generateMiniatureDataUrl(
+          state.currentSpline,
+          activeTest.start_s ?? 0.0,
+          activeTest.finish_s ?? 1.0,
+          { testId }
+        );
+        activeTest.preview_image = miniatureDataUrl;
       } catch (minErr) {
-        console.warn("Track Miniature Builder network/execution warning:", minErr);
+        console.warn("Client-side miniature generation warning:", minErr);
       }
     }
 
+    saveCurriculum(state.curriculum);
     state.cacheBuster = Date.now();
     renderLicenseTabs();
     renderTestList();
-    if (saveRes?.static) {
-      showToast(`Saved test ${testId} (client-side). Export via 'Export Mod Package' when ready.`);
-    } else {
-      showToast(`Saved test ${testId}! Track miniature updated.`);
-    }
+    showToast(`Saved test ${testId}! Track miniature updated.`);
   } catch (err) {
     showToast("Save failed: " + err.message, "error");
   } finally {
@@ -1250,4 +1247,54 @@ export function setupEditorEventListeners() {
   dom.form?.addEventListener("submit", (e) => {
     void handleFormSubmit(e);
   });
+
+  if (dom.btnDownloadRecordScript) {
+    dom.btnDownloadRecordScript.addEventListener("click", () => {
+      executeExportSingleTelemetryScript();
+    });
+  }
+
+  if (dom.telemetryDropzoneEditor && dom.inputEditorTelemetryFile) {
+    dom.telemetryDropzoneEditor.addEventListener("click", () => {
+      dom.inputEditorTelemetryFile.click();
+    });
+
+    const handleTelemetryFile = async (file) => {
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const parsed = JSON.parse(text);
+        await saveCustomTelemetryProfile(parsed);
+        showToast(`Loaded telemetry for ${parsed.car_id || "car"} @ ${parsed.track_id || "track"}! Calculating targets...`, "success");
+        await autoCalculateTargetsFromTelemetry();
+      } catch (err) {
+        showToast("Telemetry file error: " + err.message, "error");
+      }
+    };
+
+    dom.inputEditorTelemetryFile.addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      if (file) void handleTelemetryFile(file);
+      dom.inputEditorTelemetryFile.value = "";
+    });
+
+    dom.telemetryDropzoneEditor.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dom.telemetryDropzoneEditor.style.borderColor = "#38bdf8";
+      dom.telemetryDropzoneEditor.style.background = "rgba(56, 189, 248, 0.15)";
+    });
+
+    dom.telemetryDropzoneEditor.addEventListener("dragleave", () => {
+      dom.telemetryDropzoneEditor.style.borderColor = "rgba(255, 255, 255, 0.25)";
+      dom.telemetryDropzoneEditor.style.background = "rgba(0, 0, 0, 0.25)";
+    });
+
+    dom.telemetryDropzoneEditor.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dom.telemetryDropzoneEditor.style.borderColor = "rgba(255, 255, 255, 0.25)";
+      dom.telemetryDropzoneEditor.style.background = "rgba(0, 0, 0, 0.25)";
+      const file = e.dataTransfer?.files?.[0];
+      if (file) void handleTelemetryFile(file);
+    });
+  }
 }

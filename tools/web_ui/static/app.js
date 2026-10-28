@@ -21,6 +21,12 @@ import { setupReferenceViewListeners } from "./js/reference-view.js";
 import { initTelemetrySubmitter } from "./js/telemetry-submitter.js";
 import { buildAndExportModZip } from "./js/mod-packager.js";
 import { initTheme } from "./js/theme.js";
+import {
+  exportCurriculumJson,
+  importCurriculumJsonFile,
+  resetCurriculumToDefaults,
+} from "./js/curriculum-store.js";
+import { renderLicenseTabs, selectTier } from "./js/test-editor.js";
 
 /**
  * Global operational event listeners (Rebuild, Sync, Modal close).
@@ -109,6 +115,59 @@ function setupGlobalEventListeners() {
         }
       });
     }
+  }
+
+  // Canonical curriculum.json Export
+  if (dom.btnExportJson) {
+    dom.btnExportJson.addEventListener("click", () => {
+      try {
+        exportCurriculumJson(state.curriculum);
+        showToast("Exported curriculum.json successfully!", "success");
+      } catch (err) {
+        showToast("Failed to export JSON: " + err.message, "error");
+      }
+    });
+  }
+
+  // Canonical curriculum.json Import
+  if (dom.btnImportJson && dom.inputImportJsonFile) {
+    dom.btnImportJson.addEventListener("click", () => {
+      dom.inputImportJsonFile.click();
+    });
+
+    dom.inputImportJsonFile.addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        const loaded = await importCurriculumJsonFile(file);
+        state.curriculum = loaded;
+        renderLicenseTabs();
+        selectTier(0);
+        showToast(`Imported ${loaded.length} license tiers from ${file.name}!`, "success");
+      } catch (err) {
+        showToast("Import error: " + err.message, "error");
+      } finally {
+        dom.inputImportJsonFile.value = "";
+      }
+    });
+  }
+
+  // Reset to Baseline Defaults
+  if (dom.btnResetDefaults) {
+    dom.btnResetDefaults.addEventListener("click", async () => {
+      if (!confirm("Reset all license tests to baseline curriculum defaults? Any unsaved local edits will be replaced.")) {
+        return;
+      }
+      try {
+        const baseline = await resetCurriculumToDefaults();
+        state.curriculum = baseline;
+        renderLicenseTabs();
+        selectTier(0);
+        showToast("Curriculum reset to baseline defaults successfully!", "success");
+      } catch (err) {
+        showToast("Reset failed: " + err.message, "error");
+      }
+    });
   }
 
   // Modal Close Buttons

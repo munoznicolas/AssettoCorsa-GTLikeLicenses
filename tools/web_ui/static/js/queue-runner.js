@@ -8,6 +8,7 @@ import { dom } from "./dom.js";
 import { api, isStaticHost } from "./api.js";
 import { showToast, openModal, escapeHtml } from "./ui-utils.js";
 import { saveFormIntoActiveTest } from "./test-editor.js";
+import { resolveTelemetryEngine } from "./telemetry-store.js";
 
 let pendingTelemetryJobId = null;
 let pendingTelemetryTestId = null;
@@ -146,23 +147,24 @@ export async function fetchAndApplyAISpeed(isManualClick = true) {
   setSpeedButtonLoading(true);
 
   try {
-    const data = await api.calculateInitialSpeed({
-      track_id: trackId,
-      track_layout: trackLayout,
-      car_id: carId,
-      start_s: startS,
-      finish_s: Number.parseFloat(dom.inputFinish?.value || "1") || 1,
-      start_mode: startMode,
-      with_stop_box: dom.checkStopBox?.checked || false,
-      countdown_sec: 3.0,
-    });
-
-    if (!data.success) {
-      if (isManualClick) showToast(data.error || "Failed to calculate AI speed", "error");
-    } else if (data.status === "cached") {
-      handleCachedSpeedResult(data, isManualClick);
-    } else if (data.status === "queued") {
-      handleQueuedSpeedJob(data);
+    const telRes = await resolveTelemetryEngine(trackId, trackLayout, carId);
+    if (telRes) {
+      const { engine, source } = telRes;
+      const physics = engine.calculateGatePhysics(startS, 3.0);
+      handleCachedSpeedResult({
+        success: true,
+        status: "cached",
+        source,
+        speed_kmh: physics.speed_kmh,
+        spawn_offset_m: physics.spawn_offset_m,
+        gear: physics.gear,
+        rpm: physics.rpm,
+        recorded_at: engine.recordedAt,
+      }, isManualClick);
+    } else {
+      if (isManualClick) {
+        showToast(`No telemetry profile found for ${carId} @ ${trackId}. Upload or record in AC.`, "warning");
+      }
     }
   } catch (err) {
     if (isManualClick) showToast(`Calculation error: ${err.message}`, "error");

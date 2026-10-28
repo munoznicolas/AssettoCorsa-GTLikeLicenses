@@ -168,6 +168,16 @@ def build_static_site(out_dir: str = "dist_site", clean: bool = True) -> str:
                 shutil.copy2(os.path.join(splines_src, f), os.path.join(splines_dst, f))
         print(f"  [OK] Bundled {len(os.listdir(splines_dst))} pre-rendered track splines into api/splines/")
 
+    # Copy Pre-rendered Telemetry Profiles
+    telemetry_src = os.path.join(REPO_ROOT, "data", "telemetry_profiles")
+    telemetry_dst = os.path.join(api_dir, "telemetry_profiles")
+    if os.path.isdir(telemetry_src):
+        os.makedirs(telemetry_dst, exist_ok=True)
+        for f in os.listdir(telemetry_src):
+            if f.endswith(".json"):
+                shutil.copy2(os.path.join(telemetry_src, f), os.path.join(telemetry_dst, f))
+        print(f"  [OK] Bundled {len(os.listdir(telemetry_dst))} pre-rendered telemetry profiles into api/telemetry_profiles/")
+
     print("  [OK] Pre-rendered curriculum, tracks, cars, reference tests, and missing telemetry APIs")
 
     # 3. Copy Career Previews and Vector Maps
