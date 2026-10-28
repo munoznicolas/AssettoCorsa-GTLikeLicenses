@@ -202,6 +202,53 @@ class TestDesignerServer(unittest.TestCase):
         self.assertIn("if (dom.btnRunMissingTelemetry)", qr_js)
         self.assertIn('dom.btnRunMissingTelemetry.style.display = "none"', qr_js)
 
+    def test_mobile_friendly_responsive_markup(self):
+        index_html_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "index.html")
+        with open(index_html_path, "r", encoding="utf-8") as f:
+            html = f.read()
+
+        # Verify mobile header actions drawer toggle and backdrop
+        self.assertIn('id="btn-header-menu"', html)
+        self.assertIn('class="btn btn-secondary btn-icon-only mobile-menu-toggle"', html)
+        self.assertIn('id="actions-menu-backdrop"', html)
+        self.assertIn('id="header-actions"', html)
+
+        # Verify mobile master-detail back button
+        self.assertIn('id="btn-back-to-list"', html)
+        self.assertIn('mobile-back-btn', html)
+
+        # Verify target times grid
+        self.assertIn('target-times-grid', html)
+        self.assertIn('input-suffix', html)
+
+    def test_mobile_friendly_css_rules(self):
+        style_css_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "style.css")
+        with open(style_css_path, "r", encoding="utf-8") as f:
+            css = f.read()
+
+        # Dynamic viewport unit for mobile browser address bars
+        self.assertIn("100dvh", css)
+
+        # Master-detail screen switcher for mobile
+        self.assertIn(".workspace.view-editor", css)
+        self.assertIn(".mobile-back-btn", css)
+
+        # Color scheme dark and high-contrast option styling
+        self.assertIn("color-scheme: dark;", css)
+        self.assertIn("select option", css)
+
+    def test_mobile_drawer_and_back_navigation_integration(self):
+        dom_js_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "js", "dom.js")
+        with open(dom_js_path, "r", encoding="utf-8") as f:
+            dom_js = f.read()
+        app_js_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "app.js")
+        with open(app_js_path, "r", encoding="utf-8") as f:
+            app_js = f.read()
+
+        self.assertIn("dom.btnHeaderMenu", dom_js)
+        self.assertIn("dom.btnBackToList", dom_js)
+        self.assertIn("dom.btnHeaderMenu.addEventListener", app_js)
+
 
 if __name__ == "__main__":
     unittest.main()

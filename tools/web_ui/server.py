@@ -85,7 +85,11 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
         msg = format % args
         if "/api/queue/status" in msg and " 200 " in msg:
             return
-        sys.stdout.write(f"[{self.log_date_time_string()}] {msg}\n")
+        try:
+            sys.stdout.buffer.write(f"[{self.log_date_time_string()}] {msg}\n".encode("utf-8", errors="replace"))
+            sys.stdout.flush()
+        except Exception:
+            pass
 
     def _is_trusted_origin(self, origin: str) -> bool:
         try:

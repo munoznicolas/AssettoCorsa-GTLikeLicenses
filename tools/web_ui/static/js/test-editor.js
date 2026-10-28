@@ -1305,19 +1305,16 @@ export function setupEditorEventListeners() {
 
     dom.telemetryDropzoneEditor.addEventListener("dragover", (e) => {
       e.preventDefault();
-      dom.telemetryDropzoneEditor.style.borderColor = "#38bdf8";
-      dom.telemetryDropzoneEditor.style.background = "rgba(56, 189, 248, 0.15)";
+      dom.telemetryDropzoneEditor.classList.add("dragover");
     });
 
     dom.telemetryDropzoneEditor.addEventListener("dragleave", () => {
-      dom.telemetryDropzoneEditor.style.borderColor = "rgba(255, 255, 255, 0.25)";
-      dom.telemetryDropzoneEditor.style.background = "rgba(0, 0, 0, 0.25)";
+      dom.telemetryDropzoneEditor.classList.remove("dragover");
     });
 
     dom.telemetryDropzoneEditor.addEventListener("drop", (e) => {
       e.preventDefault();
-      dom.telemetryDropzoneEditor.style.borderColor = "rgba(255, 255, 255, 0.25)";
-      dom.telemetryDropzoneEditor.style.background = "rgba(0, 0, 0, 0.25)";
+      dom.telemetryDropzoneEditor.classList.remove("dragover");
       const file = e.dataTransfer?.files?.[0];
       if (file) void handleTelemetryFile(file);
     });
