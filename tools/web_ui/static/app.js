@@ -30,6 +30,30 @@ import { initTour } from "./js/tour.js";
 /**
  * Global operational event listeners (Rebuild, Sync, Modal close).
  */
+/**
+ * Dynamically adjust button visibility based on runtime environment
+ * (local developer server vs. statically hosted GitHub Pages/file protocol).
+ */
+export function applyHostVisibility() {
+  const isStatic = isStaticHost();
+
+  // Local-only actions (require local AC installation and Python server)
+  if (dom.btnSync) {
+    dom.btnSync.style.display = isStatic ? "none" : "";
+  }
+  if (dom.btnRunLive) {
+    dom.btnRunLive.style.display = isStatic ? "none" : "";
+  }
+  if (dom.btnRunMissingTelemetry) {
+    dom.btnRunMissingTelemetry.style.display = isStatic ? "none" : "";
+  }
+
+  // Static-only actions (community contribution via serverless gateway)
+  if (dom.btnOpenSubmitPrModal) {
+    dom.btnOpenSubmitPrModal.style.display = isStatic ? "" : "none";
+  }
+}
+
 function setupGlobalEventListeners() {
   // Export Content Manager Mod (.zip) with pure client-side validation & packaging
   if (dom.btnRebuild) {
@@ -173,6 +197,7 @@ function setupGlobalEventListeners() {
  */
 async function init() {
   initDom();
+  applyHostVisibility();
   initCanvasInteraction();
   setupEditorEventListeners();
   setupQueueEventListeners();

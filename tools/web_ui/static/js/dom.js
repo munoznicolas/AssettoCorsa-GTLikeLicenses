@@ -101,6 +101,7 @@ export function initDom() {
 
   // Missing Telemetry Batch Modal & Buttons
   dom.btnRunMissingTelemetry = document.getElementById("btn-run-missing-telemetry");
+  dom.btnOpenSubmitPrModal = document.getElementById("btn-open-submit-pr-modal");
   dom.telemetryBatchModal = document.getElementById("telemetry-batch-modal");
   dom.telemetryModalClose = document.getElementById("telemetry-modal-close");
   dom.selectTelemetryTier = document.getElementById("select-telemetry-tier");

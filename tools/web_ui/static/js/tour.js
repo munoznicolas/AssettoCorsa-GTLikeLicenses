@@ -5,6 +5,7 @@
  */
 
 import { dom } from "./dom.js";
+import { isStaticHost } from "./api.js";
 import { state } from "./state.js";
 import { selectTier, loadTestIntoForm } from "./test-editor.js";
 import { showToast } from "./ui-utils.js";
@@ -77,7 +78,7 @@ export function startEditTestTour() {
     stagePadding: 8,
     stageRadius: 6,
     allowClose: true,
-    doneBtnText: "Finish Tour 🏁",
+    doneBtnText: "Finish Tour",
     nextBtnText: "Next →",
     prevBtnText: "← Back",
     progressText: "Step {{current}} of {{total}}",
@@ -89,7 +90,7 @@ export function startEditTestTour() {
       {
         element: "#license-tabs",
         popover: {
-          title: "🏁 License Tiers",
+          title: "License Tiers",
           description: "Gran Turismo driving school tests are grouped across 5 progressive tiers (National B up to Super License). Click any tab to switch license categories.",
           side: "bottom",
           align: "start"
@@ -98,7 +99,7 @@ export function startEditTestTour() {
       {
         element: "#sidebar",
         popover: {
-          title: "📋 Curriculum Tests",
+          title: "Curriculum Tests",
           description: "Each tier contains dedicated driving school tests. Select any test from this sidebar to load it into the editor, or click <strong>+ Add Test</strong> to create a new curriculum test.",
           side: "right",
           align: "start"
@@ -107,7 +108,7 @@ export function startEditTestTour() {
       {
         element: "#card-lesson-info",
         popover: {
-          title: "📝 Lesson Objective & Description",
+          title: "Lesson Objective & Description",
           description: "Customize the test title, pedagogical objective, and driver instructions. These briefing notes appear directly on the countdown screen and HUD in Assetto Corsa.",
           side: "bottom",
           align: "start"
@@ -116,7 +117,7 @@ export function startEditTestTour() {
       {
         element: "#card-track-vehicle",
         popover: {
-          title: "🏎️ Vehicle & Circuit Selection",
+          title: "Vehicle & Circuit Selection",
           description: "Assign official Kunos or modded cars and track layouts. The circuit spline provides the underlying racing line geometry for AI autopilot and speed calculation.",
           side: "bottom",
           align: "start"
@@ -125,7 +126,7 @@ export function startEditTestTour() {
       {
         element: "#card-gates-spline",
         popover: {
-          title: "📍 3D Start & Finish Gates",
+          title: "3D Start & Finish Gates",
           description: "Position the start and finish gates along the track spline using the interactive percentage/distance sliders and 2D track canvas preview.",
           side: "top",
           align: "start"
@@ -134,7 +135,7 @@ export function startEditTestTour() {
       {
         element: "#card-target-times",
         popover: {
-          title: "⏱️ Medal Targets (Adjudication)",
+          title: "Medal Targets (Adjudication)",
           description: "Set the Gold, Silver, and Bronze cutoff times in seconds. In-game, the Lua engine adjudicates sector times, awarding medals and unlocking the next test when target times are met.",
           side: "top",
           align: "start"
@@ -143,8 +144,10 @@ export function startEditTestTour() {
       {
         element: ".form-actions",
         popover: {
-          title: "💾 Save, Test Drive & Sync",
-          description: "Click <strong>Save Test</strong> to persist changes. Use <strong>Watch AI Demo</strong> to verify the test live in Assetto Corsa, and <strong>Sync to AC</strong> in the navbar to deploy directly to Content Manager!",
+          title: isStaticHost() ? "Save & Export" : "Save, Test Drive & Sync",
+          description: isStaticHost()
+            ? "Click <strong>Save Test</strong> to persist changes. Use <strong>Export</strong> in the navbar to generate a ready-to-install Content Manager package (.zip)!"
+            : "Click <strong>Save Test</strong> to persist changes. Use <strong>Watch AI Demo</strong> to verify the test live in Assetto Corsa, and <strong>Sync to AC</strong> in the navbar to deploy directly to Content Manager!",
           side: "bottom",
           align: "end"
         }
@@ -184,7 +187,7 @@ export function startMissingTelemetryTour() {
     stagePadding: 8,
     stageRadius: 6,
     allowClose: true,
-    doneBtnText: "Finish Tour 🏁",
+    doneBtnText: "Finish Tour",
     nextBtnText: "Next →",
     prevBtnText: "← Back",
     progressText: "Step {{current}} of {{total}}",
@@ -200,7 +203,7 @@ export function startMissingTelemetryTour() {
       {
         element: "#telemetry-missing-card",
         popover: {
-          title: "⚠️ Missing AI Telemetry Alert",
+          title: "Missing AI Telemetry Alert",
           description: "Rolling starts and medal target calibrations require AI racing line telemetry. When a test's car + track combination has no pre-recorded data, this warning card appears automatically.",
           side: "top",
           align: "start"
@@ -209,7 +212,7 @@ export function startMissingTelemetryTour() {
       {
         element: "#btn-download-record-script",
         popover: {
-          title: "📥 Download Recording Script (.ps1)",
+          title: "Download Recording Script (.ps1)",
           description: "Click here to download an automated PowerShell runner script tailored specifically for this car and track combination.",
           side: "bottom",
           align: "end"
@@ -218,7 +221,7 @@ export function startMissingTelemetryTour() {
       {
         element: "#telemetry-missing-card",
         popover: {
-          title: "⚡ Run Script in Assetto Corsa",
+          title: "Run Script in Assetto Corsa",
           description: "Run the downloaded PowerShell script in your terminal:<br><code style=\"color:#38bdf8;background:rgba(0,0,0,0.4);padding:3px 8px;border-radius:4px;display:inline-block;margin:6px 0;font-size:12px;\">.\\record_telemetry_*.ps1</code><br>Assetto Corsa will launch with native AI autopilot, drive the circuit spline, and record the ideal racing line profile to a JSON file.",
           side: "top",
           align: "center"
@@ -227,19 +230,21 @@ export function startMissingTelemetryTour() {
       {
         element: "#telemetry-dropzone-editor",
         popover: {
-          title: "📂 Drag & Drop Recorded Profile",
+          title: "Drag & Drop Recorded Profile",
           description: "Once Assetto Corsa completes recording, drag and drop the generated <code>.json</code> file into this dropzone. The web studio immediately calculates entry speed, initial gears, and medal targets!",
           side: "top",
           align: "center"
         }
       },
       {
-        element: "#btn-open-submit-pr-modal",
+        element: isStaticHost() ? "#btn-open-submit-pr-modal" : "#btn-sync",
         popover: {
-          title: "🌐 Share & Contribute (GitHub PR)",
-          description: "Once your profile is tested, click <strong>Submit Telemetry (PR)</strong> to automatically submit your recording to the community catalog via a GitHub Pull Request!",
+          title: isStaticHost() ? "Share & Contribute (GitHub PR)" : "Sync to Assetto Corsa",
+          description: isStaticHost()
+            ? "Once your profile is tested, click <strong>Submit Telemetry (PR)</strong> to automatically submit your recording to the community catalog via a GitHub Pull Request!"
+            : "Once your profile is tested, click <strong>Sync to AC</strong> in the navbar to deploy the updated telemetry directly to Content Manager!",
           side: "bottom",
-          align: "start"
+          align: isStaticHost() ? "start" : "end"
         }
       }
     ]

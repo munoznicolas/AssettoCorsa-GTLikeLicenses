@@ -5,7 +5,7 @@
  * and automated Pull Request creation via serverless gateway.
  */
 
-import { api } from "./api.js";
+import { api, isStaticHost } from "./api.js";
 import { dom } from "./dom.js";
 import { showToast, escapeHtml } from "./ui-utils.js";
 
@@ -16,7 +16,12 @@ let parsedTelemetry = null;
  * Initialize telemetry submitter modal and event handlers.
  */
 export function initTelemetrySubmitter() {
-  const btnOpen = document.getElementById("btn-open-submit-pr-modal");
+  const btnOpen = dom.btnOpenSubmitPrModal || document.getElementById("btn-open-submit-pr-modal");
+  if (btnOpen) {
+    if (!isStaticHost()) {
+      btnOpen.style.display = "none";
+    }
+  }
   const modal = document.getElementById("modal-submit-pr");
   const btnClose = document.getElementById("modal-submit-pr-close");
   const btnCancel = document.getElementById("btn-submit-pr-cancel");

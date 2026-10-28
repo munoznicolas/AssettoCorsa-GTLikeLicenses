@@ -832,7 +832,13 @@ export function setupQueueEventListeners() {
   }
 
   // Missing Telemetry Batch Controls
-  if (dom.btnRunMissingTelemetry) dom.btnRunMissingTelemetry.addEventListener("click", openMissingTelemetryModal);
+  if (dom.btnRunMissingTelemetry) {
+    if (isStaticHost()) {
+      dom.btnRunMissingTelemetry.style.display = "none";
+    } else {
+      dom.btnRunMissingTelemetry.addEventListener("click", openMissingTelemetryModal);
+    }
+  }
   if (dom.telemetryModalClose) dom.telemetryModalClose.addEventListener("click", closeMissingTelemetryModal);
   if (dom.btnTelemetryCancel) dom.btnTelemetryCancel.addEventListener("click", closeMissingTelemetryModal);
   if (dom.selectTelemetryTier) dom.selectTelemetryTier.addEventListener("change", () => {
