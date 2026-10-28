@@ -1682,3 +1682,144 @@ body {
   white-space: nowrap;
   border: 0;
 }
+
+
+/* ==========================================================================
+   Driver.js Onboarding Tour - Cyber GT Theme
+   ========================================================================== */
+
+.driver-popover {
+  background-color: #131722 !important;
+  border: 1px solid rgba(56, 189, 248, 0.45) !important;
+  border-radius: var(--radius-md, 8px) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.85), 0 0 24px rgba(56, 189, 248, 0.2) !important;
+  color: #f1f5f9 !important;
+  padding: 18px 20px !important;
+  max-width: 380px !important;
+  min-width: 290px !important;
+  z-index: 1000000000 !important;
+  box-sizing: border-box !important;
+}
+
+.driver-popover * {
+  font-family: var(--font-body, "Inter", sans-serif) !important;
+  box-sizing: border-box !important;
+}
+
+.driver-popover-title {
+  font-family: var(--font-display, "Chakra Petch", sans-serif) !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: #38bdf8 !important;
+  letter-spacing: 0.6px !important;
+  margin: 0 0 8px 0 !important;
+  display: block !important;
+  line-height: 1.4 !important;
+}
+
+.driver-popover-description {
+  font-size: 13px !important;
+  line-height: 1.55 !important;
+  color: #cbd5e1 !important;
+  margin-bottom: 0 !important;
+}
+
+.driver-popover-close-btn {
+  color: #94a3b8 !important;
+  top: 10px !important;
+  right: 12px !important;
+  width: 24px !important;
+  height: 24px !important;
+  font-size: 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 4px !important;
+  transition: all 0.15s ease !important;
+}
+
+.driver-popover-close-btn:hover,
+.driver-popover-close-btn:focus {
+  color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.15) !important;
+}
+
+.driver-popover-footer {
+  margin-top: 16px !important;
+  padding-top: 12px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+.driver-popover-progress-text {
+  font-family: var(--font-mono, "JetBrains Mono", monospace) !important;
+  font-size: 11px !important;
+  color: #94a3b8 !important;
+}
+
+.driver-popover-navigation-btns {
+  display: flex !important;
+  gap: 8px !important;
+}
+
+.driver-popover-footer button {
+  font-family: var(--font-body, "Inter", sans-serif) !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  padding: 6px 14px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  background-color: #1e293b !important;
+  border: 1px solid #334155 !important;
+  color: #f1f5f9 !important;
+  text-shadow: none !important;
+}
+
+.driver-popover-footer button:hover {
+  background-color: rgba(56, 189, 248, 0.2) !important;
+  border-color: #38bdf8 !important;
+  color: #38bdf8 !important;
+}
+
+.driver-popover-next-btn,
+.driver-popover-footer button.driver-popover-next-btn {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+  border-color: #3b82f6 !important;
+  color: #ffffff !important;
+}
+
+.driver-popover-next-btn:hover,
+.driver-popover-footer button.driver-popover-next-btn:hover {
+  background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+  border-color: #60a5fa !important;
+  color: #ffffff !important;
+}
+
+/* Arrow styling */
+.driver-popover-arrow {
+  border-color: transparent !important;
+}
+.driver-popover-arrow-side-left {
+  border-left-color: #131722 !important;
+}
+.driver-popover-arrow-side-right {
+  border-right-color: #131722 !important;
+}
+.driver-popover-arrow-side-top {
+  border-top-color: #131722 !important;
+}
+.driver-popover-arrow-side-bottom {
+  border-bottom-color: #131722 !important;
+}
+
+/* Tour Welcome Card styles */
+.tour-select-card {
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.tour-select-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
