@@ -36,7 +36,6 @@ export function initDom() {
   dom.runQueueBadge = document.getElementById("run-queue-badge");
   dom.btnRebuild = document.getElementById("btn-rebuild");
   dom.btnSync = document.getElementById("btn-sync");
-  dom.btnExportJson = document.getElementById("btn-export-json");
   dom.btnImportJson = document.getElementById("btn-import-json");
   dom.inputImportJsonFile = document.getElementById("input-import-json-file");
   dom.btnResetDefaults = document.getElementById("btn-reset-defaults");
