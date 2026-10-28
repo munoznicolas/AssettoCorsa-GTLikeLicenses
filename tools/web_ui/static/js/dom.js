@@ -36,7 +36,7 @@ export function initDom() {
   dom.runQueueBadge = document.getElementById("run-queue-badge");
   dom.btnRebuild = document.getElementById("btn-rebuild");
   dom.btnSync = document.getElementById("btn-sync");
-  dom.btnThemeToggle = document.getElementById("btn-theme-toggle");
+
 
   // Form Elements
   dom.form = document.getElementById("test-form");
@@ -113,3 +113,4 @@ export function initDom() {
 
   return dom;
 }
+
