@@ -159,6 +159,9 @@ export const api = {
    * Calculate or retrieve initial AI rolling speed from cached profiles / game engine.
    */
   async calculateInitialSpeed(payload) {
+    if (isStaticHost()) {
+      return { success: false, error: "Initial speed calculation requires local Assetto Corsa server" };
+    }
     const res = await fetch("/api/calculate_initial_speed", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -171,6 +174,9 @@ export const api = {
    * Numerically integrates telemetry points to calculate Gold, Silver, Bronze targets and launch physics.
    */
   async calculateTargets(payload) {
+    if (isStaticHost()) {
+      return { success: false, error: "Target calculation requires local Assetto Corsa server" };
+    }
     const res = await fetch("/api/calculate_targets", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -183,6 +189,9 @@ export const api = {
    * Get runner process queue and AC process status.
    */
   async getQueueStatus() {
+    if (isStaticHost()) {
+      return { success: true, is_ac_running: false, queue_length: 0, queue: [], active_job: null };
+    }
     const res = await fetch("/api/queue/status");
     return await safeParseJson(res);
   },
@@ -191,6 +200,9 @@ export const api = {
    * Cancel specific job or active AC simulation.
    */
   async cancelQueueJob({ jobId = null, cancelAll = false } = {}) {
+    if (isStaticHost()) {
+      return { success: true, cancelled: true };
+    }
     const res = await fetch("/api/queue/cancel", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -215,6 +227,9 @@ export const api = {
    * Enqueue in-engine recording for all rolling start tests missing telemetry.
    */
   async queueMissingTelemetry(tier = "ALL", includeFlying = true) {
+    if (isStaticHost()) {
+      return { success: false, error: "Batch recording requires local Assetto Corsa environment" };
+    }
     const res = await fetch("/api/telemetry/queue_missing", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -227,6 +242,9 @@ export const api = {
    * Enqueue or launch live AC session.
    */
   async runLiveTest(payload) {
+    if (isStaticHost()) {
+      return { success: false, error: "Live simulation requires local Assetto Corsa environment" };
+    }
     const res = await fetch("/api/run_test", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -239,6 +257,9 @@ export const api = {
    * Check status of an individual queue job.
    */
   async getJob(jobId) {
+    if (isStaticHost()) {
+      return { success: false, error: "Job polling not available on static host" };
+    }
     const res = await fetch(`/api/job/${jobId}`);
     return await safeParseJson(res);
   },
@@ -247,6 +268,9 @@ export const api = {
    * Trigger content rebuild and curriculum validation.
    */
   async generateContent() {
+    if (isStaticHost()) {
+      return { success: false, error: "Content generation requires local Python server" };
+    }
     const res = await fetch("/api/generate", { method: "POST" });
     return await safeParseJson(res);
   },
@@ -255,6 +279,9 @@ export const api = {
    * Trigger Track Miniature Builder for a specific test.
    */
   async generateMiniature(testId, testData = null) {
+    if (isStaticHost()) {
+      return { success: false, error: "Miniature generation requires local Python server" };
+    }
     const res = await fetch("/api/generate_miniature", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -267,6 +294,9 @@ export const api = {
    * Trigger live sync directly to Assetto Corsa root.
    */
   async syncToAC() {
+    if (isStaticHost()) {
+      return { success: false, error: "Direct sync requires local Assetto Corsa installation" };
+    }
     const res = await fetch("/api/sync", { method: "POST" });
     return await safeParseJson(res);
   },

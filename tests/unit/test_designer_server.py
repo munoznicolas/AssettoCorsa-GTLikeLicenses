@@ -118,6 +118,39 @@ class TestDesignerServer(unittest.TestCase):
             with open(module_path, "w", encoding="utf-8") as f:
                 f.write(original_code)
 
+    def test_get_queue_status_endpoint(self):
+        status, data, raw = self._make_request("/api/queue/status")
+        self.assertEqual(status, 200)
+        self.assertTrue(data.get("success"))
+        self.assertIn("is_ac_running", data)
+        self.assertIn("queue", data)
+        self.assertIn("queue_length", data)
+
+    def test_static_host_client_guards(self):
+        static_js_dir = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "js")
+        with open(os.path.join(static_js_dir, "api.js"), "r", encoding="utf-8") as f:
+            api_js = f.read()
+        with open(os.path.join(static_js_dir, "queue-runner.js"), "r", encoding="utf-8") as f:
+            queue_runner_js = f.read()
+        with open(os.path.join(REPO_ROOT, "tools", "web_ui", "static", "app.js"), "r", encoding="utf-8") as f:
+            app_js = f.read()
+
+        # Verify api.js guards getQueueStatus on static hosts
+        self.assertIn("if (isStaticHost())", api_js)
+        self.assertIn("async getQueueStatus()", api_js)
+
+        # Verify queue-runner.js stops pollQueueStatus on static hosts
+        self.assertIn("export async function pollQueueStatus()", queue_runner_js)
+        self.assertIn("if (isStaticHost())", queue_runner_js)
+
+        # Verify window focus & visibility listeners are conditioned on !isStaticHost()
+        self.assertIn("if (!isStaticHost())", queue_runner_js)
+        self.assertIn('window.addEventListener("focus", () => void pollQueueStatus());', queue_runner_js)
+
+        # Verify app.js bootstraps pollQueueStatus only when !isStaticHost()
+        self.assertIn("if (!isStaticHost())", app_js)
+        self.assertIn("pollQueueStatus();", app_js)
+
 
 if __name__ == "__main__":
     unittest.main()

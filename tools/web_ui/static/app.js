@@ -192,7 +192,9 @@ async function init() {
   initTelemetrySubmitter();
 
   await loadInitialData();
-  pollQueueStatus();
+  if (!isStaticHost()) {
+    pollQueueStatus();
+  }
 }
 
 // Initialize on DOM Ready

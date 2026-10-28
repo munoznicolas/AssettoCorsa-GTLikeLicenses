@@ -216,6 +216,10 @@ export async function pollQueueStatus() {
   clearTimeout(queuePollTimer);
   queuePollTimer = null;
 
+  if (isStaticHost()) {
+    return;
+  }
+
   let isBusy = false;
   try {
     const data = await api.getQueueStatus();
@@ -515,10 +519,14 @@ function updateMissingTelemetryUI(tier, data) {
   }
 
   if (dom.btnTelemetryEnqueue) {
-    dom.btnTelemetryEnqueue.disabled = uniqueCombosCount === 0;
-    dom.btnTelemetryEnqueue.innerHTML = uniqueCombosCount > 0
-      ? `<span>▶ Run Telemetry for Missing Combos (${uniqueCombosCount} Jobs)</span>`
-      : "<span>✓ All Telemetry Recorded</span>";
+    if (isStaticHost()) {
+      dom.btnTelemetryEnqueue.style.display = "none";
+    } else {
+      dom.btnTelemetryEnqueue.disabled = uniqueCombosCount === 0;
+      dom.btnTelemetryEnqueue.innerHTML = uniqueCombosCount > 0
+        ? `<span>▶ Run Telemetry for Missing Combos (${uniqueCombosCount} Jobs)</span>`
+        : "<span>✓ All Telemetry Recorded</span>";
+    }
   }
 
   if (dom.telemetryQueueInfo) {
@@ -547,8 +555,12 @@ export async function loadMissingTelemetryData() {
     dom.telemetrySummaryText.innerHTML = "⏳ Scanning curriculum tests for missing telemetry profiles...";
   }
   if (dom.btnTelemetryEnqueue) {
-    dom.btnTelemetryEnqueue.disabled = true;
-    dom.btnTelemetryEnqueue.innerHTML = "<span>⏳ Scanning...</span>";
+    if (isStaticHost()) {
+      dom.btnTelemetryEnqueue.style.display = "none";
+    } else {
+      dom.btnTelemetryEnqueue.disabled = true;
+      dom.btnTelemetryEnqueue.innerHTML = "<span>⏳ Scanning...</span>";
+    }
   }
 
   try {
@@ -856,10 +868,12 @@ export function setupQueueEventListeners() {
   }
 
   // Refresh queue status immediately when user switches back to this browser tab
-  window.addEventListener("focus", () => void pollQueueStatus());
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") {
-      void pollQueueStatus();
-    }
-  });
+  if (!isStaticHost()) {
+    window.addEventListener("focus", () => void pollQueueStatus());
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        void pollQueueStatus();
+      }
+    });
+  }
 }
