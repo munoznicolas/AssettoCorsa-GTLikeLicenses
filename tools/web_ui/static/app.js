@@ -21,7 +21,6 @@ import { setupReferenceViewListeners } from "./js/reference-view.js";
 import { initTelemetrySubmitter } from "./js/telemetry-submitter.js";
 import { buildAndExportModZip } from "./js/mod-packager.js";
 import {
-  exportCurriculumJson,
   importCurriculumJsonFile,
   resetCurriculumToDefaults,
 } from "./js/curriculum-store.js";
@@ -117,17 +116,6 @@ function setupGlobalEventListeners() {
     }
   }
 
-  // Canonical curriculum.json Export
-  if (dom.btnExportJson) {
-    dom.btnExportJson.addEventListener("click", () => {
-      try {
-        exportCurriculumJson(state.curriculum);
-        showToast("Exported curriculum.json successfully!", "success");
-      } catch (err) {
-        showToast("Failed to export JSON: " + err.message, "error");
-      }
-    });
-  }
 
   // Canonical curriculum.json Import
   if (dom.btnImportJson && dom.inputImportJsonFile) {
