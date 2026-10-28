@@ -26,6 +26,7 @@ import {
 } from "./js/curriculum-store.js";
 import { renderLicenseTabs, selectTier } from "./js/test-editor.js";
 import { initTour } from "./js/tour.js";
+import { initTheme } from "./js/theme.js";
 
 /**
  * Global operational event listeners (Rebuild, Sync, Modal close).
@@ -205,6 +206,7 @@ async function init() {
   setupGlobalEventListeners();
   initTelemetrySubmitter();
   initTour();
+  initTheme();
 
   await loadInitialData();
   if (!isStaticHost()) {

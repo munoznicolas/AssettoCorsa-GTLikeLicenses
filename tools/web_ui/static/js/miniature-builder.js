@@ -110,8 +110,8 @@ export function generateMiniatureDataUrl(spline, startS = 0.0, finishS = 1.0, op
 
   // 1. Dark high-contrast background gradient
   const bgGrad = ctx.createLinearGradient(0, 0, width, height);
-  bgGrad.addColorStop(0, "#0b0f19");
-  bgGrad.addColorStop(1, "#111827");
+  bgGrad.addColorStop(0, "#0c0f14");
+  bgGrad.addColorStop(1, "#13171e");
   ctx.fillStyle = bgGrad;
   ctx.fillRect(0, 0, width, height);
 
@@ -134,7 +134,7 @@ export function generateMiniatureDataUrl(spline, startS = 0.0, finishS = 1.0, op
   const points = spline?.points || spline?.waypoints || [];
   if (points.length < 2) {
     // Fallback placeholder
-    ctx.fillStyle = "#64748b";
+    ctx.fillStyle = "#5c687a";
     ctx.font = "bold 16px sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
@@ -145,7 +145,7 @@ export function generateMiniatureDataUrl(spline, startS = 0.0, finishS = 1.0, op
   const bounds = computeBounds(points);
 
   // 2. Full Circuit Silhouette (slate gray)
-  ctx.strokeStyle = "#334155";
+  ctx.strokeStyle = "#262e3b";
   ctx.lineWidth = 4;
   ctx.lineCap = "round";
   ctx.lineJoin = "round";

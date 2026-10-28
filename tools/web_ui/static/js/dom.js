@@ -39,6 +39,8 @@ export function initDom() {
   dom.btnImportJson = document.getElementById("btn-import-json");
   dom.inputImportJsonFile = document.getElementById("input-import-json-file");
   dom.btnResetDefaults = document.getElementById("btn-reset-defaults");
+  dom.btnThemeToggle = document.getElementById("btn-theme-toggle");
+  dom.themeToggleIcon = document.getElementById("theme-toggle-icon");
 
   // Form Elements
   dom.form = document.getElementById("test-form");
