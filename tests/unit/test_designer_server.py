@@ -6,6 +6,7 @@ Ensures JSON responses are always returned (no HTML error leaks), preventing JSO
 """
 
 import json
+import re
 import os
 import sys
 import threading
@@ -150,6 +151,56 @@ class TestDesignerServer(unittest.TestCase):
         # Verify app.js bootstraps pollQueueStatus only when !isStaticHost()
         self.assertIn("if (!isStaticHost())", app_js)
         self.assertIn("pollQueueStatus();", app_js)
+
+
+
+    def test_tour_titles_no_emojis(self):
+        tour_js_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "js", "tour.js")
+        with open(tour_js_path, "r", encoding="utf-8") as f:
+            tour_js = f.read()
+
+        # Find all title properties inside popovers
+        title_matches = re.findall(r'title:\s*([^\r\n,]+)', tour_js)
+        self.assertGreater(len(title_matches), 0)
+
+        # Emoji detection regex for astral symbols and common emoji code points
+        emoji_pattern = re.compile(r'[𐀀-􏿿☀-⛿✀-➿⌀-⏿]')
+        for raw_title in title_matches:
+            self.assertFalse(
+                emoji_pattern.search(raw_title),
+                f"Tour title contains emoji: {raw_title}"
+            )
+
+        # Verify done button has no emoji
+        done_matches = re.findall(r'doneBtnText:\s*"([^"]+)"', tour_js)
+        for done_text in done_matches:
+            self.assertFalse(
+                emoji_pattern.search(done_text),
+                f"Done button text contains emoji: {done_text}"
+            )
+
+        # Verify tour steps dynamically adapt to static vs local host
+        self.assertIn('isStaticHost() ? "Save & Export" : "Save, Test Drive & Sync"', tour_js)
+        self.assertIn('isStaticHost() ? "#btn-open-submit-pr-modal" : "#btn-sync"', tour_js)
+
+    def test_dynamic_host_button_visibility(self):
+        app_js_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "app.js")
+        with open(app_js_path, "r", encoding="utf-8") as f:
+            app_js = f.read()
+        qr_js_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "js", "queue-runner.js")
+        with open(qr_js_path, "r", encoding="utf-8") as f:
+            qr_js = f.read()
+
+        # Verify applyHostVisibility adjusts button visibility dynamically
+        self.assertIn("export function applyHostVisibility()", app_js)
+        self.assertIn('dom.btnSync.style.display = isStatic ? "none" : ""', app_js)
+        self.assertIn('dom.btnRunLive.style.display = isStatic ? "none" : ""', app_js)
+        self.assertIn('dom.btnRunMissingTelemetry.style.display = isStatic ? "none" : ""', app_js)
+        self.assertIn('dom.btnOpenSubmitPrModal.style.display = isStatic ? "" : "none"', app_js)
+
+        # Verify queue runner conditions btnRunMissingTelemetry listener on isStaticHost()
+        self.assertIn("if (dom.btnRunMissingTelemetry)", qr_js)
+        self.assertIn('dom.btnRunMissingTelemetry.style.display = "none"', qr_js)
 
 
 if __name__ == "__main__":
