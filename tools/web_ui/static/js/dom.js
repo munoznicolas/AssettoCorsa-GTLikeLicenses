@@ -118,6 +118,13 @@ export function initDom() {
   dom.telemetryDropzoneEditor = document.getElementById("telemetry-dropzone-editor");
   dom.inputEditorTelemetryFile = document.getElementById("input-editor-telemetry-file");
 
+  // Tour & Onboarding Elements
+  dom.btnTourHelp = document.getElementById("btn-tour-help");
+  dom.modalTourWelcome = document.getElementById("modal-tour-welcome");
+  dom.modalTourClose = document.getElementById("modal-tour-close");
+  dom.btnStartTourEdit = document.getElementById("btn-start-tour-edit");
+  dom.btnStartTourTelemetry = document.getElementById("btn-start-tour-telemetry");
+  dom.btnSkipTour = document.getElementById("btn-skip-tour");
+
   return dom;
 }
-
