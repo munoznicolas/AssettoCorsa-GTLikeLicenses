@@ -32,11 +32,11 @@ function filterTracks(query) {
   return state.tracks.filter((t) => {
     const idMatch = (t.track_id || "").toLowerCase().includes(query);
     const nameMatch = (t.name || "").toLowerCase().includes(query);
-    const layoutMatch = (t.layouts || []).some(
-      (l) =>
-        (l.name || "").toLowerCase().includes(query) ||
-        (l.layout_id || "").toLowerCase().includes(query)
-    );
+    const layoutMatch = (t.layouts || []).some((l) => {
+      const lName = typeof l === "string" ? l : (l.name || "");
+      const lId = typeof l === "string" ? l : (l.layout_id || "");
+      return lName.toLowerCase().includes(query) || lId.toLowerCase().includes(query);
+    });
     return idMatch || nameMatch || layoutMatch;
   });
 }
@@ -174,10 +174,14 @@ export function populateLayoutDropdown(trackId, selectedLayout = "") {
   }
 
   for (const l of track.layouts) {
+    const layoutId = typeof l === "string" ? l : (l.layout_id ?? "");
+    const layoutName = typeof l === "string"
+      ? (l ? l.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) : "Default Layout")
+      : (l.name || l.layout_id || "Default Layout");
     const opt = document.createElement("option");
-    opt.value = l.layout_id;
-    opt.textContent = l.name || l.layout_id || "Default Layout";
-    if (l.layout_id === selectedLayout) {
+    opt.value = layoutId;
+    opt.textContent = layoutName;
+    if (layoutId === (selectedLayout || "")) {
       opt.selected = true;
     }
     dom.selectLayout.appendChild(opt);
@@ -592,7 +596,8 @@ export async function autoCalculateTargetsFromTelemetry(overrideStartS = null, o
   if (!test) return;
 
   const trackId = dom.selectTrack?.value || test.track_id;
-  const layout = dom.selectLayout?.value ?? test.track_layout ?? "";
+  let layout = dom.selectLayout ? dom.selectLayout.value : (test.track_layout || "");
+  if (layout === "undefined" || layout === "null") layout = "";
   const carId = dom.selectCar?.value || test.car_id;
   const rawStart = dom.inputStart?.value ?? test.start_s ?? 0;
   const rawFinish = dom.inputFinish?.value ?? test.finish_s ?? 1;
@@ -630,7 +635,7 @@ export async function autoCalculateTargetsFromTelemetry(overrideStartS = null, o
       // Telemetry not available for this track + car combination
       if (dom.telemetryMissingCard) dom.telemetryMissingCard.style.display = "block";
       if (dom.btnExportSingleTelemetryScript) dom.btnExportSingleTelemetryScript.style.display = "inline-flex";
-      showAISpeedStatus(`?? No telemetry profile for ${carId} @ ${trackId}. Upload profile below or record in AC.`);
+      showAISpeedStatus(`⚠️ No telemetry profile for ${carId} @ ${trackId}. Upload profile below or record in AC.`);
     }
   } catch (err) {
     console.warn("Client-side telemetry targets error:", err);
@@ -803,7 +808,8 @@ export function saveFormIntoActiveTest() {
   test.description = dom.inputDescription?.value.trim() ?? "";
   test.car_id = dom.selectCar?.value || test.car_id;
   test.track_id = dom.selectTrack?.value || test.track_id;
-  test.track_layout = dom.selectLayout?.value ?? "";
+  const selLayout = dom.selectLayout?.value ?? "";
+  test.track_layout = (selLayout === "undefined" || selLayout === "null") ? "" : selLayout;
 
   const rawStart = dom.inputStart?.value ?? 0;
   const rawFinish = dom.inputFinish?.value ?? 1;

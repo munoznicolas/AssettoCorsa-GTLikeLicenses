@@ -1,4 +1,21 @@
 /**
+ * Normalizes and sanitizes curriculum test fields (e.g. cleans "undefined" layouts).
+ * @param {Array} curriculum
+ * @returns {Array}
+ */
+export function sanitizeCurriculum(curriculum) {
+  if (!Array.isArray(curriculum)) return curriculum;
+  for (const tier of curriculum) {
+    for (const test of (tier?.tests || [])) {
+      if (test.track_layout === "undefined" || test.track_layout === "null") {
+        test.track_layout = "";
+      }
+    }
+  }
+  return curriculum;
+}
+
+/**
  * curriculum-store.js
  * Browser LocalStorage Source of Truth & JSON Backup Manager for License Test Curriculum.
  *
@@ -39,7 +56,7 @@ export async function loadCurriculum() {
     if (stored) {
       const parsed = JSON.parse(stored);
       if (isValidCurriculum(parsed)) {
-        return parsed;
+        return sanitizeCurriculum(parsed);
       }
     }
   } catch (err) {
@@ -51,8 +68,9 @@ export async function loadCurriculum() {
     const baseline = await api.getCurriculum();
     const curriculumData = baseline?.curriculum || baseline;
     if (isValidCurriculum(curriculumData)) {
-      saveCurriculum(curriculumData);
-      return curriculumData;
+      const sanitized = sanitizeCurriculum(curriculumData);
+      saveCurriculum(sanitized);
+      return sanitized;
     }
   } catch (err) {
     console.error("Failed to fetch baseline curriculum.json:", err);

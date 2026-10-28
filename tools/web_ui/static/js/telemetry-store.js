@@ -61,7 +61,10 @@ function openTelemetryDb() {
  */
 export function getTelemetryFilename(trackId, layout, carId, aiLevel = 100) {
   const cleanTrack = String(trackId || "").trim().toLowerCase();
-  const cleanLayout = String(layout || "").trim().toLowerCase();
+  let cleanLayout = String(layout || "").trim().toLowerCase();
+  if (cleanLayout === "undefined" || cleanLayout === "null") {
+    cleanLayout = "";
+  }
   const cleanCar = String(carId || "").trim().toLowerCase();
   const level = Number(aiLevel || 100);
 

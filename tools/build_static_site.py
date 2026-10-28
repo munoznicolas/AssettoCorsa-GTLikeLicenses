@@ -52,8 +52,12 @@ def _build_fallback_tracks(curriculum: List[Dict[str, Any]]) -> List[Dict[str, A
                     "name": name,
                     "layouts": [],
                 }
-            if layout not in tracks_map[tid]["layouts"]:
-                tracks_map[tid]["layouts"].append(layout)
+            layout_ids = [l["layout_id"] if isinstance(l, dict) else l for l in tracks_map[tid]["layouts"]]
+            if layout not in layout_ids:
+                tracks_map[tid]["layouts"].append({
+                    "layout_id": layout,
+                    "name": layout.replace("_", " ").title() if layout else "Default Layout",
+                })
 
     return sorted(tracks_map.values(), key=lambda x: x["name"])
 
