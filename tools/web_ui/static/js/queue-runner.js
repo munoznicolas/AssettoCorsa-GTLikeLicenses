@@ -82,9 +82,9 @@ function handleCachedSpeedResult(data, isManualClick) {
   applySpeedDataToTest(test, data);
 
   if (data.targets) {
-    if (dom.targetGold) dom.targetGold.value = Number(data.targets.gold_seconds).toFixed(1);
-    if (dom.targetSilver) dom.targetSilver.value = Number(data.targets.silver_seconds).toFixed(1);
-    if (dom.targetBronze) dom.targetBronze.value = Number(data.targets.bronze_seconds).toFixed(1);
+    if (dom.targetGold) dom.targetGold.value = Number(data.targets.gold_seconds).toFixed(3);
+    if (dom.targetSilver) dom.targetSilver.value = Number(data.targets.silver_seconds).toFixed(3);
+    if (dom.targetBronze) dom.targetBronze.value = Number(data.targets.bronze_seconds).toFixed(3);
     if (test) {
       test.targets = {
         gold_seconds: Number(data.targets.gold_seconds),

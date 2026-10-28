@@ -1,6 +1,7 @@
 /* style.css - Gran Turismo Aesthetic for License Test Designer */
 
 :root {
+  color-scheme: dark;
   --bg-main: #0c0f14;
   --bg-panel: #13171e;
   --bg-card: #191f28;
@@ -41,14 +42,20 @@ body {
   font-family: var(--font-body);
   font-size: 14px;
   line-height: 1.5;
-  height: 100vh;
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: 100dvh;
   overflow: hidden;
+  -webkit-text-size-adjust: 100%;
 }
 
 #app {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
 }
 
 /* Header */
@@ -146,8 +153,9 @@ body {
 .license-tab {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 18px;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 14px;
   background: transparent;
   border: none;
   border-bottom: 3px solid transparent;
@@ -159,6 +167,7 @@ body {
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  min-height: 48px;
 }
 
 .reference-tab {
@@ -189,10 +198,20 @@ body {
 }
 
 .tab-badge-img {
-  width: 22px;
-  height: 22px;
+  width: 28px;
+  height: 28px;
   object-fit: contain;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.6));
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.license-tab:hover .tab-badge-img {
+  transform: scale(1.1);
+}
+
+.license-tab.active .tab-badge-img {
+  transform: scale(1.12);
+  filter: drop-shadow(0 0 6px rgba(225, 29, 72, 0.65));
 }
 
 .tab-count {
@@ -236,6 +255,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
   border-bottom: 1px solid var(--border-color);
   min-height: 57px;
   box-sizing: border-box;
@@ -343,13 +363,15 @@ body {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  padding: 10px 12px;
+  padding: 12px 14px;
   cursor: pointer;
   transition: all 0.15s ease;
   position: relative;
   display: flex;
   gap: 12px;
   align-items: center;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .sidebar.collapsed .test-item {
@@ -381,7 +403,7 @@ body {
 
 .test-item-thumb {
   width: 76px;
-  height: 44px;
+  height: 48px;
   flex-shrink: 0;
   border-radius: 4px;
   overflow: hidden;
@@ -439,7 +461,8 @@ body {
 .test-item-top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 8px;
   margin-bottom: 4px;
 }
 
@@ -482,7 +505,8 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
+  line-height: 1.3;
 }
 
 .test-item-meta {
@@ -605,6 +629,39 @@ body {
 .form-control:focus {
   border-color: var(--border-focus);
   box-shadow: 0 0 0 1px var(--border-focus);
+}
+
+/* Custom Select Dropdowns & Options */
+select.form-control,
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238b9bb4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: calc(100% - 14px) center;
+  background-size: 14px;
+  padding-right: 38px !important;
+  cursor: pointer;
+}
+
+select.form-control:focus,
+select:focus {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+select.form-control:disabled,
+select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235c687a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+select option,
+select optgroup {
+  background-color: #13171e;
+  color: #f3f4f6;
+  padding: 8px 12px;
 }
 
 .form-control[readonly],
@@ -899,17 +956,12 @@ body {
 
 .map-toolbar {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   padding: 8px 12px;
   background-color: rgba(0, 0, 0, 0.3);
   border-bottom: 1px solid var(--border-color);
   font-size: 11px;
-}
-
-.map-info {
-  font-family: var(--font-mono);
-  color: var(--accent-gold);
 }
 
 .map-legend {
@@ -1118,6 +1170,46 @@ body {
   font-size: 12px;
 }
 
+/* Target Times Grid & Seconds Suffix */
+.form-grid.target-times-grid {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.input-suffix-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-suffix-wrapper input {
+  padding-right: 22px !important;
+  width: 100%;
+  font-family: var(--font-mono);
+}
+
+.input-suffix-wrapper input::-webkit-outer-spin-button,
+.input-suffix-wrapper input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.input-suffix-wrapper input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.input-suffix-wrapper .input-suffix {
+  position: absolute;
+  right: 8px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  pointer-events: none;
+  user-select: none;
+}
+
 /* Modal */
 .modal {
   position: fixed;
@@ -1227,6 +1319,8 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 .mt-2 {
   margin-top: 8px;
@@ -1881,4 +1975,599 @@ body {
   font-size: 12.5px;
   color: #cbd5e1;
   line-height: 1.45;
+}
+
+
+/* ==========================================================================
+   Mobile-Friendly Responsive Enhancements (Plan A: Master-Detail Architecture)
+   ========================================================================== */
+
+/* Utility and Desktop Base States */
+.mobile-only {
+  display: none !important;
+}
+
+.header-actions-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mobile-menu-toggle {
+  display: none;
+}
+
+.actions-menu-backdrop {
+  display: none;
+}
+
+.actions-drawer-header {
+  display: none;
+}
+
+
+/* Mobile Back Button (Hidden on Desktop) */
+.mobile-back-btn {
+  display: none;
+}
+
+
+/* --------------------------------------------------------------------------
+   Breakpoint: <= 960px (Header Actions Drawer & Tablet Adaptation)
+   -------------------------------------------------------------------------- */
+@media (max-width: 960px) {
+  .navbar {
+    padding: 8px 16px;
+    height: 56px;
+  }
+
+  .brand {
+    gap: 10px;
+  }
+
+  .title-wrap h1 {
+    font-size: 14px;
+    letter-spacing: 0.5px;
+  }
+
+  .title-wrap .subtitle {
+    font-size: 10px;
+    max-width: 220px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Show Mobile Menu Toggle & Keep Main Export Visible */
+  .mobile-menu-toggle {
+    display: inline-flex;
+    padding: 8px 10px;
+  }
+
+  .mobile-only {
+    display: flex !important;
+  }
+
+  /* Header Actions Drawer */
+  .header-actions {
+    position: fixed;
+    top: 56px;
+    right: 0;
+    width: 310px;
+    max-width: 85vw;
+    background-color: #12161f;
+    border-left: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: -8px 12px 30px rgba(0, 0, 0, 0.85);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 2500;
+    transform: translateX(100%);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    max-height: calc(100dvh - 60px);
+    overflow-y: auto;
+  }
+
+  .header-actions.open {
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+
+  .actions-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding-bottom: 10px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .actions-drawer-header h3 {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .header-actions .btn {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  /* Backdrop */
+  .actions-menu-backdrop {
+    display: block;
+    position: fixed;
+    top: 56px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(2px);
+    z-index: 2400;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .actions-menu-backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Breakpoint: <= 768px (Mobile Plan A: Master-Detail Full Transition)
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  /* Prevent iOS input auto-zoom by enforcing >= 16px on mobile inputs */
+  input[type="text"],
+  input[type="number"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  .title-wrap .subtitle {
+    display: none;
+  }
+
+  /* All license logo tabs fit side-by-side in one row */
+  .license-nav {
+    padding: 0 8px;
+  }
+
+  .nav-tabs-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  .tab-container {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+    flex: 1;
+    justify-content: space-around;
+  }
+
+  .license-tab {
+    padding: 6px 8px;
+    min-height: 44px;
+    min-width: 44px;
+    gap: 0;
+  }
+
+  .tab-badge-img {
+    width: 26px;
+    height: 26px;
+  }
+
+  .nav-divider {
+    height: 20px;
+    margin: 0 4px;
+  }
+
+  .extra-tabs-container {
+    flex-shrink: 0;
+  }
+
+  .reference-tab {
+    padding: 6px 8px;
+    font-size: 11px;
+    gap: 4px;
+  }
+
+  .reference-tab .tab-count {
+    display: none;
+  }
+
+  /* Master-Detail Workspace (Plan A) */
+  .workspace {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* View 1: Test Catalog (Default) */
+  .sidebar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100% !important;
+    height: 100%;
+    z-index: 10;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+    border-right: none;
+  }
+
+  #btn-toggle-sidebar {
+    display: none !important;
+  }
+
+  .sidebar.collapsed {
+    width: 100% !important;
+  }
+
+  .sidebar.collapsed .tier-info,
+  .sidebar.collapsed .tier-description {
+    display: flex !important;
+  }
+
+  .sidebar-header {
+    padding: 12px 14px;
+    min-height: 52px;
+  }
+
+  .test-list {
+    padding: 10px 12px;
+    gap: 10px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .test-item {
+    padding: 12px 14px;
+    min-height: auto;
+    flex-shrink: 0;
+  }
+
+  /* View 2: Test Editor (Active when .workspace.view-editor) */
+  .editor-pane {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100% !important;
+    height: 100%;
+    padding: 12px 12px 48px 12px;
+    z-index: 5;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+    transform: translateX(100%);
+    opacity: 0;
+    pointer-events: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .workspace.view-editor .sidebar {
+    transform: translateX(-100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .workspace.view-editor .editor-pane {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 15;
+  }
+  /* Mobile Back Button in Title Row */
+  .mobile-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 42px;
+    padding: 0 10px;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .form-title-group {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  #form-test-id-badge {
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    padding: 0 8px;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .title-input {
+    height: 42px;
+    font-size: 15px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Form Grids Collapse to Single Column (Except Target Times) */
+  .form-grid.cols-2,
+  .form-grid.cols-3,
+  .form-grid.cols-4 {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .form-grid.target-times-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .target-times-grid .medal-label {
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .target-times-grid .form-control {
+    font-size: 13px;
+    padding-left: 8px;
+    padding-right: 20px !important;
+  }
+
+  .form-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .form-title-group {
+    width: 100%;
+  }
+
+  .form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .form-actions .btn {
+    flex: 1 1 auto;
+    min-height: 42px;
+    justify-content: center;
+  }
+
+  .card {
+    padding: 14px;
+    border-radius: var(--radius-md);
+  }
+
+  .card-title {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+
+  /* Start Mode Selector Stacks */
+  .start-mode-selector {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .mode-card {
+    padding: 12px 14px;
+    min-height: 52px;
+  }
+
+  /* Track Canvas & Map Controls */
+  .map-toolbar {
+    display: flex;
+    justify-content: flex-start;
+    padding: 8px 12px;
+  }
+
+  .map-legend {
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 10px;
+  }
+
+  #track-canvas {
+    height: 230px;
+    touch-action: none;
+  }
+
+  /* Touch-Friendly Range Sliders */
+  .range-slider {
+    height: 8px;
+    margin-top: 10px;
+  }
+
+  .range-slider::-webkit-slider-thumb {
+    width: 28px;
+    height: 28px;
+  }
+
+  .sector-badge-bar {
+    font-size: 11px;
+    text-align: center;
+  }
+
+  /* Reference View on Mobile */
+  .reference-view {
+    padding: 12px;
+    height: calc(100dvh - 100px);
+    gap: 12px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ref-header {
+    padding: 14px;
+  }
+
+  .ref-title-group h2 {
+    font-size: 14px;
+  }
+
+  .ref-subtitle {
+    font-size: 11px;
+  }
+
+  .game-pills {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 6px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+  }
+
+  .game-pills::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pill-btn {
+    flex-shrink: 0;
+    min-height: 36px;
+    padding: 6px 14px;
+  }
+
+  .ref-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .metric-card {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .metric-icon {
+    font-size: 20px;
+  }
+
+  .metric-value {
+    font-size: 15px;
+  }
+
+  .ref-charts-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .chart-card {
+    padding: 12px;
+  }
+
+  .chart-canvas-wrapper {
+    height: 210px;
+  }
+
+  .table-card {
+    padding: 12px;
+  }
+
+  .table-filters {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .table-search,
+  .table-select {
+    min-width: 100%;
+    width: 100%;
+  }
+
+  /* Modals on Mobile */
+  .modal-content {
+    width: 96vw;
+    max-width: 96vw;
+    max-height: 92dvh;
+    margin: 8px;
+  }
+
+  .modal-header {
+    padding: 12px 14px;
+  }
+
+  .modal-body {
+    padding: 14px;
+  }
+
+  .modal-footer {
+    padding: 10px 14px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .modal-footer .btn {
+    flex: 1 1 auto;
+    min-height: 38px;
+  }
+
+  /* Driver.js popovers bounded on narrow viewports */
+  .driver-popover {
+    max-width: calc(100vw - 24px) !important;
+    min-width: 250px !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Breakpoint: <= 480px (Ultra-Compact Phone Screen Tuning)
+   -------------------------------------------------------------------------- */
+@media (max-width: 480px) {
+  .navbar {
+    padding: 6px 12px;
+  }
+
+  .gt-logo {
+    font-size: 20px;
+    padding: 1px 6px;
+  }
+
+  .title-wrap h1 {
+    font-size: 13px;
+  }
+
+  .btn-export-main {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .ref-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .reference-tab .ref-tab-label {
+    display: none;
+  }
+
+  .reference-tab {
+    padding: 6px 10px;
+    font-size: 15px;
+  }
 }

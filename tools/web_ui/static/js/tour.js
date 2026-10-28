@@ -82,7 +82,26 @@ export function startEditTestTour() {
     nextBtnText: "Next →",
     prevBtnText: "← Back",
     progressText: "Step {{current}} of {{total}}",
+    onHighlightStarted: (element) => {
+      const el = typeof element === "string" ? document.querySelector(element) : element;
+      if (!el) return;
+
+      // Plan A mobile screen switcher sync (< 768px)
+      if (window.innerWidth <= 768) {
+        if (el.id === "sidebar" || el.id === "license-tabs" || el.closest?.(".sidebar") || el.closest?.(".license-nav")) {
+          dom.workspaceView?.classList.remove("view-editor");
+        } else {
+          dom.workspaceView?.classList.add("view-editor");
+        }
+      }
+
+      try {
+        el.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+      } catch (e) {}
+    },
     onDestroyed: () => {
+      dom.headerActions?.classList.remove("open");
+      dom.actionsMenuBackdrop?.classList.remove("open");
       localStorage.setItem("gt_tour_completed", "true");
       activeDriver = null;
     },
@@ -91,7 +110,7 @@ export function startEditTestTour() {
         element: "#license-tabs",
         popover: {
           title: "License Tiers",
-          description: "Gran Turismo driving school tests are grouped across 5 progressive tiers (National B up to Super License). Click any tab to switch license categories.",
+          description: "Gran Turismo driving school tests are grouped across 5 iconic license emblem tiers (National B up to Super License). Click or tap any license logo to switch tiers.",
           side: "bottom",
           align: "start"
         }
@@ -100,7 +119,7 @@ export function startEditTestTour() {
         element: "#sidebar",
         popover: {
           title: "Curriculum Tests",
-          description: "Each tier contains dedicated driving school tests. Select any test from this sidebar to load it into the editor, or click <strong>+ Add Test</strong> to create a new curriculum test.",
+          description: "Each tier contains dedicated driving school tests. Select any test card to open the full editor view, or click <strong>+ Add Test</strong> to create a new curriculum test.",
           side: "right",
           align: "start"
         }
@@ -127,7 +146,7 @@ export function startEditTestTour() {
         element: "#card-gates-spline",
         popover: {
           title: "3D Start & Finish Gates",
-          description: "Position the start and finish gates along the track spline using the interactive percentage/distance sliders and 2D track canvas preview.",
+          description: "Position start and finish gates along the track spline using the <strong>🟢 Start</strong> and <strong>🔴 Finish</strong> selector pills, single-tap canvas placement, or precision distance sliders.",
           side: "top",
           align: "start"
         }
@@ -147,7 +166,7 @@ export function startEditTestTour() {
           title: isStaticHost() ? "Save & Export" : "Save, Test Drive & Sync",
           description: isStaticHost()
             ? "Click <strong>Save Test</strong> to persist changes. Use <strong>Export</strong> in the navbar to generate a ready-to-install Content Manager package (.zip)!"
-            : "Click <strong>Save Test</strong> to persist changes. Use <strong>Watch AI Demo</strong> to verify the test live in Assetto Corsa, and <strong>Sync to AC</strong> in the navbar to deploy directly to Content Manager!",
+            : "Click <strong>Save Test</strong> to persist changes. On desktop use <strong>Watch AI Demo</strong> and <strong>Sync to AC</strong>; on mobile, access Sync and PR tools via the <strong>⋮ Menu</strong>!",
           side: "bottom",
           align: "end"
         }
@@ -170,13 +189,23 @@ export function startMissingTelemetryTour() {
     return;
   }
 
-  // Temporarily ensure the Missing Telemetry Card is visible so the spotlight can highlight it
+  // 1. On mobile, immediately activate the editor pane so telemetry elements are rendered in view
+  if (dom.workspaceView) {
+    dom.workspaceView.classList.add("view-editor");
+  }
+
+  // 2. Temporarily ensure the Missing Telemetry Card is visible so the spotlight can highlight it
   const wasMissingVisible = dom.telemetryMissingCard && dom.telemetryMissingCard.style.display !== "none";
   if (dom.telemetryMissingCard) {
     dom.telemetryMissingCard.style.display = "block";
   }
   if (dom.btnExportSingleTelemetryScript) {
     dom.btnExportSingleTelemetryScript.style.display = "inline-flex";
+  }
+
+  // 3. Immediately scroll the missing telemetry card into center view before initializing the driver
+  if (dom.telemetryMissingCard) {
+    dom.telemetryMissingCard.scrollIntoView({ behavior: "instant", block: "center" });
   }
 
   const driver = window.driver.js.driver;
@@ -191,11 +220,36 @@ export function startMissingTelemetryTour() {
     nextBtnText: "Next →",
     prevBtnText: "← Back",
     progressText: "Step {{current}} of {{total}}",
+    onHighlightStarted: (element) => {
+      const el = typeof element === "string" ? document.querySelector(element) : element;
+      if (!el) return;
+
+      if (window.innerWidth <= 768) {
+        dom.workspaceView?.classList.add("view-editor");
+      }
+
+      if (window.innerWidth <= 960) {
+        const isHeaderAction = el.id === "btn-sync" || el.id === "btn-open-submit-pr-modal";
+        if (isHeaderAction) {
+          dom.headerActions?.classList.add("open");
+          dom.actionsMenuBackdrop?.classList.add("open");
+        } else {
+          dom.headerActions?.classList.remove("open");
+          dom.actionsMenuBackdrop?.classList.remove("open");
+        }
+      }
+
+      try {
+        el.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+      } catch (e) {}
+    },
     onDestroyed: () => {
       // Restore card state
       if (!wasMissingVisible && dom.telemetryMissingCard) {
         dom.telemetryMissingCard.style.display = "none";
       }
+      dom.headerActions?.classList.remove("open");
+      dom.actionsMenuBackdrop?.classList.remove("open");
       localStorage.setItem("gt_tour_completed", "true");
       activeDriver = null;
     },
@@ -205,7 +259,7 @@ export function startMissingTelemetryTour() {
         popover: {
           title: "Missing AI Telemetry Alert",
           description: "Rolling starts and medal target calibrations require AI racing line telemetry. When a test's car + track combination has no pre-recorded data, this warning card appears automatically.",
-          side: "top",
+          side: "bottom",
           align: "start"
         }
       },
@@ -223,7 +277,7 @@ export function startMissingTelemetryTour() {
         popover: {
           title: "Run Script in Assetto Corsa",
           description: "Run the downloaded PowerShell script in your terminal:<br><code style=\"color:#38bdf8;background:rgba(0,0,0,0.4);padding:3px 8px;border-radius:4px;display:inline-block;margin:6px 0;font-size:12px;\">.\\record_telemetry_*.ps1</code><br>Assetto Corsa will launch with native AI autopilot, drive the circuit spline, and record the ideal racing line profile to a JSON file.",
-          side: "top",
+          side: "bottom",
           align: "center"
         }
       },
@@ -232,7 +286,7 @@ export function startMissingTelemetryTour() {
         popover: {
           title: "Drag & Drop Recorded Profile",
           description: "Once Assetto Corsa completes recording, drag and drop the generated <code>.json</code> file into this dropzone. The web studio immediately calculates entry speed, initial gears, and medal targets!",
-          side: "top",
+          side: "bottom",
           align: "center"
         }
       },
@@ -250,7 +304,10 @@ export function startMissingTelemetryTour() {
     ]
   });
 
-  activeDriver.drive();
+  // Short delay to ensure the browser has completed layout & scrolling before Driver.js reads the bounding box
+  setTimeout(() => {
+    activeDriver.drive();
+  }, 60);
 }
 
 /**

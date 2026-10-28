@@ -48,71 +48,92 @@
             >
           </div>
         </div>
-        <div class="header-actions">
-          <button
-            id="btn-stop-ac"
-            class="btn"
-            style="display: none; background: #dc2626; color: #fff; border: 1px solid #ef4444;"
-            title="Stop / Terminate active Assetto Corsa session"
-          >
-            <span>Stop AC</span>
-          </button>
-          <button
-            id="btn-run-missing-telemetry"
-            class="btn btn-warning"
-            title="Batch run/record telemetry in Assetto Corsa for all rolling start tests missing track+car profiles"
-          >
-            <span>Record Missing Telemetry</span>
-          </button>
-          <button
-            id="btn-sync"
-            class="btn btn-secondary"
-            title="Sync changes directly to Assetto Corsa install"
-          >
-            <span>Sync to AC</span>
-          </button>
-          <button
-            id="btn-open-submit-pr-modal"
-            class="btn"
-            style="background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4);"
-            title="Submit a recorded telemetry file via Google login to open a GitHub Pull Request"
-          >
-            <span>Submit Telemetry (PR)</span>
-          </button>
-          <button
-            id="btn-import-json"
-            class="btn btn-secondary"
-            title="Import and restore curriculum.json configuration file"
-          >
-            <span>Import JSON</span>
-          </button>
-          <input
-            type="file"
-            id="input-import-json-file"
-            accept=".json,application/json"
-            style="display: none;"
-          />
-          <button
-            id="btn-reset-defaults"
-            class="btn btn-secondary"
-            title="Reset curriculum back to baseline defaults"
-          >
-            <span>Reset Defaults</span>
-          </button>
-          <button
-            id="btn-tour-help"
-            class="btn btn-secondary"
-            title="Interactive Onboarding Tours &amp; Help"
-          >
-            <span>Take Tour</span>
-          </button>
+        <div class="header-actions-wrapper">
           <button
             id="btn-rebuild"
-            class="btn btn-primary"
+            class="btn btn-primary btn-export-main"
             title="Export full Content Manager ready-to-install mod package (.zip)"
           >
             <span>Export</span>
           </button>
+          <button
+            type="button"
+            id="btn-header-menu"
+            class="btn btn-secondary btn-icon-only mobile-menu-toggle"
+            title="More Actions"
+            aria-label="More Actions"
+            aria-expanded="false"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="1.5"></circle>
+              <circle cx="12" cy="5" r="1.5"></circle>
+              <circle cx="12" cy="19" r="1.5"></circle>
+            </svg>
+          </button>
+          <div id="header-actions" class="header-actions">
+            <div class="actions-drawer-header mobile-only">
+              <h3>Mod &amp; Telemetry Actions</h3>
+              <button type="button" id="btn-close-actions-menu" class="modal-close-btn" aria-label="Close menu">&times;</button>
+            </div>
+            <button
+              id="btn-stop-ac"
+              class="btn"
+              style="display: none; background: #dc2626; color: #fff; border: 1px solid #ef4444;"
+              title="Stop / Terminate active Assetto Corsa session"
+            >
+              <span>Stop AC</span>
+            </button>
+            <button
+              id="btn-run-missing-telemetry"
+              class="btn btn-warning"
+              title="Batch run/record telemetry in Assetto Corsa for all rolling start tests missing track+car profiles"
+            >
+              <span>Record Missing Telemetry</span>
+            </button>
+            <button
+              id="btn-sync"
+              class="btn btn-secondary"
+              title="Sync changes directly to Assetto Corsa install"
+            >
+              <span>Sync to AC</span>
+            </button>
+            <button
+              id="btn-open-submit-pr-modal"
+              class="btn"
+              style="background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4);"
+              title="Submit a recorded telemetry file via Google login to open a GitHub Pull Request"
+            >
+              <span>Submit Telemetry (PR)</span>
+            </button>
+            <button
+              id="btn-import-json"
+              class="btn btn-secondary"
+              title="Import and restore curriculum.json configuration file"
+            >
+              <span>Import JSON</span>
+            </button>
+            <input
+              type="file"
+              id="input-import-json-file"
+              accept=".json,application/json"
+              style="display: none;"
+            />
+            <button
+              id="btn-reset-defaults"
+              class="btn btn-secondary"
+              title="Reset curriculum back to baseline defaults"
+            >
+              <span>Reset Defaults</span>
+            </button>
+            <button
+              id="btn-tour-help"
+              class="btn btn-secondary"
+              title="Interactive Onboarding Tours &amp; Help"
+            >
+              <span>Take Tour</span>
+            </button>
+          </div>
+          <div id="actions-menu-backdrop" class="actions-menu-backdrop"></div>
         </div>
       </header>
 
@@ -127,9 +148,11 @@
             <button
               id="tab-btn-reference"
               class="license-tab reference-tab"
-              title="Gran Turismo Benchmark Data & Visualizations"
+              title="Gran Turismo Benchmark Data & Visualizations (406 Tests)"
+              aria-label="Gran Turismo Benchmark Data & Visualizations"
             >
-              <span>GT Constant Values</span>
+              <span class="ref-tab-icon" aria-hidden="true">📊</span>
+              <span class="ref-tab-label">GT Values</span>
               <span class="tab-count" id="ref-total-badge">406</span>
             </button>
           </div>
@@ -199,6 +222,7 @@
 
         <!-- Right Column: Test Editor & Interactive Spline Preview -->
         <main class="editor-pane">
+
           <div id="editor-empty" class="editor-empty" style="display: none">
             <div class="empty-state">
               <span class="empty-icon">🏁</span>
@@ -213,7 +237,19 @@
           <form id="test-form" class="editor-form">
             <div class="form-header">
               <div class="form-title-group">
-                <span id="form-test-id-badge" class="badge badge-lg">B-1</span>
+                <button
+                  type="button"
+                  id="btn-back-to-list"
+                  class="btn btn-secondary btn-sm mobile-back-btn"
+                  title="Back to Test List"
+                  aria-label="Back to Test List"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                  </svg>
+                  <span>Tests</span>
+                </button>
+                                <span id="form-test-id-badge" class="badge badge-lg">B-1</span>
                 <label for="input-title" class="visually-hidden">Test Title</label>
                 <input
                   type="text"
@@ -404,9 +440,6 @@
               <!-- Interactive Spline Canvas Map -->
               <div class="map-container">
                 <div class="map-toolbar">
-                  <span id="map-track-info" class="map-info"
-                    >Track Length: 0 m</span
-                  >
                   <div class="map-legend">
                     <span class="legend-item"
                       ><span class="dot dot-start"></span> Start Gate</span
@@ -588,46 +621,52 @@
 
             <!-- Section 5: Target Times -->
             <div id="card-target-times" class="card form-card">
-              <div class="card-title">Target Times (Medal Adjudication)</div>
-              <div class="form-grid cols-3">
+              <div class="card-title">Target Times</div>
+              <div class="form-grid cols-3 target-times-grid">
                 <div class="form-group">
-                  <label for="target-gold" class="medal-label medal-gold"
-                    >🥇 Gold Target (seconds)</label
-                  >
-                  <input
-                    type="number"
-                    id="target-gold"
-                    class="form-control mono medal-input gold"
-                    step="0.001"
-                    min="1"
-                    required
-                  />
+                  <label for="target-gold" class="medal-label medal-gold">🥇 Gold</label>
+                  <div class="input-suffix-wrapper">
+                    <input
+                      type="number"
+                      id="target-gold"
+                      class="form-control mono medal-input gold"
+                      step="0.001"
+                      min="1"
+                      placeholder="0.000"
+                      required
+                    />
+                    <span class="input-suffix">s</span>
+                  </div>
                 </div>
                 <div class="form-group">
-                  <label for="target-silver" class="medal-label medal-silver"
-                    >🥈 Silver Target (seconds)</label
-                  >
-                  <input
-                    type="number"
-                    id="target-silver"
-                    class="form-control mono medal-input silver"
-                    step="0.001"
-                    min="1"
-                    required
-                  />
+                  <label for="target-silver" class="medal-label medal-silver">🥈 Silver</label>
+                  <div class="input-suffix-wrapper">
+                    <input
+                      type="number"
+                      id="target-silver"
+                      class="form-control mono medal-input silver"
+                      step="0.001"
+                      min="1"
+                      placeholder="0.000"
+                      required
+                    />
+                    <span class="input-suffix">s</span>
+                  </div>
                 </div>
                 <div class="form-group">
-                  <label for="target-bronze" class="medal-label medal-bronze"
-                    >🥉 Bronze Target (seconds)</label
-                  >
-                  <input
-                    type="number"
-                    id="target-bronze"
-                    class="form-control mono medal-input bronze"
-                    step="0.001"
-                    min="1"
-                    required
-                  />
+                  <label for="target-bronze" class="medal-label medal-bronze">🥉 Bronze</label>
+                  <div class="input-suffix-wrapper">
+                    <input
+                      type="number"
+                      id="target-bronze"
+                      class="form-control mono medal-input bronze"
+                      step="0.001"
+                      min="1"
+                      placeholder="0.000"
+                      required
+                    />
+                    <span class="input-suffix">s</span>
+                  </div>
                 </div>
               </div>
               <div
@@ -1042,7 +1081,7 @@
                   Flow 1: Modifying an Existing Test
                 </div>
                 <p class="tour-card-desc">
-                  Walk through selecting tests, tuning track &amp; car specs, positioning start/finish gates on the spline, setting medal times, and saving changes.
+                  Walk through license tiers, mobile-ready catalog browsing, track &amp; car specs, single-tap gate placement, medal times, and saving changes.
                 </p>
               </button>
 

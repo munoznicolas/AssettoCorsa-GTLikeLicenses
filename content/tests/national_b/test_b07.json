@@ -10,40 +10,40 @@
   "start_mode": "STANDING",
   "spawn": {
     "position": [
-      -6.85,
-      0.225,
-      135.324
+      30.859,
+      0.226,
+      113.096
     ],
     "forward_vector": [
-      -0.8579,
+      -0.8748,
       -0.0,
-      0.5138
+      0.4844
     ],
     "initial_speed_kmh": 0.0
   },
   "timing": {
     "start_gate": {
       "p1": [
-        -9.933,
-        0.225,
-        130.177
+        27.952,
+        0.226,
+        107.847
       ],
       "p2": [
-        -3.767,
-        0.225,
-        140.471
+        33.766,
+        0.226,
+        118.345
       ]
     },
     "finish_gate": {
       "p1": [
-        -52.951,
-        0.226,
-        -73.136
+        -74.873,
+        0.227,
+        60.275
       ],
       "p2": [
-        -44.751,
-        0.226,
-        -81.896
+        -85.587,
+        0.227,
+        65.679
       ]
     }
   },
@@ -54,8 +54,8 @@
     "stop_box_overshoot_fail": false
   },
   "targets": {
-    "gold_seconds": 17.2,
-    "silver_seconds": 18.5,
-    "bronze_seconds": 20.2
+    "gold_seconds": 12.9,
+    "silver_seconds": 13.9,
+    "bronze_seconds": 15.2
   }
 }

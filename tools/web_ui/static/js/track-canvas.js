@@ -25,7 +25,6 @@ export function setTrackCanvasPositionCallback(callback) {
 export async function fetchAndRenderSpline(trackId, layout) {
   if (!trackId) {
     state.currentSpline = null;
-    if (dom.mapTrackInfo) dom.mapTrackInfo.textContent = "No track selected";
     drawEmptyCanvas();
     return;
   }
@@ -35,9 +34,6 @@ export async function fetchAndRenderSpline(trackId, layout) {
     const data = await api.getSpline(trackId, layout);
     if (data.success && data.spline) {
       state.currentSpline = data.spline;
-      if (dom.mapTrackInfo) {
-        dom.mapTrackInfo.textContent = `Length: ${data.spline.total_length_m.toLocaleString()} m | Points: ${data.spline.point_count}`;
-      }
       if (onPositionChangeCallback && dom.inputStart && dom.inputFinish) {
         onPositionChangeCallback(
           parseFloat(dom.inputStart.value || 0),
@@ -46,14 +42,10 @@ export async function fetchAndRenderSpline(trackId, layout) {
       }
     } else {
       state.currentSpline = null;
-      if (dom.mapTrackInfo) {
-        dom.mapTrackInfo.textContent = "AI spline not found for this track layout";
-      }
       drawEmptyCanvas();
     }
   } catch (e) {
     state.currentSpline = null;
-    if (dom.mapTrackInfo) dom.mapTrackInfo.textContent = "Error loading spline";
     drawEmptyCanvas();
   } finally {
     if (dom.canvasLoading) dom.canvasLoading.style.display = "none";
@@ -213,18 +205,21 @@ export function drawMarker(ctx, x, y, color, label) {
   ctx.restore();
 }
 
+
 /**
- * Attach click interaction to canvas map.
+ * Attach click & touch interactions to canvas map.
  */
 export function initCanvasInteraction() {
   if (!dom.trackCanvas) return;
 
-  dom.trackCanvas.addEventListener("click", (e) => {
+  const handlePointerAt = (clientX, clientY, shiftKey) => {
     if (!state.currentSpline || (dom.toggleFullLap && dom.toggleFullLap.checked)) return;
 
     const rect = dom.trackCanvas.getBoundingClientRect();
-    const clickX = (e.clientX - rect.left) * (dom.trackCanvas.width / rect.width);
-    const clickY = (e.clientY - rect.top) * (dom.trackCanvas.height / rect.height);
+    if (!rect.width || !rect.height) return;
+
+    const clickX = (clientX - rect.left) * (dom.trackCanvas.width / rect.width);
+    const clickY = (clientY - rect.top) * (dom.trackCanvas.height / rect.height);
 
     const pts = state.currentSpline.points;
     const bounds = state.currentSpline.bounds;
@@ -238,7 +233,7 @@ export function initCanvasInteraction() {
     const ox = (dom.trackCanvas.width - bw * scale) / 2 - bounds.min_x * scale;
     const oy = (dom.trackCanvas.height - bh * scale) / 2 - bounds.min_y * scale;
 
-    // Find closest waypoint to mouse click
+    // Find closest waypoint to mouse/touch position
     let closestPt = null;
     let minDist = Infinity;
     for (let i = 0; i < pts.length; i++) {
@@ -251,13 +246,13 @@ export function initCanvasInteraction() {
       }
     }
 
-    if (closestPt && minDist < 40 && onPositionChangeCallback) {
+    if (closestPt && minDist < 50 && onPositionChangeCallback) {
       const s = closestPt.s;
       const curStart = parseFloat(dom.inputStart ? dom.inputStart.value : 0) || 0;
       const curFinish = parseFloat(dom.inputFinish ? dom.inputFinish.value : 1) || 1;
 
-      // If Shift key is held, set Finish. Otherwise set whichever gate is closer.
-      if (e.shiftKey) {
+      // If Shift key is held (desktop), place Finish; otherwise move closest gate
+      if (shiftKey) {
         onPositionChangeCallback(curStart, s);
       } else {
         const distToStart = Math.abs(s - curStart);
@@ -269,6 +264,17 @@ export function initCanvasInteraction() {
         }
       }
     }
+  };
+
+  dom.trackCanvas.addEventListener("click", (e) => {
+    handlePointerAt(e.clientX, e.clientY, e.shiftKey);
   });
+
+  dom.trackCanvas.addEventListener("touchstart", (e) => {
+    if (e.touches && e.touches.length === 1) {
+      const touch = e.touches[0];
+      handlePointerAt(touch.clientX, touch.clientY, false);
+    }
+  }, { passive: true });
 }
 

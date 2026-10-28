@@ -55,6 +55,36 @@ export function applyHostVisibility() {
 }
 
 function setupGlobalEventListeners() {
+  // Mobile Header Menu (Actions Drawer)
+  const closeActionsMenu = () => {
+    dom.headerActions?.classList.remove("open");
+    dom.actionsMenuBackdrop?.classList.remove("open");
+    dom.btnHeaderMenu?.setAttribute("aria-expanded", "false");
+  };
+
+  if (dom.btnHeaderMenu) {
+    dom.btnHeaderMenu.addEventListener("click", () => {
+      const isOpen = dom.headerActions?.classList.toggle("open");
+      dom.actionsMenuBackdrop?.classList.toggle("open", isOpen);
+      dom.btnHeaderMenu.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    });
+  }
+
+  if (dom.btnCloseActionsMenu) {
+    dom.btnCloseActionsMenu.addEventListener("click", closeActionsMenu);
+  }
+  if (dom.actionsMenuBackdrop) {
+    dom.actionsMenuBackdrop.addEventListener("click", closeActionsMenu);
+  }
+
+  dom.headerActions?.querySelectorAll("button").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (window.innerWidth <= 900) {
+        closeActionsMenu();
+      }
+    });
+  });
+
   // Export Content Manager Mod (.zip) with pure client-side validation & packaging
   if (dom.btnRebuild) {
     dom.btnRebuild.addEventListener("click", async () => {

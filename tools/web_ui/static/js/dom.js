@@ -12,6 +12,13 @@ export function initDom() {
   dom.workspaceView = document.querySelector(".workspace");
   dom.referenceView = document.getElementById("reference-view");
 
+  // Mobile Plan A Navigation & Actions Drawer
+  dom.btnHeaderMenu = document.getElementById("btn-header-menu");
+  dom.btnCloseActionsMenu = document.getElementById("btn-close-actions-menu");
+  dom.actionsMenuBackdrop = document.getElementById("actions-menu-backdrop");
+  dom.headerActions = document.getElementById("header-actions");
+  dom.btnBackToList = document.getElementById("btn-back-to-list");
+
   // Reference View
   dom.gamePillsContainer = document.getElementById("game-selector-pills");
   dom.refSearchInput = document.getElementById("ref-search-input");
@@ -70,7 +77,6 @@ export function initDom() {
   dom.dispSectorDist = document.getElementById("disp-sector-dist");
   dom.trackCanvas = document.getElementById("track-canvas");
   dom.canvasLoading = document.getElementById("canvas-loading");
-  dom.mapTrackInfo = document.getElementById("map-track-info");
 
   // Start Mode Elements
   dom.radioStanding = document.getElementById("radio-standing");

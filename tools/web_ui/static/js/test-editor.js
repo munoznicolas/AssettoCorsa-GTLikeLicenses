@@ -291,10 +291,10 @@ export function renderLicenseTabs() {
   state.curriculum.forEach((tier, idx) => {
     const btn = document.createElement("button");
     btn.className = `license-tab ${idx === state.activeTierIndex ? "active" : ""}`;
+    btn.title = `${tier.tier_name} (${Number(tier.tests.length) || 0} Tests)`;
+    btn.setAttribute("aria-label", tier.tier_name);
     btn.innerHTML = `
       <img class="tab-badge-img" src="./assets/career_ui/${escapeHtml(tier.badge_asset)}" alt="${escapeHtml(tier.tier_name)}">
-      <span>${escapeHtml(tier.tier_name)}</span>
-      <span class="tab-count">${Number(tier.tests.length) || 0}</span>
     `;
     btn.addEventListener("click", () => selectTier(idx));
     dom.tabsContainer.appendChild(btn);
@@ -310,7 +310,10 @@ export function selectTier(tierIdx) {
   state.isReferenceViewActive = false;
 
   // Show workspace, hide reference view
-  if (dom.workspaceView) dom.workspaceView.style.display = "flex";
+  if (dom.workspaceView) {
+    dom.workspaceView.style.display = "flex";
+    dom.workspaceView.classList.remove("view-editor");
+  }
   if (dom.referenceView) dom.referenceView.style.display = "none";
   if (dom.tabBtnReference) dom.tabBtnReference.classList.remove("active");
 
@@ -382,6 +385,7 @@ export function renderTestList() {
 
     item.addEventListener("click", () => {
       void loadTestIntoForm(idx);
+      if (dom.workspaceView) dom.workspaceView.classList.add("view-editor");
     });
     dom.testList.appendChild(item);
   });
@@ -422,9 +426,12 @@ function populateTestTargets(test) {
     silver_seconds: 12,
     bronze_seconds: 15,
   };
-  if (dom.targetGold) dom.targetGold.value = targets.gold_seconds;
-  if (dom.targetSilver) dom.targetSilver.value = targets.silver_seconds;
-  if (dom.targetBronze) dom.targetBronze.value = targets.bronze_seconds;
+  const g = Number(targets.gold_seconds);
+  const s = Number(targets.silver_seconds);
+  const b = Number(targets.bronze_seconds);
+  if (dom.targetGold) dom.targetGold.value = Number.isNaN(g) ? "" : g.toFixed(3);
+  if (dom.targetSilver) dom.targetSilver.value = Number.isNaN(s) ? "" : s.toFixed(3);
+  if (dom.targetBronze) dom.targetBronze.value = Number.isNaN(b) ? "" : b.toFixed(3);
   validateTargets();
 }
 
@@ -557,9 +564,9 @@ function applyCalculatedPhysics(test, physics, startMode) {
  */
 function applyCalculatedTargets(test, res, startMode) {
   const tg = res.targets;
-  if (dom.targetGold) dom.targetGold.value = tg.gold_seconds.toFixed(1);
-  if (dom.targetSilver) dom.targetSilver.value = tg.silver_seconds.toFixed(1);
-  if (dom.targetBronze) dom.targetBronze.value = tg.bronze_seconds.toFixed(1);
+  if (dom.targetGold) dom.targetGold.value = tg.gold_seconds.toFixed(3);
+  if (dom.targetSilver) dom.targetSilver.value = tg.silver_seconds.toFixed(3);
+  if (dom.targetBronze) dom.targetBronze.value = tg.bronze_seconds.toFixed(3);
 
   test.targets = {
     gold_seconds: tg.gold_seconds,
@@ -872,6 +879,7 @@ function handleAddTest() {
   renderLicenseTabs();
   renderTestList();
   void loadTestIntoForm(activeTier.tests.length - 1);
+  if (dom.workspaceView) dom.workspaceView.classList.add("view-editor");
   showToast(`Added new test ${newTest.test_id}`);
 }
 
@@ -1226,6 +1234,14 @@ export function initSidebarCollapse() {
 }
 
 export function setupEditorEventListeners() {
+  // Mobile Back Button (Plan A)
+  if (dom.btnBackToList) {
+    dom.btnBackToList.addEventListener("click", () => {
+      if (dom.workspaceView) dom.workspaceView.classList.remove("view-editor");
+    });
+  }
+
+
   initSidebarCollapse();
 
   setTrackCanvasPositionCallback((startS, finishS) => {
@@ -1244,6 +1260,13 @@ export function setupEditorEventListeners() {
 
   [dom.targetGold, dom.targetSilver, dom.targetBronze].forEach((el) => {
     el?.addEventListener("input", validateTargets);
+    el?.addEventListener("change", () => {
+      const v = Number.parseFloat(el.value);
+      if (!Number.isNaN(v)) {
+        el.value = v.toFixed(3);
+      }
+      validateTargets();
+    });
   });
 
   dom.form?.addEventListener("submit", (e) => {
