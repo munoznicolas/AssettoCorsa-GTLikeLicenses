@@ -42,6 +42,12 @@ export function setupReferenceViewListeners() {
       renderRefTableOnly();
     });
   }
+
+  window.addEventListener("themechange", () => {
+    if (state.isReferenceViewActive) {
+      renderReferenceView();
+    }
+  });
 }
 
 /**
@@ -180,6 +186,14 @@ export function renderReferenceCharts(list) {
     state.activeRefGame === "ALL" ? `${t.game} ${t.code}` : t.code
   );
 
+  const cs = getComputedStyle(document.documentElement);
+  const textColor = cs.getPropertyValue("--text-muted").trim() || "#8b9bb4";
+  const titleColor = cs.getPropertyValue("--text-dim").trim() || "#5c687a";
+  const gridColor = cs.getPropertyValue("--border-subtle").trim() || "rgba(255, 255, 255, 0.05)";
+  const tooltipBg = cs.getPropertyValue("--bg-panel").trim() || "#1e293b";
+  const tooltipText = cs.getPropertyValue("--text-main").trim() || "#ffffff";
+  const tooltipBorder = cs.getPropertyValue("--border-color").trim() || "#334155";
+
   const baseChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -187,10 +201,10 @@ export function renderReferenceCharts(list) {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: "#1e293b",
-        titleColor: "#fff",
-        bodyColor: "#cbd5e1",
-        borderColor: "#334155",
+        backgroundColor: tooltipBg,
+        titleColor: tooltipText,
+        bodyColor: textColor,
+        borderColor: tooltipBorder,
         borderWidth: 1,
         padding: 10,
         titleFont: { family: "Chakra Petch", size: 12, weight: "bold" },
@@ -199,9 +213,9 @@ export function renderReferenceCharts(list) {
     },
     scales: {
       x: {
-        grid: { color: "rgba(255, 255, 255, 0.05)" },
+        grid: { color: gridColor },
         ticks: {
-          color: "#94a3b8",
+          color: textColor,
           font: { family: "JetBrains Mono", size: 10 },
           maxRotation: 45,
           autoSkip: true,
@@ -213,14 +227,14 @@ export function renderReferenceCharts(list) {
             state.activeRefGame === "ALL"
               ? "Curriculum Progression (All GT Games)"
               : `${state.activeRefGame} Test Progression`,
-          color: "#64748b",
+          color: titleColor,
           font: { family: "Chakra Petch", size: 11, weight: "bold" },
         },
       },
       y: {
-        grid: { color: "rgba(255, 255, 255, 0.05)" },
+        grid: { color: gridColor },
         ticks: {
-          color: "#94a3b8",
+          color: textColor,
           font: { family: "JetBrains Mono", size: 10 },
         },
       },
@@ -526,7 +540,7 @@ export function renderReferenceCharts(list) {
             ctx.font = "bold 10px 'JetBrains Mono', monospace";
             const textWidth = ctx.measureText(text).width;
 
-            ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
+            ctx.fillStyle = "rgba(19, 23, 30, 0.9)";
             ctx.fillRect(px - textWidth / 2 - 5, top + 4, textWidth + 10, 16);
             ctx.strokeStyle = color;
             ctx.strokeRect(px - textWidth / 2 - 5, top + 4, textWidth + 10, 16);
@@ -585,7 +599,7 @@ export function renderReferenceCharts(list) {
           title: {
             display: true,
             text: "Relative Test Frequency / Density",
-            color: "#64748b",
+            color: "#5c687a",
             font: { family: "Chakra Petch", size: 11, weight: "bold" },
           },
         },
@@ -732,9 +746,9 @@ export function renderRefTableOnly() {
       <td><span class="tag-pw">${t.pw_kg_hp ? escapeHtml(t.pw_kg_hp) : "N/A"}</span></td>
       <td><span class="tag-layout ${layoutClass}">${safeLayout}</span></td>
       <td>${escapeHtml(t.track)}</td>
-      <td style="color: #fbbf24; font-family: var(--font-mono); font-weight: 600;">${escapeHtml(t.gold)}</td>
-      <td style="color: #cbd5e1; font-family: var(--font-mono);">${escapeHtml(t.silver)}</td>
-      <td style="color: #d97706; font-family: var(--font-mono);">${escapeHtml(t.bronze)}</td>
+      <td style="color: var(--accent-gold); font-family: var(--font-mono); font-weight: 600;">${escapeHtml(t.gold)}</td>
+      <td style="color: var(--accent-silver); font-family: var(--font-mono);">${escapeHtml(t.silver)}</td>
+      <td style="color: var(--accent-bronze); font-family: var(--font-mono);">${escapeHtml(t.bronze)}</td>
     `;
     dom.refTableBody.appendChild(row);
   });

@@ -27,6 +27,17 @@
     <meta name="twitter:image" content="og-image.svg" />
 
     <link rel="stylesheet" href="driver.css" />
+        <meta name="color-scheme" content="light dark" />
+    <script>
+      (function () {
+        try {
+          const stored = localStorage.getItem("theme");
+          const prefersLight = window.matchMedia("(prefers-color-scheme: light)").matches;
+          const theme = stored ? stored : (prefersLight ? "light" : "dark");
+          document.documentElement.setAttribute("data-theme", theme);
+        } catch (e) {}
+      })();
+    </script>
     <link rel="stylesheet" href="style.css?v=20261028b" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -161,37 +172,37 @@
         <div class="header-actions">
           <button
             id="btn-stop-ac"
-            class="btn"
-            style="display: none; background: #dc2626; color: #fff; border: 1px solid #ef4444;"
+            class="btn btn-danger"
+            style="display: none;"
             title="Stop / Terminate active Assetto Corsa session"
           >
             <span>Stop AC</span>
           </button>
           <button
-            id="btn-run-missing-telemetry"
-            class="btn btn-warning"
-            title="Batch run/record telemetry in Assetto Corsa for all rolling start tests missing track+car profiles"
-          >
-            <span>Record Missing Telemetry</span>
-          </button>
-          <button
             id="btn-sync"
-            class="btn btn-secondary"
+            class="btn btn-primary"
             title="Sync changes directly to Assetto Corsa install"
           >
             <span>Sync to AC</span>
           </button>
           <button
             id="btn-open-submit-pr-modal"
-            class="btn"
-            style="background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4);"
+            class="btn btn-primary"
+            style="display: none;"
             title="Submit a recorded telemetry file via Google login to open a GitHub Pull Request"
           >
             <span>Submit Telemetry (PR)</span>
           </button>
           <button
+            id="btn-run-missing-telemetry"
+            class="btn btn-secondary btn-sm"
+            title="Batch run/record telemetry in Assetto Corsa for all rolling start tests missing track+car profiles"
+          >
+            <span>Record Missing Telemetry</span>
+          </button>
+          <button
             id="btn-import-json"
-            class="btn btn-secondary"
+            class="btn btn-secondary btn-sm"
             title="Import and restore curriculum.json configuration file"
           >
             <span>Import JSON</span>
@@ -204,24 +215,32 @@
           />
           <button
             id="btn-reset-defaults"
-            class="btn btn-secondary"
+            class="btn btn-secondary btn-sm"
             title="Reset curriculum back to baseline defaults"
           >
             <span>Reset Defaults</span>
           </button>
           <button
             id="btn-tour-help"
-            class="btn btn-secondary"
+            class="btn btn-secondary btn-sm"
             title="Interactive Onboarding Tours &amp; Help"
           >
             <span>Take Tour</span>
           </button>
           <button
             id="btn-rebuild"
-            class="btn btn-primary"
+            class="btn btn-secondary btn-sm"
             title="Export full Content Manager ready-to-install mod package (.zip)"
           >
-            <span>Export</span>
+            <span>Export Mod (.zip)</span>
+          </button>
+          <button
+            id="btn-theme-toggle"
+            class="btn btn-secondary btn-sm theme-toggle-btn"
+            title="Toggle theme (Light / Dark)"
+            aria-label="Toggle theme"
+          >
+            <span id="theme-toggle-icon" aria-hidden="true">☀️</span>
           </button>
         </div>
       </header>
@@ -543,12 +562,12 @@
 
               <!-- Starting and Ending Position Controls -->
               <div class="form-grid cols-2 mt-3">
-                <div class="form-group">
-                  <div class="flex-between">
-                    <label for="slider-start-s"
-                      >Start Position (<span id="disp-start-s">0.00%</span> /
-                      <span id="disp-start-m">0 m</span>)</label
-                    >
+                <div class="form-group gate-control-group gate-start">
+                  <div class="gate-header">
+                    <span class="badge badge-success gate-badge">🏁 Start Gate</span>
+                    <label for="slider-start-s" class="gate-label">
+                      Position: <span id="disp-start-s">0.00%</span> (<span id="disp-start-m">0 m</span>)
+                    </label>
                     <label for="input-start-s" class="visually-hidden">Start Position Value</label>
                     <input
                       type="number"
@@ -572,12 +591,12 @@
                   />
                 </div>
 
-                <div class="form-group">
-                  <div class="flex-between">
-                    <label for="slider-finish-s"
-                      >Finish Position (<span id="disp-finish-s">100.00%</span>
-                      / <span id="disp-finish-m">0 m</span>)</label
-                    >
+                <div class="form-group gate-control-group gate-finish">
+                  <div class="gate-header">
+                    <span class="badge badge-danger gate-badge">🏁 Finish Gate</span>
+                    <label for="slider-finish-s" class="gate-label">
+                      Position: <span id="disp-finish-s">100.00%</span> (<span id="disp-finish-m">0 m</span>)
+                    </label>
                     <label for="input-finish-s" class="visually-hidden">Finish Position Value</label>
                     <input
                       type="number"
@@ -659,28 +678,28 @@
                 </label>
               </div>
 
-              <div id="ai-speed-status-badge" class="mt-2" style="display: none; font-size: 11px; padding: 4px 8px; border-radius: 4px; background: #451a03; border: 1px solid #d97706; color: #fef3c7;">
+              <div id="ai-speed-status-badge" class="mt-2" class="badge badge-gold mt-2" style="display: none;">
                 <span id="ai-speed-status-text">Calculated from AI Telemetry</span>
               </div>
               <button
                 type="button"
                 id="btn-export-single-telemetry-script"
                 class="btn btn-xs btn-secondary mt-1"
-                style="display: none; font-size: 11px; padding: 3px 8px; border-color: #38bdf8; color: #38bdf8; gap: 4px; align-items: center;"
+                style="display: none; font-size: 11px; padding: 3px 8px; border-color: var(--accent-sky); color: var(--accent-sky); gap: 4px; align-items: center;"
                 title="Download a PowerShell runner script to record telemetry for this test's car and track in Assetto Corsa"
               >
                 <span>Download Telemetry Runner Script (.ps1)</span>
               </button>
 
-              <div id="telemetry-missing-card" class="mt-2" style="display: none; padding: 12px; border-radius: 6px; background: rgba(245, 158, 11, 0.1); border: 1px dashed rgba(245, 158, 11, 0.4);">
+              <div id="telemetry-missing-card" class="mt-2" class="info-banner-warning mt-2" style="display: none;">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                  <span style="font-size: 12px; font-weight: 600; color: #fbbf24;">⚠️ Missing AI Telemetry Profile</span>
-                  <button type="button" id="btn-download-record-script" class="btn btn-xs btn-secondary" style="font-size: 11px; border-color: #fbbf24; color: #fbbf24;">
+                  <span style="font-size: 12px; font-weight: 600; color: var(--accent-gold);">⚠️ Missing AI Telemetry Profile</span>
+                  <button type="button" id="btn-download-record-script" class="btn btn-xs btn-secondary" style="font-size: 11px; border-color: var(--accent-gold); color: var(--accent-gold);">
                     <span>📥 Download Recording Script (.ps1)</span>
                   </button>
                 </div>
-                <div id="telemetry-dropzone-editor" style="border: 1px dashed rgba(255,255,255,0.25); border-radius: 4px; padding: 10px; text-align: center; cursor: pointer; background: rgba(0,0,0,0.25); transition: border-color 0.2s;">
-                  <span style="font-size: 11px; color: #94a3b8;">Drop recorded <code>.json</code> profile here or click to browse</span>
+                <div id="telemetry-dropzone-editor" class="dropzone-dashed" style="padding: 10px; text-align: center; cursor: pointer; margin-top: 8px;">
+                  <span style="font-size: 11px; color: var(--text-muted);">Drop recorded <code>.json</code> profile here or click to browse</span>
                   <input type="file" id="input-editor-telemetry-file" accept=".json,application/json" style="display: none;" />
                 </div>
               </div>
@@ -987,7 +1006,7 @@
             <button id="telemetry-modal-close" class="modal-close-btn">&times;</button>
           </div>
           <div class="modal-body">
-            <p style="font-size: 13px; color: #cbd5e1; margin-bottom: 12px; line-height: 1.5;">
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5;">
               Rolling start tests require an authentic 100% AI flying lap telemetry profile for their track and car combination to calibrate initial gate speed, gear, RPM, and spawn run-up distance.
             </p>
 
@@ -1011,11 +1030,11 @@
               </div>
             </div>
 
-            <div id="telemetry-summary-banner" style="padding: 10px 14px; border-radius: 6px; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); margin-bottom: 14px; font-size: 13px;">
+            <div id="telemetry-summary-banner" class="info-banner-sky" style="margin-bottom: 14px; font-size: 13px;">
               <span id="telemetry-summary-text">Scanning curriculum tests...</span>
             </div>
 
-            <div class="table-responsive" style="max-height: 250px; overflow-y: auto; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px;">
+            <div class="table-responsive" style="max-height: 250px; overflow-y: auto; border: 1px solid var(--border-subtle); border-radius: var(--radius-md);">
               <table class="ref-data-table" style="font-size: 12px; width: 100%;">
                 <thead>
                   <tr>
@@ -1034,12 +1053,12 @@
             </div>
           </div>
           <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-            <span id="telemetry-queue-info" style="font-size: 12px; color: #94a3b8;"></span>
+            <span id="telemetry-queue-info" style="font-size: 12px; color: var(--text-muted);"></span>
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-              <button type="button" id="btn-telemetry-export-script" class="btn btn-secondary" title="Export a PowerShell script to record telemetry on a local PC with Assetto Corsa" style="border-color: #38bdf8; color: #38bdf8;">
+              <button type="button" id="btn-telemetry-export-script" class="btn btn-secondary" title="Export a PowerShell script to record telemetry on a local PC with Assetto Corsa" style="border-color: var(--accent-sky); color: var(--accent-sky);">
                 <span>Download Local Runner Script (.ps1)</span>
               </button>
-              <button type="button" id="btn-telemetry-enqueue" class="btn btn-primary" style="background: #f59e0b; border-color: #d97706; color: #000; font-weight: 600;">
+              <button type="button" id="btn-telemetry-enqueue" class="btn btn-primary" class="btn btn-accent" style="color: #000000; font-weight: 600;">
                 <span>▶ Run Telemetry for Missing Combos</span>
               </button>
               <button type="button" id="btn-telemetry-cancel" class="btn btn-secondary">Close</button>
@@ -1056,18 +1075,18 @@
             <button id="modal-submit-pr-close" class="modal-close-btn">&times;</button>
           </div>
           <div class="modal-body">
-            <p style="font-size: 13px; color: #94a3b8; margin-bottom: 16px; line-height: 1.5;">
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">
               Submit your recorded Assetto Corsa AI telemetry profile directly to the repository.
               No Git knowledge or command-line required — just sign in with Google, drop your JSON file, and an autoformatted Pull Request will be created for review.
             </p>
 
             <!-- Step 1: Google Authentication -->
-            <div class="form-card" style="margin-bottom: 14px; padding: 14px; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; background: rgba(255,255,255,0.02);">
+            <div class="form-card" style="margin-bottom: 14px; padding: 14px; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: var(--bg-card);">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <label style="font-size: 12px; font-weight: 600; color: #f8fafc; text-transform: uppercase; letter-spacing: 0.5px;">
+                <label style="font-size: 12px; font-weight: 600; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px;">
                   1. Contributor Identity
                 </label>
-                <span id="google-auth-status" class="badge" style="background: rgba(148, 163, 184, 0.2); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.3);">
+                <span id="google-auth-status" class="badge badge-neutral">
                   Not Signed In
                 </span>
               </div>
@@ -1076,29 +1095,29 @@
                   Sign in with Google
                 </button>
                 <div id="user-profile-badge" style="display: none; align-items: center; gap: 8px;">
-                  <span id="user-display-name" style="color: #4ade80; font-weight: 500; font-size: 13px;"></span>
+                  <span id="user-display-name" style="color: var(--accent-green); font-weight: 500; font-size: 13px;"></span>
                   <button type="button" id="btn-signout-google" class="btn btn-xs btn-secondary" style="font-size: 10px; padding: 1px 6px;">Sign Out</button>
                 </div>
               </div>
             </div>
 
             <!-- Step 2: Telemetry JSON File Dropzone -->
-            <div class="form-card" style="margin-bottom: 14px; padding: 14px; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; background: rgba(255,255,255,0.02);">
-              <label style="font-size: 12px; font-weight: 600; color: #f8fafc; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 8px;">
+            <div class="form-card" style="margin-bottom: 14px; padding: 14px; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: var(--bg-card);">
+              <label style="font-size: 12px; font-weight: 600; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 8px;">
                 2. Telemetry Result File (.json)
               </label>
-              <div id="telemetry-dropzone" style="border: 2px dashed rgba(56, 189, 248, 0.35); border-radius: 8px; padding: 24px 16px; text-align: center; cursor: pointer; transition: all 0.2s; background: rgba(15, 23, 42, 0.4);">
+              <div id="telemetry-dropzone" class="dropzone-dashed" style="padding: 24px 16px; text-align: center; cursor: pointer;">
                 <span style="font-size: 28px; display: block; margin-bottom: 6px;">📁</span>
-                <span style="font-size: 13px; color: #f8fafc; font-weight: 500; display: block;">Drag & drop telemetry profile JSON here</span>
-                <span style="font-size: 11px; color: #64748b; display: block; margin-top: 4px;">or click to browse from <code>data/telemetry_profiles/</code></span>
+                <span style="font-size: 13px; color: var(--text-main); font-weight: 500; display: block;">Drag & drop telemetry profile JSON here</span>
+                <span style="font-size: 11px; color: var(--text-dim); display: block; margin-top: 4px;">or click to browse from <code>data/telemetry_profiles/</code></span>
                 <input type="file" id="telemetry-file-input" accept=".json" style="display: none;" />
               </div>
 
               <!-- File Preview Card -->
-              <div id="telemetry-file-preview" style="display: none; margin-top: 12px; padding: 12px; border-radius: 6px; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25);">
+              <div id="telemetry-file-preview" class="info-banner-sky" style="display: none; margin-top: 12px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                  <strong id="preview-filename" style="color: #38bdf8; font-family: monospace; font-size: 12px;"></strong>
-                  <span id="preview-valid-badge" class="badge" style="background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4);">✓ Valid Profile</span>
+                  <strong id="preview-filename" style="color: var(--accent-sky); font-family: var(--font-mono); font-size: 12px;"></strong>
+                  <span id="preview-valid-badge" class="badge badge-success">✓ Valid Profile</span>
                 </div>
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; font-size: 11px; color: #cbd5e1;">
                   <div><strong>Track:</strong> <span id="preview-track">-</span></div>
@@ -1115,18 +1134,18 @@
             <div id="pr-submission-status" style="display: none; padding: 10px 14px; border-radius: 6px; margin-bottom: 14px; font-size: 12px;"></div>
 
             <!-- Success Card -->
-            <div id="pr-success-card" style="display: none; padding: 16px; border-radius: 8px; background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); text-align: center;">
+            <div id="pr-success-card" class="info-banner-success" style="display: none; text-align: center;">
               <span style="font-size: 32px; display: block; margin-bottom: 8px;">🎉</span>
-              <h4 style="color: #4ade80; margin-bottom: 6px;">Pull Request Created Successfully!</h4>
-              <p style="font-size: 12px; color: #cbd5e1; margin-bottom: 14px;">Your telemetry profile has been submitted and autoformatted for maintainer review.</p>
-              <a id="pr-link-btn" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="background: #22c55e; border-color: #16a34a; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+              <h4 style="color: var(--accent-green); margin-bottom: 6px;">Pull Request Created Successfully!</h4>
+              <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">Your telemetry profile has been submitted and autoformatted for maintainer review.</p>
+              <a id="pr-link-btn" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary" class="btn btn-success" style="font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
                 <span>View Pull Request on GitHub</span> <span class="icon">↗</span>
               </a>
             </div>
           </div>
           <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
             <button type="button" id="btn-submit-pr-cancel" class="btn btn-secondary">Close</button>
-            <button type="button" id="btn-submit-telemetry-pr" class="btn btn-primary" style="background: #22c55e; border-color: #16a34a; font-weight: 600;" disabled>
+            <button type="button" id="btn-submit-telemetry-pr" class="btn btn-primary" class="btn btn-success" style="font-weight: 600;" disabled>
               <span>Submit Pull Request</span>
             </button>
           </div>
@@ -1143,7 +1162,7 @@
             <button id="modal-tour-close" class="modal-close-btn" aria-label="Close">&times;</button>
           </div>
           <div class="modal-body" style="padding: 20px 24px;">
-            <p style="color: var(--text-secondary, #94a3b8); margin-bottom: 20px; font-size: 13.5px; line-height: 1.5;">
+            <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 13.5px; line-height: 1.5;">
               Welcome! Learn how to design, calibrate, and test Gran Turismo-style license curriculum tests in Assetto Corsa. Choose a guided interactive tour below:
             </p>
             <div style="display: grid; gap: 14px;">

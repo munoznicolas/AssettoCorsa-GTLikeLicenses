@@ -57,19 +57,16 @@ export function initTelemetrySubmitter() {
 
     dropzone.addEventListener("dragover", (e) => {
       e.preventDefault();
-      dropzone.style.borderColor = "#38bdf8";
-      dropzone.style.background = "rgba(56, 189, 248, 0.1)";
+      dropzone.classList.add("dragover");
     });
 
     dropzone.addEventListener("dragleave", () => {
-      dropzone.style.borderColor = "rgba(56, 189, 248, 0.35)";
-      dropzone.style.background = "rgba(15, 23, 42, 0.4)";
+      dropzone.classList.remove("dragover");
     });
 
     dropzone.addEventListener("drop", (e) => {
       e.preventDefault();
-      dropzone.style.borderColor = "rgba(56, 189, 248, 0.35)";
-      dropzone.style.background = "rgba(15, 23, 42, 0.4)";
+      dropzone.classList.remove("dragover");
       if (e.dataTransfer?.files?.length) {
         void handleFileSelected(e.dataTransfer.files[0]);
       }
