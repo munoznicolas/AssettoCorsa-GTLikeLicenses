@@ -41,8 +41,8 @@
   <g transform="translate(100, 110)">
     <rect width="110" height="110" rx="24" fill="url(#badgeGrad)" stroke="#ef4444" stroke-width="4" filter="url(#glow)"/>
     <g font-family="'Chakra Petch', 'Arial Black', sans-serif" font-weight="900" font-style="italic" text-anchor="middle">
-      <text x="40" y="76" font-size="64" fill="#ef4444">G</text>
-      <text x="76" y="76" font-size="64" fill="#ffffff">T</text>
+      <text x="54" y="76" font-size="62" fill="#ffffff" letter-spacing="-2">LC</text>
+
     </g>
     <line x1="18" y1="92" x2="92" y2="92" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
   </g>
