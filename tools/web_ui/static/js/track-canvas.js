@@ -1,3 +1,12 @@
+function getThemeColor(varName, fallback) {
+  try {
+    const val = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+    return val || fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+
 /**
  * track-canvas.js
  * 2D Interactive Track Map and AI Spline visualizer.
@@ -67,10 +76,10 @@ export function drawEmptyCanvas() {
   if (!dom.trackCanvas) return;
   const ctx = dom.trackCanvas.getContext("2d");
   ctx.clearRect(0, 0, dom.trackCanvas.width, dom.trackCanvas.height);
-  ctx.fillStyle = "#161b22";
+  ctx.fillStyle = getThemeColor("--bg-card", "#0c0f14");
   ctx.fillRect(0, 0, dom.trackCanvas.width, dom.trackCanvas.height);
 
-  ctx.fillStyle = "#48566a";
+  ctx.fillStyle = getThemeColor("--text-dim", "#5c687a");
   ctx.font = "14px Inter, sans-serif";
   ctx.textAlign = "center";
   ctx.fillText(
@@ -116,9 +125,9 @@ export function renderCanvasTrack() {
   const startS = parseFloat(dom.inputStart ? dom.inputStart.value : 0) || 0;
   const finishS = parseFloat(dom.inputFinish ? dom.inputFinish.value : 1) || 1;
 
-  // 1. Draw base track line (dark road)
+  // 1. Draw base track line
   ctx.lineWidth = 6;
-  ctx.strokeStyle = "#27313f";
+  ctx.strokeStyle = getThemeColor("--border-color", "#262e3b");
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
   ctx.beginPath();
@@ -128,10 +137,10 @@ export function renderCanvasTrack() {
   }
   ctx.stroke();
 
-  // 2. Draw active sector (glowing gold)
+  // 2. Draw active sector
   ctx.lineWidth = 4;
-  ctx.strokeStyle = "#f59e0b";
-  ctx.shadowColor = "rgba(245, 158, 11, 0.6)";
+  ctx.strokeStyle = getThemeColor("--accent-gold", "#f59e0b");
+  ctx.shadowColor = getThemeColor("--accent-gold-border", "rgba(245, 158, 11, 0.35)");
   ctx.shadowBlur = 8;
   ctx.beginPath();
 
@@ -163,13 +172,13 @@ export function renderCanvasTrack() {
   // 3. Find and Draw Start Gate Marker
   const startPt = findPointAtProgress(pts, startS);
   if (startPt) {
-    drawMarker(ctx, toX(startPt.x), toY(startPt.y), "#10b981", "START");
+    drawMarker(ctx, toX(startPt.x), toY(startPt.y), getThemeColor("--accent-green", "#10b981"), "START");
   }
 
   // 4. Find and Draw Finish Gate Marker
   const finishPt = findPointAtProgress(pts, finishS);
   if (finishPt) {
-    drawMarker(ctx, toX(finishPt.x), toY(finishPt.y), "#e11d48", "FINISH");
+    drawMarker(ctx, toX(finishPt.x), toY(finishPt.y), getThemeColor("--accent-danger", "#e11d48"), "FINISH");
   }
 }
 
@@ -195,21 +204,73 @@ export function findPointAtProgress(pts, targetS) {
  */
 export function drawMarker(ctx, x, y, color, label) {
   ctx.save();
+
+  // 1. Draw glowing circular gate anchor
   ctx.fillStyle = color;
   ctx.shadowColor = color;
   ctx.shadowBlur = 8;
   ctx.beginPath();
-  ctx.arc(x, y, 7, 0, Math.PI * 2);
+  ctx.arc(x, y, 6.5, 0, Math.PI * 2);
   ctx.fill();
 
+  // 2. White outer ring around dot
+  ctx.shadowBlur = 0;
   ctx.strokeStyle = "#ffffff";
   ctx.lineWidth = 2;
   ctx.stroke();
 
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 9px 'JetBrains Mono', monospace";
+  // 3. Draw pill badge container for label
+  ctx.font = "bold 10px 'JetBrains Mono', monospace";
   ctx.textAlign = "center";
-  ctx.fillText(label, x, y - 11);
+  ctx.textBaseline = "middle";
+
+  const metrics = ctx.measureText(label);
+  const textWidth = metrics.width;
+  const pillW = textWidth + 12;
+  const pillH = 16;
+  const pillX = x - pillW / 2;
+  // If near top edge of canvas, position pill below anchor to prevent clipping
+  const pillY = y < 30 ? y + 14 : y - 24;
+  const radius = 3;
+
+  const isLight = document.documentElement.getAttribute("data-theme") === "light";
+
+  if (isLight) {
+    // Light mode: solid colored pill badge with crisp white text (contrast > 4.7:1)
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    if (ctx.roundRect) {
+      ctx.roundRect(pillX, pillY, pillW, pillH, radius);
+    } else {
+      ctx.rect(pillX, pillY, pillW, pillH);
+    }
+    ctx.fill();
+
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.15)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText(label, x, pillY + pillH / 2);
+  } else {
+    // Dark mode: dark pill badge with colored text matching gate
+    ctx.fillStyle = "rgba(12, 15, 20, 0.9)";
+    ctx.beginPath();
+    if (ctx.roundRect) {
+      ctx.roundRect(pillX, pillY, pillW, pillH, radius);
+    } else {
+      ctx.rect(pillX, pillY, pillW, pillH);
+    }
+    ctx.fill();
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.fillStyle = color;
+    ctx.fillText(label, x, pillY + pillH / 2);
+  }
+
   ctx.restore();
 }
 
@@ -219,6 +280,7 @@ export function drawMarker(ctx, x, y, color, label) {
 export function initCanvasInteraction() {
   if (!dom.trackCanvas) return;
 
+  window.addEventListener("themechange", () => renderCanvasTrack());
   dom.trackCanvas.addEventListener("click", (e) => {
     if (!state.currentSpline || (dom.toggleFullLap && dom.toggleFullLap.checked)) return;
 
