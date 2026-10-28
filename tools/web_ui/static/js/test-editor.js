@@ -625,12 +625,16 @@ export async function autoCalculateTargetsFromTelemetry(overrideStartS = null, o
         sector_length_m: targets.sector_length_m,
       }, startMode);
 
-      if (dom.telemetryMissingCard) dom.telemetryMissingCard.style.display = "none";
-      if (dom.btnExportSingleTelemetryScript) dom.btnExportSingleTelemetryScript.style.display = "none";
+      if (!state.isTourActive) {
+        if (dom.telemetryMissingCard) dom.telemetryMissingCard.style.display = "none";
+        if (dom.btnExportSingleTelemetryScript) dom.btnExportSingleTelemetryScript.style.display = "none";
+      }
     } else {
       // Telemetry not available for this track + car combination
-      if (dom.telemetryMissingCard) dom.telemetryMissingCard.style.display = "block";
-      if (dom.btnExportSingleTelemetryScript) dom.btnExportSingleTelemetryScript.style.display = "inline-flex";
+      if (!state.isTourActive) {
+        if (dom.telemetryMissingCard) dom.telemetryMissingCard.style.display = "block";
+        if (dom.btnExportSingleTelemetryScript) dom.btnExportSingleTelemetryScript.style.display = "inline-flex";
+      }
       showAISpeedStatus(`⚠️ No telemetry profile for ${carId} @ ${trackId}. Upload profile below or record in AC.`);
     }
   } catch (err) {

@@ -15,6 +15,7 @@ export const state = {
   activeRefGame: "ALL",
   refCharts: {},
   isReferenceViewActive: false,
+  isTourActive: false,
   cacheBuster: Date.now(),
 };
 
@@ -36,4 +37,3 @@ export function getActiveTest() {
     ? tier.tests[state.activeTestIndex]
     : null;
 }
-

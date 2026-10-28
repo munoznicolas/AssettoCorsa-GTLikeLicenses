@@ -53,7 +53,9 @@ function ensureEditorReady() {
     const testIdx = state.activeTestIndex ?? 0;
     const activeTier = state.curriculum[tierIdx];
     if (activeTier && activeTier.tests && activeTier.tests.length > 0) {
-      void loadTestIntoForm(testIdx);
+      if (!dom.inputTitle || !dom.inputTitle.value) {
+        void loadTestIntoForm(testIdx);
+      }
     }
   }
 }
@@ -63,6 +65,7 @@ function ensureEditorReady() {
  */
 export function startEditTestTour() {
   closeTourWelcomeModal();
+  state.isTourActive = true;
   ensureEditorReady();
 
   if (!window.driver?.js?.driver) {
@@ -84,6 +87,7 @@ export function startEditTestTour() {
     progressText: "Step {{current}} of {{total}}",
     onDestroyed: () => {
       localStorage.setItem("gt_tour_completed", "true");
+      state.isTourActive = false;
       activeDriver = null;
     },
     steps: [
@@ -163,9 +167,11 @@ export function startEditTestTour() {
  */
 export function startMissingTelemetryTour() {
   closeTourWelcomeModal();
+  state.isTourActive = true;
   ensureEditorReady();
 
   if (!window.driver?.js?.driver) {
+    state.isTourActive = false;
     showToast("Tour engine not loaded.", "error");
     return;
   }
@@ -174,6 +180,7 @@ export function startMissingTelemetryTour() {
   const wasMissingVisible = dom.telemetryMissingCard && dom.telemetryMissingCard.style.display !== "none";
   if (dom.telemetryMissingCard) {
     dom.telemetryMissingCard.style.display = "block";
+    dom.telemetryMissingCard.scrollIntoView({ behavior: "auto", block: "center" });
   }
   if (dom.btnExportSingleTelemetryScript) {
     dom.btnExportSingleTelemetryScript.style.display = "inline-flex";
@@ -196,7 +203,11 @@ export function startMissingTelemetryTour() {
       if (!wasMissingVisible && dom.telemetryMissingCard) {
         dom.telemetryMissingCard.style.display = "none";
       }
+      if (!wasMissingVisible && dom.btnExportSingleTelemetryScript) {
+        dom.btnExportSingleTelemetryScript.style.display = "none";
+      }
       localStorage.setItem("gt_tour_completed", "true");
+      state.isTourActive = false;
       activeDriver = null;
     },
     steps: [
