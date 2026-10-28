@@ -5,7 +5,7 @@
 
 import { state } from "./state.js";
 import { dom } from "./dom.js";
-import { api } from "./api.js";
+import { api, isStaticHost } from "./api.js";
 import { showToast, escapeHtml } from "./ui-utils.js";
 import {
   fetchAndRenderSpline,
@@ -813,6 +813,9 @@ export function saveFormIntoActiveTest() {
 export async function saveCurrentTier() {
   const activeTier = state.curriculum[state.activeTierIndex];
   if (!activeTier) return;
+  if (isStaticHost()) {
+    return { success: true, static: true };
+  }
   const data = await api.saveTier(activeTier.tier_name, activeTier.tests);
   if (!data.success) {
     throw new Error(data.error || "Save failed");
@@ -884,14 +887,21 @@ async function handleDeleteTest() {
   const newIdx = Math.max(0, Math.min(state.activeTestIndex, activeTier.tests.length - 1));
   state.activeTestIndex = newIdx;
 
+  // Immediately update UI state so test is removed on screen
+  renderLicenseTabs();
+  renderTestList();
+  await loadTestIntoForm(newIdx);
+
+  // Persist to server if running with local backend
   try {
-    await saveCurrentTier();
-    renderLicenseTabs();
-    renderTestList();
-    await loadTestIntoForm(newIdx);
-    showToast(`Removed test ${deletedId}. Subsequent tests renumbered successfully.`);
+    const saveRes = await saveCurrentTier();
+    if (saveRes?.static) {
+      showToast(`Removed test ${deletedId}. Subsequent tests renumbered successfully.`);
+    } else {
+      showToast(`Removed test ${deletedId}. Subsequent tests renumbered successfully.`);
+    }
   } catch (err) {
-    showToast("Error saving after delete: " + err.message, "error");
+    showToast(`Removed test ${deletedId} (in memory). Server save warning: ${err.message}`, "warning");
   }
 }
 
@@ -1012,10 +1022,10 @@ async function handleFormSubmit(e) {
   }
 
   try {
-    await saveCurrentTier();
+    const saveRes = await saveCurrentTier();
 
     // Fire off Track Miniature Builder for this particular test so it updates its image
-    if (testId) {
+    if (testId && !isStaticHost() && !saveRes?.static) {
       try {
         const minResult = await api.generateMiniature(testId, activeTest);
         if (minResult && !minResult.success) {
@@ -1029,7 +1039,11 @@ async function handleFormSubmit(e) {
     state.cacheBuster = Date.now();
     renderLicenseTabs();
     renderTestList();
-    showToast(`Saved test ${testId}! Track miniature updated.`);
+    if (saveRes?.static) {
+      showToast(`Saved test ${testId} (client-side). Export via 'Export Mod Package' when ready.`);
+    } else {
+      showToast(`Saved test ${testId}! Track miniature updated.`);
+    }
   } catch (err) {
     showToast("Save failed: " + err.message, "error");
   } finally {

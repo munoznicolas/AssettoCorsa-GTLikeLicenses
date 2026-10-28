@@ -1,14 +1,43 @@
 /**
+ * Resolves whether the application is running in a static host environment
+ * (such as GitHub Pages or file protocol) where no local Python server is available.
+ * @returns {boolean}
+ */
+export function isStaticHost() {
+  return Boolean(
+    window.location.hostname.endsWith("github.io") ||
+    window.location.protocol === "file:" ||
+    window.IS_STATIC_HOST
+  );
+}
+
+/**
+ * Safely parses a Fetch Response as JSON, throwing descriptive errors
+ * if the server returned HTML (e.g., 404/500/unhandled route) or invalid JSON.
+ * @param {Response} res
+ * @returns {Promise<any>}
+ */
+export async function safeParseJson(res) {
+  const text = await res.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    const isHtml = text.trim().startsWith("<");
+    if (isHtml || !res.ok) {
+      throw new Error(`Server returned HTTP ${res.status} (${res.statusText || (isHtml ? "HTML response" : "error")})`);
+    }
+    throw new Error(`Invalid JSON response: ${text.slice(0, 100)}`);
+  }
+}
+
+/**
  * Resolves API URL, automatically mapping to static pre-rendered JSON files
  * when running on GitHub Pages or file protocol.
  * @param {string} endpoint
  * @returns {string}
  */
 export function resolveApiPath(endpoint) {
-  const isStatic =
-    window.location.hostname.endsWith("github.io") ||
-    window.location.protocol === "file:" ||
-    Boolean(window.IS_STATIC_HOST);
+  const isStatic = isStaticHost();
 
   if (isStatic) {
     const clean = endpoint.startsWith("/") ? endpoint.slice(1) : endpoint;
@@ -51,19 +80,29 @@ export const api = {
    */
   async getCurriculum() {
     const res = await fetch(resolveApiPath("api/curriculum"));
-    return await res.json();
+    return await safeParseJson(res);
   },
 
   /**
    * Save curriculum tier data.
    */
   async saveTier(tierName, tests) {
-    const res = await fetch("/api/save_tier", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tier_name: tierName, tests }),
-    });
-    return await res.json();
+    if (isStaticHost()) {
+      return { success: true, static: true };
+    }
+    try {
+      const res = await fetch("/api/save_tier", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tier_name: tierName, tests }),
+      });
+      return await safeParseJson(res);
+    } catch (err) {
+      if (err.message && (err.message.includes("404") || err.message.includes("HTML") || err.message.includes("Failed to fetch"))) {
+        return { success: true, static: true, warning: "Saved in memory (no backend server detected)" };
+      }
+      return { success: false, error: err.message };
+    }
   },
 
   /**
@@ -72,7 +111,7 @@ export const api = {
    */
   async getTracks(allTracks = false) {
     const res = await fetch(resolveApiPath(`api/tracks${allTracks ? "?all=1" : ""}`));
-    return await res.json();
+    return await safeParseJson(res);
   },
 
   /**
@@ -81,7 +120,7 @@ export const api = {
    */
   async getCars(allCars = false) {
     const res = await fetch(resolveApiPath(`api/cars${allCars ? "?all=1" : ""}`));
-    return await res.json();
+    return await safeParseJson(res);
   },
 
   /**
@@ -92,7 +131,7 @@ export const api = {
     try {
       const res = await fetch(resolveApiPath(`api/spline?${query.toString()}`));
       if (res.ok) {
-        return await res.json();
+        return await safeParseJson(res);
       }
       // If layout-specific file not found (e.g. 404), fallback to base track spline
       if (layout) {
@@ -113,7 +152,7 @@ export const api = {
    */
   async getReferenceTests() {
     const res = await fetch(resolveApiPath("api/reference_tests"));
-    return await res.json();
+    return await safeParseJson(res);
   },
 
   /**
@@ -125,7 +164,7 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    return await res.json();
+    return await safeParseJson(res);
   },
 
   /**
@@ -137,7 +176,7 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    return await res.json();
+    return await safeParseJson(res);
   },
 
   /**
@@ -145,7 +184,7 @@ export const api = {
    */
   async getQueueStatus() {
     const res = await fetch("/api/queue/status");
-    return await res.json();
+    return await safeParseJson(res);
   },
 
   /**
@@ -157,7 +196,7 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ job_id: jobId, cancel_all: cancelAll }),
     });
-    return await res.json();
+    return await safeParseJson(res);
   },
 
   /**
@@ -169,7 +208,7 @@ export const api = {
       include_flying: includeFlying ? "1" : "0",
     });
     const res = await fetch(resolveApiPath(`api/telemetry/missing?${query.toString()}`));
-    return await res.json();
+    return await safeParseJson(res);
   },
 
   /**
@@ -181,7 +220,7 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ tier, include_flying: includeFlying }),
     });
-    return await res.json();
+    return await safeParseJson(res);
   },
 
   /**
@@ -193,7 +232,7 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    return await res.json();
+    return await safeParseJson(res);
   },
 
   /**
@@ -201,7 +240,7 @@ export const api = {
    */
   async getJob(jobId) {
     const res = await fetch(`/api/job/${jobId}`);
-    return await res.json();
+    return await safeParseJson(res);
   },
 
   /**
@@ -209,7 +248,7 @@ export const api = {
    */
   async generateContent() {
     const res = await fetch("/api/generate", { method: "POST" });
-    return await res.json();
+    return await safeParseJson(res);
   },
 
   /**
@@ -221,7 +260,7 @@ export const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ test_id: testId, test_data: testData }),
     });
-    return await res.json();
+    return await safeParseJson(res);
   },
 
   /**
@@ -229,7 +268,7 @@ export const api = {
    */
   async syncToAC() {
     const res = await fetch("/api/sync", { method: "POST" });
-    return await res.json();
+    return await safeParseJson(res);
   },
 
   /**
@@ -252,6 +291,6 @@ export const api = {
         telemetry_data: telemetryData,
       }),
     });
-    return await res.json();
+    return await safeParseJson(res);
   },
 };

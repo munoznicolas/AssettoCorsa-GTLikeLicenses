@@ -389,6 +389,10 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
         if self._dispatch_get_prefix(path):
             return
 
+        if path.startswith("/api/"):
+            self.send_json_response({"success": False, "error": f"Unknown API Route: {path}"}, status=404)
+            return
+
         super().do_GET()
 
     def _read_json_payload(self) -> Optional[Dict[str, Any]]:
@@ -630,7 +634,7 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
         if handler:
             handler(payload)
         else:
-            self.send_error(404, "Unknown API Route")
+            self.send_json_response({"success": False, "error": f"Unknown API Route: {path}"}, status=404)
 
 
 def main() -> int:

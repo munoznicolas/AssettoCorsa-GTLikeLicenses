@@ -5,7 +5,7 @@
 
 import { state } from "./js/state.js";
 import { dom, initDom } from "./js/dom.js";
-import { api } from "./js/api.js";
+import { api, isStaticHost } from "./js/api.js";
 import { showToast, openModal, closeModal } from "./js/ui-utils.js";
 import { initCanvasInteraction } from "./js/track-canvas.js";
 import {
@@ -80,12 +80,7 @@ function setupGlobalEventListeners() {
 
   // Live Sync to Assetto Corsa Root (hidden on static hosts, available in local dev server)
   if (dom.btnSync) {
-    const isStatic =
-      window.location.hostname.endsWith("github.io") ||
-      window.location.protocol === "file:" ||
-      Boolean(window.IS_STATIC_HOST);
-
-    if (isStatic) {
+    if (isStaticHost()) {
       dom.btnSync.style.display = "none";
     } else {
       dom.btnSync.addEventListener("click", async () => {

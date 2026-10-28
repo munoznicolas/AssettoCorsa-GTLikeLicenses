@@ -5,7 +5,7 @@
 
 import { state } from "./state.js";
 import { dom } from "./dom.js";
-import { api } from "./api.js";
+import { api, isStaticHost } from "./api.js";
 import { showToast, openModal, escapeHtml } from "./ui-utils.js";
 import { saveFormIntoActiveTest } from "./test-editor.js";
 
@@ -811,12 +811,7 @@ export function executeExportSingleTelemetryScript() {
 
 export function setupQueueEventListeners() {
   if (dom.btnRunLive) {
-    const isStatic =
-      window.location.hostname.endsWith("github.io") ||
-      window.location.protocol === "file:" ||
-      Boolean(window.IS_STATIC_HOST);
-
-    if (isStatic) {
+    if (isStaticHost()) {
       dom.btnRunLive.style.display = "none";
     } else {
       dom.btnRunLive.addEventListener("click", () => {
