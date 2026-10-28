@@ -6,6 +6,7 @@
 import { state } from "./state.js";
 import { dom } from "./dom.js";
 import { formatTimeDisplay, escapeHtml } from "./ui-utils.js";
+import { isLightTheme, onThemeChange } from "./theme.js";
 
 /**
  * Register event listeners for reference view tabs, filter pills, search input, and tier dropdown.
@@ -42,6 +43,12 @@ export function setupReferenceViewListeners() {
       renderRefTableOnly();
     });
   }
+
+  onThemeChange(() => {
+    if (state.isReferenceViewActive && state.referenceTests && state.referenceTests.length > 0) {
+      renderReferenceView();
+    }
+  });
 }
 
 /**
@@ -180,6 +187,15 @@ export function renderReferenceCharts(list) {
     state.activeRefGame === "ALL" ? `${t.game} ${t.code}` : t.code
   );
 
+  const isLight = isLightTheme();
+  const textColor = isLight ? "#475569" : "#94a3b8";
+  const gridColor = isLight ? "rgba(0, 0, 0, 0.06)" : "rgba(255, 255, 255, 0.05)";
+  const titleColor = isLight ? "#334155" : "#64748b";
+  const tooltipBg = isLight ? "#ffffff" : "#0f1422";
+  const tooltipTitle = isLight ? "#0f172a" : "#ffffff";
+  const tooltipBody = isLight ? "#334155" : "#cbd5e1";
+  const tooltipBorder = isLight ? "#cbd5e1" : "#1e2942";
+
   const baseChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
@@ -187,10 +203,10 @@ export function renderReferenceCharts(list) {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: "#1e293b",
-        titleColor: "#fff",
-        bodyColor: "#cbd5e1",
-        borderColor: "#334155",
+        backgroundColor: tooltipBg,
+        titleColor: tooltipTitle,
+        bodyColor: tooltipBody,
+        borderColor: tooltipBorder,
         borderWidth: 1,
         padding: 10,
         titleFont: { family: "Chakra Petch", size: 12, weight: "bold" },
@@ -199,9 +215,9 @@ export function renderReferenceCharts(list) {
     },
     scales: {
       x: {
-        grid: { color: "rgba(255, 255, 255, 0.05)" },
+        grid: { color: gridColor },
         ticks: {
-          color: "#94a3b8",
+          color: textColor,
           font: { family: "JetBrains Mono", size: 10 },
           maxRotation: 45,
           autoSkip: true,
@@ -213,14 +229,14 @@ export function renderReferenceCharts(list) {
             state.activeRefGame === "ALL"
               ? "Curriculum Progression (All GT Games)"
               : `${state.activeRefGame} Test Progression`,
-          color: "#64748b",
+          color: titleColor,
           font: { family: "Chakra Petch", size: 11, weight: "bold" },
         },
       },
       y: {
-        grid: { color: "rgba(255, 255, 255, 0.05)" },
+        grid: { color: gridColor },
         ticks: {
-          color: "#94a3b8",
+          color: textColor,
           font: { family: "JetBrains Mono", size: 10 },
         },
       },
@@ -320,7 +336,7 @@ export function renderReferenceCharts(list) {
             color: "#f87171",
             font: { family: "JetBrains Mono", size: 10 },
           },
-          grid: { color: "rgba(255, 255, 255, 0.05)" },
+          grid: { color: gridColor },
         },
         yPW: {
           type: "linear",
@@ -526,7 +542,7 @@ export function renderReferenceCharts(list) {
             ctx.font = "bold 10px 'JetBrains Mono', monospace";
             const textWidth = ctx.measureText(text).width;
 
-            ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
+            ctx.fillStyle = isLight ? "rgba(255, 255, 255, 0.95)" : "rgba(15, 23, 42, 0.9)";
             ctx.fillRect(px - textWidth / 2 - 5, top + 4, textWidth + 10, 16);
             ctx.strokeStyle = color;
             ctx.strokeRect(px - textWidth / 2 - 5, top + 4, textWidth + 10, 16);

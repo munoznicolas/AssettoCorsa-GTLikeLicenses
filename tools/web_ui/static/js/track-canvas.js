@@ -6,6 +6,7 @@
 import { state } from "./state.js";
 import { dom } from "./dom.js";
 import { api } from "./api.js";
+import { isLightTheme, onThemeChange } from "./theme.js";
 
 let onPositionChangeCallback = null;
 
@@ -31,27 +32,26 @@ export async function fetchAndRenderSpline(trackId, layout) {
   }
 
   if (dom.canvasLoading) dom.canvasLoading.style.display = "flex";
+
   try {
     const data = await api.getSpline(trackId, layout);
-    if (data.success && data.spline) {
-      state.currentSpline = data.spline;
+    if (data.success && data.points && data.points.length > 0) {
+      state.currentSpline = data;
       if (dom.mapTrackInfo) {
-        dom.mapTrackInfo.textContent = `Length: ${data.spline.total_length_m.toLocaleString()} m | Points: ${data.spline.point_count}`;
+        const count = data.points.length;
+        const lenKm = ((data.total_length || 0) / 1000).toFixed(2);
+        dom.mapTrackInfo.textContent = `${count} pts • ${lenKm} km`;
       }
-      if (onPositionChangeCallback && dom.inputStart && dom.inputFinish) {
-        onPositionChangeCallback(
-          parseFloat(dom.inputStart.value || 0),
-          parseFloat(dom.inputFinish.value || 1)
-        );
-      }
+      renderCanvasTrack();
     } else {
       state.currentSpline = null;
       if (dom.mapTrackInfo) {
-        dom.mapTrackInfo.textContent = "AI spline not found for this track layout";
+        dom.mapTrackInfo.textContent = data.error || "No AI spline available for layout";
       }
       drawEmptyCanvas();
     }
-  } catch (e) {
+  } catch (err) {
+    console.error("Failed to load track spline:", err);
     state.currentSpline = null;
     if (dom.mapTrackInfo) dom.mapTrackInfo.textContent = "Error loading spline";
     drawEmptyCanvas();
@@ -65,12 +65,13 @@ export async function fetchAndRenderSpline(trackId, layout) {
  */
 export function drawEmptyCanvas() {
   if (!dom.trackCanvas) return;
+  const isLight = isLightTheme();
   const ctx = dom.trackCanvas.getContext("2d");
   ctx.clearRect(0, 0, dom.trackCanvas.width, dom.trackCanvas.height);
-  ctx.fillStyle = "#161b22";
+  ctx.fillStyle = isLight ? "#f8fafc" : "#080b12";
   ctx.fillRect(0, 0, dom.trackCanvas.width, dom.trackCanvas.height);
 
-  ctx.fillStyle = "#48566a";
+  ctx.fillStyle = isLight ? "#64748b" : "#596b86";
   ctx.font = "14px Inter, sans-serif";
   ctx.textAlign = "center";
   ctx.fillText(
@@ -94,6 +95,7 @@ export function renderCanvasTrack() {
     return;
   }
 
+  const isLight = isLightTheme();
   const pts = state.currentSpline.points;
   const bounds = state.currentSpline.bounds;
   const ctx = dom.trackCanvas.getContext("2d");
@@ -101,6 +103,8 @@ export function renderCanvasTrack() {
   const h = dom.trackCanvas.height;
 
   ctx.clearRect(0, 0, w, h);
+  ctx.fillStyle = isLight ? "#f8fafc" : "#080b12";
+  ctx.fillRect(0, 0, w, h);
 
   // Coordinate transforms to fit canvas with padding
   const pad = 30;
@@ -116,9 +120,9 @@ export function renderCanvasTrack() {
   const startS = parseFloat(dom.inputStart ? dom.inputStart.value : 0) || 0;
   const finishS = parseFloat(dom.inputFinish ? dom.inputFinish.value : 1) || 1;
 
-  // 1. Draw base track line (dark road)
+  // 1. Draw base track line (subdued circuit outline)
   ctx.lineWidth = 6;
-  ctx.strokeStyle = "#27313f";
+  ctx.strokeStyle = isLight ? "#cbd5e1" : "#1e2942";
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
   ctx.beginPath();
@@ -128,10 +132,10 @@ export function renderCanvasTrack() {
   }
   ctx.stroke();
 
-  // 2. Draw active sector (glowing gold)
+  // 2. Draw active sector (glowing gold ribbon)
   ctx.lineWidth = 4;
-  ctx.strokeStyle = "#f59e0b";
-  ctx.shadowColor = "rgba(245, 158, 11, 0.6)";
+  ctx.strokeStyle = isLight ? "#d97706" : "#facc15";
+  ctx.shadowColor = isLight ? "rgba(217, 119, 6, 0.4)" : "rgba(250, 204, 21, 0.6)";
   ctx.shadowBlur = 8;
   ctx.beginPath();
 
@@ -163,13 +167,13 @@ export function renderCanvasTrack() {
   // 3. Find and Draw Start Gate Marker
   const startPt = findPointAtProgress(pts, startS);
   if (startPt) {
-    drawMarker(ctx, toX(startPt.x), toY(startPt.y), "#10b981", "START");
+    drawMarker(ctx, toX(startPt.x), toY(startPt.y), isLight ? "#059669" : "#10b981", "START");
   }
 
   // 4. Find and Draw Finish Gate Marker
   const finishPt = findPointAtProgress(pts, finishS);
   if (finishPt) {
-    drawMarker(ctx, toX(finishPt.x), toY(finishPt.y), "#e11d48", "FINISH");
+    drawMarker(ctx, toX(finishPt.x), toY(finishPt.y), isLight ? "#dc2626" : "#e11d48", "FINISH");
   }
 }
 
@@ -206,7 +210,7 @@ export function drawMarker(ctx, x, y, color, label) {
   ctx.lineWidth = 2;
   ctx.stroke();
 
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = isLightTheme() ? "#0f172a" : "#ffffff";
   ctx.font = "bold 9px 'JetBrains Mono', monospace";
   ctx.textAlign = "center";
   ctx.fillText(label, x, y - 11);
@@ -218,6 +222,11 @@ export function drawMarker(ctx, x, y, color, label) {
  */
 export function initCanvasInteraction() {
   if (!dom.trackCanvas) return;
+
+  // Re-render track when theme changes
+  onThemeChange(() => {
+    renderCanvasTrack();
+  });
 
   dom.trackCanvas.addEventListener("click", (e) => {
     if (!state.currentSpline || (dom.toggleFullLap && dom.toggleFullLap.checked)) return;
@@ -271,4 +280,3 @@ export function initCanvasInteraction() {
     }
   });
 }
-

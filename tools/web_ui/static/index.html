@@ -26,7 +26,24 @@
     <meta name="twitter:description" content="Design, inspect, and contribute Gran Turismo-style driving school license tests &amp; AI telemetry profiles for Assetto Corsa." />
     <meta name="twitter:image" content="og-image.svg" />
 
-    <link rel="stylesheet" href="style.css?v=20261027c" />
+        <script>
+      (function () {
+        try {
+          var setting = localStorage.getItem("gt_license_theme") || "system";
+          var isDark =
+            setting === "dark" ||
+            (setting === "system" &&
+              window.matchMedia &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          var resolved = isDark ? "dark" : "light";
+          document.documentElement.setAttribute("data-theme", resolved);
+          document.documentElement.setAttribute("data-theme-setting", setting);
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute("content", isDark ? "#080b12" : "#ffffff");
+        } catch (e) {}
+      })();
+    </script>
+    <link rel="stylesheet" href="style.css?v=20261027d" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -77,6 +94,15 @@
             title="Submit a recorded telemetry file via Google login to open a GitHub Pull Request"
           >
             <span>Submit Telemetry (PR)</span>
+          </button>
+                    <button
+            id="btn-theme-toggle"
+            class="btn btn-icon-only btn-secondary theme-toggle-btn"
+            type="button"
+            aria-label="Toggle theme"
+            title="Theme: System (Auto) — Follows OS theme. Click to switch to GT2 Dark"
+          >
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
           </button>
           <button
             id="btn-rebuild"
