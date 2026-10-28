@@ -36,7 +36,6 @@ export function initDom() {
   dom.runQueueBadge = document.getElementById("run-queue-badge");
   dom.btnRebuild = document.getElementById("btn-rebuild");
   dom.btnSync = document.getElementById("btn-sync");
-  dom.btnThemeToggle = document.getElementById("btn-theme-toggle");
   dom.btnExportJson = document.getElementById("btn-export-json");
   dom.btnImportJson = document.getElementById("btn-import-json");
   dom.inputImportJsonFile = document.getElementById("input-import-json-file");
@@ -121,3 +120,4 @@ export function initDom() {
 
   return dom;
 }
+
