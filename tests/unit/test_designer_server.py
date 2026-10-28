@@ -202,6 +202,60 @@ class TestDesignerServer(unittest.TestCase):
         self.assertIn("if (dom.btnRunMissingTelemetry)", qr_js)
         self.assertIn('dom.btnRunMissingTelemetry.style.display = "none"', qr_js)
 
+    def test_mobile_unsupported_markup_and_early_detection(self):
+        index_html_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "index.html")
+        with open(index_html_path, "r", encoding="utf-8") as f:
+            html = f.read()
+
+        # Verify early mobile device detection script
+        self.assertIn("device-mobile", html)
+        self.assertIn("isMobile", html)
+
+        # Verify mobile unsupported screen container and accessibility
+        self.assertIn('id="mobile-unsupported-screen"', html)
+        self.assertIn('class="mobile-unsupported-screen"', html)
+        self.assertIn('role="region"', html)
+        self.assertIn("Desktop Experience Required", html)
+        self.assertIn("Mobile screens are not currently supported", html)
+
+        # Verify interactive actions
+        self.assertIn('id="btn-mobile-copy-url"', html)
+        self.assertIn("Copy Link for PC", html)
+        self.assertIn("View on GitHub", html)
+
+    def test_mobile_unsupported_css_rules(self):
+        style_css_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "style.css")
+        with open(style_css_path, "r", encoding="utf-8") as f:
+            css = f.read()
+
+        # Default hidden on desktop
+        self.assertIn(".mobile-unsupported-screen {", css)
+        self.assertIn("display: none;", css)
+
+        # Media query triggers for phone & small screen blocking
+        self.assertIn("@media (max-width: 850px)", css)
+        self.assertIn("100dvh", css)
+
+        # Body / #app hidden on mobile viewport or device-mobile class
+        self.assertIn("html.device-mobile #app", css)
+        self.assertIn("html.device-mobile .mobile-unsupported-screen", css)
+
+        # Light theme adaptation
+        self.assertIn("@media (prefers-color-scheme: light)", css)
+
+    def test_mobile_copy_button_integration(self):
+        dom_js_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "js", "dom.js")
+        with open(dom_js_path, "r", encoding="utf-8") as f:
+            dom_js = f.read()
+        app_js_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "app.js")
+        with open(app_js_path, "r", encoding="utf-8") as f:
+            app_js = f.read()
+
+        self.assertIn("dom.btnMobileCopyUrl", dom_js)
+        self.assertIn("dom.btnMobileCopyText", dom_js)
+        self.assertIn("if (dom.btnMobileCopyUrl)", app_js)
+        self.assertIn("clipboard.writeText", app_js)
+
 
 if __name__ == "__main__":
     unittest.main()

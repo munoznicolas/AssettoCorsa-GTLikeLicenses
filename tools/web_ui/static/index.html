@@ -45,8 +45,118 @@
       href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,600;0,700;1,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
       rel="stylesheet"
     />
+    <!-- Early Mobile Device Detection Script to avoid flash of desktop UI -->
+    <script>
+      (function () {
+        try {
+          var ua = navigator.userAgent || "";
+          var isMobile = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua) ||
+            ((window.matchMedia && window.matchMedia("(max-width: 850px)").matches) && ('ontouchstart' in window || navigator.maxTouchPoints > 0));
+          if (isMobile) {
+            document.documentElement.classList.add("device-mobile");
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
+    <!-- Mobile Devices Not Supported Screen (First Step Measure) -->
+    <div id="mobile-unsupported-screen" class="mobile-unsupported-screen" role="region" aria-label="Mobile Device Notice">
+      <div class="mobile-card">
+        <div class="mobile-card-header">
+          <div class="mobile-brand">
+            <span class="gt-logo">LC</span>
+            <div class="title-wrap">
+              <div class="brand-title">LICENSE CENTER</div>
+              <span class="brand-subtitle">Assetto Corsa Driving School Studio</span>
+            </div>
+          </div>
+          <div class="mobile-badge-pill">
+            <span class="pulse-dot"></span>
+            <span>DESKTOP ONLY</span>
+          </div>
+        </div>
+
+        <div class="mobile-visual-wrap">
+          <svg class="mobile-graphic-svg" viewBox="0 0 160 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <!-- Monitor & Desktop Graphic -->
+            <rect class="desktop-monitor-body" x="25" y="10" width="105" height="60" rx="6" fill="#13171e" stroke="#262e3b" stroke-width="2"/>
+            <line class="desktop-monitor-divider" x1="25" y1="22" x2="130" y2="22" stroke="#262e3b" stroke-width="1.5"/>
+            <circle cx="33" cy="16" r="2.5" fill="#ef4444"/>
+            <circle cx="41" cy="16" r="2.5" fill="#f59e0b"/>
+            <circle cx="49" cy="16" r="2.5" fill="#10b981"/>
+            <!-- Racing line inside screen -->
+            <path d="M35 55 C 55 55, 60 35, 80 45 C 95 52, 105 30, 118 32" stroke="#2563eb" stroke-width="2" stroke-linecap="round"/>
+            <path d="M35 58 C 55 58, 60 38, 80 48 C 95 55, 105 33, 118 35" stroke="#e11d48" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="3 3"/>
+            <!-- Monitor stand -->
+            <path class="desktop-monitor-stand" d="M70 70 L85 70 L89 82 L66 82 Z" fill="#1e2430"/>
+            <rect class="desktop-monitor-base" x="60" y="82" width="35" height="4" rx="2" fill="#333f52"/>
+            <!-- Mobile phone overlay with restriction badge -->
+            <g transform="translate(108, 32)">
+              <rect class="phone-body" x="0" y="0" width="34" height="58" rx="5" fill="#0c0f14" stroke="#ef4444" stroke-width="2"/>
+              <line class="phone-speaker" x1="11" y1="4" x2="23" y2="4" stroke="#5c687a" stroke-width="1.5" stroke-linecap="round"/>
+              <rect class="phone-screen" x="4" y="8" width="26" height="42" rx="2" fill="#191f28"/>
+              <!-- Restriction warning symbol inside phone -->
+              <circle cx="17" cy="29" r="9" fill="rgba(239, 68, 68, 0.2)" stroke="#ef4444" stroke-width="1.2"/>
+              <path d="M17 24 L17 30 M17 33 L17 33.5" stroke="#ef4444" stroke-width="1.8" stroke-linecap="round"/>
+              <circle class="phone-home" cx="17" cy="53" r="1.5" fill="#5c687a"/>
+            </g>
+          </svg>
+        </div>
+
+        <div class="mobile-card-body">
+          <h1 class="mobile-title">Desktop Experience Required</h1>
+          <p class="mobile-desc">
+            The <strong>AC License Center</strong> test designer, interactive track spline inspector, and telemetry studio are designed for desktop and laptop displays.
+          </p>
+          <div class="mobile-notice-box">
+            <span class="notice-icon" aria-hidden="true">⚠️</span>
+            <div class="notice-text">
+              <strong>Mobile screens are not currently supported.</strong>
+              <span>We are actively redesigning the interface for mobile displays. Please open this tool on a computer in the meantime.</span>
+            </div>
+          </div>
+
+          <div class="mobile-reasons-list">
+            <div class="reason-item">
+              <span class="reason-icon" aria-hidden="true">📐</span>
+              <div class="reason-text">
+                <span class="reason-title">High-Precision Spline Mapping</span>
+                <span class="reason-sub">Interactive 2D gate positioning &amp; track curvature canvas</span>
+              </div>
+            </div>
+            <div class="reason-item">
+              <span class="reason-icon" aria-hidden="true">📈</span>
+              <div class="reason-text">
+                <span class="reason-title">Multi-Channel Telemetry Graphs</span>
+                <span class="reason-sub">High-frequency speed, throttle, brake, and steer comparison</span>
+              </div>
+            </div>
+            <div class="reason-item">
+              <span class="reason-icon" aria-hidden="true">🏎️</span>
+              <div class="reason-text">
+                <span class="reason-title">Assetto Corsa Integration</span>
+                <span class="reason-sub">Direct file syncing and Content Manager package generation</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mobile-card-footer">
+          <button type="button" id="btn-mobile-copy-url" class="btn btn-secondary mobile-action-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <span id="btn-mobile-copy-text">Copy Link for PC</span>
+          </button>
+          <a href="https://github.com/nicolasmunoz/AssettoCorsa-GTLikeLicenses" target="_blank" rel="noopener noreferrer" class="btn btn-primary mobile-action-btn">
+            <span>View on GitHub</span>
+            <span class="btn-arrow" aria-hidden="true">↗</span>
+          </a>
+        </div>
+      </div>
+    </div>
     <div id="app">
       <!-- Top Header -->
       <header class="navbar">
@@ -1090,6 +1200,6 @@
     <script src="chart.umd.min.js"></script>
     <script src="jszip.min.js"></script>
     <script src="driver.js"></script>
-    <script type="module" src="app.js?v=20261028a"></script>
+    <script type="module" src="app.js?v=20261028b"></script>
   </body>
 </html>
