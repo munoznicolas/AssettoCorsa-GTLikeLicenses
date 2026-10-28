@@ -94,13 +94,8 @@ function handleCachedSpeedResult(data, isManualClick) {
     }
   }
 
-  const sourceLabel = data.source ? ` (${data.source})` : "";
-  const dateStr = data.recorded_at
-    ? ` • 📅 ${new Date(data.recorded_at).toISOString().replace("T", " ").substring(0, 16)} UTC`
-    : "";
-  const targetsStr = data.targets ? ` | Gold: ${data.targets.gold_seconds}s` : "";
   showAISpeedStatus(
-    `AI Telemetry Handover${sourceLabel}${dateStr}: ${data.speed_kmh} km/h | Gear ${data.gear || "Auto"} @ ${data.rpm || "Auto"} RPM | Run-up: ${data.spawn_offset_m}m${targetsStr}`
+    `AI Telemetry: ${data.speed_kmh} km/h | Gear ${data.gear || "Auto"} @ ${data.rpm || "Auto"} RPM | Run-up: ${data.spawn_offset_m}m`
   );
   if (isManualClick) {
     showToast(`Applied authentic ${data.speed_kmh} km/h and medal targets from cached AI Telemetry!`, "success");
@@ -181,11 +176,8 @@ function handleCompletedTelemetryJob(job) {
   if (curTest && curTest.test_id === pendingTelemetryTestId && job.result) {
     applySpeedDataToTest(curTest, job.result);
 
-    const dateStr = job.result.recorded_at
-      ? ` • 📅 ${new Date(job.result.recorded_at).toISOString().replace("T", " ").substring(0, 16)} UTC`
-      : "";
     showAISpeedStatus(
-      `AI Telemetry Handover (live in-engine)${dateStr}: ${job.result.speed_kmh} km/h | Gear ${job.result.gear || "Auto"} @ ${job.result.rpm || "Auto"} RPM | Run-up: ${job.result.spawn_offset_m}m`
+      `AI Telemetry: ${job.result.speed_kmh} km/h | Gear ${job.result.gear || "Auto"} @ ${job.result.rpm || "Auto"} RPM | Run-up: ${job.result.spawn_offset_m}m`
     );
     showToast(
       `✨ 100% AI Telemetry recorded & applied to ${curTest.test_id}: ${job.result.speed_kmh} km/h (Gear ${job.result.gear})!`,

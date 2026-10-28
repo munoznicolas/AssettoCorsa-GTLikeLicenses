@@ -570,12 +570,7 @@ function applyCalculatedTargets(test, res, startMode) {
   applyCalculatedPhysics(test, res.physics, startMode);
   validateTargets();
 
-  const speedVal = res.physics?.speed_kmh ?? test.speed;
-  const modeLabel = startMode === "STANDING" ? "Standing Launch" : `${speedVal} km/h Handover`;
-  const sourceLabel = res.source ? ` (${res.source.replaceAll("_", " ")})` : "";
-  showAISpeedStatus(
-    `⚡ Telemetry Targets${sourceLabel}: Gold ${tg.gold_seconds}s | Silver ${tg.silver_seconds}s | Bronze ${tg.bronze_seconds}s • ${modeLabel} • Sector: ${res.sector_time_s}s (${res.sector_length_m}m)`
-  );
+  updateTestAISpeedDisplay(test);
 }
 
 /**
@@ -609,6 +604,7 @@ export async function autoCalculateTargetsFromTelemetry(overrideStartS = null, o
 
   test.start_s = startS;
   test.finish_s = finishS;
+  test.start_mode = startMode;
 
   if (!trackId || !carId) return;
 
