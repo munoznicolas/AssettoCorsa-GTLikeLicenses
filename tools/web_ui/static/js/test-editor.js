@@ -1212,7 +1212,7 @@ export function initSidebarCollapse() {
   const savedState = localStorage.getItem("gt_sidebar_collapsed") === "true";
   updateSidebarState(savedState);
 
-  dom.btnToggleSidebar.addEventListener("click", () => {
+  const toggleSidebar = () => {
     const willCollapse = !dom.sidebar.classList.contains("collapsed");
     updateSidebarState(willCollapse);
     try {
@@ -1220,7 +1220,10 @@ export function initSidebarCollapse() {
     } catch {
       // Ignore localStorage exceptions in restricted contexts
     }
-  });
+  };
+
+  window.toggleSidebar = toggleSidebar;
+  dom.btnToggleSidebar.onclick = toggleSidebar;
 }
 
 export function setupEditorEventListeners() {

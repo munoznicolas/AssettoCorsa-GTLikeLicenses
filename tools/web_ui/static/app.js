@@ -20,6 +20,7 @@ import {
 import { setupReferenceViewListeners } from "./js/reference-view.js";
 import { initTelemetrySubmitter } from "./js/telemetry-submitter.js";
 import { buildAndExportModZip } from "./js/mod-packager.js";
+import { initTheme } from "./js/theme.js";
 
 /**
  * Global operational event listeners (Rebuild, Sync, Modal close).
@@ -125,6 +126,7 @@ function setupGlobalEventListeners() {
  */
 async function init() {
   initDom();
+  initTheme();
   initCanvasInteraction();
   setupEditorEventListeners();
   setupQueueEventListeners();
