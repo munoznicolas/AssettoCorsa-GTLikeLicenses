@@ -186,6 +186,38 @@ function setupGlobalEventListeners() {
   if (dom.modalClose) dom.modalClose.addEventListener("click", closeModal);
   if (dom.modalBtnOk) dom.modalBtnOk.addEventListener("click", closeModal);
 
+  // Copy Link on Mobile Notice Screen
+  if (dom.btnMobileCopyUrl) {
+    dom.btnMobileCopyUrl.addEventListener("click", async () => {
+      try {
+        const url = window.location.href;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(url);
+        } else {
+          const ta = document.createElement("textarea");
+          ta.value = url;
+          ta.style.position = "fixed";
+          ta.style.opacity = "0";
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+        }
+        if (dom.btnMobileCopyText) {
+          dom.btnMobileCopyText.textContent = "✓ Copied Link!";
+        }
+        showToast("Link copied to clipboard! Paste it on your computer.", "success");
+        setTimeout(() => {
+          if (dom.btnMobileCopyText) {
+            dom.btnMobileCopyText.textContent = "Copy Link for PC";
+          }
+        }, 2500);
+      } catch (err) {
+        showToast("Unable to copy URL: " + err.message, "error");
+      }
+    });
+  }
+
   // Outside Click Close for Modals
   window.addEventListener("click", (e) => {
     if (e.target === dom.logModal) closeModal();
