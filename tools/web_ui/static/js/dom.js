@@ -14,7 +14,6 @@ export function initDom() {
 
   // Mobile Plan A Navigation & Actions Drawer
   dom.btnHeaderMenu = document.getElementById("btn-header-menu");
-  dom.btnCloseActionsMenu = document.getElementById("btn-close-actions-menu");
   dom.actionsMenuBackdrop = document.getElementById("actions-menu-backdrop");
   dom.headerActions = document.getElementById("header-actions");
   dom.btnBackToList = document.getElementById("btn-back-to-list");

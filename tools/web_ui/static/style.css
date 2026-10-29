@@ -1246,13 +1246,10 @@ select optgroup {
   font-size: 11px;
 }
 
-=======
 .map-info {
   font-family: var(--font-mono);
   color: var(--text-muted);
 }
-
->>>>>>> origin/main
 .map-legend {
   display: flex;
   gap: 14px;
@@ -2270,7 +2267,6 @@ select optgroup {
 
 
 /* ==========================================================================
-<<<<<<< HEAD
    Mobile-Friendly Responsive Enhancements (Plan A: Master-Detail Architecture)
    ========================================================================== */
 
@@ -2290,10 +2286,6 @@ select optgroup {
 }
 
 .actions-menu-backdrop {
-  display: none;
-}
-
-.actions-drawer-header {
   display: none;
 }
 
@@ -2350,7 +2342,7 @@ select optgroup {
     background-color: #12161f;
     border-left: 1px solid var(--border-color);
     border-bottom: 1px solid var(--border-color);
-    box-shadow: -8px 12px 30px rgba(0, 0, 0, 0.85);
+    box-shadow: none;
     padding: 16px;
     display: flex;
     flex-direction: column;
@@ -2366,24 +2358,6 @@ select optgroup {
   .header-actions.open {
     transform: translateX(0);
     pointer-events: auto;
-  }
-
-  .actions-drawer-header {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    padding-bottom: 10px;
-    margin-bottom: 6px;
-    border-bottom: 1px solid var(--border-color);
-  }
-
-  .actions-drawer-header h3 {
-    font-family: var(--font-display);
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--accent-gold);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
   }
 
   .header-actions .btn {

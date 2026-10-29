@@ -71,9 +71,6 @@ function setupGlobalEventListeners() {
     });
   }
 
-  if (dom.btnCloseActionsMenu) {
-    dom.btnCloseActionsMenu.addEventListener("click", closeActionsMenu);
-  }
   if (dom.actionsMenuBackdrop) {
     dom.actionsMenuBackdrop.addEventListener("click", closeActionsMenu);
   }
