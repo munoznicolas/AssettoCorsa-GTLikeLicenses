@@ -1,10 +1,8 @@
 /**
  * theme.js
- * Theme controller supporting automatic browser preference detection and manual user toggle.
+ * Theme controller automatically synchronized with the user's browser/system preference.
  * Dispatches 'themechange' custom events for reactive UI and canvas updates.
  */
-
-import { dom } from "./dom.js";
 
 const STORAGE_KEY = "theme";
 
@@ -36,25 +34,29 @@ export function getActiveTheme() {
 }
 
 /**
- * Update theme toggle button icon, title, and label.
+ * Apply theme to document and notify subscribers via 'themechange' event.
  * @param {"light" | "dark"} theme
  */
 export function updateThemeToggleUI(theme) {
-  if (!dom.btnThemeToggle || !dom.themeToggleIcon) return;
+  if (!dom.btnThemeToggle) return;
   const isLight = theme === "light";
-  dom.themeToggleIcon.textContent = isLight ? "🌙" : "☀️";
+  const iconSlot = document.getElementById("theme-toggle-icon");
+  const textSlot = document.getElementById("theme-toggle-text");
+
+  const moonSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+  const sunSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+
+  if (iconSlot) {
+    iconSlot.innerHTML = isLight ? moonSvg : sunSvg;
+  }
+  if (textSlot) {
+    textSlot.textContent = isLight ? "Dark Theme" : "Light Theme";
+  }
   const label = isLight ? "Switch to dark theme" : "Switch to light theme";
   dom.btnThemeToggle.setAttribute("title", label);
   dom.btnThemeToggle.setAttribute("aria-label", label);
-  if (dom.themeToggleText) {
-    dom.themeToggleText.textContent = isLight ? "Dark Theme" : "Light Theme";
-  }
 }
 
-/**
- * Apply theme to document, update UI toggle, and notify subscribers.
- * @param {"light" | "dark"} theme
- */
 export function setTheme(theme) {
   const resolved = theme === "light" ? "light" : "dark";
   const prev = document.documentElement.getAttribute("data-theme");
@@ -79,11 +81,22 @@ export function syncThemeWithBrowser() {
 }
 
 /**
- * Toggle between light and dark modes manually.
+ * Legacy UI updater retained as a no-op for backward compatibility.
+ * @param {"light" | "dark"} _theme
+ */
+export function updateThemeToggleUI(_theme) {
+  // Theme toggle button has been removed in favor of automatic browser sync.
+}
+
+/**
+ * Legacy toggle retained as a no-op for backward compatibility.
  */
 export function toggleTheme() {
-  const current = getActiveTheme();
+  const current = getEffectiveTheme();
   const next = current === "light" ? "dark" : "light";
+  try {
+    localStorage.setItem(STORAGE_KEY, next);
+  } catch (_) {}
   setTheme(next);
 }
 
@@ -91,16 +104,15 @@ export function toggleTheme() {
  * Initialize theme synchronizer and register media query listener for browser changes.
  */
 export function initTheme() {
-  // Synchronize immediately on startup
-  const active = getActiveTheme();
-  setTheme(active);
-
-  // Hook up button toggle if present in the DOM
-  if (dom.btnThemeToggle) {
-    dom.btnThemeToggle.addEventListener("click", () => {
-      toggleTheme();
-    });
+  // Clean up any legacy manual theme override stored in localStorage
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch (e) {
+    // Ignore storage errors in sandboxed environments
   }
+
+  // Synchronize immediately on startup
+  syncThemeWithBrowser();
 
   // Listen for real-time changes in browser / OS preference
   try {
@@ -113,6 +125,7 @@ export function initTheme() {
       if (mediaQuery.addEventListener) {
         mediaQuery.addEventListener("change", onPreferenceChange);
       } else if (mediaQuery.addListener) {
+        // Fallback for older WebKit / Safari
         mediaQuery.addListener(onPreferenceChange);
       }
     }
