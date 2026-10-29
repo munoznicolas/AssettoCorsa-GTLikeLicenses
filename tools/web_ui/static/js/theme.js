@@ -1,25 +1,40 @@
 /**
  * theme.js
- * Theme controller supporting Light and Dark modes with localStorage persistence,
- * system preference awareness, and FOUC-safe synchronization.
+ * Theme controller automatically synchronized with the user's browser/system preference.
+ * Dispatches 'themechange' custom events for reactive UI and canvas updates.
  */
-
-import { dom } from "./dom.js";
 
 const STORAGE_KEY = "theme";
 
 /**
- * Get current active theme from DOM attribute or fallback to dark.
+ * Detect user's browser/system color scheme preference.
  * @returns {"light" | "dark"}
  */
-export function getActiveTheme() {
-  return document.documentElement.getAttribute("data-theme") === "light"
-    ? "light"
-    : "dark";
+export function getBrowserTheme() {
+  if (typeof window !== "undefined" && window.matchMedia) {
+    return window.matchMedia("(prefers-color-scheme: light)").matches
+      ? "light"
+      : "dark";
+  }
+  return "dark";
 }
 
 /**
- * Synchronize theme toggle button icon and accessibility labels.
+ * Get current active theme from DOM attribute or fallback to browser preference.
+ * @returns {"light" | "dark"}
+ */
+export function getActiveTheme() {
+  const currentAttr =
+    typeof document !== "undefined"
+      ? document.documentElement.getAttribute("data-theme")
+      : null;
+  return currentAttr === "light" || currentAttr === "dark"
+    ? currentAttr
+    : getBrowserTheme();
+}
+
+/**
+ * Apply theme to document and notify subscribers via 'themechange' event.
  * @param {"light" | "dark"} theme
  */
 export function updateThemeToggleUI(theme) {
@@ -42,59 +57,78 @@ export function updateThemeToggleUI(theme) {
   dom.btnThemeToggle.setAttribute("aria-label", label);
 }
 
-/**
- * Apply theme to document, optionally persist to localStorage, and notify subscribers.
- * @param {"light" | "dark"} theme
- * @param {boolean} persist
- */
-export function setTheme(theme, persist = true) {
-  document.documentElement.setAttribute("data-theme", theme);
-  if (persist) {
-    try {
-      localStorage.setItem(STORAGE_KEY, theme);
-    } catch (e) {
-      console.warn("Unable to save theme preference to localStorage:", e);
-    }
+export function setTheme(theme) {
+  const resolved = theme === "light" ? "light" : "dark";
+  const prev = document.documentElement.getAttribute("data-theme");
+  document.documentElement.setAttribute("data-theme", resolved);
+  updateThemeToggleUI(resolved);
+
+  if (prev !== resolved) {
+    window.dispatchEvent(
+      new CustomEvent("themechange", { detail: { theme: resolved } })
+    );
   }
-  updateThemeToggleUI(theme);
-  window.dispatchEvent(new CustomEvent("themechange", { detail: { theme } }));
 }
 
 /**
- * Toggle between light and dark themes.
+ * Synchronize the document theme with the user's browser preference.
+ * @returns {"light" | "dark"}
+ */
+export function syncThemeWithBrowser() {
+  const preferred = getBrowserTheme();
+  setTheme(preferred);
+  return preferred;
+}
+
+/**
+ * Legacy UI updater retained as a no-op for backward compatibility.
+ * @param {"light" | "dark"} _theme
+ */
+export function updateThemeToggleUI(_theme) {
+  // Theme toggle button has been removed in favor of automatic browser sync.
+}
+
+/**
+ * Legacy toggle retained as a no-op for backward compatibility.
  */
 export function toggleTheme() {
-  const current = getActiveTheme();
+  const current = getEffectiveTheme();
   const next = current === "light" ? "dark" : "light";
-  setTheme(next, true);
+  try {
+    localStorage.setItem(STORAGE_KEY, next);
+  } catch (_) {}
+  setTheme(next);
 }
 
 /**
- * Initialize theme listener and bind toggle button event handler.
+ * Initialize theme synchronizer and register media query listener for browser changes.
  */
 export function initTheme() {
-  const active = getActiveTheme();
-  updateThemeToggleUI(active);
-
-  if (dom.btnThemeToggle) {
-    dom.btnThemeToggle.addEventListener("click", () => {
-      toggleTheme();
-    });
+  // Clean up any legacy manual theme override stored in localStorage
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch (e) {
+    // Ignore storage errors in sandboxed environments
   }
 
-  // Follow OS preference if the user has not explicitly stored a preference
+  // Synchronize immediately on startup
+  syncThemeWithBrowser();
+
+  // Listen for real-time changes in browser / OS preference
   try {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    mediaQuery.addEventListener("change", (e) => {
-      try {
-        if (!localStorage.getItem(STORAGE_KEY)) {
-          const osTheme = e.matches ? "dark" : "light";
-          setTheme(osTheme, false);
-        }
-      } catch (err) {
-        // Ignore localStorage access errors
+    if (typeof window !== "undefined" && window.matchMedia) {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: light)");
+      const onPreferenceChange = (e) => {
+        setTheme(e.matches ? "light" : "dark");
+      };
+
+      if (mediaQuery.addEventListener) {
+        mediaQuery.addEventListener("change", onPreferenceChange);
+      } else if (mediaQuery.addListener) {
+        // Fallback for older WebKit / Safari
+        mediaQuery.addListener(onPreferenceChange);
       }
-    });
+    }
   } catch (e) {
     console.warn("prefers-color-scheme listener not available:", e);
   }

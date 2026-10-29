@@ -27,14 +27,15 @@
     <meta name="twitter:image" content="og-image.svg" />
 
     <link rel="stylesheet" href="driver.css" />
-        <meta name="color-scheme" content="light dark" />
+    <meta name="color-scheme" content="light dark" />
     <script>
       (function () {
         try {
-          const stored = localStorage.getItem("theme");
+          localStorage.removeItem("theme");
+        } catch (e) {}
+        try {
           const prefersLight = window.matchMedia("(prefers-color-scheme: light)").matches;
-          const theme = stored ? stored : (prefersLight ? "light" : "dark");
-          document.documentElement.setAttribute("data-theme", theme);
+          document.documentElement.setAttribute("data-theme", prefersLight ? "light" : "dark");
         } catch (e) {}
       })();
     </script>
@@ -61,6 +62,7 @@
         </div>
         <div class="header-actions-wrapper">
           <button
+
             type="button"
             id="btn-header-menu"
             class="btn btn-secondary btn-icon-only mobile-menu-toggle"
