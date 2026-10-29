@@ -249,6 +249,73 @@ class TestDesignerServer(unittest.TestCase):
         self.assertIn("dom.btnBackToList", dom_js)
         self.assertIn("dom.btnHeaderMenu.addEventListener", app_js)
 
+    def test_menu_button_hierarchy_design_system(self):
+        index_html_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "index.html")
+        with open(index_html_path, "r", encoding="utf-8") as f:
+            html = f.read()
+
+        # Extract header-actions container block
+        header_actions_match = re.search(r'<div id="header-actions"[^>]*>(.*?)</div>\s*</div>', html, re.DOTALL)
+        self.assertIsNotNone(header_actions_match, "header-actions container found in index.html")
+        actions_html = header_actions_match.group(1)
+
+        # 1. Primary CTA: Export Package must be the ONLY solid primary button
+        self.assertIn('id="btn-rebuild"', actions_html)
+        self.assertIn('class="btn btn-primary btn-export-main"', actions_html)
+        primary_buttons = re.findall(r'class="[^"]*btn-primary[^"]*"', actions_html)
+        self.assertEqual(len(primary_buttons), 1, "There must be exactly one primary solid CTA in header actions")
+
+        # 2. Secondary Actions: Sync to AC must NOT be btn-primary, must be secondary
+        self.assertIn('id="btn-sync"', actions_html)
+        sync_match = re.search(r'<button[^>]*id="btn-sync"[^>]*class="([^"]*)"', actions_html)
+        self.assertIsNotNone(sync_match)
+        sync_classes = sync_match.group(1).split()
+        self.assertIn("btn-secondary", sync_classes)
+        self.assertNotIn("btn-primary", sync_classes, "Sync to AC must not compete as solid primary CTA")
+        self.assertIn("btn-sync-action", sync_classes)
+
+        # 3. File Operations & Utility: Import JSON and Record Missing are secondary
+        self.assertIn('id="btn-import-json"', actions_html)
+        self.assertIn('id="btn-run-missing-telemetry"', actions_html)
+
+        # 4. Destructive / Warning: Reset Defaults must have warning intent
+        self.assertIn('id="btn-reset-defaults"', actions_html)
+        reset_match = re.search(r'<button[^>]*id="btn-reset-defaults"[^>]*class="([^"]*)"', actions_html)
+        self.assertIsNotNone(reset_match)
+        reset_classes = reset_match.group(1).split()
+        self.assertIn("btn-warning", reset_classes)
+        self.assertNotIn("btn-secondary", reset_classes)
+
+        # 5. Ghost / Utility: Take Tour & Theme Toggle are ghost buttons
+        tour_match = re.search(r'<button[^>]*id="btn-tour-help"[^>]*class="([^"]*)"', actions_html)
+        self.assertIsNotNone(tour_match)
+        self.assertIn("btn-ghost", tour_match.group(1).split())
+
+        theme_match = re.search(r'<button[^>]*id="btn-theme-toggle"[^>]*class="([^"]*)"', actions_html)
+        self.assertIsNotNone(theme_match)
+        self.assertIn("btn-ghost", theme_match.group(1).split())
+
+        # 6. Button Ordering in the Actions Menu:
+        # Take Tour -> Sync -> Import -> Record Missing -> [divider] -> Export Package -> [divider] -> Reset -> Dark Theme
+        pos_tour = actions_html.find('id="btn-tour-help"')
+        pos_sync = actions_html.find('id="btn-sync"')
+        pos_import = actions_html.find('id="btn-import-json"')
+        pos_record = actions_html.find('id="btn-run-missing-telemetry"')
+        pos_export = actions_html.find('id="btn-rebuild"')
+        pos_reset = actions_html.find('id="btn-reset-defaults"')
+        pos_theme = actions_html.find('id="btn-theme-toggle"')
+
+        self.assertLess(pos_tour, pos_sync)
+        self.assertLess(pos_sync, pos_import)
+        self.assertLess(pos_import, pos_record)
+        self.assertLess(pos_record, pos_export)
+        self.assertLess(pos_export, pos_reset)
+        self.assertLess(pos_reset, pos_theme)
+
+        # 7. Dividers: At least two dividers separating groups in header actions
+        dividers = re.findall(r'class="menu-divider[^"]*"', actions_html)
+        self.assertGreaterEqual(len(dividers), 2)
+
 
 if __name__ == "__main__":
     unittest.main()

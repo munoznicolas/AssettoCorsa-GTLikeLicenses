@@ -35,6 +35,15 @@ class TestWebUITheme(unittest.TestCase):
         self.assertIn("prefers-color-scheme", content)
         self.assertIn("data-theme", content)
 
+    def test_dom_js_theme_toggle_elements(self):
+        """Verify dom.js binds theme toggle elements."""
+        dom_path = os.path.join(STATIC_DIR, "js", "dom.js")
+        self.assertTrue(os.path.isfile(dom_path), f"File missing: {dom_path}")
+        with open(dom_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        self.assertIn("btnThemeToggle", content)
+
     def test_theme_js_synchronization_logic(self):
         """Verify theme.js supports detection, toggle and themechange event."""
         theme_path = os.path.join(STATIC_DIR, "js", "theme.js")
@@ -60,6 +69,7 @@ class TestWebUITheme(unittest.TestCase):
         self.assertIn("color-scheme: light dark;", content)
         self.assertIn(':root[data-theme="light"]', content)
         self.assertIn(':root[data-theme="dark"]', content)
+        self.assertIn(".theme-toggle-btn", content)
 
 
 if __name__ == "__main__":

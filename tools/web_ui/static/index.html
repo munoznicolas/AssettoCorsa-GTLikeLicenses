@@ -77,14 +77,15 @@
             </svg>
           </button>
           <div id="actions-menu-backdrop" class="actions-menu-backdrop"></div>
-          <div id="header-actions" class="header-actions">
+                    <div id="header-actions" class="header-actions">
             <div class="actions-drawer-header">
               <span>Actions</span>
             </div>
-            <!-- Secondary/Utility Actions (Left) -->
+
+            <!-- Ghost / Utility (Top) -->
             <button
               id="btn-tour-help"
-              class="btn btn-secondary btn-sm"
+              class="btn btn-ghost btn-sm"
               title="Interactive Onboarding Tours &amp; Help"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -93,41 +94,8 @@
               </svg>
               <span>Tour</span>
             </button>
-            <button
-              id="btn-reset-defaults"
-              class="btn btn-secondary btn-sm"
-              title="Reset curriculum back to baseline defaults"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
-              </svg>
-              <span>Reset</span>
-            </button>
-            <button
-              id="btn-run-missing-telemetry"
-              class="btn btn-secondary btn-sm"
-              title="Batch record missing telemetry in Assetto Corsa"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
-              <span>Record Missing</span>
-            </button>
-            <button
-              id="btn-open-submit-pr-modal"
-              class="btn btn-secondary btn-sm"
-              style="display: none; background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4);"
-              title="Submit telemetry to open a GitHub Pull Request"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="18" cy="18" r="3"></circle>
-                <circle cx="6" cy="6" r="3"></circle>
-                <path d="M13 6h3a2 2 0 0 1 2 2v7"></path>
-                <line x1="6" y1="9" x2="6" y2="21"></line>
-              </svg>
-              <span>Submit PR</span>
-            </button>
+
+            <!-- Secondary Actions -->
             <button
               id="btn-stop-ac"
               class="btn btn-danger btn-sm"
@@ -139,8 +107,32 @@
               </svg>
               <span>Stop AC</span>
             </button>
+            <button
+              id="btn-sync"
+              class="btn btn-secondary btn-sm btn-sync-action"
+              title="Sync changes directly to Assetto Corsa install"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+              </svg>
+              <span>Sync to AC</span>
+            </button>
+            <button
+              id="btn-open-submit-pr-modal"
+              class="btn btn-secondary btn-sm btn-sync-action"
+              style="display: none;"
+              title="Submit telemetry to open a GitHub Pull Request"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="18" cy="18" r="3"></circle>
+                <circle cx="6" cy="6" r="3"></circle>
+                <path d="M13 6h3a2 2 0 0 1 2 2v7"></path>
+                <line x1="6" y1="9" x2="6" y2="21"></line>
+              </svg>
+              <span>Submit PR</span>
+            </button>
 
-            <!-- File Operations Group (Import + Export) -->
+            <!-- File Operations & Recording -->
             <button
               id="btn-import-json"
               class="btn btn-secondary btn-sm"
@@ -160,17 +152,22 @@
               style="display: none;"
             />
 
-            <!-- Primary Action (Rightmost) -->
             <button
-              id="btn-sync"
-              class="btn btn-primary"
-              title="Sync changes directly to Assetto Corsa install"
+              id="btn-run-missing-telemetry"
+              class="btn btn-secondary btn-sm"
+              title="Batch record missing telemetry in Assetto Corsa"
             >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <circle cx="12" cy="12" r="3"></circle>
               </svg>
-              <span>Sync to AC</span>
+              <span>Record Missing</span>
             </button>
+
+            <!-- Section Divider -->
+            <div class="menu-divider"></div>
+
+            <!-- Primary Action (The ONLY Solid Primary CTA) -->
             <button
               id="btn-rebuild"
               class="btn btn-primary btn-export-main"
@@ -183,17 +180,37 @@
               </svg>
               <span>Export Package</span>
             </button>
+
+            <!-- Section Divider -->
+            <div class="menu-divider"></div>
+
+            <!-- Warning / Destructive Action -->
+            <button
+              id="btn-reset-defaults"
+              class="btn btn-warning btn-sm"
+              title="Reset curriculum back to baseline defaults"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+              </svg>
+              <span>Reset</span>
+            </button>
+
+            <!-- Ghost / Utility (Bottom) -->
             <button
               id="btn-theme-toggle"
-              class="btn btn-secondary btn-sm theme-toggle-btn"
+              class="btn btn-ghost btn-sm theme-toggle-btn"
               title="Toggle theme (Light / Dark)"
               aria-label="Toggle theme"
             >
-              <span id="theme-toggle-icon" class="theme-icon-slot" aria-hidden="true"></span>
+              <span id="theme-toggle-icon" class="theme-icon-slot">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+              </span>
               <span id="theme-toggle-text">Dark Theme</span>
             </button>
-          </div>
-        </div>
+          </div></div>
       </header>
 
       <!-- License Tabs & Reference Tab -->
