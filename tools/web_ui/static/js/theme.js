@@ -30,6 +30,9 @@ export function updateThemeToggleUI(theme) {
   const label = isLight ? "Switch to dark theme" : "Switch to light theme";
   dom.btnThemeToggle.setAttribute("title", label);
   dom.btnThemeToggle.setAttribute("aria-label", label);
+  if (dom.themeToggleText) {
+    dom.themeToggleText.textContent = isLight ? "Dark Theme" : "Light Theme";
+  }
 }
 
 /**

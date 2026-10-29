@@ -80,7 +80,7 @@ function setupGlobalEventListeners() {
 
   dom.headerActions?.querySelectorAll("button").forEach((btn) => {
     btn.addEventListener("click", () => {
-      if (window.innerWidth <= 900) {
+      if (window.innerWidth <= 960) {
         closeActionsMenu();
       }
     });
