@@ -1,8 +1,10 @@
 /**
  * theme.js
- * Theme controller automatically synchronized with the user's browser/system preference.
+ * Theme controller supporting automatic browser preference detection and manual user toggle.
  * Dispatches 'themechange' custom events for reactive UI and canvas updates.
  */
+
+import { dom } from "./dom.js";
 
 const STORAGE_KEY = "theme";
 
@@ -34,13 +36,30 @@ export function getActiveTheme() {
 }
 
 /**
- * Apply theme to document and notify subscribers via 'themechange' event.
+ * Update theme toggle button icon, title, and label.
+ * @param {"light" | "dark"} theme
+ */
+export function updateThemeToggleUI(theme) {
+  if (!dom.btnThemeToggle || !dom.themeToggleIcon) return;
+  const isLight = theme === "light";
+  dom.themeToggleIcon.textContent = isLight ? "🌙" : "☀️";
+  const label = isLight ? "Switch to dark theme" : "Switch to light theme";
+  dom.btnThemeToggle.setAttribute("title", label);
+  dom.btnThemeToggle.setAttribute("aria-label", label);
+  if (dom.themeToggleText) {
+    dom.themeToggleText.textContent = isLight ? "Dark Theme" : "Light Theme";
+  }
+}
+
+/**
+ * Apply theme to document, update UI toggle, and notify subscribers.
  * @param {"light" | "dark"} theme
  */
 export function setTheme(theme) {
   const resolved = theme === "light" ? "light" : "dark";
   const prev = document.documentElement.getAttribute("data-theme");
   document.documentElement.setAttribute("data-theme", resolved);
+  updateThemeToggleUI(resolved);
 
   if (prev !== resolved) {
     window.dispatchEvent(
@@ -60,33 +79,28 @@ export function syncThemeWithBrowser() {
 }
 
 /**
- * Legacy UI updater retained as a no-op for backward compatibility.
- * @param {"light" | "dark"} _theme
- */
-export function updateThemeToggleUI(_theme) {
-  // Theme toggle button has been removed in favor of automatic browser sync.
-}
-
-/**
- * Legacy toggle retained as a no-op for backward compatibility.
+ * Toggle between light and dark modes manually.
  */
 export function toggleTheme() {
-  // Theme is synchronized with browser preference; manual toggle disabled.
+  const current = getActiveTheme();
+  const next = current === "light" ? "dark" : "light";
+  setTheme(next);
 }
 
 /**
  * Initialize theme synchronizer and register media query listener for browser changes.
  */
 export function initTheme() {
-  // Clean up any legacy manual theme override stored in localStorage
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch (e) {
-    // Ignore storage errors in sandboxed environments
-  }
-
   // Synchronize immediately on startup
-  syncThemeWithBrowser();
+  const active = getActiveTheme();
+  setTheme(active);
+
+  // Hook up button toggle if present in the DOM
+  if (dom.btnThemeToggle) {
+    dom.btnThemeToggle.addEventListener("click", () => {
+      toggleTheme();
+    });
+  }
 
   // Listen for real-time changes in browser / OS preference
   try {
@@ -99,7 +113,6 @@ export function initTheme() {
       if (mediaQuery.addEventListener) {
         mediaQuery.addEventListener("change", onPreferenceChange);
       } else if (mediaQuery.addListener) {
-        // Fallback for older WebKit / Safari
         mediaQuery.addListener(onPreferenceChange);
       }
     }

@@ -62,13 +62,7 @@
         </div>
         <div class="header-actions-wrapper">
           <button
-            id="btn-rebuild"
-            class="btn btn-primary btn-export-main"
-            title="Export full Content Manager ready-to-install mod package (.zip)"
-          >
-            <span>Export</span>
-          </button>
-          <button
+
             type="button"
             id="btn-header-menu"
             class="btn btn-secondary btn-icon-only mobile-menu-toggle"
@@ -89,47 +83,57 @@
               <button
                 type="button"
                 id="btn-close-actions-menu"
-                class="btn btn-secondary btn-sm btn-icon-only"
+                class="btn btn-ghost btn-sm btn-icon-only"
                 aria-label="Close menu"
               >
                 ✕
               </button>
             </div>
+            <div class="menu-divider mobile-only"></div>
+
+            <!-- Ghost / Utility (Top) -->
+            <button
+              id="btn-tour-help"
+              class="btn btn-ghost btn-sm"
+              title="Interactive Onboarding Tours &amp; Help"
+            >
+              <span class="btn-icon" aria-hidden="true">🧭</span>
+              <span>Take Tour</span>
+            </button>
+
+            <!-- Secondary Actions -->
             <button
               id="btn-stop-ac"
-              class="btn"
-              style="display: none; background: #dc2626; color: #fff; border: 1px solid #ef4444;"
+              class="btn btn-danger btn-sm"
+              style="display: none;"
               title="Stop / Terminate active Assetto Corsa session"
             >
+              <span class="btn-icon" aria-hidden="true">⏹</span>
               <span>Stop AC</span>
             </button>
             <button
               id="btn-sync"
-              class="btn btn-primary"
+              class="btn btn-secondary btn-sm btn-sync-action"
               title="Sync changes directly to Assetto Corsa install"
             >
+              <span class="btn-icon" aria-hidden="true">🔄</span>
               <span>Sync to AC</span>
             </button>
             <button
               id="btn-open-submit-pr-modal"
-              class="btn"
-              style="display: none; background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4);"
+              class="btn btn-secondary btn-sm btn-sync-action"
+              style="display: none;"
               title="Submit a recorded telemetry file via Google login to open a GitHub Pull Request"
             >
+              <span class="btn-icon" aria-hidden="true">☁️</span>
               <span>Submit Telemetry (PR)</span>
-            </button>
-            <button
-              id="btn-run-missing-telemetry"
-              class="btn btn-secondary btn-sm"
-              title="Batch run/record telemetry in Assetto Corsa for all rolling start tests missing track+car profiles"
-            >
-              <span>Record Missing Telemetry</span>
             </button>
             <button
               id="btn-import-json"
               class="btn btn-secondary btn-sm"
               title="Import and restore curriculum.json configuration file"
             >
+              <span class="btn-icon" aria-hidden="true">⭳</span>
               <span>Import JSON</span>
             </button>
             <input
@@ -139,18 +143,49 @@
               style="display: none;"
             />
             <button
-              id="btn-reset-defaults"
+              id="btn-run-missing-telemetry"
               class="btn btn-secondary btn-sm"
+              title="Batch run/record telemetry in Assetto Corsa for all rolling start tests missing track+car profiles"
+            >
+              <span class="btn-icon" aria-hidden="true">⊙</span>
+              <span>Record Missing</span>
+            </button>
+
+            <!-- Section Divider -->
+            <div class="menu-divider"></div>
+
+            <!-- Primary Action (The ONLY Solid Primary CTA) -->
+            <button
+              id="btn-rebuild"
+              class="btn btn-primary btn-export-main"
+              title="Export full Content Manager ready-to-install mod package (.zip)"
+            >
+              <span class="btn-icon" aria-hidden="true">⭳</span>
+              <span>Export Package</span>
+            </button>
+
+            <!-- Section Divider -->
+            <div class="menu-divider"></div>
+
+            <!-- Warning / Destructive Action -->
+            <button
+              id="btn-reset-defaults"
+              class="btn btn-warning btn-sm"
               title="Reset curriculum back to baseline defaults"
             >
+              <span class="btn-icon" aria-hidden="true">↺</span>
               <span>Reset Defaults</span>
             </button>
+
+            <!-- Ghost / Utility (Bottom) -->
             <button
-              id="btn-tour-help"
-              class="btn btn-secondary btn-sm"
-              title="Interactive Onboarding Tours &amp; Help"
+              id="btn-theme-toggle"
+              class="btn btn-ghost btn-sm theme-toggle-btn"
+              title="Toggle theme (Light / Dark)"
+              aria-label="Toggle theme"
             >
-              <span>Take Tour</span>
+              <span id="theme-toggle-icon" class="btn-icon" aria-hidden="true">🌙</span>
+              <span id="theme-toggle-text">Dark Theme</span>
             </button>
           </div>
         </div>
