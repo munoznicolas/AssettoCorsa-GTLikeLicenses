@@ -14,6 +14,8 @@ export const state = {
   referenceTests: [],
   activeRefGame: "ALL",
   refCharts: {},
+  refChartsAggregateByLicense: true,
+  goldScaleFocus: true,
   isReferenceViewActive: false,
   cacheBuster: Date.now(),
 };

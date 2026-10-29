@@ -268,18 +268,24 @@ export function drawMarker(ctx, x, y, color, label) {
 
 
 /**
- * Attach click & touch interactions to canvas map.
+ * Attach pointer interactions, hover hit-testing ('grab' cursor) and direct dragging ('grabbing' cursor) to canvas map.
  */
 export function initCanvasInteraction() {
   if (!dom.trackCanvas) return;
 
   window.addEventListener("themechange", () => renderCanvasTrack());
 
-  const handlePointerAt = (clientX, clientY, shiftKey) => {
-    if (!state.currentSpline || (dom.toggleFullLap && dom.toggleFullLap.checked)) return;
+  let activeDragHandle = null; // 'start' | 'finish' | null
+  const HANDLE_HIT_RADIUS = 22; // pixels
+
+  /**
+   * Helper to compute canvas coordinate transform and waypoint distances.
+   */
+  const getCanvasContextAt = (clientX, clientY) => {
+    if (!state.currentSpline || (dom.toggleFullLap && dom.toggleFullLap.checked)) return null;
 
     const rect = dom.trackCanvas.getBoundingClientRect();
-    if (!rect.width || !rect.height) return;
+    if (!rect.width || !rect.height) return null;
 
     const clickX = (clientX - rect.left) * (dom.trackCanvas.width / rect.width);
     const clickY = (clientY - rect.top) * (dom.trackCanvas.height / rect.height);
@@ -296,12 +302,40 @@ export function initCanvasInteraction() {
     const ox = (dom.trackCanvas.width - bw * scale) / 2 - bounds.min_x * scale;
     const oy = (dom.trackCanvas.height - bh * scale) / 2 - bounds.min_y * scale;
 
-    // Find closest waypoint to mouse/touch position
+    const toX = (x) => x * scale + ox;
+    const toY = (y) => y * scale + oy;
+
+    const curStart = parseFloat(dom.inputStart ? dom.inputStart.value : 0) || 0;
+    const curFinish = parseFloat(dom.inputFinish ? dom.inputFinish.value : 1) || 1;
+
+    // Check hit against Start marker
+    let isOverStart = false;
+    const startPt = findPointAtProgress(pts, curStart);
+    if (startPt) {
+      const sx = toX(startPt.x);
+      const sy = toY(startPt.y);
+      if (Math.hypot(clickX - sx, clickY - sy) <= HANDLE_HIT_RADIUS) {
+        isOverStart = true;
+      }
+    }
+
+    // Check hit against Finish marker
+    let isOverFinish = false;
+    const finishPt = findPointAtProgress(pts, curFinish);
+    if (finishPt) {
+      const fx = toX(finishPt.x);
+      const fy = toY(finishPt.y);
+      if (Math.hypot(clickX - fx, clickY - fy) <= HANDLE_HIT_RADIUS) {
+        isOverFinish = true;
+      }
+    }
+
+    // Find closest waypoint to pointer position
     let closestPt = null;
     let minDist = Infinity;
     for (let i = 0; i < pts.length; i++) {
-      const px = pts[i].x * scale + ox;
-      const py = pts[i].y * scale + oy;
+      const px = toX(pts[i].x);
+      const py = toY(pts[i].y);
       const d = Math.hypot(clickX - px, clickY - py);
       if (d < minDist) {
         minDist = d;
@@ -309,35 +343,113 @@ export function initCanvasInteraction() {
       }
     }
 
-    if (closestPt && minDist < 50 && onPositionChangeCallback) {
-      const s = closestPt.s;
-      const curStart = parseFloat(dom.inputStart ? dom.inputStart.value : 0) || 0;
-      const curFinish = parseFloat(dom.inputFinish ? dom.inputFinish.value : 1) || 1;
+    return {
+      clickX,
+      clickY,
+      curStart,
+      curFinish,
+      isOverStart,
+      isOverFinish,
+      closestPt,
+      minDist,
+    };
+  };
 
-      // If Shift key is held (desktop), place Finish; otherwise move closest gate
-      if (shiftKey) {
-        onPositionChangeCallback(curStart, s);
-      } else {
-        const distToStart = Math.abs(s - curStart);
-        const distToFinish = Math.abs(s - curFinish);
-        if (distToStart < distToFinish) {
-          onPositionChangeCallback(s, curFinish);
-        } else {
-          onPositionChangeCallback(curStart, s);
+  /**
+   * Pointer Move: Update cursor ('grab', 'grabbing', 'pointer') and execute real-time dragging.
+   */
+  dom.trackCanvas.addEventListener("pointermove", (e) => {
+    if (!state.currentSpline || (dom.toggleFullLap && dom.toggleFullLap.checked)) return;
+
+    const ctxInfo = getCanvasContextAt(e.clientX, e.clientY);
+    if (!ctxInfo) return;
+
+    if (activeDragHandle) {
+      // Actively dragging START or FINISH marker
+      dom.trackCanvas.style.cursor = "grabbing";
+      if (ctxInfo.closestPt && onPositionChangeCallback) {
+        const s = ctxInfo.closestPt.s;
+        if (activeDragHandle === "start") {
+          onPositionChangeCallback(s, ctxInfo.curFinish);
+        } else if (activeDragHandle === "finish") {
+          onPositionChangeCallback(ctxInfo.curStart, s);
         }
+      }
+    } else {
+      // Hovering state
+      if (ctxInfo.isOverFinish || ctxInfo.isOverStart) {
+        dom.trackCanvas.style.cursor = "grab";
+      } else if (ctxInfo.minDist < 35) {
+        dom.trackCanvas.style.cursor = "pointer";
+      } else {
+        dom.trackCanvas.style.cursor = "default";
+      }
+    }
+  });
+
+  /**
+   * Pointer Down: Initiate drag on START or FINISH gate marker.
+   */
+  dom.trackCanvas.addEventListener("pointerdown", (e) => {
+    if (!state.currentSpline || (dom.toggleFullLap && dom.toggleFullLap.checked)) return;
+
+    const ctxInfo = getCanvasContextAt(e.clientX, e.clientY);
+    if (!ctxInfo) return;
+
+    if (ctxInfo.isOverFinish) {
+      activeDragHandle = "finish";
+      dom.trackCanvas.style.cursor = "grabbing";
+      try { dom.trackCanvas.setPointerCapture(e.pointerId); } catch (_) {}
+      e.preventDefault();
+    } else if (ctxInfo.isOverStart) {
+      activeDragHandle = "start";
+      dom.trackCanvas.style.cursor = "grabbing";
+      try { dom.trackCanvas.setPointerCapture(e.pointerId); } catch (_) {}
+      e.preventDefault();
+    } else if (ctxInfo.minDist < 35 && onPositionChangeCallback) {
+      // Click-to-place closest gate
+      const s = ctxInfo.closestPt.s;
+      if (e.shiftKey) {
+        activeDragHandle = "finish";
+        onPositionChangeCallback(ctxInfo.curStart, s);
+      } else {
+        const distToStart = Math.abs(s - ctxInfo.curStart);
+        const distToFinish = Math.abs(s - ctxInfo.curFinish);
+        if (distToStart < distToFinish) {
+          activeDragHandle = "start";
+          onPositionChangeCallback(s, ctxInfo.curFinish);
+        } else {
+          activeDragHandle = "finish";
+          onPositionChangeCallback(ctxInfo.curStart, s);
+        }
+      }
+      dom.trackCanvas.style.cursor = "grabbing";
+      try { dom.trackCanvas.setPointerCapture(e.pointerId); } catch (_) {}
+    }
+  });
+
+  /**
+   * Pointer Up / Cancel: Conclude drag and restore cursor.
+   */
+  const handlePointerEnd = (e) => {
+    if (activeDragHandle) {
+      activeDragHandle = null;
+      try { dom.trackCanvas.releasePointerCapture(e.pointerId); } catch (_) {}
+      const ctxInfo = getCanvasContextAt(e.clientX, e.clientY);
+      if (ctxInfo && (ctxInfo.isOverFinish || ctxInfo.isOverStart)) {
+        dom.trackCanvas.style.cursor = "grab";
+      } else {
+        dom.trackCanvas.style.cursor = "default";
       }
     }
   };
 
-  dom.trackCanvas.addEventListener("click", (e) => {
-    handlePointerAt(e.clientX, e.clientY, e.shiftKey);
-  });
-
-  dom.trackCanvas.addEventListener("touchstart", (e) => {
-    if (e.touches && e.touches.length === 1) {
-      const touch = e.touches[0];
-      handlePointerAt(touch.clientX, touch.clientY, false);
+  dom.trackCanvas.addEventListener("pointerup", handlePointerEnd);
+  dom.trackCanvas.addEventListener("pointercancel", handlePointerEnd);
+  dom.trackCanvas.addEventListener("pointerleave", () => {
+    if (!activeDragHandle) {
+      dom.trackCanvas.style.cursor = "default";
     }
-  }, { passive: true });
+  });
 }
 
