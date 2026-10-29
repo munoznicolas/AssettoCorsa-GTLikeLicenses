@@ -27,14 +27,15 @@
     <meta name="twitter:image" content="og-image.svg" />
 
     <link rel="stylesheet" href="driver.css" />
-        <meta name="color-scheme" content="light dark" />
+    <meta name="color-scheme" content="light dark" />
     <script>
       (function () {
         try {
-          const stored = localStorage.getItem("theme");
+          localStorage.removeItem("theme");
+        } catch (e) {}
+        try {
           const prefersLight = window.matchMedia("(prefers-color-scheme: light)").matches;
-          const theme = stored ? stored : (prefersLight ? "light" : "dark");
-          document.documentElement.setAttribute("data-theme", theme);
+          document.documentElement.setAttribute("data-theme", prefersLight ? "light" : "dark");
         } catch (e) {}
       })();
     </script>
@@ -66,14 +67,6 @@
             title="Export full Content Manager ready-to-install mod package (.zip)"
           >
             <span>Export</span>
-          </button>
-          <button
-            id="btn-theme-toggle"
-            class="btn btn-secondary btn-sm theme-toggle-btn"
-            title="Toggle theme (Light / Dark)"
-            aria-label="Toggle theme"
-          >
-            <span id="theme-toggle-icon" aria-hidden="true">☀️</span>
           </button>
           <button
             type="button"
