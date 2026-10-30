@@ -316,6 +316,14 @@ class TestDesignerServer(unittest.TestCase):
         dividers = re.findall(r'class="menu-divider[^"]*"', actions_html)
         self.assertGreaterEqual(len(dividers), 2)
 
+    def test_export_package_button_green_styling(self):
+        """Verify Export Package CTA is styled with green background."""
+        style_css_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "style.css")
+        with open(style_css_path, "r", encoding="utf-8") as f:
+            css = f.read()
+        self.assertIn(".btn-export-main", css)
+        self.assertIn("var(--accent-green)", css)
+
 
 if __name__ == "__main__":
     unittest.main()

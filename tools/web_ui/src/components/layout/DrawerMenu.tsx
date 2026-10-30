@@ -58,7 +58,7 @@ export const DrawerMenu: React.FC<Props> = ({
         {/* Primary Actions */}
         <button
           id="btn-rebuild"
-          className="btn btn-secondary"
+          className="btn btn-primary btn-export-main"
           title="Export Content Manager package (.zip)"
           onClick={() => {
             onClose();

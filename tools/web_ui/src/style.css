@@ -1059,6 +1059,24 @@ select optgroup {
   filter: brightness(1.08);
 }
 
+.btn-export-main,
+.btn-primary.btn-export-main,
+#btn-rebuild {
+  background-color: var(--accent-green);
+  color: #ffffff;
+}
+.btn-export-main:hover,
+.btn-primary.btn-export-main:hover,
+#btn-rebuild:hover {
+  filter: brightness(1.12);
+  box-shadow: 0 0 10px var(--accent-green-border);
+}
+.btn-export-main:active,
+.btn-primary.btn-export-main:active,
+#btn-rebuild:active {
+  transform: translateY(1px);
+}
+
 .btn-secondary {
   background-color: var(--bg-card);
   color: var(--text-main);
