@@ -4,6 +4,8 @@
  * Dispatches 'themechange' custom events for reactive UI and canvas updates.
  */
 
+import { dom } from "./dom.js";
+
 const STORAGE_KEY = "theme";
 
 /**
@@ -57,10 +59,15 @@ export function updateThemeToggleUI(theme) {
   dom.btnThemeToggle.setAttribute("aria-label", label);
 }
 
-export function setTheme(theme) {
+export function setTheme(theme, persist = true) {
   const resolved = theme === "light" ? "light" : "dark";
   const prev = document.documentElement.getAttribute("data-theme");
   document.documentElement.setAttribute("data-theme", resolved);
+  if (persist) {
+    try {
+      localStorage.setItem(STORAGE_KEY, resolved);
+    } catch (_) {}
+  }
   updateThemeToggleUI(resolved);
 
   if (prev !== resolved) {
@@ -76,50 +83,53 @@ export function setTheme(theme) {
  */
 export function syncThemeWithBrowser() {
   const preferred = getBrowserTheme();
-  setTheme(preferred);
+  setTheme(preferred, false);
   return preferred;
 }
 
 /**
- * Legacy UI updater retained as a no-op for backward compatibility.
- * @param {"light" | "dark"} _theme
- */
-export function updateThemeToggleUI(_theme) {
-  // Theme toggle button has been removed in favor of automatic browser sync.
-}
-
-/**
- * Legacy toggle retained as a no-op for backward compatibility.
+ * Toggle between light and dark themes.
  */
 export function toggleTheme() {
-  const current = getEffectiveTheme();
+  const current = getActiveTheme();
   const next = current === "light" ? "dark" : "light";
-  try {
-    localStorage.setItem(STORAGE_KEY, next);
-  } catch (_) {}
-  setTheme(next);
+  setTheme(next, true);
 }
 
 /**
  * Initialize theme synchronizer and register media query listener for browser changes.
  */
 export function initTheme() {
-  // Clean up any legacy manual theme override stored in localStorage
-  try {
-    localStorage.removeItem(STORAGE_KEY);
-  } catch (e) {
-    // Ignore storage errors in sandboxed environments
+  const stored = (() => {
+    try {
+      return localStorage.getItem(STORAGE_KEY);
+    } catch (_) {
+      return null;
+    }
+  })();
+
+  if (stored === "light" || stored === "dark") {
+    setTheme(stored, false);
+  } else {
+    syncThemeWithBrowser();
   }
 
-  // Synchronize immediately on startup
-  syncThemeWithBrowser();
+  if (dom.btnThemeToggle) {
+    dom.btnThemeToggle.addEventListener("click", () => {
+      toggleTheme();
+    });
+  }
 
   // Listen for real-time changes in browser / OS preference
   try {
     if (typeof window !== "undefined" && window.matchMedia) {
       const mediaQuery = window.matchMedia("(prefers-color-scheme: light)");
       const onPreferenceChange = (e) => {
-        setTheme(e.matches ? "light" : "dark");
+        try {
+          if (!localStorage.getItem(STORAGE_KEY)) {
+            setTheme(e.matches ? "light" : "dark", false);
+          }
+        } catch (_) {}
       };
 
       if (mediaQuery.addEventListener) {
