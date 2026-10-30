@@ -27,14 +27,15 @@
     <meta name="twitter:image" content="og-image.svg" />
 
     <link rel="stylesheet" href="driver.css" />
-        <meta name="color-scheme" content="light dark" />
+    <meta name="color-scheme" content="light dark" />
     <script>
       (function () {
         try {
-          const stored = localStorage.getItem("theme");
+          localStorage.removeItem("theme");
+        } catch (e) {}
+        try {
           const prefersLight = window.matchMedia("(prefers-color-scheme: light)").matches;
-          const theme = stored ? stored : (prefersLight ? "light" : "dark");
-          document.documentElement.setAttribute("data-theme", theme);
+          document.documentElement.setAttribute("data-theme", prefersLight ? "light" : "dark");
         } catch (e) {}
       })();
     </script>
@@ -53,7 +54,7 @@
         <div class="brand">
           <span class="gt-logo">LC</span>
           <div class="title-wrap">
-            <h1>License Center</h1>
+            <h1>LICENSE CENTER</h1>
             <span class="subtitle"
               >Assetto Corsa Driving School &amp; Telemetry Studio</span
             >
@@ -61,89 +62,87 @@
         </div>
         <div class="header-actions-wrapper">
           <button
+
             type="button"
             id="btn-header-menu"
-            class="btn btn-secondary header-menu-toggle mobile-menu-toggle"
-            title="Menu"
-            aria-label="Open menu"
+            class="btn btn-secondary btn-icon-only mobile-menu-toggle"
+            title="Menu & Actions"
+            aria-label="Menu & Actions"
             aria-expanded="false"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="3" y1="12" x2="21" y2="12"></line>
               <line x1="3" y1="6" x2="21" y2="6"></line>
               <line x1="3" y1="18" x2="21" y2="18"></line>
             </svg>
-            <span>Menu</span>
           </button>
           <div id="actions-menu-backdrop" class="actions-menu-backdrop"></div>
-          <div id="header-actions" class="header-actions">
+                    <div id="header-actions" class="header-actions">
             <div class="actions-drawer-header">
-              <span class="actions-drawer-title">Actions</span>
-              <button
-                type="button"
-                id="btn-close-actions-menu"
-                class="btn btn-secondary btn-sm btn-icon-only"
-                aria-label="Close menu"
-              >
-                ✕
-              </button>
+              <span>Actions</span>
             </div>
-            
+
+            <!-- Ghost / Utility (Top) -->
             <button
-              id="btn-rebuild"
-              class="btn btn-secondary btn-export-main"
-              title="Export Content Manager package (.zip)"
+              id="btn-tour-help"
+              class="btn btn-ghost btn-sm"
+              title="Interactive Onboarding Tours &amp; Help"
             >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-              <span>Export Package (.zip)</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+              </svg>
+              <span>Tour</span>
             </button>
 
-            <button
-              id="btn-sync"
-              class="btn btn-secondary"
-              title="Sync changes directly to Assetto Corsa install"
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
-              <span>Sync to Assetto Corsa</span>
-            </button>
-
+            <!-- Secondary Actions -->
             <button
               id="btn-stop-ac"
               class="btn btn-danger btn-sm"
               style="display: none;"
               title="Stop active Assetto Corsa session"
             >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="6" y="6" width="12" height="12" rx="2"></rect>
+              </svg>
               <span>Stop AC</span>
             </button>
-
+            <button
+              id="btn-sync"
+              class="btn btn-secondary btn-sm btn-sync-action"
+              title="Sync changes directly to Assetto Corsa install"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+              </svg>
+              <span>Sync to AC</span>
+            </button>
             <button
               id="btn-open-submit-pr-modal"
-              class="btn btn-success btn-sm"
+              class="btn btn-secondary btn-sm btn-sync-action"
               style="display: none;"
-              title="Submit a recorded telemetry file via Google login to open a GitHub Pull Request"
+              title="Submit telemetry to open a GitHub Pull Request"
             >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"></circle><circle cx="6" cy="6" r="3"></circle><path d="M13 6h3a2 2 0 0 1 2 2v7"></path><line x1="6" y1="9" x2="6" y2="21"></line></svg>
-              <span>Submit Telemetry (PR)</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="18" cy="18" r="3"></circle>
+                <circle cx="6" cy="6" r="3"></circle>
+                <path d="M13 6h3a2 2 0 0 1 2 2v7"></path>
+                <line x1="6" y1="9" x2="6" y2="21"></line>
+              </svg>
+              <span>Submit PR</span>
             </button>
 
-            <div class="menu-divider"></div>
-
-            <button
-              id="btn-run-missing-telemetry"
-              class="btn btn-secondary btn-sm"
-              title="Batch run/record telemetry in Assetto Corsa for all rolling start tests missing track+car profiles"
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"></circle><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"></path></svg>
-              <span>Record Missing Telemetry</span>
-            </button>
-
+            <!-- File Operations & Recording -->
             <button
               id="btn-import-json"
               class="btn btn-secondary btn-sm"
               title="Import and restore curriculum.json configuration file"
             >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
               <span>Import JSON</span>
             </button>
             <input
@@ -154,36 +153,64 @@
             />
 
             <button
-              id="btn-reset-defaults"
+              id="btn-run-missing-telemetry"
               class="btn btn-secondary btn-sm"
-              title="Reset curriculum back to baseline defaults"
+              title="Batch record missing telemetry in Assetto Corsa"
             >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
-              <span>Reset Defaults</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              <span>Record Missing</span>
             </button>
 
+            <!-- Section Divider -->
             <div class="menu-divider"></div>
 
+            <!-- Primary Action (The ONLY Solid Primary CTA) -->
             <button
-              id="btn-tour-help"
-              class="btn btn-secondary btn-sm"
-              title="Interactive Onboarding Tours &amp; Help"
+              id="btn-rebuild"
+              class="btn btn-primary btn-export-main"
+              title="Export full Content Manager ready-to-install mod package (.zip)"
             >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-              <span>Take Tour</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Export Package</span>
             </button>
 
+            <!-- Section Divider -->
+            <div class="menu-divider"></div>
+
+            <!-- Warning / Destructive Action -->
+            <button
+              id="btn-reset-defaults"
+              class="btn btn-warning btn-sm"
+              title="Reset curriculum back to baseline defaults"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path>
+              </svg>
+              <span>Reset</span>
+            </button>
+
+            <!-- Ghost / Utility (Bottom) -->
             <button
               id="btn-theme-toggle"
-              class="btn btn-secondary btn-sm theme-toggle-btn"
+              class="btn btn-ghost btn-sm theme-toggle-btn"
               title="Toggle theme (Light / Dark)"
               aria-label="Toggle theme"
             >
-              <span id="theme-toggle-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></span>
-              <span id="theme-toggle-text">Toggle Theme</span>
+              <span id="theme-toggle-icon" class="theme-icon-slot">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+              </span>
+              <span id="theme-toggle-text">Dark Theme</span>
             </button>
-          </div>
-        </div>
+          </div></div>
       </header>
 
       <!-- License Tabs & Reference Tab -->
@@ -200,7 +227,7 @@
               title="Gran Turismo Benchmark Data & Visualizations (406 Tests)"
               aria-label="Gran Turismo Benchmark Data & Visualizations"
             >
-              <span class="ref-tab-icon" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span>
+              <span class="ref-tab-icon" aria-hidden="true">📊</span>
               <span class="ref-tab-label">GT Values</span>
               <span class="tab-count" id="ref-total-badge">406</span>
             </button>
@@ -242,7 +269,7 @@
             <div class="sidebar-header-actions">
               <button
                 id="btn-add-test"
-                class="btn btn-sm btn-secondary"
+                class="btn btn-sm btn-accent"
                 title="Add new test to this license"
               >
                 <span class="btn-text">+ Add Test</span>
@@ -274,7 +301,7 @@
 
           <div id="editor-empty" class="editor-empty" style="display: none">
             <div class="empty-state">
-              <span class="empty-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg></span>
+              <span class="empty-icon">🏁</span>
               <h3>No Test Selected</h3>
               <p>
                 Select a test from the left panel to inspect or edit, or click
@@ -313,28 +340,43 @@
                 <button
                   type="button"
                   id="btn-run-live"
-                  class="btn btn-primary"
+                  class="btn btn-secondary btn-sm"
                   title="Launch this test in Assetto Corsa with AI autopilot demo"
+                  aria-label="Demo in Assetto Corsa"
                 >
-                  <span>Watch AI Demo</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  </svg>
+                  <span class="btn-label">Demo</span>
                 </button>
                 <button
                   type="button"
                   id="btn-delete-test"
-                  class="btn btn-danger btn-icon-only"
-                  title="Delete Test"
-                  aria-label="Delete Test"
+                  class="btn btn-danger btn-sm"
+                  title="Delete this test from curriculum"
+                  aria-label="Delete test"
                 >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                  </svg>
+                  <span class="btn-label">Delete</span>
                 </button>
                 <button
                   type="submit"
                   id="btn-save-test"
-                  class="btn btn-success btn-icon-only"
-                  title="Save Test"
-                  aria-label="Save Test"
+                  class="btn btn-success"
+                  title="Save current test modifications (Ctrl+S)"
+                  aria-label="Save test"
                 >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                    <polyline points="7 3 7 8 15 8"></polyline>
+                  </svg>
+                  <span class="btn-label">Save</span>
                 </button>
               </div>
             </div>
@@ -349,7 +391,7 @@
                     type="text"
                     id="input-objective"
                     class="form-control"
-                    placeholder="Driving technique"
+                    placeholder="Key driving technique to teach..."
                     required
                   />
                 </div>
@@ -374,7 +416,7 @@
                   id="input-description"
                   class="form-control"
                   rows="2"
-                  placeholder="Instruction displayed during countdown"
+                  placeholder="Driver instruction displayed during countdown..."
                   required
                 ></textarea>
               </div>
@@ -382,102 +424,160 @@
 
             <!-- Section 2: Vehicle & Track Selection -->
             <div id="card-track-vehicle" class="card form-card">
-              <div class="card-title">
+              <div class="card-title flex-between">
                 <span>Track & Vehicle Selection</span>
+                <span
+                  class="badge"
+                  title="Limited to official Kunos Simulazioni content"
+                  >Kunos Official Only</span
+                >
               </div>
               <div class="form-grid cols-3">
                 <div class="form-group">
                   <div class="field-label-row">
-                    <label for="select-track">Track (Kunos)</label>
+                    <label for="input-search-track">Track (Kunos)</label>
                     <span
                       id="track-filter-count"
                       class="filter-count-badge"
                       style="display: none"
                     ></span>
                   </div>
-                  <div class="filter-search-box">
-                    <span class="search-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
-                    <label for="input-search-track" class="visually-hidden">Search track name or ID</label>
-                    <input
-                      type="text"
-                      id="input-search-track"
-                      class="form-control filter-input"
-                      placeholder="Search tracks"
-                      aria-label="Search track name or ID"
-                      autocomplete="off"
-                    />
-                    <button
-                      type="button"
-                      id="btn-clear-track-search"
-                      class="filter-clear-btn"
-                      title="Clear search"
+                  <div id="autocomplete-track" class="mui-autocomplete">
+                    <div class="mui-autocomplete-input-wrap">
+                      <span class="mui-autocomplete-icon">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="11" cy="11" r="8"></circle>
+                          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                      </span>
+                      <input
+                        type="text"
+                        id="input-search-track"
+                        class="form-control mui-autocomplete-input"
+                        placeholder="Search or select Kunos track..."
+                        autocomplete="off"
+                        role="combobox"
+                        aria-expanded="false"
+                        aria-autocomplete="list"
+                      />
+                      <div class="mui-autocomplete-actions">
+                        <button
+                          type="button"
+                          id="btn-clear-track-search"
+                          class="mui-btn-clear"
+                          title="Clear track selection"
+                          style="display: none"
+                        >
+                          &times;
+                        </button>
+                        <span class="mui-autocomplete-arrow">▼</span>
+                      </div>
+                    </div>
+                    <div
+                      id="track-options-list"
+                      class="mui-autocomplete-popper"
                       style="display: none"
-                    >
-                      &times;
-                    </button>
+                      role="listbox"
+                    ></div>
+                    <!-- Hidden sync select for 100% backward compatibility -->
+                    <select id="select-track" class="form-control" style="display: none;" required>
+                      <option value="">Select Kunos Track...</option>
+                    </select>
                   </div>
-                  <select id="select-track" class="form-control" required>
-                    <option value="">Select Kunos Track...</option>
-                  </select>
                 </div>
                 <div class="form-group">
                   <div class="field-label-row">
                     <label for="select-layout">Layout</label>
                   </div>
-                  <div class="filter-search-box filter-search-box-placeholder">
-                    <span class="search-placeholder-text"
-                      >Track configuration</span
-                    >
-                  </div>
-                  <select id="select-layout" class="form-control">
+                  <select id="select-layout" class="form-control" style="height: 38px;">
                     <option value="">Default Layout</option>
                   </select>
                 </div>
                 <div class="form-group">
                   <div class="field-label-row">
-                    <label for="select-car">Car Model (Kunos)</label>
+                    <label for="input-search-car">Car Model (Kunos)</label>
                     <span
                       id="car-filter-count"
                       class="filter-count-badge"
                       style="display: none"
                     ></span>
                   </div>
-                  <div class="filter-search-box">
-                    <span class="search-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
-                    <label for="input-search-car" class="visually-hidden">Search car model</label>
-                    <input
-                      type="text"
-                      id="input-search-car"
-                      class="form-control filter-input"
-                      placeholder="Search cars"
-                      aria-label="Search car model"
-                      autocomplete="off"
-                    />
-                    <button
-                      type="button"
-                      id="btn-clear-car-search"
-                      class="filter-clear-btn"
-                      title="Clear search"
+                  <div id="autocomplete-car" class="mui-autocomplete">
+                    <div class="mui-autocomplete-input-wrap">
+                      <span class="mui-autocomplete-icon">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="11" cy="11" r="8"></circle>
+                          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                      </span>
+                      <input
+                        type="text"
+                        id="input-search-car"
+                        class="form-control mui-autocomplete-input"
+                        placeholder="Search model, brand, drivetrain..."
+                        autocomplete="off"
+                        role="combobox"
+                        aria-expanded="false"
+                        aria-autocomplete="list"
+                      />
+                      <div class="mui-autocomplete-actions">
+                        <button
+                          type="button"
+                          id="btn-clear-car-search"
+                          class="mui-btn-clear"
+                          title="Clear car selection"
+                          style="display: none"
+                        >
+                          &times;
+                        </button>
+                        <span class="mui-autocomplete-arrow">▼</span>
+                      </div>
+                    </div>
+                    <div
+                      id="car-options-list"
+                      class="mui-autocomplete-popper"
                       style="display: none"
-                    >
-                      &times;
-                    </button>
+                      role="listbox"
+                    ></div>
+                    <!-- Hidden sync select for 100% backward compatibility -->
+                    <select id="select-car" class="form-control" style="display: none;" required>
+                      <option value="">Select Kunos Car...</option>
+                    </select>
                   </div>
-                  <select id="select-car" class="form-control" required>
-                    <option value="">Select Kunos Car...</option>
-                  </select>
                 </div>
               </div>
             </div>
 
             <!-- Section 3: Lap Mode & Spatial Positions (Interactive Map) -->
             <div id="card-gates-spline" class="card form-card">
-              <div class="card-title">
+              <div class="card-title flex-between">
                 <span>Test Bounds & Track Positions</span>
+                <div class="toggle-group">
+                  <label class="toggle-label">
+                    <input type="checkbox" id="toggle-full-lap" />
+                    <span class="toggle-switch"></span>
+                    <span id="full-lap-text" class="toggle-text"
+                      >Full Lap Test</span
+                    >
+                  </label>
+                </div>
               </div>
 
               <!-- Interactive Spline Canvas Map -->
               <div class="map-container">
+                <div class="map-toolbar">
+                  <div class="map-legend">
+                    <span class="legend-item"
+                      ><span class="dot dot-start"></span> Start Gate</span
+                    >
+                    <span class="legend-item"
+                      ><span class="dot dot-finish"></span> Finish Gate</span
+                    >
+                    <span class="legend-item"
+                      ><span class="bar bar-active"></span> Active Sector</span
+                    >
+                  </div>
+                </div>
                 <div class="canvas-wrapper">
                   <canvas id="track-canvas" width="700" height="320"></canvas>
                   <div
@@ -494,9 +594,9 @@
               <div class="form-grid cols-2 mt-3">
                 <div class="form-group gate-control-group gate-start">
                   <div class="gate-header">
-                    <span class="badge badge-success gate-badge">Start Gate</span>
+                    <span class="badge badge-success gate-badge">🏁 Start Gate</span>
                     <label for="slider-start-s" class="gate-label">
-                      Position: <span id="disp-start-s" style="display: none;">0.00%</span><span id="disp-start-m">0 m</span>
+                      Position: <span id="disp-start-s">0.00%</span> (<span id="disp-start-m">0 m</span>)
                     </label>
                     <label for="input-start-s" class="visually-hidden">Start Position Value</label>
                     <input
@@ -523,9 +623,9 @@
 
                 <div class="form-group gate-control-group gate-finish">
                   <div class="gate-header">
-                    <span class="badge badge-danger gate-badge">Finish Gate</span>
+                    <span class="badge badge-danger gate-badge">🏁 Finish Gate</span>
                     <label for="slider-finish-s" class="gate-label">
-                      Position: <span id="disp-finish-s" style="display: none;">100.00%</span><span id="disp-finish-m">0 m</span>
+                      Position: <span id="disp-finish-s">100.00%</span> (<span id="disp-finish-m">0 m</span>)
                     </label>
                     <label for="input-finish-s" class="visually-hidden">Finish Position Value</label>
                     <input
@@ -567,9 +667,10 @@
                     id="radio-standing"
                   />
                   <div class="mode-body">
-                    <span class="mode-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><rect x="9" y="9" width="6" height="6"></rect></svg></span>
+                    <span class="mode-icon">🛑</span>
                     <div class="mode-text">
                       <strong>Standing Start</strong>
+                      <span>Chassis stationary at start line (0 km/h)</span>
                     </div>
                   </div>
                 </label>
@@ -582,9 +683,10 @@
                     id="radio-rolling"
                   />
                   <div class="mode-body">
-                    <span class="mode-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></span>
+                    <span class="mode-icon">🏎️</span>
                     <div class="mode-text">
                       <strong>Rolling Start</strong>
+                      <span>AI autopilot drives through countdown to GO!</span>
                     </div>
                   </div>
                 </label>
@@ -597,9 +699,10 @@
                     id="radio-flying"
                   />
                   <div class="mode-body">
-                    <span class="mode-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></span>
+                    <span class="mode-icon">✈️</span>
                     <div class="mode-text">
                       <strong>Flying Lap</strong>
+                      <span>Hot lap with high-speed rolling launch</span>
                     </div>
                   </div>
                 </label>
@@ -620,9 +723,9 @@
 
               <div id="telemetry-missing-card" class="mt-2" class="info-banner-warning mt-2" style="display: none;">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                  <span style="font-size: 12px; font-weight: 600; color: var(--accent-gold);">Missing AI telemetry profile</span>
+                  <span style="font-size: 12px; font-weight: 600; color: var(--accent-gold);">⚠️ Missing AI Telemetry Profile</span>
                   <button type="button" id="btn-download-record-script" class="btn btn-xs btn-secondary" style="font-size: 11px; border-color: var(--accent-gold); color: var(--accent-gold);">
-                    <span>Download runner script (.ps1)</span>
+                    <span>📥 Download Recording Script (.ps1)</span>
                   </button>
                 </div>
                 <div id="telemetry-dropzone-editor" class="dropzone-dashed" style="padding: 10px; text-align: center; cursor: pointer; margin-top: 8px;">
@@ -647,7 +750,7 @@
               <div class="card-title">Target Times</div>
               <div class="form-grid cols-3 target-times-grid">
                 <div class="form-group">
-                  <label for="target-gold" class="medal-label medal-gold"><span class="medal-dot gold"></span>Gold</label>
+                  <label for="target-gold" class="medal-label medal-gold">🥇 Gold</label>
                   <div class="input-suffix-wrapper">
                     <input
                       type="number"
@@ -662,7 +765,7 @@
                   </div>
                 </div>
                 <div class="form-group">
-                  <label for="target-silver" class="medal-label medal-silver"><span class="medal-dot silver"></span>Silver</label>
+                  <label for="target-silver" class="medal-label medal-silver">🥈 Silver</label>
                   <div class="input-suffix-wrapper">
                     <input
                       type="number"
@@ -677,7 +780,7 @@
                   </div>
                 </div>
                 <div class="form-group">
-                  <label for="target-bronze" class="medal-label medal-bronze"><span class="medal-dot bronze"></span>Bronze</label>
+                  <label for="target-bronze" class="medal-label medal-bronze">🥉 Bronze</label>
                   <div class="input-suffix-wrapper">
                     <input
                       type="number"
@@ -697,7 +800,8 @@
                 class="target-validation-error"
                 style="display: none"
               >
-                Targets must satisfy Gold &lt; Silver &lt; Bronze
+                ⚠️ Logical error: Targets must satisfy Gold &lt; Silver &lt;
+                Bronze.
               </div>
             </div>
           </form>
@@ -709,7 +813,12 @@
         <!-- Reference View Header -->
         <div class="ref-header">
           <div class="ref-title-group">
-            <h2>Gran Turismo Driving School Benchmarks</h2>
+            <h2>GRAN TURISMO DRIVING SCHOOL CONSTANT VALUES & BENCHMARKS</h2>
+            <p class="ref-subtitle">
+              Authoritative GT1–GT7 curriculum telemetry: horsepower
+              progression, power-to-weight calibration, medal durations, and
+              powertrain layouts.
+            </p>
           </div>
 
           <!-- Game Selector Controls -->
@@ -721,7 +830,6 @@
               <button class="pill-btn" data-game="GT2">GT2</button>
               <button class="pill-btn" data-game="GT3">GT3</button>
               <button class="pill-btn" data-game="GT4">GT4</button>
-              <div class="game-pills-break"></div>
               <button class="pill-btn" data-game="GT5">GT5</button>
               <button class="pill-btn" data-game="GT6">GT6</button>
               <button class="pill-btn" data-game="GT7">GT7</button>
@@ -739,81 +847,158 @@
         <!-- Quick Metrics Summary Cards -->
         <div class="ref-metrics-grid">
           <div class="ref-card metric-card">
-            <div class="metric-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg></div>
+            <div class="metric-icon metric-icon-flag">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+                <line x1="4" y1="22" x2="4" y2="15"></line>
+              </svg>
+            </div>
             <div class="metric-info">
               <span class="metric-label">Total Tests</span>
               <span id="metric-total-tests" class="metric-value">406</span>
             </div>
           </div>
           <div class="ref-card metric-card">
-            <div class="metric-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"></circle><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path></svg></div>
+            <div class="metric-icon metric-icon-gold">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="8" r="6"></circle>
+                <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path>
+              </svg>
+            </div>
             <div class="metric-info">
               <span class="metric-label">Total Gold Time</span>
               <span id="metric-total-gold" class="metric-value">292:17.2</span>
             </div>
           </div>
           <div class="ref-card metric-card">
-            <div class="metric-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
+            <div class="metric-icon metric-icon-time">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="13" r="8"></circle>
+                <path d="M12 9v4l2.5 2.5"></path>
+                <path d="M12 2v3"></path>
+                <path d="M10 2h4"></path>
+              </svg>
+            </div>
             <div class="metric-info">
               <span class="metric-label">Avg Gold Duration</span>
               <span id="metric-avg-gold" class="metric-value">0:45.670</span>
             </div>
           </div>
           <div class="ref-card metric-card">
-            <div class="metric-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg></div>
+            <div class="metric-icon metric-icon-hp">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m12 14 4-4"></path>
+                <path d="M3.34 19a10 10 0 1 1 17.32 0"></path>
+              </svg>
+            </div>
             <div class="metric-info">
               <span class="metric-label">Average Horsepower</span>
               <span id="metric-avg-hp" class="metric-value">318 HP</span>
             </div>
           </div>
           <div class="ref-card metric-card">
-            <div class="metric-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"></path><rect x="6" y="8" width="12" height="5" rx="1"></rect></svg></div>
+            <div class="metric-icon metric-icon-pw">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="3" x2="12" y2="21"></line>
+                <path d="m3 9 9-4 9 4"></path>
+                <path d="M4 14l-2 5a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l-2-5"></path>
+                <path d="M18 14l-2 5a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l-2-5"></path>
+              </svg>
+            </div>
             <div class="metric-info">
               <span class="metric-label">Avg Power / Weight</span>
               <span id="metric-avg-pw" class="metric-value">5.12 kg/hp</span>
             </div>
           </div>
-          <div class="ref-card metric-card">
-            <div class="metric-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></div>
-            <div class="metric-info">
+          <div class="ref-card metric-card metric-card-drivetrain">
+            <div class="metric-icon metric-icon-dt">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="6" height="7" rx="1.5"></rect>
+                <rect x="15" y="3" width="6" height="7" rx="1.5"></rect>
+                <rect x="3" y="14" width="6" height="7" rx="1.5"></rect>
+                <rect x="15" y="14" width="6" height="7" rx="1.5"></rect>
+                <path d="M9 6.5h6"></path>
+                <path d="M9 17.5h6"></path>
+                <line x1="12" y1="6.5" x2="12" y2="17.5"></line>
+              </svg>
+            </div>
+            <div class="metric-info metric-info-dt">
               <span class="metric-label">Drivetrain Distribution</span>
-              <span id="metric-drivetrain-breakdown" class="metric-value sm"
-                >FR: 157 | FF: 84</span
-              >
+              <div id="metric-drivetrain-breakdown" class="drivetrain-chips-row">
+                <span class="dt-chip dt-fr"><span class="dt-chip-name">FR</span> <span class="dt-chip-val">157</span></span>
+                <span class="dt-chip dt-ff"><span class="dt-chip-name">FF</span> <span class="dt-chip-val">84</span></span>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- 4 Visualizations Grid -->
         <div class="ref-charts-grid">
-          <!-- Chart 1: Power & Power-to-Weight Ratio vs Test Progression (Dual Y-Axis) -->
+          <!-- Chart 1: Power & Power-to-Weight Ratio vs Progression (Dual Y-Axis) -->
           <div class="ref-card chart-card">
             <div class="chart-header">
               <div class="chart-title">
                 <span class="chart-dot hp"></span>
-                <h3>Power & Power-to-Weight Ratio vs Test Progression</h3>
+                <h3 id="title-chart-power">Average Power &amp; Power-to-Weight Ratio by License</h3>
               </div>
               <div class="chart-legend-badges">
-                <span class="chart-badge text-red">● Left: HP</span>
-                <span class="chart-badge text-amber">● Right: kg/hp</span>
+                <span class="chart-badge chart-swipe-hint">Swipe ↔</span>
+                <button
+                  id="btn-toggle-power-agg"
+                  class="chart-badge chart-badge-btn active"
+                  type="button"
+                  title="Toggle aggregation: By License Tier vs Individual Tests"
+                >Avg by License</button>
+                <button
+                  type="button"
+                  id="badge-toggle-hp"
+                  class="chart-badge chart-badge-btn-toggle text-red"
+                  title="Click to toggle Horsepower line"
+                >● Left: HP</button>
+                <button
+                  type="button"
+                  id="badge-toggle-pw"
+                  class="chart-badge chart-badge-btn-toggle text-amber"
+                  title="Click to toggle Power/Weight line"
+                >● Right: kg/hp</button>
               </div>
             </div>
-            <div class="chart-canvas-wrapper">
-              <canvas id="chart-power-pw"></canvas>
+            <div class="chart-canvas-wrapper chart-scrollable">
+              <div class="chart-scroll-inner">
+                <canvas id="chart-power-pw"></canvas>
+              </div>
             </div>
           </div>
 
-          <!-- Chart 2: Gold Medal Duration vs Test Progression -->
+          <!-- Chart 2: Gold Medal Duration vs Progression -->
           <div class="ref-card chart-card">
             <div class="chart-header">
               <div class="chart-title">
                 <span class="chart-dot gold"></span>
-                <h3>Gold Medal Duration vs Test Progression</h3>
+                <h3 id="title-chart-gold">Average Gold Medal Duration by License</h3>
               </div>
-              <span class="chart-badge">Y: Duration (Seconds)</span>
+              <div class="chart-legend-badges">
+                <span class="chart-badge chart-swipe-hint">Swipe ↔</span>
+                <button
+                  id="btn-toggle-gold-agg"
+                  class="chart-badge chart-badge-btn active"
+                  type="button"
+                  title="Toggle aggregation: By License Tier vs Individual Tests"
+                >Avg by License</button>
+                <button
+                  id="btn-toggle-gold-scale"
+                  class="chart-badge chart-badge-btn"
+                  type="button"
+                  style="display: none;"
+                  title="Toggle focus zoom (tests ≤ 3 min vs full 9 min scale)"
+                >Focus ≤3m</button>
+                <span class="chart-badge">Y: Duration (mm:ss)</span>
+              </div>
             </div>
-            <div class="chart-canvas-wrapper">
-              <canvas id="chart-gold"></canvas>
+            <div class="chart-canvas-wrapper chart-scrollable">
+              <div class="chart-scroll-inner">
+                <canvas id="chart-gold"></canvas>
+              </div>
             </div>
           </div>
 
@@ -841,21 +1026,28 @@
               </div>
             </div>
             <div class="chart-canvas-wrapper">
-              <canvas id="chart-gold-dist"></canvas>
+              <div class="chart-scroll-inner">
+                <canvas id="chart-gold-dist"></canvas>
+              </div>
             </div>
           </div>
 
-          <!-- Chart 4: Car Drivetrain Layout vs Test Progression -->
+          <!-- Chart 4: Car Drivetrain Architecture Distribution -->
           <div class="ref-card chart-card">
             <div class="chart-header">
               <div class="chart-title">
                 <span class="chart-dot drivetrain"></span>
-                <h3>Car Drivetrain Layout vs Test Progression</h3>
+                <h3>Car Drivetrain Architecture Distribution</h3>
               </div>
-              <span class="chart-badge">Y: Layout (FF, FR, MR, RR, FAWD)</span>
+              <div class="chart-legend-badges">
+                <span class="chart-badge">X: Tests Count</span>
+                <span class="chart-badge text-cyan">By Powertrain Layout</span>
+              </div>
             </div>
             <div class="chart-canvas-wrapper">
-              <canvas id="chart-drivetrain"></canvas>
+              <div class="chart-scroll-inner">
+                <canvas id="chart-drivetrain"></canvas>
+              </div>
             </div>
           </div>
         </div>
@@ -865,6 +1057,7 @@
           <div class="table-card-header">
             <div class="table-title">
               <h3>Constant Values Documentation Table</h3>
+              <span id="table-count-label" class="badge">406 Tests</span>
             </div>
             <div class="table-filters">
               <label for="ref-search-input" class="visually-hidden">Search reference table</label>
@@ -929,7 +1122,7 @@
       <div id="telemetry-batch-modal" class="modal" style="display: none">
         <div class="modal-content" style="max-width: 720px;">
           <div class="modal-header">
-            <h3 id="telemetry-modal-title">Record Missing Telemetry</h3>
+            <h3 id="telemetry-modal-title">📡 Record Missing Telemetry (Rolling Starts)</h3>
             <button id="telemetry-modal-close" class="modal-close-btn">&times;</button>
           </div>
           <div class="modal-body">
@@ -1034,7 +1227,7 @@
                 2. Telemetry Result File (.json)
               </label>
               <div id="telemetry-dropzone" class="dropzone-dashed" style="padding: 24px 16px; text-align: center; cursor: pointer;">
-                <span style="display: flex; justify-content: center; margin-bottom: 8px;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg></span>
+                <span style="font-size: 28px; display: block; margin-bottom: 6px;">📁</span>
                 <span style="font-size: 13px; color: var(--text-main); font-weight: 500; display: block;">Drag & drop telemetry profile JSON here</span>
                 <span style="font-size: 11px; color: var(--text-dim); display: block; margin-top: 4px;">or click to browse from <code>data/telemetry_profiles/</code></span>
                 <input type="file" id="telemetry-file-input" accept=".json" style="display: none;" />
@@ -1062,8 +1255,8 @@
 
             <!-- Success Card -->
             <div id="pr-success-card" class="info-banner-success" style="display: none; text-align: center;">
-              <span style="display: flex; justify-content: center; margin-bottom: 8px;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="9 12 12 15 16 10"></polyline></svg></span>
-              <h4 style="color: var(--accent-green); margin-bottom: 6px;">Pull request created successfully</h4>
+              <span style="font-size: 32px; display: block; margin-bottom: 8px;">🎉</span>
+              <h4 style="color: var(--accent-green); margin-bottom: 6px;">Pull Request Created Successfully!</h4>
               <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">Your telemetry profile has been submitted and autoformatted for maintainer review.</p>
               <a id="pr-link-btn" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary" class="btn btn-success" style="font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
                 <span>View Pull Request on GitHub</span> <span class="icon">↗</span>
