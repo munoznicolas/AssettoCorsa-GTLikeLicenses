@@ -38,12 +38,18 @@ export const STORAGE_KEY = "gt_curriculum_v1";
  */
 export function isValidCurriculum(data) {
   if (!Array.isArray(data) || data.length === 0) return false;
-  return data.every(
+  const structureValid = data.every(
     (tier) =>
       tier &&
       typeof tier.tier_name === "string" &&
       Array.isArray(tier.tests)
   );
+  if (!structureValid) return false;
+  const totalTests = data.reduce(
+    (sum, tier) => sum + (Array.isArray(tier.tests) ? tier.tests.length : 0),
+    0
+  );
+  return totalTests > 0;
 }
 
 /**
