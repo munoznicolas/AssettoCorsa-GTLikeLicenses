@@ -80,10 +80,16 @@ function setupGlobalEventListeners() {
 
   dom.headerActions?.querySelectorAll("button").forEach((btn) => {
     btn.addEventListener("click", () => {
-      if (window.innerWidth <= 900) {
+      if (btn.id !== "btn-theme-toggle" && btn.id !== "btn-close-actions-menu") {
         closeActionsMenu();
       }
     });
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && dom.headerActions?.classList.contains("open")) {
+      closeActionsMenu();
+    }
   });
 
   // Export Content Manager Mod (.zip) with pure client-side validation & packaging

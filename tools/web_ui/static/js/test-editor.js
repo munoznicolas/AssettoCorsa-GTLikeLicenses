@@ -376,9 +376,7 @@ export function renderTestList() {
         </div>
         <div class="test-item-title">${escapeHtml(test.title)}</div>
         <div class="test-item-meta">
-          <span>🏁 ${lapTypeLabel}</span>
-          <span>📍 ${escapeHtml(test.track_id)}</span>
-          <span>🥇 ${test.targets?.gold_seconds !== undefined ? `${Number(test.targets.gold_seconds).toFixed(2)}s` : ""}</span>
+          <span>${escapeHtml(test.track_id)}</span>
         </div>
       </div>
     `;
@@ -638,7 +636,7 @@ export async function autoCalculateTargetsFromTelemetry(overrideStartS = null, o
       // Telemetry not available for this track + car combination
       if (dom.telemetryMissingCard) dom.telemetryMissingCard.style.display = "block";
       if (dom.btnExportSingleTelemetryScript) dom.btnExportSingleTelemetryScript.style.display = "inline-flex";
-      showAISpeedStatus(`⚠️ No telemetry profile for ${carId} @ ${trackId}. Upload profile below or record in AC.`);
+      showAISpeedStatus(`No telemetry profile for ${carId} @ ${trackId}. Upload profile below or record in AC.`);
     }
   } catch (err) {
     console.warn("Client-side telemetry targets error:", err);
@@ -1027,7 +1025,10 @@ async function handleFormSubmit(e) {
   const originalHtml = submitBtn ? submitBtn.innerHTML : "";
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.innerHTML = `<span>Saving & Building Miniature...</span>`;
+    submitBtn.setAttribute("title", "Saving test...");
+    if (!submitBtn.classList.contains("btn-icon-only")) {
+      submitBtn.innerHTML = `<span>Saving & Building Miniature...</span>`;
+    }
   }
 
   try {

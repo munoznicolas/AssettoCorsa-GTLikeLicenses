@@ -385,6 +385,31 @@ def _discover_track_layouts(t_path: str, t_id: str, ac_root: str) -> List[Dict[s
     return layouts
 
 
+KUNOS_TRACK_NAMES: Dict[str, str] = {
+    "drift": "Drift",
+    "imola": "Imola",
+    "ks_barcelona": "Barcelona - Catalunya",
+    "ks_black_cat_county": "Black Cat County",
+    "ks_brands_hatch": "Brands Hatch",
+    "ks_drag": "Drag Strip",
+    "ks_highlands": "Highlands",
+    "ks_laguna_seca": "Laguna Seca",
+    "ks_monza66": "Monza 1966",
+    "ks_nordschleife": "Nürburgring Nordschleife",
+    "ks_nurburgring": "Nürburgring",
+    "ks_red_bull_ring": "Red Bull Ring",
+    "ks_silverstone": "Silverstone",
+    "ks_silverstone1967": "Silverstone 1967",
+    "ks_vallelunga": "Vallelunga",
+    "ks_zandvoort": "Zandvoort",
+    "magione": "Magione",
+    "monza": "Monza",
+    "mugello": "Mugello",
+    "spa": "Spa-Francorchamps",
+    "trento-bondone": "Trento-Bondone",
+}
+
+
 def get_available_tracks(ac_root: str = DEFAULT_AC_ROOT, kunos_only: bool = True) -> List[Dict[str, Any]]:
     """Discovers all tracks and layouts that have valid AI splines, filtered to Kunos content."""
     tracks_dir = os.path.join(ac_root, "content", "tracks")
@@ -401,6 +426,8 @@ def get_available_tracks(ac_root: str = DEFAULT_AC_ROOT, kunos_only: bool = True
             continue
 
         track_name = _read_ui_name(os.path.join(t_path, "ui", "ui_track.json"), t_id)
+        if (track_name == t_id or not track_name) and t_id in KUNOS_TRACK_NAMES:
+            track_name = KUNOS_TRACK_NAMES[t_id]
         layouts = _discover_track_layouts(t_path, t_id, ac_root)
         if layouts:
             tracks_list.append({
@@ -492,6 +519,19 @@ def get_available_cars(ac_root: str = DEFAULT_AC_ROOT, kunos_only: bool = True) 
 def get_track_spline_data(track_id: str, layout: str = "", ac_root: str = DEFAULT_AC_ROOT) -> Optional[Dict[str, Any]]:
     """Extracts downsampled centerline points for 2D map preview."""
     spline_file = find_spline_file(track_id, layout, ac_root)
+    if not spline_file and not layout:
+        # Fallback to the first available layout for tracks with multiple sub-layouts
+        tracks = get_available_tracks(ac_root)
+        for t in tracks:
+            if t["track_id"] == track_id and t.get("layouts"):
+                for lay in t["layouts"]:
+                    sf = lay.get("spline_file") or find_spline_file(track_id, lay.get("layout_id", ""), ac_root)
+                    if sf and os.path.isfile(sf):
+                        spline_file = sf
+                        break
+                if spline_file:
+                    break
+
     if not spline_file:
         return None
 
@@ -801,6 +841,7 @@ def _build_reference_entry(
         "hp": hp,
         "weight_kg": wt,
         "pw_kg_hp": pw,
+        "pw": pw,
         "drivetrain_layout": layout,
         "track": track_name,
         "gold": _format_time_str(gold_sec),

@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b0d14"/>
+      <stop offset="40%" stop-color="#121622"/>
+      <stop offset="100%" stop-color="#080a0f"/>
+    </linearGradient>
+
+    <linearGradient id="redAccent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ef4444"/>
+      <stop offset="100%" stop-color="#b91c1c"/>
+    </linearGradient>
+
+    <linearGradient id="badgeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e2433"/>
+      <stop offset="100%" stop-color="#0f131c"/>
+    </linearGradient>
+
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.75" stroke-opacity="0.6"/>
+    </pattern>
+
+    <filter id="glow">
+      <feDropShadow dx="0" dy="4" stdDeviation="12" flood-color="#ef4444" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <!-- Subdued Grid Overlay -->
+  <rect width="1200" height="630" fill="url(#grid)"/>
+
+  <!-- Top Accent Bar -->
+  <rect x="0" y="0" width="1200" height="6" fill="url(#redAccent)"/>
+
+  <!-- Background Racing Diagonal Stripes -->
+  <path d="M 900 -50 L 1150 680 L 1090 680 L 840 -50 Z" fill="#ef4444" fill-opacity="0.05"/>
+  <path d="M 970 -50 L 1220 680 L 1180 680 L 930 -50 Z" fill="#ef4444" fill-opacity="0.08"/>
+
+  <!-- GT Logo Badge -->
+  <g transform="translate(100, 110)">
+    <rect width="110" height="110" rx="24" fill="url(#badgeGrad)" stroke="#ef4444" stroke-width="4" filter="url(#glow)"/>
+    <g font-family="'Chakra Petch', 'Arial Black', sans-serif" font-weight="900" font-style="italic" text-anchor="middle">
+      <text x="54" y="76" font-size="62" fill="#ffffff" letter-spacing="-2">LC</text>
+
+    </g>
+    <line x1="18" y1="92" x2="92" y2="92" stroke="#ef4444" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <!-- Main Titles -->
+  <g transform="translate(240, 150)">
+    <text font-family="'Chakra Petch', 'Arial Black', sans-serif" font-weight="900" font-style="italic" font-size="44" fill="#ffffff" letter-spacing="1">
+      ASSETTO CORSA
+    </text>
+    <text y="50" font-family="'Chakra Petch', 'Arial Black', sans-serif" font-weight="900" font-style="italic" font-size="44" fill="#ef4444" letter-spacing="1">
+      GT LICENSE TEST DESIGNER
+    </text>
+  </g>
+
+  <!-- Subtitle / Mission Statement -->
+  <text x="100" y="310" font-family="'Inter', sans-serif" font-weight="500" font-size="24" fill="#94a3b8" letter-spacing="0.5">
+    58 Driving School Tests • 3D Start/Finish Gates • Out-In-Out Trajectory Ribbon • AI Telemetry
+  </text>
+
+  <!-- Feature Pills -->
+  <g transform="translate(100, 360)">
+    <!-- Pill 1 -->
+    <rect x="0" y="0" width="280" height="56" rx="14" fill="#1e2433" stroke="#334155" stroke-width="1.5"/>
+    <text x="24" y="35" font-family="'Inter', sans-serif" font-weight="600" font-size="18" fill="#e2e8f0">
+      ⚡ CSP New Modes Lua
+    </text>
+
+    <!-- Pill 2 -->
+    <rect x="300" y="0" width="310" height="56" rx="14" fill="#1e2433" stroke="#334155" stroke-width="1.5"/>
+    <text x="324" y="35" font-family="'Inter', sans-serif" font-weight="600" font-size="18" fill="#e2e8f0">
+      🏆 Content Manager Career
+    </text>
+
+    <!-- Pill 3 -->
+    <rect x="630" y="0" width="320" height="56" rx="14" fill="#1e2433" stroke="#334155" stroke-width="1.5"/>
+    <text x="654" y="35" font-family="'Inter', sans-serif" font-weight="600" font-size="18" fill="#e2e8f0">
+      🤝 Community Telemetry (PR)
+    </text>
+  </g>
+
+  <!-- Bottom Details Bar -->
+  <g transform="translate(100, 520)">
+    <line x1="0" y1="0" x2="1000" y2="0" stroke="#334155" stroke-width="1"/>
+    <text x="0" y="40" font-family="'JetBrains Mono', monospace" font-size="16" fill="#64748b">
+      National B • National A • International B • International A • Super License
+    </text>
+    <text x="1000" y="40" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="16" fill="#ef4444">
+      Open Source • GitHub Pages
+    </text>
+  </g>
+</svg>

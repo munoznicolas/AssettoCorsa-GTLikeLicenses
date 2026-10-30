@@ -306,13 +306,13 @@ export function renderReferenceCharts(list) {
             },
             afterTitle: (items) => {
               const t = list[items[0].dataIndex];
-              return `🚗 ${t.car}`;
+              return t.car;
             },
             label: (item) => {
               if (item.datasetIndex === 0) {
-                return `⚡ Horsepower: ${item.parsed.y} HP`;
+                return `Horsepower: ${item.parsed.y} HP`;
               } else {
-                return `⚖️ Power/Weight: ${item.parsed.y} kg/hp`;
+                return `Power/Weight: ${item.parsed.y} kg/hp`;
               }
             },
           },
@@ -395,7 +395,7 @@ export function renderReferenceCharts(list) {
             },
             label: (item) => {
               const t = list[item.dataIndex];
-              return `🥇 Gold Target: ${t.gold} (${item.parsed.y}s) | Track: ${t.track}`;
+              return `Gold Target: ${t.gold} (${item.parsed.y}s) | Track: ${t.track}`;
             },
           },
         },
@@ -568,7 +568,7 @@ export function renderReferenceCharts(list) {
             label: (item) => {
               const nearby = distNearbyTests[item.dataIndex];
               const count = nearby ? nearby.length : 0;
-              return `📊 Tests in ±2.5s window: ${count} (Density Score: ${item.parsed.y})`;
+              return `Tests in ±2.5s window: ${count} (Density Score: ${item.parsed.y})`;
             },
             afterLabel: (item) => {
               const nearby = distNearbyTests[item.dataIndex];

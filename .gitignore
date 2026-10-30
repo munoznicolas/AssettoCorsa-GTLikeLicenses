@@ -27,3 +27,5 @@ build/
 *.egg-info/
 dist_site/
 _site/
+node_modules/
+tools/web_ui/dist/
