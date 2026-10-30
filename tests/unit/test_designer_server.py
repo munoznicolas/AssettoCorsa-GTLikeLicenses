@@ -316,6 +316,45 @@ class TestDesignerServer(unittest.TestCase):
         dividers = re.findall(r'class="menu-divider[^"]*"', actions_html)
         self.assertGreaterEqual(len(dividers), 2)
 
+    def test_export_package_button_green_styling(self):
+        """Verify Export Package CTA is styled with green background."""
+        style_css_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "style.css")
+        with open(style_css_path, "r", encoding="utf-8") as f:
+            css = f.read()
+        self.assertIn(".btn-export-main", css)
+        self.assertIn("var(--accent-green)", css)
+
+    def test_mobile_reference_charts_per_game_logic(self):
+        """Verify mobile reference charts show per game when ALL games are selected and per license when a game is picked."""
+        ref_view_js_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "js", "reference-view.js")
+        with open(ref_view_js_path, "r", encoding="utf-8") as f:
+            js = f.read()
+
+        # 1. Functions must be exported and defined
+        self.assertIn("export function isMobileChartViewport()", js)
+        self.assertIn("export function shouldShowPerGameChart(", js)
+        self.assertIn("export function aggregateTestsByGame(", js)
+
+        # 2. shouldShowPerGameChart conditions on mobile (<= 768) and activeGame == 'ALL'
+        self.assertIn("innerWidth <= 768", js)
+        self.assertIn('activeGame === "ALL"', js)
+
+        # 3. Both charts (Power/PW and Gold) branch on showPerGame
+        self.assertIn("const showPerGame = shouldShowPerGameChart(state.activeRefGame);", js)
+        self.assertIn("aggregates = aggregateTestsByGame(list);", js)
+        self.assertIn("aggregates = aggregateTestsByLicense(list, state.activeRefGame);", js)
+
+        # 4. updateAggregationUiControls adapts button and title text to Avg by Game vs Avg by License
+        self.assertIn('const aggLabel = showPerGame ? "Avg by Game" : "Avg by License";', js)
+        self.assertIn('"Average Power & Power-to-Weight Ratio by Game"', js)
+        self.assertIn('"Average Gold Medal Duration by Game"', js)
+
+        # 5. Mobile stylesheet includes no-scroll adaptation for compact charts
+        style_css_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "style.css")
+        with open(style_css_path, "r", encoding="utf-8") as f:
+            css = f.read()
+        self.assertIn(".chart-canvas-wrapper.chart-scrollable.no-scroll", css)
+
 
 if __name__ == "__main__":
     unittest.main()
