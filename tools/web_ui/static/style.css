@@ -3310,6 +3310,15 @@ select optgroup {
     height: 100%;
   }
 
+  .chart-canvas-wrapper.chart-scrollable.no-scroll {
+    overflow-x: hidden;
+  }
+
+  .chart-canvas-wrapper.chart-scrollable.no-scroll .chart-scroll-inner {
+    min-width: 100%;
+    width: 100%;
+  }
+
   .table-card {
     padding: 12px;
   }

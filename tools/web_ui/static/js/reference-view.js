@@ -106,6 +106,19 @@ export function setupReferenceViewListeners() {
       renderReferenceView();
     }
   });
+
+  let refResizeTimer = null;
+  window.addEventListener("resize", () => {
+    if (state.isReferenceViewActive) {
+      clearTimeout(refResizeTimer);
+      refResizeTimer = setTimeout(() => {
+        const list = getFilteredRefTests();
+        updateAggregationUiControls();
+        renderPowerChart(list);
+        renderGoldChart(list);
+      }, 150);
+    }
+  });
 }
 
 /**
@@ -321,6 +334,111 @@ function formatShortLicense(lic) {
 }
 
 /**
+ * Determine if current viewport matches mobile screen breakpoint (<= 768px).
+ */
+export function isMobileChartViewport() {
+  return typeof window !== "undefined" && window.innerWidth <= 768;
+}
+
+/**
+ * Determine if reference charts should group by game release (mobile view with ALL games selected).
+ */
+export function shouldShowPerGameChart(activeGame = state.activeRefGame) {
+  const isAgg = state.refChartsAggregateByLicense !== false;
+  return isAgg && isMobileChartViewport() && (activeGame === "ALL" || !activeGame);
+}
+
+/**
+ * Aggregate reference tests grouped per game release for compact mobile visualization.
+ */
+export function aggregateTestsByGame(list) {
+  const groupsMap = new Map();
+  const GAME_ORDER = ["GT1", "GT2", "GT3", "GT4", "GT5", "GT6", "GT7", "AC Mod"];
+
+  for (const game of GAME_ORDER) {
+    groupsMap.set(game, {
+      game,
+      tests: [],
+    });
+  }
+
+  for (const t of list) {
+    const game = t.game || "GT";
+    if (!groupsMap.has(game)) {
+      groupsMap.set(game, {
+        game,
+        tests: [],
+      });
+    }
+    groupsMap.get(game).tests.push(t);
+  }
+
+  const aggregates = [];
+  for (const [game, grp] of groupsMap.entries()) {
+    const tests = grp.tests;
+    if (!tests || tests.length === 0) continue;
+
+    const validHp = tests.filter((t) => t.hp && t.hp > 0);
+    const avgHp =
+      validHp.length > 0
+        ? Math.round(validHp.reduce((sum, t) => sum + t.hp, 0) / validHp.length)
+        : null;
+
+    const validPw = tests.filter((t) => t.pw_kg_hp && t.pw_kg_hp > 0);
+    const avgPw =
+      validPw.length > 0
+        ? parseFloat((validPw.reduce((sum, t) => sum + t.pw_kg_hp, 0) / validPw.length).toFixed(2))
+        : null;
+
+    const validGold = tests.filter(
+      (t) => t.gold_seconds !== null && t.gold_seconds !== undefined && isFinite(t.gold_seconds)
+    );
+    const avgDuration =
+      validGold.length > 0
+        ? parseFloat((validGold.reduce((sum, t) => sum + t.gold_seconds, 0) / validGold.length).toFixed(2))
+        : null;
+
+    const minHp = validHp.length > 0 ? Math.min(...validHp.map((t) => t.hp)) : null;
+    const maxHp = validHp.length > 0 ? Math.max(...validHp.map((t) => t.hp)) : null;
+
+    const minPw = validPw.length > 0 ? Math.min(...validPw.map((t) => t.pw_kg_hp)).toFixed(2) : null;
+    const maxPw = validPw.length > 0 ? Math.max(...validPw.map((t) => t.pw_kg_hp)).toFixed(2) : null;
+
+    const minGold = validGold.length > 0 ? Math.min(...validGold.map((t) => t.gold_seconds)) : null;
+    const maxGold = validGold.length > 0 ? Math.max(...validGold.map((t) => t.gold_seconds)) : null;
+
+    const carList = Array.from(new Set(tests.map((t) => t.car).filter(Boolean)));
+    const licenseList = Array.from(new Set(tests.map((t) => t.license).filter(Boolean)));
+
+    aggregates.push({
+      key: game,
+      game,
+      license: "All Tiers",
+      shortLabel: game,
+      fullLabel: game,
+      testCount: tests.length,
+      licenseCount: licenseList.length,
+      validHpCount: validHp.length,
+      avgHp,
+      minHp,
+      maxHp,
+      validPwCount: validPw.length,
+      avgPw,
+      minPw,
+      maxPw,
+      validGoldCount: validGold.length,
+      avgDuration,
+      minGold,
+      maxGold,
+      sampleCars: carList.slice(0, 3),
+      tests,
+    });
+  }
+
+  return aggregates;
+}
+
+/**
  * Aggregate test list by license tier per game calculating average HP, kg/hp and gold duration.
  */
 export function aggregateTestsByLicense(list, activeGame = "ALL") {
@@ -408,32 +526,43 @@ export function aggregateTestsByLicense(list, activeGame = "ALL") {
  */
 export function updateAggregationUiControls() {
   const isAgg = state.refChartsAggregateByLicense !== false;
+  const showPerGame = shouldShowPerGameChart(state.activeRefGame);
   const btnPower = document.getElementById("btn-toggle-power-agg");
   const btnGold = document.getElementById("btn-toggle-gold-agg");
   const btnScale = document.getElementById("btn-toggle-gold-scale");
   const titlePower = document.getElementById("title-chart-power");
   const titleGold = document.getElementById("title-chart-gold");
 
+  const aggLabel = showPerGame ? "Avg by Game" : "Avg by License";
+
   if (btnPower) {
     btnPower.classList.toggle("active", isAgg);
-    btnPower.textContent = isAgg ? "Avg by License" : "All Tests";
+    btnPower.textContent = isAgg ? aggLabel : "All Tests";
   }
   if (btnGold) {
     btnGold.classList.toggle("active", isAgg);
-    btnGold.textContent = isAgg ? "Avg by License" : "All Tests";
+    btnGold.textContent = isAgg ? aggLabel : "All Tests";
   }
   if (btnScale) {
     btnScale.style.display = isAgg ? "none" : "inline-block";
   }
   if (titlePower) {
-    titlePower.textContent = isAgg
-      ? "Average Power & Power-to-Weight Ratio by License"
-      : "Power & Power-to-Weight Ratio vs Test Progression";
+    if (isAgg) {
+      titlePower.textContent = showPerGame
+        ? "Average Power & Power-to-Weight Ratio by Game"
+        : "Average Power & Power-to-Weight Ratio by License";
+    } else {
+      titlePower.textContent = "Power & Power-to-Weight Ratio vs Test Progression";
+    }
   }
   if (titleGold) {
-    titleGold.textContent = isAgg
-      ? "Average Gold Medal Duration by License"
-      : "Gold Medal Duration vs Test Progression";
+    if (isAgg) {
+      titleGold.textContent = showPerGame
+        ? "Average Gold Medal Duration by Game"
+        : "Average Gold Medal Duration by License";
+    } else {
+      titleGold.textContent = "Gold Medal Duration vs Test Progression";
+    }
   }
 
   const badgeHp = document.getElementById("badge-toggle-hp");
@@ -465,6 +594,7 @@ export function renderReferenceCharts(list) {
 function renderPowerChart(list) {
   const { gridColor, baseChartOptions } = getSharedChartContext();
   const isAgg = state.refChartsAggregateByLicense !== false;
+  const showPerGame = shouldShowPerGameChart(state.activeRefGame);
 
   let labels;
   let hpData;
@@ -472,7 +602,11 @@ function renderPowerChart(list) {
   let aggregates = null;
 
   if (isAgg) {
-    aggregates = aggregateTestsByLicense(list, state.activeRefGame);
+    if (showPerGame) {
+      aggregates = aggregateTestsByGame(list);
+    } else {
+      aggregates = aggregateTestsByLicense(list, state.activeRefGame);
+    }
     labels = aggregates.map((a) => a.shortLabel);
     hpData = aggregates.map((a) => a.avgHp);
     pwData = aggregates.map((a) => a.avgPw);
@@ -485,6 +619,19 @@ function renderPowerChart(list) {
   }
 
   const dense = labels.length > 50;
+
+  // Responsive scroll configuration for mobile
+  const canvasPower = document.getElementById("chart-power-pw");
+  const wrapperPower = canvasPower?.closest(".chart-canvas-wrapper");
+  const cardPower = canvasPower?.closest(".chart-card");
+  const swipeHintPower = cardPower?.querySelector(".chart-swipe-hint");
+  const isCompactPower = labels.length <= 10;
+  if (wrapperPower) {
+    wrapperPower.classList.toggle("no-scroll", isCompactPower);
+  }
+  if (swipeHintPower) {
+    swipeHintPower.style.display = isCompactPower ? "none" : "";
+  }
 
   renderSingleChart("chart-power-pw", {
     type: "line",
@@ -533,6 +680,9 @@ function renderPowerChart(list) {
               const idx = items[0].dataIndex;
               if (isAgg) {
                 const a = aggregates[idx];
+                if (showPerGame) {
+                  return `${a.game} — All Licenses (${a.testCount} tests, ${a.licenseCount} tiers)`;
+                }
                 return `${a.game} — ${a.license} (${a.testCount} tests)`;
               }
               const t = list[idx];
@@ -573,16 +723,19 @@ function renderPowerChart(list) {
           title: {
             display: true,
             text: isAgg
-              ? (state.activeRefGame === "ALL"
-                  ? "License Tier Progression by Game (Average Values)"
-                  : `${state.activeRefGame} License Progression (Average Values)`)
+              ? (showPerGame
+                  ? "Game Releases (Average Values)"
+                  : (state.activeRefGame === "ALL"
+                      ? "License Tier Progression by Game (Average Values)"
+                      : `${state.activeRefGame} License Progression (Average Values)`))
               : baseChartOptions.scales.x.title.text,
             color: baseChartOptions.scales.x.title.color,
             font: baseChartOptions.scales.x.title.font,
           },
           ticks: {
             ...baseChartOptions.scales.x.ticks,
-            maxTicksLimit: isAgg ? 25 : 14,
+            maxRotation: showPerGame ? 0 : 45,
+            maxTicksLimit: showPerGame ? 10 : (isAgg ? 25 : 14),
           },
         },
         yHP: {
@@ -628,6 +781,7 @@ function renderPowerChart(list) {
 function renderGoldChart(list) {
   const { textColor, gridColor, baseChartOptions } = getSharedChartContext();
   const isAgg = state.refChartsAggregateByLicense !== false;
+  const showPerGame = shouldShowPerGameChart(state.activeRefGame);
   const isFocused = !isAgg && state.goldScaleFocus !== false;
   const maxZoomSec = 180; // 3-minute threshold for individual tests
 
@@ -636,7 +790,11 @@ function renderGoldChart(list) {
   let aggregates = null;
 
   if (isAgg) {
-    aggregates = aggregateTestsByLicense(list, state.activeRefGame);
+    if (showPerGame) {
+      aggregates = aggregateTestsByGame(list);
+    } else {
+      aggregates = aggregateTestsByLicense(list, state.activeRefGame);
+    }
     labels = aggregates.map((a) => a.shortLabel);
     goldData = aggregates.map((a) => a.avgDuration);
   } else {
@@ -651,6 +809,19 @@ function renderGoldChart(list) {
   }
 
   const dense = labels.length > 50;
+
+  // Responsive scroll configuration for mobile
+  const canvasGold = document.getElementById("chart-gold");
+  const wrapperGold = canvasGold?.closest(".chart-canvas-wrapper");
+  const cardGold = canvasGold?.closest(".chart-card");
+  const swipeHintGold = cardGold?.querySelector(".chart-swipe-hint");
+  const isCompactGold = labels.length <= 10;
+  if (wrapperGold) {
+    wrapperGold.classList.toggle("no-scroll", isCompactGold);
+  }
+  if (swipeHintGold) {
+    swipeHintGold.style.display = isCompactGold ? "none" : "";
+  }
 
   renderSingleChart("chart-gold", {
     type: "line",
@@ -683,6 +854,9 @@ function renderGoldChart(list) {
               const idx = items[0].dataIndex;
               if (isAgg) {
                 const a = aggregates[idx];
+                if (showPerGame) {
+                  return `${a.game} — All Licenses (${a.testCount} tests, ${a.licenseCount} tiers)`;
+                }
                 return `${a.game} — ${a.license} (${a.testCount} tests)`;
               }
               const t = list[idx];
@@ -723,16 +897,19 @@ function renderGoldChart(list) {
           title: {
             display: true,
             text: isAgg
-              ? (state.activeRefGame === "ALL"
-                  ? "License Tier Progression by Game (Average Values)"
-                  : `${state.activeRefGame} License Progression (Average Values)`)
+              ? (showPerGame
+                  ? "Game Releases (Average Values)"
+                  : (state.activeRefGame === "ALL"
+                      ? "License Tier Progression by Game (Average Values)"
+                      : `${state.activeRefGame} License Progression (Average Values)`))
               : baseChartOptions.scales.x.title.text,
             color: baseChartOptions.scales.x.title.color,
             font: baseChartOptions.scales.x.title.font,
           },
           ticks: {
             ...baseChartOptions.scales.x.ticks,
-            maxTicksLimit: isAgg ? 25 : 14,
+            maxRotation: showPerGame ? 0 : 45,
+            maxTicksLimit: showPerGame ? 10 : (isAgg ? 25 : 14),
           },
         },
         y: {
