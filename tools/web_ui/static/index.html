@@ -752,84 +752,164 @@
           </div>
         </div>
 
-        <!-- Quick Metrics Summary Cards -->
-        <div class="ref-metrics-grid">
-          <div class="ref-card metric-card">
-            <div class="metric-icon">🏁</div>
-            <div class="metric-info">
-              <span class="metric-label">Total Tests</span>
-              <span id="metric-total-tests" class="metric-value">406</span>
+        <!-- Quick Metrics Summary Card (Single unified element) -->
+        <div class="ref-card ref-metrics-card">
+          <div class="ref-metrics-grid">
+            <div class="metric-item">
+              <div class="metric-icon metric-icon-flag">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+                  <line x1="4" y1="22" x2="4" y2="15"></line>
+                </svg>
+              </div>
+              <div class="metric-info">
+                <span class="metric-label">Total Tests</span>
+                <span id="metric-total-tests" class="metric-value">406</span>
+              </div>
             </div>
-          </div>
-          <div class="ref-card metric-card">
-            <div class="metric-icon">🥇</div>
-            <div class="metric-info">
-              <span class="metric-label">Total Gold Time</span>
-              <span id="metric-total-gold" class="metric-value">292:17.2</span>
+
+            <div class="metric-item">
+              <div class="metric-icon metric-icon-gold">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="8" r="6"></circle>
+                  <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path>
+                </svg>
+              </div>
+              <div class="metric-info">
+                <span class="metric-label">Total Gold Time</span>
+                <span id="metric-total-gold" class="metric-value">292:17.2</span>
+              </div>
             </div>
-          </div>
-          <div class="ref-card metric-card">
-            <div class="metric-icon">⏱️</div>
-            <div class="metric-info">
-              <span class="metric-label">Avg Gold Duration</span>
-              <span id="metric-avg-gold" class="metric-value">0:45.670</span>
+
+            <div class="metric-item">
+              <div class="metric-icon metric-icon-time">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="13" r="8"></circle>
+                  <path d="M12 9v4l2.5 2.5"></path>
+                  <path d="M12 2v3"></path>
+                  <path d="M10 2h4"></path>
+                </svg>
+              </div>
+              <div class="metric-info">
+                <span class="metric-label">Avg Gold Duration</span>
+                <span id="metric-avg-gold" class="metric-value">0:45.670</span>
+              </div>
             </div>
-          </div>
-          <div class="ref-card metric-card">
-            <div class="metric-icon">🐎</div>
-            <div class="metric-info">
-              <span class="metric-label">Average Horsepower</span>
-              <span id="metric-avg-hp" class="metric-value">318 HP</span>
+
+            <div class="metric-item">
+              <div class="metric-icon metric-icon-hp">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m12 14 4-4"></path>
+                  <path d="M3.34 19a10 10 0 1 1 17.32 0"></path>
+                </svg>
+              </div>
+              <div class="metric-info">
+                <span class="metric-label">Average Horsepower</span>
+                <span id="metric-avg-hp" class="metric-value">318 HP</span>
+              </div>
             </div>
-          </div>
-          <div class="ref-card metric-card">
-            <div class="metric-icon">⚖️</div>
-            <div class="metric-info">
-              <span class="metric-label">Avg Power / Weight</span>
-              <span id="metric-avg-pw" class="metric-value">5.12 kg/hp</span>
+
+            <div class="metric-item">
+              <div class="metric-icon metric-icon-pw">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="3" x2="12" y2="21"></line>
+                  <path d="m3 9 9-4 9 4"></path>
+                  <path d="M4 14l-2 5a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l-2-5"></path>
+                  <path d="M18 14l-2 5a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l-2-5"></path>
+                </svg>
+              </div>
+              <div class="metric-info">
+                <span class="metric-label">Avg Power / Weight</span>
+                <span id="metric-avg-pw" class="metric-value">5.12 kg/hp</span>
+              </div>
             </div>
-          </div>
-          <div class="ref-card metric-card">
-            <div class="metric-icon">⚙️</div>
-            <div class="metric-info">
-              <span class="metric-label">Drivetrain Distribution</span>
-              <span id="metric-drivetrain-breakdown" class="metric-value sm"
-                >FR: 157 | FF: 84</span
-              >
+
+            <div class="metric-item metric-item-drivetrain">
+              <div class="metric-icon metric-icon-dt">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="6" height="7" rx="1.5"></rect>
+                  <rect x="15" y="3" width="6" height="7" rx="1.5"></rect>
+                  <rect x="3" y="14" width="6" height="7" rx="1.5"></rect>
+                  <rect x="15" y="14" width="6" height="7" rx="1.5"></rect>
+                  <path d="M9 6.5h6"></path>
+                  <path d="M9 17.5h6"></path>
+                  <line x1="12" y1="6.5" x2="12" y2="17.5"></line>
+                </svg>
+              </div>
+              <div class="metric-info metric-info-dt">
+                <span class="metric-label">Drivetrain Distribution</span>
+                <div id="metric-drivetrain-breakdown" class="drivetrain-chips-row">
+                  <span class="dt-chip dt-fr"><span class="dt-chip-name">FR</span> <span class="dt-chip-val">157</span></span>
+                  <span class="dt-chip dt-ff"><span class="dt-chip-name">FF</span> <span class="dt-chip-val">84</span></span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- 4 Visualizations Grid -->
         <div class="ref-charts-grid">
-          <!-- Chart 1: Power & Power-to-Weight Ratio vs Test Progression (Dual Y-Axis) -->
+          <!-- Chart 1: Power & Power-to-Weight Ratio vs Progression (Dual Y-Axis) -->
           <div class="ref-card chart-card">
             <div class="chart-header">
               <div class="chart-title">
                 <span class="chart-dot hp"></span>
-                <h3>Power & Power-to-Weight Ratio vs Test Progression</h3>
+                <h3 id="title-chart-power">Average Power &amp; Power-to-Weight Ratio by Game</h3>
               </div>
               <div class="chart-legend-badges">
-                <span class="chart-badge text-red">● Left: HP</span>
-                <span class="chart-badge text-amber">● Right: kg/hp</span>
+                <span class="chart-badge chart-swipe-hint" title="Swipe horizontally to view all license tiers">SWIPE ↔</span>
+                <button
+                  type="button"
+                  id="btn-toggle-power-agg"
+                  class="chart-badge chart-btn-toggle active"
+                  title="Toggle between Aggregated Average and Raw Individual Tests"
+                >
+                  Avg by Game
+                </button>
+                <span id="badge-toggle-hp" class="chart-badge text-red chart-filter-badge" title="Filter / Dim HorsePower Series">● Left: HP</span>
+                <span id="badge-toggle-pw" class="chart-badge text-amber chart-filter-badge" title="Filter / Dim Power-to-Weight Series">● Right: kg/hp</span>
               </div>
             </div>
-            <div class="chart-canvas-wrapper">
-              <canvas id="chart-power-pw"></canvas>
+            <div class="chart-canvas-wrapper chart-scrollable">
+              <div class="chart-scroll-inner">
+                <canvas id="chart-power-pw"></canvas>
+              </div>
             </div>
           </div>
 
-          <!-- Chart 2: Gold Medal Duration vs Test Progression -->
+          <!-- Chart 2: Gold Medal Duration vs Progression -->
           <div class="ref-card chart-card">
             <div class="chart-header">
               <div class="chart-title">
                 <span class="chart-dot gold"></span>
-                <h3>Gold Medal Duration vs Test Progression</h3>
+                <h3 id="title-chart-gold">Average Gold Medal Duration by Game</h3>
               </div>
-              <span class="chart-badge">Y: Duration (Seconds)</span>
+              <div class="chart-legend-badges">
+                <span class="chart-badge chart-swipe-hint" title="Swipe horizontally to view all license tiers">SWIPE ↔</span>
+                <button
+                  type="button"
+                  id="btn-toggle-gold-agg"
+                  class="chart-badge chart-btn-toggle active"
+                  title="Toggle between Aggregated Average and Raw Individual Tests"
+                >
+                  Avg by Game
+                </button>
+                <button
+                  type="button"
+                  id="btn-toggle-gold-scale"
+                  class="chart-badge chart-btn-toggle"
+                  style="display: none;"
+                  title="Toggle between Full Range and Zoomed View (<3min)"
+                >
+                  Focus &lt;3m
+                </button>
+                <span class="chart-badge">Y: Duration (mm:ss)</span>
+              </div>
             </div>
-            <div class="chart-canvas-wrapper">
-              <canvas id="chart-gold"></canvas>
+            <div class="chart-canvas-wrapper chart-scrollable">
+              <div class="chart-scroll-inner">
+                <canvas id="chart-gold"></canvas>
+              </div>
             </div>
           </div>
 

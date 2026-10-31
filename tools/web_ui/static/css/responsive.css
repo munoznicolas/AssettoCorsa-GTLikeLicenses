@@ -483,22 +483,67 @@
     font-size: 11px;
   }
 
+  .ref-metrics-card {
+    padding: 10px 12px;
+  }
+
   .ref-metrics-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
   }
 
+  .metric-item,
   .metric-card {
-    padding: 10px 12px;
+    padding: 6px 8px;
     gap: 8px;
   }
 
   .metric-icon {
-    font-size: 20px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .metric-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .metric-label {
+    font-size: 9px;
   }
 
   .metric-value {
-    font-size: 15px;
+    font-size: 13px;
+  }
+
+  .dt-chip {
+    font-size: 9px;
+    padding: 0 4px;
+  }
+
+  .chart-scrollable {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    padding-bottom: 6px;
+  }
+
+  .chart-scrollable .chart-scroll-inner {
+    min-width: 620px;
+    height: 100%;
+  }
+
+  .chart-canvas-wrapper.chart-scrollable.no-scroll {
+    overflow-x: hidden;
+  }
+
+  .chart-canvas-wrapper.chart-scrollable.no-scroll .chart-scroll-inner {
+    min-width: 100%;
+    width: 100%;
+  }
+
+  .chart-swipe-hint {
+    display: inline-flex;
   }
 
   .ref-charts-grid {
@@ -597,7 +642,32 @@
   }
 
   .ref-metrics-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .metric-item,
+  .metric-card {
+    padding: 4px 6px;
+    gap: 6px;
+  }
+
+  .metric-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .metric-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .metric-label {
+    font-size: 8.5px;
+  }
+
+  .metric-value {
+    font-size: 12px;
   }
 
   .reference-tab .ref-tab-label {
