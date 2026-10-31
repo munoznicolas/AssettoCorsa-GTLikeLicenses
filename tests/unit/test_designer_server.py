@@ -221,10 +221,23 @@ class TestDesignerServer(unittest.TestCase):
         self.assertIn('target-times-grid', html)
         self.assertIn('input-suffix', html)
 
+        # Verify modular CSS links
+        self.assertIn('href="css/variables.css', html)
+        self.assertIn('href="css/responsive.css', html)
+
     def test_mobile_friendly_css_rules(self):
         style_css_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "style.css")
-        with open(style_css_path, "r", encoding="utf-8") as f:
-            css = f.read()
+        css_dir = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "css")
+        css_parts = []
+        if os.path.isfile(style_css_path):
+            with open(style_css_path, "r", encoding="utf-8") as f:
+                css_parts.append(f.read())
+        if os.path.isdir(css_dir):
+            for fname in sorted(os.listdir(css_dir)):
+                if fname.endswith(".css"):
+                    with open(os.path.join(css_dir, fname), "r", encoding="utf-8") as f:
+                        css_parts.append(f.read())
+        css = "\n".join(css_parts)
 
         # Dynamic viewport unit for mobile browser address bars
         self.assertIn("100dvh", css)
@@ -236,6 +249,15 @@ class TestDesignerServer(unittest.TestCase):
         # Color scheme dark and high-contrast option styling
         self.assertIn("color-scheme: dark;", css)
         self.assertIn("select option", css)
+
+        # Modular CSS file integrity
+        expected_modules = [
+            "variables.css", "base.css", "layout.css", "catalog.css",
+            "editor.css", "canvas.css", "components.css", "telemetry.css",
+            "tour.css", "responsive.css"
+        ]
+        for mod in expected_modules:
+            self.assertTrue(os.path.isfile(os.path.join(css_dir, mod)), f"Missing CSS module: {mod}")
 
     def test_mobile_drawer_and_back_navigation_integration(self):
         dom_js_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "js", "dom.js")

@@ -1,0 +1,437 @@
+/* Reusable Dashed Telemetry Dropzone */
+.dropzone-dashed {
+  border: 2px dashed var(--accent-sky-border);
+  border-radius: var(--radius-md);
+  background: var(--bg-input);
+  transition: all 0.2s ease;
+}
+
+.dropzone-dashed:hover,
+.dropzone-dashed.dragover {
+  border-color: var(--accent-sky);
+  background: var(--accent-sky-bg);
+}
+
+
+/* ==========================================================================
+   GT Reference & Constant Values View Styles
+   ========================================================================== */
+.reference-view {
+  padding: 24px;
+  overflow-y: auto;
+  height: calc(100vh - 116px);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background-color: var(--bg-primary);
+}
+
+.ref-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 20px 24px;
+}
+
+.ref-title-group h2 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.ref-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.ref-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ref-control-label {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.game-pills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pill-btn {
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 9999px;
+  padding: 5px 14px;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pill-btn:hover {
+  color: var(--text-main);
+  border-color: var(--border-color);
+  background-color: var(--bg-card);
+}
+
+.pill-btn.active {
+  background-color: var(--accent-sky-bg);
+  border-color: var(--accent-sky);
+  color: var(--accent-sky);
+  box-shadow: none;
+}
+
+.pill-btn-ac {
+  border-color: var(--accent-danger-border);
+  color: var(--accent-danger);
+}
+
+.pill-btn-ac:hover {
+  border-color: var(--gt-red);
+  color: var(--text-main);
+  background-color: var(--accent-danger-bg);
+}
+
+.pill-btn-ac.active {
+  background-color: var(--gt-red);
+  border-color: var(--accent-danger);
+  color: var(--text-main);
+  box-shadow: none;
+}
+
+/* Metrics Grid */
+.ref-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+}
+
+.metric-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+}
+
+.metric-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.metric-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.metric-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.metric-value {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.metric-value.sm {
+  font-size: 12px;
+  color: var(--accent-sky);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 4 Charts Grid (2x2 layout) */
+.ref-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1100px) {
+  .ref-charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.chart-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 10px;
+}
+
+.chart-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chart-title h3 {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--text-main);
+}
+
+.chart-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.chart-dot.hp {
+  background-color: var(--accent-danger);
+  box-shadow: 0 0 8px var(--accent-danger);
+}
+.chart-dot.pw {
+  background-color: var(--accent-gold);
+  box-shadow: 0 0 8px var(--accent-gold);
+}
+.chart-dot.gold {
+  background-color: var(--accent-green);
+  box-shadow: 0 0 8px var(--accent-green);
+}
+.chart-dot.dist {
+  background-color: var(--accent-sky);
+  box-shadow: 0 0 8px var(--accent-sky);
+}
+.chart-dot.drivetrain {
+  background-color: var(--tier-super);
+  box-shadow: 0 0 8px var(--tier-super);
+}
+
+.chart-legend-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chart-badge {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.chart-badge.text-red,
+.text-red {
+  color: var(--accent-danger);
+}
+.chart-badge.text-amber,
+.text-amber {
+  color: var(--accent-gold);
+}
+.chart-badge.text-rose,
+.text-rose {
+  color: var(--gt-red);
+}
+.chart-badge.text-cyan,
+.text-cyan {
+  color: var(--accent-sky);
+}
+
+.chart-canvas-wrapper {
+  position: relative;
+  height: 260px;
+  width: 100%;
+}
+
+/* Reference Data Table */
+.table-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.table-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.table-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.table-title h3 {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.table-filters {
+  display: flex;
+  gap: 10px;
+}
+
+.table-search {
+  min-width: 280px;
+  font-size: 12px;
+}
+
+.table-select {
+  font-size: 12px;
+  min-width: 160px;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  max-height: 480px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+}
+
+.ref-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  text-align: left;
+}
+
+.ref-data-table th {
+  position: sticky;
+  top: 0;
+  background-color: var(--bg-panel);
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-weight: 700;
+  padding: 10px 14px;
+  border-bottom: 2px solid var(--border-color);
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.ref-data-table td {
+  padding: 8px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: var(--text-normal);
+  white-space: nowrap;
+}
+
+.ref-data-table tr:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.ref-data-table .tag-code {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--text-main);
+  background-color: var(--border-color);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.ref-data-table .tag-game {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--accent-sky);
+}
+
+.ref-data-table .tag-game-ac {
+  color: var(--accent-danger);
+  background-color: var(--accent-danger-bg);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.ref-data-table .tag-hp {
+  font-family: var(--font-mono);
+  color: var(--accent-danger);
+  font-weight: 600;
+}
+
+.ref-data-table .tag-pw {
+  font-family: var(--font-mono);
+  color: var(--accent-gold);
+  font-weight: 600;
+}
+
+.ref-data-table .tag-layout {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.ref-data-table .layout-FR {
+  background-color: #39252c;
+  color: #fca5a5;
+}
+.ref-data-table .layout-FF {
+  background-color: #1e2e47;
+  color: #93c5fd;
+}
+.ref-data-table .layout-FAWD {
+  background-color: #183635;
+  color: #6ee7b7;
+}
+.ref-data-table .layout-MR {
+  background-color: #3a3224;
+  color: #fcd34d;
+}
+.ref-data-table .layout-MAWD {
+  background-color: #18363b;
+  color: #5eead4;
+}
+.ref-data-table .layout-RR {
+  background-color: #2e2747;
+  color: #d8b4fe;
+}
+.ref-data-table .layout-RAWD {
+  background-color: #392539;
+  color: #f9a8d4;
+}

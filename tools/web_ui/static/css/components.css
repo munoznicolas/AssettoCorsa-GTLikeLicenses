@@ -1,0 +1,211 @@
+/* Base badge defined above with modifiers */
+
+.badge-success,
+.badge.badge-success {
+  background-color: var(--accent-green-bg);
+  color: var(--accent-green);
+  border: 1px solid var(--accent-green-border);
+}
+
+.badge-sky,
+.badge.badge-sky {
+  background-color: var(--accent-sky-bg);
+  color: var(--accent-sky);
+  border: 1px solid var(--accent-sky-border);
+}
+
+.badge-danger,
+.badge.badge-danger {
+  background-color: var(--accent-danger-bg);
+  color: var(--accent-danger);
+  border: 1px solid var(--accent-danger-border);
+}
+
+.badge-gold,
+.badge-warning,
+.badge.badge-gold,
+.badge.badge-warning {
+  background-color: var(--accent-gold-bg);
+  color: var(--accent-gold);
+  border: 1px solid var(--accent-gold-border);
+}
+
+.badge-neutral,
+.badge.badge-neutral {
+  background-color: rgba(148, 163, 184, 0.15);
+  color: var(--text-muted);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+/* Info & Status Banners */
+.info-banner-sky {
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: var(--accent-sky-bg);
+  border: 1px solid var(--accent-sky-border);
+}
+
+.info-banner-warning {
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: var(--accent-gold-bg);
+  border: 1px solid var(--accent-gold-border);
+}
+
+.info-banner-success {
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: var(--accent-green-bg);
+  border: 1px solid var(--accent-green-border);
+}
+
+.info-banner-danger {
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: var(--accent-danger-bg);
+  border: 1px solid var(--accent-danger);
+  color: var(--text-main);
+}
+
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  background-color: var(--bg-input);
+  color: var(--accent-gold);
+  border: 1px solid var(--border-color);
+  white-space: nowrap;
+  flex-shrink: 0;
+  word-break: keep-all;
+}
+
+.badge-lg {
+  font-size: 14px;
+  padding: 6px 12px;
+  border: 1px solid var(--border-color);
+  white-space: nowrap;
+  flex-shrink: 0;
+  word-break: keep-all;
+}
+
+#form-test-id-badge {
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 54px;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+
+/* Modal */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  width: 680px;
+  max-width: 90vw;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+}
+
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  font-family: var(--font-display);
+  font-size: 16px;
+  letter-spacing: 0.5px;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-footer {
+  padding: 12px 20px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.log-viewer {
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: #a7f3d0;
+  max-height: 350px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 12px 20px;
+  color: var(--text-main);
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  z-index: 2000;
+  transition: opacity 0.3s;
+}
+
+.toast.success {
+  border-color: var(--accent-green-border);
+  background-color: var(--accent-green-bg);
+  color: var(--accent-green);
+}
+.toast.error {
+  border-color: var(--accent-danger-border);
+  background-color: var(--accent-danger-bg);
+  color: var(--accent-danger);
+}

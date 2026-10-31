@@ -1,0 +1,210 @@
+/* style.css - Gran Turismo Aesthetic for License Test Designer */
+
+:root {
+  color-scheme: dark;
+  /* 1. Surfaces & Backgrounds */
+  --bg-main: #0c0f14;
+  --bg-panel: #13171e;
+  --bg-card: #191f28;
+  --bg-input: #10141a;
+  --overlay-bg: rgba(12, 15, 20, 0.85);
+
+  /* 2. Borders & Outlines */
+  --border-color: #262e3b;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-focus: #38bdf8;
+
+  /* 3. Typography */
+  --text-main: #f3f4f6;
+  --text-muted: #8b9bb4;
+  --text-dim: #5c687a;
+  --text-inverse: #ffffff;
+
+  /* 4. Brand Accents */
+  --gt-red: #e11d48;
+  --gt-blue: #2563eb;
+  --accent-sky: #38bdf8;
+
+  /* 5. Medals & License Tiers */
+  --accent-gold: #f59e0b;
+  --accent-gold-text: #000000;
+  --accent-silver: #94a3b8;
+  --accent-bronze: #d97706;
+  --tier-super: #8b5cf6;
+
+  /* 6. Status Semantics */
+  --accent-green: #10b981;
+  --accent-green-text: #000000;
+  --accent-danger: #ef4444;
+  --accent-warning: #f59e0b;
+
+  /* 7. Standardized Alpha Overlays & Glows */
+  --accent-sky-bg: rgba(56, 189, 248, 0.12);
+  --accent-sky-border: rgba(56, 189, 248, 0.35);
+  --accent-sky-glow: rgba(56, 189, 248, 0.25);
+
+  --accent-green-bg: rgba(16, 185, 129, 0.15);
+  --accent-green-border: rgba(16, 185, 129, 0.35);
+
+  --accent-danger-bg: rgba(239, 68, 68, 0.15);
+  --accent-danger-border: rgba(239, 68, 68, 0.35);
+
+  --accent-gold-bg: rgba(245, 158, 11, 0.15);
+  --accent-gold-border: rgba(245, 158, 11, 0.35);
+
+  /* 8. Telemetry Data Series */
+  --chart-speed: #38bdf8;
+  --chart-throttle: #10b981;
+  --chart-brake: #ef4444;
+  --chart-rpm: #f59e0b;
+  --chart-steer: #06b6d4;
+  --chart-gear: #8b5cf6;
+  --chart-latg: #f43f5e;
+
+  --font-display: "Chakra Petch", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+
+/* Light Theme (Gran Turismo White Studio Palette) */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* 1. Surfaces & Backgrounds */
+  --bg-main: #f8fafc;
+  --bg-panel: #ffffff;
+  --bg-card: #ffffff;
+  --bg-input: #f1f5f9;
+  --overlay-bg: rgba(248, 250, 252, 0.88);
+
+  /* 2. Borders & Outlines */
+  --border-color: #e2e8f0;
+  --border-subtle: rgba(0, 0, 0, 0.06);
+  --border-focus: #0284c7;
+
+  /* 3. Typography (WCAG AAA/AA calibrated) */
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --text-dim: #64748b;
+  --text-inverse: #ffffff;
+
+  /* 4. Brand Accents */
+  --gt-red: #e11d48;
+  --gt-blue: #1d4ed8;
+  --accent-sky: #0284c7;
+
+  /* 5. Medals & License Tiers */
+  --accent-gold: #b45309;
+  --accent-gold-text: #ffffff;
+  --accent-silver: #64748b;
+  --accent-bronze: #9a3412;
+  --tier-super: #7c3aed;
+
+  /* 6. Status Semantics */
+  --accent-green: #15803d;
+  --accent-green-text: #ffffff;
+  --accent-danger: #dc2626;
+  --accent-warning: #b45309;
+
+  /* 7. Standardized Alpha Overlays & Glows */
+  --accent-sky-bg: rgba(2, 132, 199, 0.08);
+  --accent-sky-border: rgba(2, 132, 199, 0.3);
+  --accent-sky-glow: rgba(2, 132, 199, 0.15);
+
+  --accent-green-bg: rgba(21, 128, 61, 0.08);
+  --accent-green-border: rgba(21, 128, 61, 0.3);
+
+  --accent-danger-bg: rgba(220, 38, 38, 0.08);
+  --accent-danger-border: rgba(220, 38, 38, 0.3);
+
+  --accent-gold-bg: rgba(180, 83, 9, 0.08);
+  --accent-gold-border: rgba(180, 83, 9, 0.3);
+
+  /* 8. Telemetry Data Series */
+  --chart-speed: #0284c7;
+  --chart-throttle: #15803d;
+  --chart-brake: #dc2626;
+  --chart-rpm: #b45309;
+  --chart-steer: #0891b2;
+  --chart-gear: #7c3aed;
+  --chart-latg: #e11d48;
+}
+
+/* Light Theme Component Overrides */
+:root[data-theme="light"] .ref-data-table .layout-FR {
+  background-color: #ffe4e6;
+  color: #be123c;
+}
+:root[data-theme="light"] .ref-data-table .layout-FF {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
+:root[data-theme="light"] .ref-data-table .layout-FAWD {
+  background-color: #d1fae5;
+  color: #047857;
+}
+:root[data-theme="light"] .ref-data-table .layout-MR {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+:root[data-theme="light"] .ref-data-table .layout-MAWD {
+  background-color: #ccfbf1;
+  color: #0f766e;
+}
+:root[data-theme="light"] .ref-data-table .layout-RR {
+  background-color: #ede9fe;
+  color: #6d28d9;
+}
+:root[data-theme="light"] .ref-data-table .layout-RAWD {
+  background-color: #fce7f3;
+  color: #be185d;
+}
+
+:root[data-theme="light"] .modal-content {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+:root[data-theme="light"] .driver-popover {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15) !important;
+}
+
+:root[data-theme="light"] .test-item-thumb {
+  background-color: var(--bg-input);
+  border-color: var(--border-color);
+}
+
+:root[data-theme="light"] .test-item-thumb img {
+  filter: invert(0.92) hue-rotate(180deg) contrast(1.08) brightness(1.02);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
+}
