@@ -721,11 +721,11 @@ export function setSpatialPositions(startS, finishS) {
 
   if (dom.sliderStart) dom.sliderStart.value = startS;
   if (dom.sliderFinish) dom.sliderFinish.value = finishS;
-  if (dom.inputStart) dom.inputStart.value = startS.toFixed(4);
-  if (dom.inputFinish) dom.inputFinish.value = finishS.toFixed(4);
+  if (dom.inputStart) dom.inputStart.value = startS.toFixed(3);
+  if (dom.inputFinish) dom.inputFinish.value = finishS.toFixed(3);
 
-  if (dom.dispStartS) dom.dispStartS.textContent = (startS * 100).toFixed(2) + "%";
-  if (dom.dispFinishS) dom.dispFinishS.textContent = (finishS * 100).toFixed(2) + "%";
+  if (dom.dispStartS) dom.dispStartS.textContent = startS.toFixed(3);
+  if (dom.dispFinishS) dom.dispFinishS.textContent = finishS.toFixed(3);
 
   const totalLen = state.currentSpline?.total_length_m ?? 0;
   const startM = Math.round(startS * totalLen);
@@ -1033,8 +1033,8 @@ export function saveFormIntoActiveTest() {
 
   const rawStart = dom.inputStart?.value ?? 0;
   const rawFinish = dom.inputFinish?.value ?? 1;
-  test.start_s = Number.parseFloat(rawStart) || 0;
-  test.finish_s = Number.parseFloat(rawFinish) || 1;
+  test.start_s = Math.round((Number.parseFloat(rawStart) || 0) * 1000) / 1000;
+  test.finish_s = Math.round((Number.parseFloat(rawFinish) || 1) * 1000) / 1000;
 
   applyStartModeSettings(test);
 

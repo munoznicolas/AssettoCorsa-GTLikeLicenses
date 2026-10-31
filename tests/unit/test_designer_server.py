@@ -368,5 +368,31 @@ class TestDesignerServer(unittest.TestCase):
         self.assertIn("dom.inputSearchLayout.value = activeName;", editor_js)
 
 
+    def test_spatial_positions_precision_and_no_percentage(self):
+        """Verify that gate positions show decimal up to 3 decimal places and no percentages."""
+        editor_js_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "js", "test-editor.js")
+        with open(editor_js_path, "r", encoding="utf-8") as f:
+            editor_js = f.read()
+        index_html_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "index.html")
+        with open(index_html_path, "r", encoding="utf-8") as f:
+            index_html = f.read()
+
+        # 1. No percentage formatting in test-editor.js
+        self.assertNotIn('(startS * 100).toFixed(2) + "%"', editor_js)
+        self.assertNotIn('(finishS * 100).toFixed(2) + "%"', editor_js)
+
+        # 2. 3 decimal places formatting
+        self.assertIn("dom.inputStart.value = startS.toFixed(3);", editor_js)
+        self.assertIn("dom.inputFinish.value = finishS.toFixed(3);", editor_js)
+        self.assertIn("dom.dispStartS.textContent = startS.toFixed(3);", editor_js)
+        self.assertIn("dom.dispFinishS.textContent = finishS.toFixed(3);", editor_js)
+
+        # 3. HTML inputs use step 0.001 and default to 3 decimal places
+        self.assertIn('id="input-start-s"', index_html)
+        self.assertIn('step="0.001"', index_html)
+        self.assertNotIn('0.00%', index_html)
+        self.assertNotIn('100.00%', index_html)
+
+
 if __name__ == "__main__":
     unittest.main()
