@@ -141,7 +141,7 @@ export function populateTrackDropdown(selectedTrackId = null) {
   for (const t of state.tracks) {
     const opt = document.createElement("option");
     opt.value = t.track_id;
-    opt.textContent = `${t.name} (${t.track_id})`;
+    opt.textContent = t.name;
     if (t.track_id === activeTrackId) {
       opt.selected = true;
     }
@@ -152,7 +152,7 @@ export function populateTrackDropdown(selectedTrackId = null) {
     dom.selectTrack.value = activeTrackId;
     const found = state.tracks.find((t) => t.track_id === activeTrackId);
     if (found && dom.inputSearchTrack) {
-      dom.inputSearchTrack.value = `${found.name} (${found.track_id})`;
+      dom.inputSearchTrack.value = found.name;
       if (dom.btnClearTrackSearch) dom.btnClearTrackSearch.style.display = "block";
     }
   } else if (dom.inputSearchTrack) {
@@ -168,11 +168,16 @@ export function populateLayoutDropdown(trackId, selectedLayout = "") {
   if (!dom.selectLayout) return;
   dom.selectLayout.innerHTML = "";
   const track = state.tracks.find((t) => t.track_id === trackId);
+  let activeName = "Default Layout";
   if (!track?.layouts?.length) {
     const opt = document.createElement("option");
     opt.value = "";
     opt.textContent = "Default Layout";
     dom.selectLayout.appendChild(opt);
+    dom.selectLayout.value = "";
+    if (dom.inputSearchLayout) {
+      dom.inputSearchLayout.value = "Default Layout";
+    }
     return;
   }
 
@@ -186,8 +191,18 @@ export function populateLayoutDropdown(trackId, selectedLayout = "") {
     opt.textContent = layoutName;
     if (layoutId === (selectedLayout || "")) {
       opt.selected = true;
+      activeName = layoutName;
     }
     dom.selectLayout.appendChild(opt);
+  }
+
+  if (!dom.selectLayout.value && dom.selectLayout.options.length > 0) {
+    dom.selectLayout.selectedIndex = 0;
+    activeName = dom.selectLayout.options[0].textContent;
+  }
+
+  if (dom.inputSearchLayout) {
+    dom.inputSearchLayout.value = activeName;
   }
 }
 
@@ -266,9 +281,7 @@ export function populateCarDropdown(selectedCarId = null) {
   for (const c of state.cars) {
     const opt = document.createElement("option");
     opt.value = c.car_id;
-    const brandStr = c.brand ? ` (${c.brand})` : "";
-    const dtStr = c.drivetrain ? ` [${c.drivetrain}]` : "";
-    opt.textContent = `${c.name}${brandStr}${dtStr}`;
+    opt.textContent = c.name;
     if (c.car_id === activeCarId) {
       opt.selected = true;
     }
@@ -279,8 +292,7 @@ export function populateCarDropdown(selectedCarId = null) {
     dom.selectCar.value = activeCarId;
     const found = state.cars.find((c) => c.car_id === activeCarId);
     if (found && dom.inputSearchCar) {
-      const brandStr = found.brand ? ` (${found.brand})` : "";
-      dom.inputSearchCar.value = `${found.name}${brandStr}`;
+      dom.inputSearchCar.value = found.name;
       if (dom.btnClearCarSearch) dom.btnClearCarSearch.style.display = "block";
     }
   } else if (dom.inputSearchCar) {
@@ -443,34 +455,13 @@ export function renderTestList() {
           <span>${escapeHtml(test.track_id)}</span>
         </div>
       </div>
-      <div class="test-item-reorder-buttons">
-        <button type="button" class="btn-test-reorder btn-test-move-up" title="Move test up" aria-label="Move test up" ${idx === 0 ? "disabled" : ""}>
-          <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path d="M8 4l5 6H3z"/></svg>
-        </button>
-        <button type="button" class="btn-test-reorder btn-test-move-down" title="Move test down" aria-label="Move test down" ${idx === activeTier.tests.length - 1 ? "disabled" : ""}>
-          <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path d="M8 12l-5-6h10z"/></svg>
-        </button>
-      </div>
+
     `;
 
-    // 1-Tap Reorder Buttons
-    const btnUp = item.querySelector(".btn-test-move-up");
-    const btnDown = item.querySelector(".btn-test-move-down");
-    btnUp?.addEventListener("click", (e) => {
-      e.stopPropagation();
-      void reorderTierTest(idx, idx - 1);
-    });
-    btnDown?.addEventListener("click", (e) => {
-      e.stopPropagation();
-      void reorderTierTest(idx, idx + 1);
-    });
+
 
     // Desktop HTML5 Drag & Drop
     item.addEventListener("dragstart", (e) => {
-      if (e.target.closest(".btn-test-reorder")) {
-        e.preventDefault();
-        return;
-      }
       draggedIndex = idx;
       item.classList.add("dragging");
       e.dataTransfer.effectAllowed = "move";
@@ -604,9 +595,9 @@ export function renderTestList() {
       handle.addEventListener("pointercancel", finishPointerDrag);
     }
 
-    // Select test on card click (excluding reorder controls)
+    // Select test on card click (excluding drag handle)
     item.addEventListener("click", (e) => {
-      if (e.target.closest(".btn-test-reorder") || e.target.closest(".test-item-drag-handle")) {
+      if (e.target.closest(".test-item-drag-handle")) {
         return;
       }
       void loadTestIntoForm(idx);
@@ -730,11 +721,11 @@ export function setSpatialPositions(startS, finishS) {
 
   if (dom.sliderStart) dom.sliderStart.value = startS;
   if (dom.sliderFinish) dom.sliderFinish.value = finishS;
-  if (dom.inputStart) dom.inputStart.value = startS.toFixed(4);
-  if (dom.inputFinish) dom.inputFinish.value = finishS.toFixed(4);
+  if (dom.inputStart) dom.inputStart.value = startS.toFixed(3);
+  if (dom.inputFinish) dom.inputFinish.value = finishS.toFixed(3);
 
-  if (dom.dispStartS) dom.dispStartS.textContent = (startS * 100).toFixed(2) + "%";
-  if (dom.dispFinishS) dom.dispFinishS.textContent = (finishS * 100).toFixed(2) + "%";
+  if (dom.dispStartS) dom.dispStartS.textContent = startS.toFixed(3);
+  if (dom.dispFinishS) dom.dispFinishS.textContent = finishS.toFixed(3);
 
   const totalLen = state.currentSpline?.total_length_m ?? 0;
   const startM = Math.round(startS * totalLen);
@@ -1042,8 +1033,8 @@ export function saveFormIntoActiveTest() {
 
   const rawStart = dom.inputStart?.value ?? 0;
   const rawFinish = dom.inputFinish?.value ?? 1;
-  test.start_s = Number.parseFloat(rawStart) || 0;
-  test.finish_s = Number.parseFloat(rawFinish) || 1;
+  test.start_s = Math.round((Number.parseFloat(rawStart) || 0) * 1000) / 1000;
+  test.finish_s = Math.round((Number.parseFloat(rawFinish) || 1) * 1000) / 1000;
 
   applyStartModeSettings(test);
 
@@ -1295,6 +1286,7 @@ async function handleFormSubmit(e) {
  */
 function setupSearchFilterListeners() {
   initTrackAutocomplete();
+  initLayoutAutocomplete();
   initCarAutocomplete();
 }
 
@@ -1333,7 +1325,6 @@ function initTrackAutocomplete() {
       item.innerHTML = `
         <div class="mui-item-main">
           <span class="mui-item-title">${escapeHtml(t.name)}</span>
-          <span class="mui-item-sub">${escapeHtml(t.track_id)}</span>
         </div>
         <span class="mui-item-badge">${layoutBadge}</span>
       `;
@@ -1348,7 +1339,7 @@ function initTrackAutocomplete() {
 
   const selectTrackItem = (t) => {
     select.value = t.track_id;
-    input.value = `${t.name} (${t.track_id})`;
+    input.value = t.name;
     if (clearBtn) clearBtn.style.display = "block";
     closePopper();
     select.dispatchEvent(new Event("change"));
@@ -1360,7 +1351,11 @@ function initTrackAutocomplete() {
     input.setAttribute("aria-expanded", "true");
     const q = input.value.trim().toLowerCase();
     // If the input already has full track name, filter with empty string to show full catalog
-    const isExact = state.tracks.some((t) => `${t.name} (${t.track_id})` === input.value.trim());
+    const isExact = state.tracks.some(
+      (t) =>
+        t.name.toLowerCase() === input.value.trim().toLowerCase() ||
+        `${t.name} (${t.track_id})`.toLowerCase() === input.value.trim().toLowerCase()
+    );
     renderPopper(isExact ? "" : q);
   };
 
@@ -1441,6 +1436,151 @@ function initTrackAutocomplete() {
 }
 
 /**
+ * Material-UI Autocomplete implementation for Track Layouts.
+ */
+function initLayoutAutocomplete() {
+  const container = document.getElementById("autocomplete-layout");
+  const input = dom.inputSearchLayout;
+  const popper = document.getElementById("layout-options-list");
+  const select = dom.selectLayout;
+  if (!container || !input || !popper || !select) return;
+
+  let highlightedIndex = -1;
+  let currentMatches = [];
+
+  const getLayoutsForCurrentTrack = () => {
+    const trackId = dom.selectTrack?.value || "";
+    const track = state.tracks.find((t) => t.track_id === trackId);
+    if (!track?.layouts?.length) {
+      return [{ layout_id: "", name: "Default Layout" }];
+    }
+    return track.layouts.map((l) => {
+      const layoutId = typeof l === "string" ? l : (l.layout_id ?? "");
+      const layoutName = typeof l === "string"
+        ? (l ? l.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) : "Default Layout")
+        : (l.name || l.layout_id || "Default Layout");
+      return { layout_id: layoutId, name: layoutName };
+    });
+  };
+
+  const filterLayouts = (query = "") => {
+    const all = getLayoutsForCurrentTrack();
+    if (!query) return all;
+    const q = query.toLowerCase();
+    return all.filter((l) => l.name.toLowerCase().includes(q) || l.layout_id.toLowerCase().includes(q));
+  };
+
+  const renderPopper = (query = "") => {
+    currentMatches = filterLayouts(query);
+    popper.innerHTML = "";
+    highlightedIndex = -1;
+
+    if (currentMatches.length === 0) {
+      popper.innerHTML = '<div class="mui-autocomplete-empty">No matching layouts found</div>';
+      return;
+    }
+
+    currentMatches.forEach((l) => {
+      const item = document.createElement("div");
+      item.className = "mui-autocomplete-item";
+      if (l.layout_id === select.value) {
+        item.classList.add("selected");
+      }
+      item.innerHTML = `
+        <div class="mui-item-main">
+          <span class="mui-item-title">${escapeHtml(l.name)}</span>
+        </div>
+      `;
+
+      item.addEventListener("click", () => {
+        selectLayoutItem(l);
+      });
+
+      popper.appendChild(item);
+    });
+  };
+
+  const selectLayoutItem = (l) => {
+    select.value = l.layout_id;
+    input.value = l.name;
+    closePopper();
+    select.dispatchEvent(new Event("change"));
+  };
+
+  const openPopper = () => {
+    container.classList.add("open");
+    popper.style.display = "block";
+    input.setAttribute("aria-expanded", "true");
+    const q = input.value.trim().toLowerCase();
+    const all = getLayoutsForCurrentTrack();
+    const isExact = all.some((l) => l.name.toLowerCase() === q);
+    renderPopper(isExact ? "" : q);
+  };
+
+  const closePopper = () => {
+    container.classList.remove("open");
+    popper.style.display = "none";
+    input.setAttribute("aria-expanded", "false");
+    highlightedIndex = -1;
+  };
+
+  input.addEventListener("focus", openPopper);
+  input.addEventListener("click", openPopper);
+
+  input.addEventListener("input", () => {
+    const q = input.value.trim().toLowerCase();
+    if (popper.style.display === "none") {
+      openPopper();
+    } else {
+      renderPopper(q);
+    }
+  });
+
+  input.addEventListener("keydown", (e) => {
+    const items = popper.querySelectorAll(".mui-autocomplete-item");
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (popper.style.display === "none") openPopper();
+      if (items.length > 0) {
+        highlightedIndex = (highlightedIndex + 1) % items.length;
+        updateHighlight(items);
+      }
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (popper.style.display === "none") openPopper();
+      if (items.length > 0) {
+        highlightedIndex = (highlightedIndex - 1 + items.length) % items.length;
+        updateHighlight(items);
+      }
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (highlightedIndex >= 0 && highlightedIndex < currentMatches.length) {
+        selectLayoutItem(currentMatches[highlightedIndex]);
+      } else if (currentMatches.length > 0) {
+        selectLayoutItem(currentMatches[0]);
+      }
+    } else if (e.key === "Escape") {
+      closePopper();
+    }
+  });
+
+  const updateHighlight = (items) => {
+    items.forEach((item, idx) => {
+      item.classList.toggle("highlighted", idx === highlightedIndex);
+      if (idx === highlightedIndex) {
+        item.scrollIntoView({ block: "nearest" });
+      }
+    });
+  };
+
+  document.addEventListener("click", (e) => {
+    if (!container.contains(e.target)) {
+      closePopper();
+    }
+  });
+}
+
+/**
  * Material-UI Autocomplete implementation for Kunos Cars.
  */
 function initCarAutocomplete() {
@@ -1470,13 +1610,10 @@ function initCarAutocomplete() {
       if (c.car_id === select.value) {
         item.classList.add("selected");
       }
-      const badge = c.drivetrain ? c.drivetrain : (c.brand || "KUNOS");
       item.innerHTML = `
         <div class="mui-item-main">
           <span class="mui-item-title">${escapeHtml(c.name)}</span>
-          <span class="mui-item-sub">${escapeHtml(c.car_id)} ${c.brand ? "• " + escapeHtml(c.brand) : ""}</span>
         </div>
-        <span class="mui-item-badge">${escapeHtml(badge)}</span>
       `;
 
       item.addEventListener("click", () => {
@@ -1489,8 +1626,7 @@ function initCarAutocomplete() {
 
   const selectCarItem = (c) => {
     select.value = c.car_id;
-    const brandStr = c.brand ? ` (${c.brand})` : "";
-    input.value = `${c.name}${brandStr}`;
+    input.value = c.name;
     if (clearBtn) clearBtn.style.display = "block";
     closePopper();
     select.dispatchEvent(new Event("change"));
@@ -1503,7 +1639,10 @@ function initCarAutocomplete() {
     const q = input.value.trim().toLowerCase();
     const isExact = state.cars.some((c) => {
       const brandStr = c.brand ? ` (${c.brand})` : "";
-      return `${c.name}${brandStr}` === input.value.trim();
+      return (
+        c.name.toLowerCase() === input.value.trim().toLowerCase() ||
+        `${c.name}${brandStr}`.toLowerCase() === input.value.trim().toLowerCase()
+      );
     });
     renderPopper(isExact ? "" : q);
   };

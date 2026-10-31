@@ -1,0 +1,681 @@
+/* ==========================================================================
+   Mobile-Friendly Responsive Enhancements (Plan A: Master-Detail Architecture)
+   ========================================================================== */
+
+/* Utility and Desktop Base States */
+.mobile-only {
+  display: none !important;
+}
+
+.header-actions-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mobile-menu-toggle {
+  display: none;
+}
+
+.actions-menu-backdrop {
+  display: none;
+}
+
+.actions-drawer-header {
+  display: none;
+}
+
+
+/* Mobile Back Button (Hidden on Desktop) */
+.mobile-back-btn {
+  display: none;
+}
+
+
+/* --------------------------------------------------------------------------
+   Breakpoint: <= 960px (Header Actions Drawer & Tablet Adaptation)
+   -------------------------------------------------------------------------- */
+@media (max-width: 960px) {
+  .navbar {
+    padding: 8px 16px;
+    height: 56px;
+  }
+
+  .brand {
+    gap: 10px;
+  }
+
+  .title-wrap h1 {
+    font-size: 14px;
+    letter-spacing: 0.5px;
+  }
+
+  .title-wrap .subtitle {
+    font-size: 10px;
+    max-width: 220px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Show Mobile Menu Toggle & Keep Main Export Visible */
+  .mobile-menu-toggle {
+    display: inline-flex;
+    padding: 8px 10px;
+  }
+
+  .mobile-only {
+    display: flex !important;
+  }
+
+  /* Header Actions Drawer */
+  .header-actions {
+    position: fixed;
+    top: 56px;
+    right: 0;
+    width: 310px;
+    max-width: 85vw;
+    background-color: #12161f;
+    border-left: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: -8px 12px 30px rgba(0, 0, 0, 0.85);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 2500;
+    transform: translateX(100%);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    max-height: calc(100dvh - 60px);
+    overflow-y: auto;
+  }
+
+  .header-actions.open {
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+
+  .actions-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding-bottom: 10px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .actions-drawer-header h3 {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .header-actions .btn {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  /* Backdrop */
+  .actions-menu-backdrop {
+    display: block;
+    position: fixed;
+    top: 56px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(2px);
+    z-index: 2400;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .actions-menu-backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Breakpoint: <= 768px (Mobile Plan A: Master-Detail Full Transition)
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  /* Prevent iOS input auto-zoom by enforcing >= 16px on mobile inputs */
+  input[type="text"],
+  input[type="number"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  .title-wrap .subtitle {
+    display: none;
+  }
+
+  /* All license logo tabs fit side-by-side in one row */
+  .license-nav {
+    padding: 0 8px;
+  }
+
+  .nav-tabs-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  .tab-container {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+    flex: 1;
+    justify-content: space-around;
+  }
+
+  .license-tab {
+    padding: 6px 8px;
+    min-height: 44px;
+    min-width: 44px;
+    gap: 0;
+  }
+
+  .tab-badge-img {
+    width: 26px;
+    height: 26px;
+  }
+
+  .nav-divider {
+    height: 20px;
+    margin: 0 4px;
+  }
+
+  .extra-tabs-container {
+    flex-shrink: 0;
+  }
+
+  .reference-tab {
+    padding: 6px 8px;
+    font-size: 11px;
+    gap: 4px;
+  }
+
+  .reference-tab .tab-count {
+    display: none;
+  }
+
+  /* Master-Detail Workspace (Plan A) */
+  .workspace {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* View 1: Test Catalog (Default) */
+  .sidebar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100% !important;
+    height: 100%;
+    z-index: 10;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+    border-right: none;
+  }
+
+  #btn-toggle-sidebar {
+    display: none !important;
+  }
+
+  .sidebar.collapsed {
+    width: 100% !important;
+  }
+
+  .sidebar.collapsed .tier-info,
+  .sidebar.collapsed .tier-description {
+    display: flex !important;
+  }
+
+  .sidebar-header {
+    padding: 12px 14px;
+    min-height: 52px;
+  }
+
+  .test-list {
+    padding: 10px 12px;
+    gap: 10px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .test-item {
+    padding: 12px 14px;
+    min-height: auto;
+    flex-shrink: 0;
+  }
+
+  /* View 2: Test Editor (Active when .workspace.view-editor) */
+  .editor-pane {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100% !important;
+    height: 100%;
+    padding: 12px 12px 48px 12px;
+    z-index: 5;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+    transform: translateX(100%);
+    opacity: 0;
+    pointer-events: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .workspace.view-editor .sidebar {
+    transform: translateX(-100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .workspace.view-editor .editor-pane {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 15;
+  }
+  /* Mobile Back Button in Title Row */
+  .mobile-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 42px;
+    padding: 0 10px;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .form-title-group {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  #form-test-id-badge {
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    padding: 0 8px;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .title-input {
+    height: 42px;
+    font-size: 15px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Form Grids Collapse to Single Column (Except Target Times) */
+  .form-grid.cols-2,
+  .form-grid.cols-3,
+  .form-grid.cols-4 {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .form-grid.target-times-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .target-times-grid .medal-label {
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .target-times-grid .form-control {
+    font-size: 13px;
+    padding-left: 8px;
+    padding-right: 20px !important;
+  }
+
+  .form-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .form-title-group {
+    width: 100%;
+  }
+
+  .form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .form-actions .btn {
+    flex: 1 1 auto;
+    min-height: 42px;
+    justify-content: center;
+  }
+
+  .card {
+    padding: 14px;
+    border-radius: var(--radius-md);
+  }
+
+  .card-title {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+
+  /* Start Mode Selector Stacks */
+  .start-mode-selector {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .mode-card {
+    padding: 12px 14px;
+    min-height: 52px;
+  }
+
+  /* Track Canvas & Map Controls */
+  .map-toolbar {
+    display: flex;
+    justify-content: flex-start;
+    padding: 8px 12px;
+  }
+
+  .map-legend {
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 10px;
+  }
+
+  #track-canvas {
+    height: 230px;
+    touch-action: none;
+  }
+
+  /* Touch-Friendly Range Sliders */
+  .range-slider {
+    height: 8px;
+    margin-top: 10px;
+  }
+
+  .range-slider::-webkit-slider-thumb {
+    width: 28px;
+    height: 28px;
+  }
+
+  .sector-badge-bar {
+    font-size: 11px;
+    text-align: center;
+  }
+
+  /* Reference View on Mobile */
+  .reference-view {
+    padding: 12px;
+    height: calc(100dvh - 100px);
+    gap: 12px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ref-header {
+    padding: 14px;
+  }
+
+  .ref-title-group h2 {
+    font-size: 14px;
+  }
+
+  .ref-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .game-pills {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    overflow: visible;
+  }
+
+  .pills-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    width: 100%;
+    flex-wrap: nowrap;
+  }
+
+  .pill-btn {
+    flex-shrink: 0;
+    min-height: 32px;
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+
+  .ref-metrics-card {
+    padding: 10px 12px;
+  }
+
+  .ref-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .metric-item,
+  .metric-card {
+    padding: 6px 8px;
+    gap: 8px;
+  }
+
+  .metric-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .metric-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .metric-label {
+    font-size: 9px;
+  }
+
+  .metric-value {
+    font-size: 13px;
+  }
+
+  .dt-chip {
+    font-size: 9px;
+    padding: 0 4px;
+  }
+
+  .chart-scrollable {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    padding-bottom: 6px;
+  }
+
+  .chart-scrollable .chart-scroll-inner {
+    min-width: 620px;
+    height: 100%;
+  }
+
+  .chart-canvas-wrapper.chart-scrollable.no-scroll {
+    overflow-x: hidden;
+  }
+
+  .chart-canvas-wrapper.chart-scrollable.no-scroll .chart-scroll-inner {
+    min-width: 100%;
+    width: 100%;
+  }
+
+  .chart-swipe-hint {
+    display: inline-flex;
+  }
+
+  .ref-charts-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .chart-card {
+    padding: 12px;
+  }
+
+  .chart-canvas-wrapper {
+    height: 210px;
+  }
+
+  .table-card {
+    padding: 12px;
+  }
+
+  .table-filters {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .table-search,
+  .table-select {
+    min-width: 100%;
+    width: 100%;
+  }
+
+  /* Modals on Mobile */
+  .modal-content {
+    width: 96vw;
+    max-width: 96vw;
+    max-height: 92dvh;
+    margin: 8px;
+  }
+
+  .modal-header {
+    padding: 12px 14px;
+  }
+
+  .modal-body {
+    padding: 14px;
+  }
+
+  .modal-footer {
+    padding: 10px 14px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .modal-footer .btn {
+    flex: 1 1 auto;
+    min-height: 38px;
+  }
+
+  /* Driver.js popovers bounded on narrow viewports */
+  .driver-popover {
+    max-width: calc(100vw - 24px) !important;
+    min-width: 250px !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Breakpoint: <= 480px (Ultra-Compact Phone Screen Tuning)
+   -------------------------------------------------------------------------- */
+@media (max-width: 480px) {
+  .navbar {
+    padding: 6px 12px;
+  }
+
+  .gt-logo {
+    font-size: 20px;
+    padding: 1px 6px;
+  }
+
+  .title-wrap h1 {
+    font-size: 13px;
+  }
+
+  .btn-export-main {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .pills-row {
+    gap: 4px;
+  }
+
+  .pill-btn {
+    padding: 4px 8px;
+    font-size: 10.5px;
+    min-height: 30px;
+  }
+
+  .ref-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .metric-item,
+  .metric-card {
+    padding: 4px 6px;
+    gap: 6px;
+  }
+
+  .metric-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .metric-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .metric-label {
+    font-size: 8.5px;
+  }
+
+  .metric-value {
+    font-size: 12px;
+  }
+
+  .reference-tab .ref-tab-label {
+    display: none;
+  }
+
+  .reference-tab {
+    padding: 6px 10px;
+    font-size: 15px;
+  }
+}

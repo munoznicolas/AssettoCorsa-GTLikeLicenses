@@ -1,0 +1,221 @@
+/* Header */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--bg-panel);
+  border-bottom: 2px solid var(--border-color);
+  padding: 10px 24px;
+  height: 60px;
+  flex-shrink: 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.gt-logo {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-style: italic;
+  font-size: 24px;
+  letter-spacing: -0.5px;
+  color: var(--text-main);
+  background: linear-gradient(135deg, var(--bg-card), var(--bg-main));
+  padding: 2px 8px;
+  border: 2px solid var(--accent-danger);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.title-wrap h1 {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text-main);
+  line-height: 1.2;
+}
+
+.title-wrap .subtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+/* License Tabs (Fixed, per requirements) */
+.license-nav {
+  background-color: var(--bg-input);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 24px;
+  flex-shrink: 0;
+}
+
+.nav-tabs-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.tab-container {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.nav-divider {
+  width: 1px;
+  height: 26px;
+  background-color: var(--border-color);
+  margin: 0 12px;
+  flex-shrink: 0;
+}
+
+.extra-tabs-container {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.license-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-height: 48px;
+}
+
+.reference-tab {
+  color: var(--accent-sky);
+  border-bottom: 3px solid transparent;
+}
+
+.reference-tab:hover {
+  color: var(--accent-sky);
+  background-color: var(--accent-sky-bg);
+}
+
+.reference-tab.active {
+  color: var(--accent-sky);
+  border-bottom-color: var(--accent-sky);
+  background-color: var(--accent-sky-bg);
+}
+
+.license-tab:hover {
+  color: var(--text-main);
+  background-color: var(--bg-card);
+}
+
+.license-tab.active {
+  color: var(--text-main);
+  border-bottom-color: var(--gt-red);
+  background-color: var(--accent-danger-bg);
+}
+
+.tab-badge-img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.6));
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.license-tab:hover .tab-badge-img {
+  transform: scale(1.1);
+}
+
+.license-tab.active .tab-badge-img {
+  transform: scale(1.12);
+  filter: drop-shadow(0 0 6px rgba(225, 29, 72, 0.65));
+}
+
+.tab-count {
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background-color: var(--bg-card);
+  color: var(--text-muted);
+}
+
+.license-tab.active .tab-count {
+  background-color: var(--gt-red);
+  color: var(--text-inverse);
+}
+
+/* Main Workspace */
+.workspace {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+
+/* ==========================================================================
+   Theme Toggle Button (Light / Dark)
+   ========================================================================== */
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.theme-toggle-btn:hover {
+  border-color: var(--border-focus);
+  background: var(--bg-card-hover, rgba(255, 255, 255, 0.08));
+}
+
+.theme-toggle-btn:active {
+  transform: scale(0.95);
+}
+
+#theme-toggle-icon {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.theme-toggle-btn:hover #theme-toggle-icon {
+  transform: rotate(15deg) scale(1.1);
+}
+
+
+.header-actions-divider {
+  width: 1px;
+  height: 22px;
+  background-color: var(--border-color);
+  margin: 0 4px;
+}

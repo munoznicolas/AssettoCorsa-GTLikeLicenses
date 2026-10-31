@@ -65,6 +65,13 @@ class TestWebUITheme(unittest.TestCase):
         with open(style_path, "r", encoding="utf-8") as f:
             content = f.read()
 
+        css_dir = os.path.join(STATIC_DIR, "css")
+        if os.path.isdir(css_dir):
+            for fname in sorted(os.listdir(css_dir)):
+                if fname.endswith(".css"):
+                    with open(os.path.join(css_dir, fname), "r", encoding="utf-8") as mf:
+                        content += "\n" + mf.read()
+
         # color-scheme declarations
         self.assertIn("color-scheme: light dark;", content)
         self.assertIn(':root[data-theme="light"]', content)

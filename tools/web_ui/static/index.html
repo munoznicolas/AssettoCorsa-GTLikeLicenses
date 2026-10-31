@@ -39,7 +39,16 @@
         } catch (e) {}
       })();
     </script>
-    <link rel="stylesheet" href="style.css?v=20261028b" />
+    <link rel="stylesheet" href="css/variables.css?v=20261028b" />
+    <link rel="stylesheet" href="css/base.css?v=20261028b" />
+    <link rel="stylesheet" href="css/layout.css?v=20261028b" />
+    <link rel="stylesheet" href="css/catalog.css?v=20261028b" />
+    <link rel="stylesheet" href="css/editor.css?v=20261028b" />
+    <link rel="stylesheet" href="css/canvas.css?v=20261028b" />
+    <link rel="stylesheet" href="css/components.css?v=20261028b" />
+    <link rel="stylesheet" href="css/telemetry.css?v=20261028b" />
+    <link rel="stylesheet" href="css/tour.css?v=20261028b" />
+    <link rel="stylesheet" href="css/responsive.css?v=20261028b" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -424,13 +433,8 @@
 
             <!-- Section 2: Vehicle & Track Selection -->
             <div id="card-track-vehicle" class="card form-card">
-              <div class="card-title flex-between">
+              <div class="card-title">
                 <span>Track & Vehicle Selection</span>
-                <span
-                  class="badge"
-                  title="Limited to official Kunos Simulazioni content"
-                  >Kunos Official Only</span
-                >
               </div>
               <div class="form-grid cols-3">
                 <div class="form-group">
@@ -487,11 +491,41 @@
                 </div>
                 <div class="form-group">
                   <div class="field-label-row">
-                    <label for="select-layout">Layout</label>
+                    <label for="input-search-layout">Layout</label>
                   </div>
-                  <select id="select-layout" class="form-control" style="height: 38px;">
-                    <option value="">Default Layout</option>
-                  </select>
+                  <div id="autocomplete-layout" class="mui-autocomplete">
+                    <div class="mui-autocomplete-input-wrap">
+                      <span class="mui-autocomplete-icon">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="11" cy="11" r="8"></circle>
+                          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                      </span>
+                      <input
+                        type="text"
+                        id="input-search-layout"
+                        class="form-control mui-autocomplete-input"
+                        placeholder="Select layout..."
+                        autocomplete="off"
+                        role="combobox"
+                        aria-expanded="false"
+                        aria-autocomplete="list"
+                      />
+                      <div class="mui-autocomplete-actions">
+                        <span class="mui-autocomplete-arrow">▼</span>
+                      </div>
+                    </div>
+                    <div
+                      id="layout-options-list"
+                      class="mui-autocomplete-popper"
+                      style="display: none"
+                      role="listbox"
+                    ></div>
+                    <!-- Hidden sync select for 100% backward compatibility -->
+                    <select id="select-layout" class="form-control" style="display: none;">
+                      <option value="">Default Layout</option>
+                    </select>
+                  </div>
                 </div>
                 <div class="form-group">
                   <div class="field-label-row">
@@ -596,7 +630,7 @@
                   <div class="gate-header">
                     <span class="badge badge-success gate-badge">🏁 Start Gate</span>
                     <label for="slider-start-s" class="gate-label">
-                      Position: <span id="disp-start-s">0.00%</span> (<span id="disp-start-m">0 m</span>)
+                      Position: <span id="disp-start-s">0.000</span> (<span id="disp-start-m">0 m</span>)
                     </label>
                     <label for="input-start-s" class="visually-hidden">Start Position Value</label>
                     <input
@@ -605,8 +639,8 @@
                       class="form-control num-input mono"
                       min="0"
                       max="1"
-                      step="0.0001"
-                      value="0.0"
+                      step="0.001"
+                      value="0.000"
                       aria-label="Start Position Value"
                     />
                   </div>
@@ -616,7 +650,7 @@
                     class="range-slider range-start"
                     min="0"
                     max="1"
-                    step="0.0005"
+                    step="0.001"
                     value="0.0"
                   />
                 </div>
@@ -625,7 +659,7 @@
                   <div class="gate-header">
                     <span class="badge badge-danger gate-badge">🏁 Finish Gate</span>
                     <label for="slider-finish-s" class="gate-label">
-                      Position: <span id="disp-finish-s">100.00%</span> (<span id="disp-finish-m">0 m</span>)
+                      Position: <span id="disp-finish-s">1.000</span> (<span id="disp-finish-m">0 m</span>)
                     </label>
                     <label for="input-finish-s" class="visually-hidden">Finish Position Value</label>
                     <input
@@ -634,8 +668,8 @@
                       class="form-control num-input mono"
                       min="0"
                       max="1"
-                      step="0.0001"
-                      value="1.0"
+                      step="0.001"
+                      value="1.000"
                       aria-label="Finish Position Value"
                     />
                   </div>
@@ -645,7 +679,7 @@
                     class="range-slider range-finish"
                     min="0"
                     max="1"
-                    step="0.0005"
+                    step="0.001"
                     value="1.0"
                   />
                 </div>
@@ -813,120 +847,130 @@
         <!-- Reference View Header -->
         <div class="ref-header">
           <div class="ref-title-group">
-            <h2>GRAN TURISMO DRIVING SCHOOL CONSTANT VALUES & BENCHMARKS</h2>
-            <p class="ref-subtitle">
-              Authoritative GT1–GT7 curriculum telemetry: horsepower
-              progression, power-to-weight calibration, medal durations, and
-              powertrain layouts.
-            </p>
+            <h2>GT CONSTANTS & BENCHMARKS</h2>
           </div>
 
           <!-- Game Selector Controls -->
           <div class="ref-controls">
             <span class="ref-control-label">SELECT GAME:</span>
             <div id="game-selector-pills" class="game-pills">
-              <button class="pill-btn active" data-game="ALL">All Games</button>
-              <button class="pill-btn" data-game="GT1">GT1</button>
-              <button class="pill-btn" data-game="GT2">GT2</button>
-              <button class="pill-btn" data-game="GT3">GT3</button>
-              <button class="pill-btn" data-game="GT4">GT4</button>
-              <button class="pill-btn" data-game="GT5">GT5</button>
-              <button class="pill-btn" data-game="GT6">GT6</button>
-              <button class="pill-btn" data-game="GT7">GT7</button>
-              <button
-                class="pill-btn pill-btn-ac"
-                data-game="AC Mod"
-                title="Assetto Corsa GT-Like Career Driving School"
-              >
-                AC Mod
-              </button>
+              <div class="pills-row">
+                <button class="pill-btn active" data-game="ALL">All Games</button>
+                <button class="pill-btn" data-game="GT1">GT1</button>
+                <button class="pill-btn" data-game="GT2">GT2</button>
+                <button class="pill-btn" data-game="GT3">GT3</button>
+                <button class="pill-btn" data-game="GT4">GT4</button>
+              </div>
+              <div class="pills-row">
+                <button class="pill-btn" data-game="GT5">GT5</button>
+                <button class="pill-btn" data-game="GT6">GT6</button>
+                <button class="pill-btn" data-game="GT7">GT7</button>
+                <button
+                  class="pill-btn pill-btn-ac"
+                  data-game="AC Mod"
+                  title="Assetto Corsa GT-Like Career Driving School"
+                >
+                  AC Mod
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Quick Metrics Summary Cards -->
-        <div class="ref-metrics-grid">
-          <div class="ref-card metric-card">
-            <div class="metric-icon metric-icon-flag">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
-                <line x1="4" y1="22" x2="4" y2="15"></line>
-              </svg>
+        <!-- Quick Metrics Summary Card (Single unified element) -->
+        <div class="ref-card ref-metrics-card">
+          <div class="ref-metrics-grid">
+            <div class="metric-item">
+              <div class="metric-icon metric-icon-flag">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path>
+                  <line x1="4" y1="22" x2="4" y2="15"></line>
+                </svg>
+              </div>
+              <div class="metric-info">
+                <span class="metric-label">Total Tests</span>
+                <span id="metric-total-tests" class="metric-value">406</span>
+              </div>
             </div>
-            <div class="metric-info">
-              <span class="metric-label">Total Tests</span>
-              <span id="metric-total-tests" class="metric-value">406</span>
+
+            <div class="metric-item">
+              <div class="metric-icon metric-icon-gold">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="8" r="6"></circle>
+                  <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path>
+                </svg>
+              </div>
+              <div class="metric-info">
+                <span class="metric-label">Total Gold Time</span>
+                <span id="metric-total-gold" class="metric-value">292:17.2</span>
+              </div>
+            </div>
+
+            <div class="metric-item">
+              <div class="metric-icon metric-icon-time">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="13" r="8"></circle>
+                  <path d="M12 9v4l2.5 2.5"></path>
+                  <path d="M12 2v3"></path>
+                  <path d="M10 2h4"></path>
+                </svg>
+              </div>
+              <div class="metric-info">
+                <span class="metric-label">Avg Gold Duration</span>
+                <span id="metric-avg-gold" class="metric-value">0:45.670</span>
+              </div>
+            </div>
+
+            <div class="metric-item">
+              <div class="metric-icon metric-icon-hp">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m12 14 4-4"></path>
+                  <path d="M3.34 19a10 10 0 1 1 17.32 0"></path>
+                </svg>
+              </div>
+              <div class="metric-info">
+                <span class="metric-label">Average Horsepower</span>
+                <span id="metric-avg-hp" class="metric-value">318 HP</span>
+              </div>
+            </div>
+
+            <div class="metric-item">
+              <div class="metric-icon metric-icon-pw">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="3" x2="12" y2="21"></line>
+                  <path d="m3 9 9-4 9 4"></path>
+                  <path d="M4 14l-2 5a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l-2-5"></path>
+                  <path d="M18 14l-2 5a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l-2-5"></path>
+                </svg>
+              </div>
+              <div class="metric-info">
+                <span class="metric-label">Avg Power / Weight</span>
+                <span id="metric-avg-pw" class="metric-value">5.12 kg/hp</span>
+              </div>
+            </div>
+
+            <div class="metric-item metric-item-drivetrain">
+              <div class="metric-icon metric-icon-dt">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="6" height="7" rx="1.5"></rect>
+                  <rect x="15" y="3" width="6" height="7" rx="1.5"></rect>
+                  <rect x="3" y="14" width="6" height="7" rx="1.5"></rect>
+                  <rect x="15" y="14" width="6" height="7" rx="1.5"></rect>
+                  <path d="M9 6.5h6"></path>
+                  <path d="M9 17.5h6"></path>
+                  <line x1="12" y1="6.5" x2="12" y2="17.5"></line>
+                </svg>
+              </div>
+              <div class="metric-info metric-info-dt">
+                <span class="metric-label">Drivetrain Distribution</span>
+                <div id="metric-drivetrain-breakdown" class="drivetrain-chips-row">
+                  <span class="dt-chip dt-fr"><span class="dt-chip-name">FR</span> <span class="dt-chip-val">157</span></span>
+                  <span class="dt-chip dt-ff"><span class="dt-chip-name">FF</span> <span class="dt-chip-val">84</span></span>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="ref-card metric-card">
-            <div class="metric-icon metric-icon-gold">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="8" r="6"></circle>
-                <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path>
-              </svg>
-            </div>
-            <div class="metric-info">
-              <span class="metric-label">Total Gold Time</span>
-              <span id="metric-total-gold" class="metric-value">292:17.2</span>
-            </div>
-          </div>
-          <div class="ref-card metric-card">
-            <div class="metric-icon metric-icon-time">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="13" r="8"></circle>
-                <path d="M12 9v4l2.5 2.5"></path>
-                <path d="M12 2v3"></path>
-                <path d="M10 2h4"></path>
-              </svg>
-            </div>
-            <div class="metric-info">
-              <span class="metric-label">Avg Gold Duration</span>
-              <span id="metric-avg-gold" class="metric-value">0:45.670</span>
-            </div>
-          </div>
-          <div class="ref-card metric-card">
-            <div class="metric-icon metric-icon-hp">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="m12 14 4-4"></path>
-                <path d="M3.34 19a10 10 0 1 1 17.32 0"></path>
-              </svg>
-            </div>
-            <div class="metric-info">
-              <span class="metric-label">Average Horsepower</span>
-              <span id="metric-avg-hp" class="metric-value">318 HP</span>
-            </div>
-          </div>
-          <div class="ref-card metric-card">
-            <div class="metric-icon metric-icon-pw">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="3" x2="12" y2="21"></line>
-                <path d="m3 9 9-4 9 4"></path>
-                <path d="M4 14l-2 5a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l-2-5"></path>
-                <path d="M18 14l-2 5a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l-2-5"></path>
-              </svg>
-            </div>
-            <div class="metric-info">
-              <span class="metric-label">Avg Power / Weight</span>
-              <span id="metric-avg-pw" class="metric-value">5.12 kg/hp</span>
-            </div>
-          </div>
-          <div class="ref-card metric-card metric-card-drivetrain">
-            <div class="metric-icon metric-icon-dt">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="6" height="7" rx="1.5"></rect>
-                <rect x="15" y="3" width="6" height="7" rx="1.5"></rect>
-                <rect x="3" y="14" width="6" height="7" rx="1.5"></rect>
-                <rect x="15" y="14" width="6" height="7" rx="1.5"></rect>
-                <path d="M9 6.5h6"></path>
-                <path d="M9 17.5h6"></path>
-                <line x1="12" y1="6.5" x2="12" y2="17.5"></line>
-              </svg>
-            </div>
-            <div class="metric-info metric-info-dt">
-              <span class="metric-label">Drivetrain Distribution</span>
-              <div id="metric-drivetrain-breakdown" class="drivetrain-chips-row">
-                <span class="dt-chip dt-fr"><span class="dt-chip-name">FR</span> <span class="dt-chip-val">157</span></span>
-                <span class="dt-chip dt-ff"><span class="dt-chip-name">FF</span> <span class="dt-chip-val">84</span></span>
+        </div>
               </div>
             </div>
           </div>
@@ -939,26 +983,26 @@
             <div class="chart-header">
               <div class="chart-title">
                 <span class="chart-dot hp"></span>
-                <h3 id="title-chart-power">Average Power &amp; Power-to-Weight Ratio by License</h3>
+                <h3 id="title-chart-power">Average Power &amp; Power-to-Weight Ratio by Game</h3>
               </div>
               <div class="chart-legend-badges">
-                <span class="chart-badge chart-swipe-hint">Swipe ↔</span>
+                <span class="chart-badge chart-swipe-hint" title="Swipe horizontally to view all license tiers">SWIPE ↔</span>
                 <button
-                  id="btn-toggle-power-agg"
-                  class="chart-badge chart-badge-btn active"
                   type="button"
-                  title="Toggle aggregation: By License Tier vs Individual Tests"
-                >Avg by License</button>
+                  id="btn-toggle-power-agg"
+                  class="chart-badge chart-badge-btn chart-btn-toggle active"
+                  title="Toggle between Aggregated Average and Raw Individual Tests"
+                >Avg by Game</button>
                 <button
                   type="button"
                   id="badge-toggle-hp"
-                  class="chart-badge chart-badge-btn-toggle text-red"
+                  class="chart-badge chart-badge-btn-toggle chart-filter-badge text-red"
                   title="Click to toggle Horsepower line"
                 >● Left: HP</button>
                 <button
                   type="button"
                   id="badge-toggle-pw"
-                  class="chart-badge chart-badge-btn-toggle text-amber"
+                  class="chart-badge chart-badge-btn-toggle chart-filter-badge text-amber"
                   title="Click to toggle Power/Weight line"
                 >● Right: kg/hp</button>
               </div>
@@ -975,20 +1019,20 @@
             <div class="chart-header">
               <div class="chart-title">
                 <span class="chart-dot gold"></span>
-                <h3 id="title-chart-gold">Average Gold Medal Duration by License</h3>
+                <h3 id="title-chart-gold">Average Gold Medal Duration by Game</h3>
               </div>
               <div class="chart-legend-badges">
-                <span class="chart-badge chart-swipe-hint">Swipe ↔</span>
+                <span class="chart-badge chart-swipe-hint" title="Swipe horizontally to view all license tiers">SWIPE ↔</span>
                 <button
+                  type="button"
                   id="btn-toggle-gold-agg"
-                  class="chart-badge chart-badge-btn active"
-                  type="button"
-                  title="Toggle aggregation: By License Tier vs Individual Tests"
-                >Avg by License</button>
+                  class="chart-badge chart-badge-btn chart-btn-toggle active"
+                  title="Toggle between Aggregated Average and Raw Individual Tests"
+                >Avg by Game</button>
                 <button
-                  id="btn-toggle-gold-scale"
-                  class="chart-badge chart-badge-btn"
                   type="button"
+                  id="btn-toggle-gold-scale"
+                  class="chart-badge chart-badge-btn chart-btn-toggle"
                   style="display: none;"
                   title="Toggle focus zoom (tests ≤ 3 min vs full 9 min scale)"
                 >Focus ≤3m</button>

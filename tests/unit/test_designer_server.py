@@ -221,10 +221,23 @@ class TestDesignerServer(unittest.TestCase):
         self.assertIn('target-times-grid', html)
         self.assertIn('input-suffix', html)
 
+        # Verify modular CSS links
+        self.assertIn('href="css/variables.css', html)
+        self.assertIn('href="css/responsive.css', html)
+
     def test_mobile_friendly_css_rules(self):
         style_css_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "style.css")
-        with open(style_css_path, "r", encoding="utf-8") as f:
-            css = f.read()
+        css_dir = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "css")
+        css_parts = []
+        if os.path.isfile(style_css_path):
+            with open(style_css_path, "r", encoding="utf-8") as f:
+                css_parts.append(f.read())
+        if os.path.isdir(css_dir):
+            for fname in sorted(os.listdir(css_dir)):
+                if fname.endswith(".css"):
+                    with open(os.path.join(css_dir, fname), "r", encoding="utf-8") as f:
+                        css_parts.append(f.read())
+        css = "\n".join(css_parts)
 
         # Dynamic viewport unit for mobile browser address bars
         self.assertIn("100dvh", css)
@@ -236,6 +249,15 @@ class TestDesignerServer(unittest.TestCase):
         # Color scheme dark and high-contrast option styling
         self.assertIn("color-scheme: dark;", css)
         self.assertIn("select option", css)
+
+        # Modular CSS file integrity
+        expected_modules = [
+            "variables.css", "base.css", "layout.css", "catalog.css",
+            "editor.css", "canvas.css", "components.css", "telemetry.css",
+            "tour.css", "responsive.css"
+        ]
+        for mod in expected_modules:
+            self.assertTrue(os.path.isfile(os.path.join(css_dir, mod)), f"Missing CSS module: {mod}")
 
     def test_mobile_drawer_and_back_navigation_integration(self):
         dom_js_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "js", "dom.js")
@@ -249,6 +271,127 @@ class TestDesignerServer(unittest.TestCase):
         self.assertIn("dom.btnBackToList", dom_js)
         self.assertIn("dom.btnHeaderMenu.addEventListener", app_js)
 
+    def test_mobile_reference_charts_per_game_logic(self):
+        """Verify reference charts show per game when ALL games are selected and per license when a game is picked."""
+        ref_view_js_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "js", "reference-view.js")
+        with open(ref_view_js_path, "r", encoding="utf-8") as f:
+            js = f.read()
+
+        # 1. Functions must be exported and defined
+        self.assertIn("export function isMobileChartViewport()", js)
+        self.assertIn("export function shouldShowPerGameChart(", js)
+        self.assertIn("export function aggregateTestsByGame(", js)
+
+        # 2. shouldShowPerGameChart conditions on activeGame == 'ALL'
+        self.assertIn("innerWidth <= 768", js)
+        self.assertIn('activeGame === "ALL"', js)
+
+        # 3. Both charts (Power/PW and Gold) branch on showPerGame
+        self.assertIn("const showPerGame = shouldShowPerGameChart(state.activeRefGame);", js)
+        self.assertIn("aggregates = aggregateTestsByGame(list);", js)
+        self.assertIn("aggregates = aggregateTestsByLicense(list, state.activeRefGame);", js)
+
+        # 4. updateAggregationUiControls adapts button and title text to Avg by Game vs Avg by License
+        self.assertIn('const aggLabel = showPerGame ? "Avg by Game" : "Avg by License";', js)
+        self.assertIn('"Average Power & Power-to-Weight Ratio by Game"', js)
+        self.assertIn('"Average Gold Medal Duration by Game"', js)
+
+        # 5. Modular stylesheet includes no-scroll adaptation for compact charts
+        resp_css_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "css", "responsive.css")
+        with open(resp_css_path, "r", encoding="utf-8") as f:
+            css = f.read()
+        self.assertIn(".chart-canvas-wrapper.chart-scrollable.no-scroll", css)
+
+
+    def test_track_autocomplete_hides_track_id(self):
+        """Verify that track_id is hidden from the track autocomplete dropdown items and search input."""
+        editor_js_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "js", "test-editor.js")
+        with open(editor_js_path, "r", encoding="utf-8") as f:
+            js = f.read()
+
+        # In initTrackAutocomplete, items must not render track_id
+        self.assertNotIn('<span class="mui-item-sub">${escapeHtml(t.track_id)}</span>', js)
+        self.assertIn('<span class="mui-item-title">${escapeHtml(t.name)}</span>', js)
+
+        # In selectTrackItem, input.value must be t.name only
+        self.assertIn("input.value = t.name;", js)
+        self.assertNotIn("input.value = `${t.name} (${t.track_id})`;", js)
+
+        # In populateTrackDropdown, input.value must be found.name only
+        self.assertIn("dom.inputSearchTrack.value = found.name;", js)
+        self.assertNotIn("dom.inputSearchTrack.value = `${found.name} (${found.track_id})`;", js)
+
+
+    def test_car_autocomplete_only_shows_name(self):
+        """Verify that manufacturer and carid are removed from car autocomplete dropdown and search input."""
+        editor_js_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "js", "test-editor.js")
+        with open(editor_js_path, "r", encoding="utf-8") as f:
+            js = f.read()
+
+        # In initCarAutocomplete, items must only render car name (no car_id or brand sub-item or badge)
+        self.assertNotIn('<span class="mui-item-sub">${escapeHtml(c.car_id)}', js)
+        self.assertNotIn('<span class="mui-item-badge">${escapeHtml(badge)}</span>', js)
+        self.assertIn('<span class="mui-item-title">${escapeHtml(c.name)}</span>', js)
+
+        # In selectCarItem, input.value must be c.name only
+        self.assertIn("input.value = c.name;", js)
+        self.assertNotIn("input.value = `${c.name}${brandStr}`;", js)
+
+        # In populateCarDropdown, input.value must be found.name only
+        self.assertIn("dom.inputSearchCar.value = found.name;", js)
+        self.assertNotIn("dom.inputSearchCar.value = `${found.name}${brandStr}`;", js)
+
+
+    def test_layout_autocomplete_integration(self):
+        """Verify that track layout dropdown uses the same MUI autocomplete pattern as track and car."""
+        index_html_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "index.html")
+        with open(index_html_path, "r", encoding="utf-8") as f:
+            html = f.read()
+        dom_js_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "js", "dom.js")
+        with open(dom_js_path, "r", encoding="utf-8") as f:
+            dom_js = f.read()
+        editor_js_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "js", "test-editor.js")
+        with open(editor_js_path, "r", encoding="utf-8") as f:
+            editor_js = f.read()
+
+        # 1. HTML markup includes autocomplete-layout and layout-options-list
+        self.assertIn('id="autocomplete-layout"', html)
+        self.assertIn('id="layout-options-list"', html)
+        self.assertIn('id="input-search-layout"', html)
+
+        # 2. dom.js references inputSearchLayout
+        self.assertIn('dom.inputSearchLayout = document.getElementById("input-search-layout");', dom_js)
+
+        # 3. test-editor.js initializes layout autocomplete
+        self.assertIn("function initLayoutAutocomplete()", editor_js)
+        self.assertIn("initLayoutAutocomplete();", editor_js)
+        self.assertIn("dom.inputSearchLayout.value = activeName;", editor_js)
+
+
+    def test_spatial_positions_precision_and_no_percentage(self):
+        """Verify that gate positions show decimal up to 3 decimal places and no percentages."""
+        editor_js_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "js", "test-editor.js")
+        with open(editor_js_path, "r", encoding="utf-8") as f:
+            editor_js = f.read()
+        index_html_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "index.html")
+        with open(index_html_path, "r", encoding="utf-8") as f:
+            index_html = f.read()
+
+        # 1. No percentage formatting in test-editor.js
+        self.assertNotIn('(startS * 100).toFixed(2) + "%"', editor_js)
+        self.assertNotIn('(finishS * 100).toFixed(2) + "%"', editor_js)
+
+        # 2. 3 decimal places formatting
+        self.assertIn("dom.inputStart.value = startS.toFixed(3);", editor_js)
+        self.assertIn("dom.inputFinish.value = finishS.toFixed(3);", editor_js)
+        self.assertIn("dom.dispStartS.textContent = startS.toFixed(3);", editor_js)
+        self.assertIn("dom.dispFinishS.textContent = finishS.toFixed(3);", editor_js)
+
+        # 3. HTML inputs use step 0.001 and default to 3 decimal places
+        self.assertIn('id="input-start-s"', index_html)
+        self.assertIn('step="0.001"', index_html)
+        self.assertNotIn('0.00%', index_html)
+        self.assertNotIn('100.00%', index_html)
     def test_menu_button_hierarchy_design_system(self):
         index_html_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "index.html")
         with open(index_html_path, "r", encoding="utf-8") as f:
