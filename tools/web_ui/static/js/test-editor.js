@@ -141,7 +141,7 @@ export function populateTrackDropdown(selectedTrackId = null) {
   for (const t of state.tracks) {
     const opt = document.createElement("option");
     opt.value = t.track_id;
-    opt.textContent = `${t.name} (${t.track_id})`;
+    opt.textContent = t.name;
     if (t.track_id === activeTrackId) {
       opt.selected = true;
     }
@@ -152,7 +152,7 @@ export function populateTrackDropdown(selectedTrackId = null) {
     dom.selectTrack.value = activeTrackId;
     const found = state.tracks.find((t) => t.track_id === activeTrackId);
     if (found && dom.inputSearchTrack) {
-      dom.inputSearchTrack.value = `${found.name} (${found.track_id})`;
+      dom.inputSearchTrack.value = found.name;
       if (dom.btnClearTrackSearch) dom.btnClearTrackSearch.style.display = "block";
     }
   } else if (dom.inputSearchTrack) {
@@ -1312,7 +1312,6 @@ function initTrackAutocomplete() {
       item.innerHTML = `
         <div class="mui-item-main">
           <span class="mui-item-title">${escapeHtml(t.name)}</span>
-          <span class="mui-item-sub">${escapeHtml(t.track_id)}</span>
         </div>
         <span class="mui-item-badge">${layoutBadge}</span>
       `;
@@ -1327,7 +1326,7 @@ function initTrackAutocomplete() {
 
   const selectTrackItem = (t) => {
     select.value = t.track_id;
-    input.value = `${t.name} (${t.track_id})`;
+    input.value = t.name;
     if (clearBtn) clearBtn.style.display = "block";
     closePopper();
     select.dispatchEvent(new Event("change"));
@@ -1339,7 +1338,11 @@ function initTrackAutocomplete() {
     input.setAttribute("aria-expanded", "true");
     const q = input.value.trim().toLowerCase();
     // If the input already has full track name, filter with empty string to show full catalog
-    const isExact = state.tracks.some((t) => `${t.name} (${t.track_id})` === input.value.trim());
+    const isExact = state.tracks.some(
+      (t) =>
+        t.name.toLowerCase() === input.value.trim().toLowerCase() ||
+        `${t.name} (${t.track_id})`.toLowerCase() === input.value.trim().toLowerCase()
+    );
     renderPopper(isExact ? "" : q);
   };
 

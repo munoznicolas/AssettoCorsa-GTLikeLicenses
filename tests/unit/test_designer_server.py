@@ -303,5 +303,24 @@ class TestDesignerServer(unittest.TestCase):
         self.assertIn(".chart-canvas-wrapper.chart-scrollable.no-scroll", css)
 
 
+    def test_track_autocomplete_hides_track_id(self):
+        """Verify that track_id is hidden from the track autocomplete dropdown items and search input."""
+        editor_js_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "js", "test-editor.js")
+        with open(editor_js_path, "r", encoding="utf-8") as f:
+            js = f.read()
+
+        # In initTrackAutocomplete, items must not render track_id
+        self.assertNotIn('<span class="mui-item-sub">${escapeHtml(t.track_id)}</span>', js)
+        self.assertIn('<span class="mui-item-title">${escapeHtml(t.name)}</span>', js)
+
+        # In selectTrackItem, input.value must be t.name only
+        self.assertIn("input.value = t.name;", js)
+        self.assertNotIn("input.value = `${t.name} (${t.track_id})`;", js)
+
+        # In populateTrackDropdown, input.value must be found.name only
+        self.assertIn("dom.inputSearchTrack.value = found.name;", js)
+        self.assertNotIn("dom.inputSearchTrack.value = `${found.name} (${found.track_id})`;", js)
+
+
 if __name__ == "__main__":
     unittest.main()

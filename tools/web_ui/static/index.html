@@ -375,84 +375,115 @@
               <div class="form-grid cols-3">
                 <div class="form-group">
                   <div class="field-label-row">
-                    <label for="select-track">Track (Kunos)</label>
+                    <label for="input-search-track">Track (Kunos)</label>
                     <span
                       id="track-filter-count"
                       class="filter-count-badge"
                       style="display: none"
                     ></span>
                   </div>
-                  <div class="filter-search-box">
-                    <span class="search-icon">🔍</span>
-                    <label for="input-search-track" class="visually-hidden">Search track name or ID</label>
-                    <input
-                      type="text"
-                      id="input-search-track"
-                      class="form-control filter-input"
-                      placeholder="Search track name / ID..."
-                      aria-label="Search track name or ID"
-                      autocomplete="off"
-                    />
-                    <button
-                      type="button"
-                      id="btn-clear-track-search"
-                      class="filter-clear-btn"
-                      title="Clear search"
+                  <div id="autocomplete-track" class="mui-autocomplete">
+                    <div class="mui-autocomplete-input-wrap">
+                      <span class="mui-autocomplete-icon">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="11" cy="11" r="8"></circle>
+                          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                      </span>
+                      <input
+                        type="text"
+                        id="input-search-track"
+                        class="form-control mui-autocomplete-input"
+                        placeholder="Search or select Kunos track..."
+                        autocomplete="off"
+                        role="combobox"
+                        aria-expanded="false"
+                        aria-autocomplete="list"
+                      />
+                      <div class="mui-autocomplete-actions">
+                        <button
+                          type="button"
+                          id="btn-clear-track-search"
+                          class="mui-btn-clear"
+                          title="Clear track selection"
+                          style="display: none"
+                        >
+                          &times;
+                        </button>
+                        <span class="mui-autocomplete-arrow">▼</span>
+                      </div>
+                    </div>
+                    <div
+                      id="track-options-list"
+                      class="mui-autocomplete-popper"
                       style="display: none"
-                    >
-                      &times;
-                    </button>
+                      role="listbox"
+                    ></div>
+                    <!-- Hidden sync select for 100% backward compatibility -->
+                    <select id="select-track" class="form-control" style="display: none;" required>
+                      <option value="">Select Kunos Track...</option>
+                    </select>
                   </div>
-                  <select id="select-track" class="form-control" required>
-                    <option value="">Select Kunos Track...</option>
-                  </select>
                 </div>
                 <div class="form-group">
                   <div class="field-label-row">
                     <label for="select-layout">Layout</label>
                   </div>
-                  <div class="filter-search-box filter-search-box-placeholder">
-                    <span class="search-placeholder-text"
-                      >Track configuration</span
-                    >
-                  </div>
-                  <select id="select-layout" class="form-control">
+                  <select id="select-layout" class="form-control" style="height: 38px;">
                     <option value="">Default Layout</option>
                   </select>
                 </div>
                 <div class="form-group">
                   <div class="field-label-row">
-                    <label for="select-car">Car Model (Kunos)</label>
+                    <label for="input-search-car">Car Model (Kunos)</label>
                     <span
                       id="car-filter-count"
                       class="filter-count-badge"
                       style="display: none"
                     ></span>
                   </div>
-                  <div class="filter-search-box">
-                    <span class="search-icon">🔍</span>
-                    <label for="input-search-car" class="visually-hidden">Search car model</label>
-                    <input
-                      type="text"
-                      id="input-search-car"
-                      class="form-control filter-input"
-                      placeholder="Search model, brand, drivetrain (FWD/RWD/AWD)..."
-                      aria-label="Search car model"
-                      autocomplete="off"
-                    />
-                    <button
-                      type="button"
-                      id="btn-clear-car-search"
-                      class="filter-clear-btn"
-                      title="Clear search"
+                  <div id="autocomplete-car" class="mui-autocomplete">
+                    <div class="mui-autocomplete-input-wrap">
+                      <span class="mui-autocomplete-icon">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="11" cy="11" r="8"></circle>
+                          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                      </span>
+                      <input
+                        type="text"
+                        id="input-search-car"
+                        class="form-control mui-autocomplete-input"
+                        placeholder="Search model, brand, drivetrain..."
+                        autocomplete="off"
+                        role="combobox"
+                        aria-expanded="false"
+                        aria-autocomplete="list"
+                      />
+                      <div class="mui-autocomplete-actions">
+                        <button
+                          type="button"
+                          id="btn-clear-car-search"
+                          class="mui-btn-clear"
+                          title="Clear car selection"
+                          style="display: none"
+                        >
+                          &times;
+                        </button>
+                        <span class="mui-autocomplete-arrow">▼</span>
+                      </div>
+                    </div>
+                    <div
+                      id="car-options-list"
+                      class="mui-autocomplete-popper"
                       style="display: none"
-                    >
-                      &times;
-                    </button>
+                      role="listbox"
+                    ></div>
+                    <!-- Hidden sync select for 100% backward compatibility -->
+                    <select id="select-car" class="form-control" style="display: none;" required>
+                      <option value="">Select Kunos Car...</option>
+                    </select>
                   </div>
-                  <select id="select-car" class="form-control" required>
-                    <option value="">Select Kunos Car...</option>
-                  </select>
                 </div>
               </div>
             </div>
