@@ -468,12 +468,12 @@ export function closeMissingTelemetryModal() {
  */
 function getTelemetryStatusBadge(combo) {
   if (combo.is_cached) {
-    return `<span class="badge" style="background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4);">✓ Recorded</span>`;
+    return `<span class="badge badge-success">Recorded</span>`;
   }
   if (combo.is_queued) {
-    return `<span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4);">⏳ In Queue</span>`;
+    return `<span class="badge badge-sky">In Queue</span>`;
   }
-  return `<span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4);">⚠️ Missing</span>`;
+  return `<span class="badge badge-warning">Missing</span>`;
 }
 
 /**
@@ -515,7 +515,7 @@ function updateMissingTelemetryUI(tier, data) {
   if (dom.telemetrySummaryText) {
     dom.telemetrySummaryText.innerHTML = missingCount > 0
       ? `Found <strong style="color: #fbbf24;">${missingCount} rolling start tests</strong> across <strong style="color: #38bdf8;">${uniqueCombosCount} unique track+car combinations</strong> lacking telemetry profiles in <strong>${escapeHtml(tier)}</strong>.`
-      : `<span style="color: #4ade80;">🏁 All rolling start tests in <strong>${escapeHtml(tier)}</strong> already have authentic telemetry recorded!</span>`;
+      : `<span style="color: var(--accent-green);">All rolling start tests in <strong>${escapeHtml(tier)}</strong> have authentic telemetry recorded.</span>`;
   }
 
   if (dom.btnTelemetryEnqueue) {

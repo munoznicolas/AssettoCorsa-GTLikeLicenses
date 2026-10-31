@@ -211,3 +211,11 @@
 .theme-toggle-btn:hover #theme-toggle-icon {
   transform: rotate(15deg) scale(1.1);
 }
+
+
+.header-actions-divider {
+  width: 1px;
+  height: 22px;
+  background-color: var(--border-color);
+  margin: 0 4px;
+}

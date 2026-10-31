@@ -1,7 +1,7 @@
 /* style.css - Gran Turismo Aesthetic for License Test Designer */
 
 :root {
-  color-scheme: dark;
+  color-scheme: light dark;
   /* 1. Surfaces & Backgrounds */
   --bg-main: #0c0f14;
   --bg-panel: #13171e;
@@ -71,6 +71,10 @@
 }
 
 /* Light Theme (Gran Turismo White Studio Palette) */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
 :root[data-theme="light"] {
   color-scheme: light;
 
@@ -135,46 +139,90 @@
 }
 
 /* Light Theme Component Overrides */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
 :root[data-theme="light"] .ref-data-table .layout-FR {
   background-color: #ffe4e6;
   color: #be123c;
 }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
 :root[data-theme="light"] .ref-data-table .layout-FF {
   background-color: #dbeafe;
   color: #1d4ed8;
 }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
 :root[data-theme="light"] .ref-data-table .layout-FAWD {
   background-color: #d1fae5;
   color: #047857;
 }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
 :root[data-theme="light"] .ref-data-table .layout-MR {
   background-color: #fef3c7;
   color: #b45309;
 }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
 :root[data-theme="light"] .ref-data-table .layout-MAWD {
   background-color: #ccfbf1;
   color: #0f766e;
 }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
 :root[data-theme="light"] .ref-data-table .layout-RR {
   background-color: #ede9fe;
   color: #6d28d9;
 }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
 :root[data-theme="light"] .ref-data-table .layout-RAWD {
   background-color: #fce7f3;
   color: #be185d;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 :root[data-theme="light"] .modal-content {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
 :root[data-theme="light"] .driver-popover {
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15) !important;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 :root[data-theme="light"] .test-item-thumb {
   background-color: var(--bg-input);
   border-color: var(--border-color);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 :root[data-theme="light"] .test-item-thumb img {

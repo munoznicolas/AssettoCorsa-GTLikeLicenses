@@ -246,6 +246,21 @@ def build_static_site(out_dir: str = "dist_site", clean: bool = True) -> str:
     with open(os.path.join(dist_path, ".nojekyll"), "w") as f:
         f.write("")
 
+    # 7. Explicitly flag runtime environment as static in pre-rendered index.html
+    index_html_path = os.path.join(dist_path, "index.html")
+    if os.path.isfile(index_html_path):
+        with open(index_html_path, "r", encoding="utf-8") as f:
+            idx_content = f.read()
+        if "window.IS_STATIC_HOST" not in idx_content:
+            idx_content = idx_content.replace(
+                "<head>",
+                "<head>\n    <script>window.IS_STATIC_HOST = true;</script>",
+                1
+            )
+            with open(index_html_path, "w", encoding="utf-8") as f:
+                f.write(idx_content)
+        print("  [OK] Injected window.IS_STATIC_HOST = true into index.html")
+
     print(f"\n[DONE] Static site build complete! Artifacts staged in: {dist_path}")
     return dist_path
 

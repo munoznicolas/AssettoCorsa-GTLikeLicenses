@@ -1,12 +1,10 @@
-/* style.css - Gran Turismo Aesthetic for License Test Designer (Master Aggregator) */
-
-@import url("css/variables.css");
-@import url("css/base.css");
-@import url("css/layout.css");
-@import url("css/catalog.css");
-@import url("css/editor.css");
-@import url("css/canvas.css");
-@import url("css/components.css");
-@import url("css/telemetry.css");
-@import url("css/tour.css");
-@import url("css/responsive.css");
+@import "css/variables.css";
+@import "css/base.css";
+@import "css/layout.css";
+@import "css/catalog.css";
+@import "css/editor.css";
+@import "css/canvas.css";
+@import "css/components.css";
+@import "css/telemetry.css";
+@import "css/tour.css";
+@import "css/responsive.css";

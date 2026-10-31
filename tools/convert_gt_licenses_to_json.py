@@ -182,6 +182,7 @@ def convert_markdown_to_json(md_path, json_path):
             t['weight_kg'] = matched_weight
             if t.get('pw_kg_hp') is None:
                 t['pw_kg_hp'] = round(matched_weight / matched_hp, 2)
+            t['pw'] = t['pw_kg_hp']
             t['drivetrain_layout'] = get_layout(t['engine'], t['drivetrain'])
 
     with open(json_path, 'w', encoding='utf-8') as f:

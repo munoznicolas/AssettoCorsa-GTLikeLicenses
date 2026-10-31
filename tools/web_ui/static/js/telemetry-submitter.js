@@ -339,7 +339,7 @@ async function executeSubmitPR() {
         successCard.style.display = "block";
         prLinkBtn.href = res.pr_url;
       }
-      showToast(`🎉 Pull Request #${res.pr_number} created successfully!`, "success");
+      showToast(`Pull Request #${res.pr_number} created successfully.`, "success");
       if (btnSubmit) {
         btnSubmit.innerHTML = "<span>✓ Pull Request Created!</span>";
       }

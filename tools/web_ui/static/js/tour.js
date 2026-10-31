@@ -146,7 +146,7 @@ export function startEditTestTour() {
         element: "#card-gates-spline",
         popover: {
           title: "3D Start & Finish Gates",
-          description: "Position start and finish gates along the track spline using the <strong>🟢 Start</strong> and <strong>🔴 Finish</strong> selector pills, single-tap canvas placement, or precision distance sliders.",
+          description: "Position start and finish gates along the track spline using the <strong>Start</strong> and <strong>Finish</strong> selectors, single-tap canvas placement, or precision distance sliders.",
           side: "top",
           align: "start"
         }
@@ -228,15 +228,13 @@ export function startMissingTelemetryTour() {
         dom.workspaceView?.classList.add("view-editor");
       }
 
-      if (window.innerWidth <= 960) {
-        const isHeaderAction = el.id === "btn-sync" || el.id === "btn-open-submit-pr-modal";
-        if (isHeaderAction) {
-          dom.headerActions?.classList.add("open");
-          dom.actionsMenuBackdrop?.classList.add("open");
-        } else {
-          dom.headerActions?.classList.remove("open");
-          dom.actionsMenuBackdrop?.classList.remove("open");
-        }
+      const isHeaderAction = el.id === "btn-sync" || el.id === "btn-open-submit-pr-modal" || el.id === "btn-rebuild";
+      if (isHeaderAction) {
+        dom.headerActions?.classList.add("open");
+        dom.actionsMenuBackdrop?.classList.add("open");
+      } else {
+        dom.headerActions?.classList.remove("open");
+        dom.actionsMenuBackdrop?.classList.remove("open");
       }
 
       try {

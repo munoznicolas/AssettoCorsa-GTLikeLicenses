@@ -85,3 +85,19 @@
   font-size: 14px;
   color: var(--accent-gold);
 }
+
+
+/* Track Canvas Interactive Cursors */
+#track-canvas {
+  touch-action: none;
+  cursor: default;
+}
+#track-canvas.cursor-grab {
+  cursor: grab !important;
+}
+#track-canvas.cursor-grabbing {
+  cursor: grabbing !important;
+}
+#track-canvas.cursor-crosshair {
+  cursor: crosshair !important;
+}

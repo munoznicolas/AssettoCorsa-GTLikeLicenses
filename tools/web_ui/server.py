@@ -66,7 +66,8 @@ from tools.web_ui.catalog_manager import (
     build_test_miniature,
 )
 
-STATIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
+DIST_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dist")
+STATIC_DIR = DIST_DIR if os.path.exists(DIST_DIR) else os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
 ASSETS_DIR = os.path.join(REPO_ROOT, "assets")
 
 
@@ -353,6 +354,13 @@ class DesignerRequestHandler(SimpleHTTPRequestHandler):
             self._serve_preview_image(test_id)
             return True
         if path.startswith("/assets/"):
+            static_assets = os.path.join(STATIC_DIR, "assets")
+            if os.path.isdir(static_assets):
+                rel = urllib.parse.unquote(path[len("/assets/"):])
+                cand = os.path.realpath(os.path.join(static_assets, rel))
+                if is_safe_path_within(static_assets, cand) and os.path.isfile(cand):
+                    self._serve_file_from_base(path, "/assets/", static_assets, "Asset Not Found")
+                    return True
             self._serve_file_from_base(path, "/assets/", ASSETS_DIR, "Asset Not Found")
             return True
         if path.startswith("/content/"):
