@@ -62,6 +62,7 @@ export function initDom() {
   dom.inputSearchTrack = document.getElementById("input-search-track");
   dom.btnClearTrackSearch = document.getElementById("btn-clear-track-search");
   dom.trackFilterCount = document.getElementById("track-filter-count");
+  dom.inputSearchLayout = document.getElementById("input-search-layout");
   dom.inputSearchCar = document.getElementById("input-search-car");
   dom.btnClearCarSearch = document.getElementById("btn-clear-car-search");
   dom.carFilterCount = document.getElementById("car-filter-count");

@@ -342,5 +342,31 @@ class TestDesignerServer(unittest.TestCase):
         self.assertNotIn("dom.inputSearchCar.value = `${found.name}${brandStr}`;", js)
 
 
+    def test_layout_autocomplete_integration(self):
+        """Verify that track layout dropdown uses the same MUI autocomplete pattern as track and car."""
+        index_html_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "index.html")
+        with open(index_html_path, "r", encoding="utf-8") as f:
+            html = f.read()
+        dom_js_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "js", "dom.js")
+        with open(dom_js_path, "r", encoding="utf-8") as f:
+            dom_js = f.read()
+        editor_js_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "js", "test-editor.js")
+        with open(editor_js_path, "r", encoding="utf-8") as f:
+            editor_js = f.read()
+
+        # 1. HTML markup includes autocomplete-layout and layout-options-list
+        self.assertIn('id="autocomplete-layout"', html)
+        self.assertIn('id="layout-options-list"', html)
+        self.assertIn('id="input-search-layout"', html)
+
+        # 2. dom.js references inputSearchLayout
+        self.assertIn('dom.inputSearchLayout = document.getElementById("input-search-layout");', dom_js)
+
+        # 3. test-editor.js initializes layout autocomplete
+        self.assertIn("function initLayoutAutocomplete()", editor_js)
+        self.assertIn("initLayoutAutocomplete();", editor_js)
+        self.assertIn("dom.inputSearchLayout.value = activeName;", editor_js)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -168,11 +168,16 @@ export function populateLayoutDropdown(trackId, selectedLayout = "") {
   if (!dom.selectLayout) return;
   dom.selectLayout.innerHTML = "";
   const track = state.tracks.find((t) => t.track_id === trackId);
+  let activeName = "Default Layout";
   if (!track?.layouts?.length) {
     const opt = document.createElement("option");
     opt.value = "";
     opt.textContent = "Default Layout";
     dom.selectLayout.appendChild(opt);
+    dom.selectLayout.value = "";
+    if (dom.inputSearchLayout) {
+      dom.inputSearchLayout.value = "Default Layout";
+    }
     return;
   }
 
@@ -186,8 +191,18 @@ export function populateLayoutDropdown(trackId, selectedLayout = "") {
     opt.textContent = layoutName;
     if (layoutId === (selectedLayout || "")) {
       opt.selected = true;
+      activeName = layoutName;
     }
     dom.selectLayout.appendChild(opt);
+  }
+
+  if (!dom.selectLayout.value && dom.selectLayout.options.length > 0) {
+    dom.selectLayout.selectedIndex = 0;
+    activeName = dom.selectLayout.options[0].textContent;
+  }
+
+  if (dom.inputSearchLayout) {
+    dom.inputSearchLayout.value = activeName;
   }
 }
 
@@ -1271,6 +1286,7 @@ async function handleFormSubmit(e) {
  */
 function setupSearchFilterListeners() {
   initTrackAutocomplete();
+  initLayoutAutocomplete();
   initCarAutocomplete();
 }
 
@@ -1411,6 +1427,151 @@ function initTrackAutocomplete() {
       select.dispatchEvent(new Event("change"));
     });
   }
+
+  document.addEventListener("click", (e) => {
+    if (!container.contains(e.target)) {
+      closePopper();
+    }
+  });
+}
+
+/**
+ * Material-UI Autocomplete implementation for Track Layouts.
+ */
+function initLayoutAutocomplete() {
+  const container = document.getElementById("autocomplete-layout");
+  const input = dom.inputSearchLayout;
+  const popper = document.getElementById("layout-options-list");
+  const select = dom.selectLayout;
+  if (!container || !input || !popper || !select) return;
+
+  let highlightedIndex = -1;
+  let currentMatches = [];
+
+  const getLayoutsForCurrentTrack = () => {
+    const trackId = dom.selectTrack?.value || "";
+    const track = state.tracks.find((t) => t.track_id === trackId);
+    if (!track?.layouts?.length) {
+      return [{ layout_id: "", name: "Default Layout" }];
+    }
+    return track.layouts.map((l) => {
+      const layoutId = typeof l === "string" ? l : (l.layout_id ?? "");
+      const layoutName = typeof l === "string"
+        ? (l ? l.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) : "Default Layout")
+        : (l.name || l.layout_id || "Default Layout");
+      return { layout_id: layoutId, name: layoutName };
+    });
+  };
+
+  const filterLayouts = (query = "") => {
+    const all = getLayoutsForCurrentTrack();
+    if (!query) return all;
+    const q = query.toLowerCase();
+    return all.filter((l) => l.name.toLowerCase().includes(q) || l.layout_id.toLowerCase().includes(q));
+  };
+
+  const renderPopper = (query = "") => {
+    currentMatches = filterLayouts(query);
+    popper.innerHTML = "";
+    highlightedIndex = -1;
+
+    if (currentMatches.length === 0) {
+      popper.innerHTML = '<div class="mui-autocomplete-empty">No matching layouts found</div>';
+      return;
+    }
+
+    currentMatches.forEach((l) => {
+      const item = document.createElement("div");
+      item.className = "mui-autocomplete-item";
+      if (l.layout_id === select.value) {
+        item.classList.add("selected");
+      }
+      item.innerHTML = `
+        <div class="mui-item-main">
+          <span class="mui-item-title">${escapeHtml(l.name)}</span>
+        </div>
+      `;
+
+      item.addEventListener("click", () => {
+        selectLayoutItem(l);
+      });
+
+      popper.appendChild(item);
+    });
+  };
+
+  const selectLayoutItem = (l) => {
+    select.value = l.layout_id;
+    input.value = l.name;
+    closePopper();
+    select.dispatchEvent(new Event("change"));
+  };
+
+  const openPopper = () => {
+    container.classList.add("open");
+    popper.style.display = "block";
+    input.setAttribute("aria-expanded", "true");
+    const q = input.value.trim().toLowerCase();
+    const all = getLayoutsForCurrentTrack();
+    const isExact = all.some((l) => l.name.toLowerCase() === q);
+    renderPopper(isExact ? "" : q);
+  };
+
+  const closePopper = () => {
+    container.classList.remove("open");
+    popper.style.display = "none";
+    input.setAttribute("aria-expanded", "false");
+    highlightedIndex = -1;
+  };
+
+  input.addEventListener("focus", openPopper);
+  input.addEventListener("click", openPopper);
+
+  input.addEventListener("input", () => {
+    const q = input.value.trim().toLowerCase();
+    if (popper.style.display === "none") {
+      openPopper();
+    } else {
+      renderPopper(q);
+    }
+  });
+
+  input.addEventListener("keydown", (e) => {
+    const items = popper.querySelectorAll(".mui-autocomplete-item");
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (popper.style.display === "none") openPopper();
+      if (items.length > 0) {
+        highlightedIndex = (highlightedIndex + 1) % items.length;
+        updateHighlight(items);
+      }
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (popper.style.display === "none") openPopper();
+      if (items.length > 0) {
+        highlightedIndex = (highlightedIndex - 1 + items.length) % items.length;
+        updateHighlight(items);
+      }
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (highlightedIndex >= 0 && highlightedIndex < currentMatches.length) {
+        selectLayoutItem(currentMatches[highlightedIndex]);
+      } else if (currentMatches.length > 0) {
+        selectLayoutItem(currentMatches[0]);
+      }
+    } else if (e.key === "Escape") {
+      closePopper();
+    }
+  });
+
+  const updateHighlight = (items) => {
+    items.forEach((item, idx) => {
+      item.classList.toggle("highlighted", idx === highlightedIndex);
+      if (idx === highlightedIndex) {
+        item.scrollIntoView({ block: "nearest" });
+      }
+    });
+  };
 
   document.addEventListener("click", (e) => {
     if (!container.contains(e.target)) {
