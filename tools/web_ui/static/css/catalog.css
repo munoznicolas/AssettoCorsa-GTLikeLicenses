@@ -292,3 +292,75 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* Drag handle & Drag Reordering */
+.test-item-drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 100%;
+  min-height: 40px;
+  cursor: grab;
+  color: var(--text-muted);
+  opacity: 0.45;
+  transition: opacity 0.15s ease, color 0.15s ease;
+  flex-shrink: 0;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.test-item:hover .test-item-drag-handle {
+  opacity: 0.9;
+  color: var(--text-main);
+}
+
+.test-item-drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Dragging & Drop Indicators */
+.test-item.dragging {
+  opacity: 0.4;
+  border: 1px dashed var(--accent-gold) !important;
+  background-color: var(--bg-main) !important;
+}
+
+.test-item.drag-over-top {
+  position: relative;
+}
+
+.test-item.drag-over-top::before {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: 4px;
+  right: 4px;
+  height: 4px;
+  background-color: var(--gt-red);
+  border-radius: 2px;
+  z-index: 10;
+  box-shadow: 0 0 6px var(--gt-red);
+}
+
+.test-item.drag-over-bottom {
+  position: relative;
+}
+
+.test-item.drag-over-bottom::after {
+  content: "";
+  position: absolute;
+  bottom: -3px;
+  left: 4px;
+  right: 4px;
+  height: 4px;
+  background-color: var(--gt-red);
+  border-radius: 2px;
+  z-index: 10;
+  box-shadow: 0 0 6px var(--gt-red);
+}
+
+.sidebar.collapsed .test-item-drag-handle {
+  display: none !important;
+}

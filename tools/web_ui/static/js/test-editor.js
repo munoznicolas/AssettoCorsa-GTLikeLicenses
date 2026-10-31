@@ -135,15 +135,10 @@ export async function loadInitialData() {
  */
 export function populateTrackDropdown(selectedTrackId = null) {
   if (!dom.selectTrack) return;
-  const query = dom.inputSearchTrack?.value.trim().toLowerCase() ?? "";
   const activeTrackId = selectedTrackId ?? dom.selectTrack.value;
 
   dom.selectTrack.innerHTML = '<option value="">Select Kunos Track...</option>';
-
-  const matches = filterTracks(query);
-  updateFilterIndicator(dom.trackFilterCount, dom.btnClearTrackSearch, query, matches.length, state.tracks.length);
-
-  for (const t of matches) {
+  for (const t of state.tracks) {
     const opt = document.createElement("option");
     opt.value = t.track_id;
     opt.textContent = `${t.name} (${t.track_id})`;
@@ -153,8 +148,16 @@ export function populateTrackDropdown(selectedTrackId = null) {
     dom.selectTrack.appendChild(opt);
   }
 
-  if (activeTrackId && (!query || matches.some((t) => t.track_id === activeTrackId))) {
+  if (activeTrackId) {
     dom.selectTrack.value = activeTrackId;
+    const found = state.tracks.find((t) => t.track_id === activeTrackId);
+    if (found && dom.inputSearchTrack) {
+      dom.inputSearchTrack.value = `${found.name} (${found.track_id})`;
+      if (dom.btnClearTrackSearch) dom.btnClearTrackSearch.style.display = "block";
+    }
+  } else if (dom.inputSearchTrack) {
+    dom.inputSearchTrack.value = "";
+    if (dom.btnClearTrackSearch) dom.btnClearTrackSearch.style.display = "none";
   }
 }
 
@@ -257,15 +260,10 @@ export function filterCars(query) {
  */
 export function populateCarDropdown(selectedCarId = null) {
   if (!dom.selectCar) return;
-  const query = dom.inputSearchCar?.value.trim() ?? "";
   const activeCarId = selectedCarId ?? dom.selectCar.value;
 
   dom.selectCar.innerHTML = '<option value="">Select Kunos Car...</option>';
-
-  const matches = filterCars(query);
-  updateFilterIndicator(dom.carFilterCount, dom.btnClearCarSearch, query, matches.length, state.cars.length);
-
-  for (const c of matches) {
+  for (const c of state.cars) {
     const opt = document.createElement("option");
     opt.value = c.car_id;
     const brandStr = c.brand ? ` (${c.brand})` : "";
@@ -277,8 +275,17 @@ export function populateCarDropdown(selectedCarId = null) {
     dom.selectCar.appendChild(opt);
   }
 
-  if (activeCarId && (!query || matches.some((c) => c.car_id === activeCarId))) {
+  if (activeCarId) {
     dom.selectCar.value = activeCarId;
+    const found = state.cars.find((c) => c.car_id === activeCarId);
+    if (found && dom.inputSearchCar) {
+      const brandStr = found.brand ? ` (${found.brand})` : "";
+      dom.inputSearchCar.value = `${found.name}${brandStr}`;
+      if (dom.btnClearCarSearch) dom.btnClearCarSearch.style.display = "block";
+    }
+  } else if (dom.inputSearchCar) {
+    dom.inputSearchCar.value = "";
+    if (dom.btnClearCarSearch) dom.btnClearCarSearch.style.display = "none";
   }
 }
 
@@ -337,8 +344,53 @@ export function selectTier(tierIdx) {
   }
 }
 
+let draggedIndex = null;
+
 /**
- * Render tests sidebar list for the active tier.
+ * Remove drag-over and dragging indicator classes from all test items.
+ */
+function clearDragOverClasses() {
+  if (!dom.testList) return;
+  dom.testList.querySelectorAll(".test-item").forEach((el) => {
+    el.classList.remove("drag-over-top", "drag-over-bottom", "dragging");
+  });
+}
+
+/**
+ * Reorder a test within the active tier and renumber IDs sequentially.
+ * @param {number} fromIndex
+ * @param {number} toIndex
+ */
+export async function reorderTierTest(fromIndex, toIndex) {
+  const activeTier = state.curriculum[state.activeTierIndex];
+  if (!activeTier?.tests) return;
+  if (fromIndex < 0 || fromIndex >= activeTier.tests.length) return;
+  if (toIndex < 0 || toIndex >= activeTier.tests.length) return;
+  if (fromIndex === toIndex) return;
+
+  const [movedTest] = activeTier.tests.splice(fromIndex, 1);
+  activeTier.tests.splice(toIndex, 0, movedTest);
+
+  // Preserve selected test index
+  if (state.activeTestIndex === fromIndex) {
+    state.activeTestIndex = toIndex;
+  } else if (state.activeTestIndex > fromIndex && state.activeTestIndex <= toIndex) {
+    state.activeTestIndex -= 1;
+  } else if (state.activeTestIndex < fromIndex && state.activeTestIndex >= toIndex) {
+    state.activeTestIndex += 1;
+  }
+
+  renumberTierTests(activeTier);
+  saveCurriculum(state.curriculum);
+
+  renderLicenseTabs();
+  renderTestList();
+  await loadTestIntoForm(state.activeTestIndex);
+  showToast(`Moved ${movedTest.title || movedTest.test_id} to position ${toIndex + 1}.`);
+}
+
+/**
+ * Render tests sidebar list for the active tier with drag & drop and 1-tap reordering.
  */
 export function renderTestList() {
   if (!dom.testList) return;
@@ -349,6 +401,8 @@ export function renderTestList() {
   activeTier.tests.forEach((test, idx) => {
     const item = document.createElement("div");
     item.className = `test-item ${idx === state.activeTestIndex ? "active" : ""}`;
+    item.dataset.index = String(idx);
+    item.setAttribute("draggable", "true");
 
     const modeClass = escapeHtml((test.start_mode || "standing").toLowerCase());
     const isFullLap = isFullLapTest(test);
@@ -362,6 +416,16 @@ export function renderTestList() {
     const previewUrl = rawPreview && rawPreview.startsWith("/") ? `.${rawPreview}` : rawPreview;
 
     item.innerHTML = `
+      <div class="test-item-drag-handle" title="Drag to reorder" aria-label="Drag to reorder">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+          <circle cx="5" cy="3" r="1.5"/>
+          <circle cx="11" cy="3" r="1.5"/>
+          <circle cx="5" cy="8" r="1.5"/>
+          <circle cx="11" cy="8" r="1.5"/>
+          <circle cx="5" cy="13" r="1.5"/>
+          <circle cx="11" cy="13" r="1.5"/>
+        </svg>
+      </div>
       <div class="test-item-thumb">
         <img src="${escapeHtml(previewUrl)}?t=${encodeURIComponent(state.cacheBuster)}" 
              alt="${escapeHtml(test.test_id)}" 
@@ -376,17 +440,158 @@ export function renderTestList() {
         </div>
         <div class="test-item-title">${escapeHtml(test.title)}</div>
         <div class="test-item-meta">
-          <span>🏁 ${lapTypeLabel}</span>
-          <span>📍 ${escapeHtml(test.track_id)}</span>
-          <span>🥇 ${test.targets?.gold_seconds !== undefined ? `${Number(test.targets.gold_seconds).toFixed(2)}s` : ""}</span>
+          <span>${escapeHtml(test.track_id)}</span>
         </div>
       </div>
+
     `;
 
-    item.addEventListener("click", () => {
+
+
+    // Desktop HTML5 Drag & Drop
+    item.addEventListener("dragstart", (e) => {
+      draggedIndex = idx;
+      item.classList.add("dragging");
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", String(idx));
+    });
+
+    item.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      if (draggedIndex === null || draggedIndex === idx) return;
+
+      const rect = item.getBoundingClientRect();
+      const midY = rect.top + rect.height / 2;
+      if (e.clientY < midY) {
+        item.classList.add("drag-over-top");
+        item.classList.remove("drag-over-bottom");
+      } else {
+        item.classList.add("drag-over-bottom");
+        item.classList.remove("drag-over-top");
+      }
+    });
+
+    item.addEventListener("dragleave", (e) => {
+      const rect = item.getBoundingClientRect();
+      if (
+        e.clientY < rect.top ||
+        e.clientY >= rect.bottom ||
+        e.clientX < rect.left ||
+        e.clientX >= rect.right
+      ) {
+        item.classList.remove("drag-over-top", "drag-over-bottom");
+      }
+    });
+
+    item.addEventListener("drop", (e) => {
+      e.preventDefault();
+      item.classList.remove("drag-over-top", "drag-over-bottom");
+      if (draggedIndex === null || draggedIndex === idx) return;
+
+      const rect = item.getBoundingClientRect();
+      const isAfter = e.clientY >= rect.top + rect.height / 2;
+      let targetIdx = isAfter
+        ? (draggedIndex < idx ? idx : idx + 1)
+        : (draggedIndex < idx ? idx - 1 : idx);
+      targetIdx = Math.max(0, Math.min(targetIdx, activeTier.tests.length - 1));
+
+      const fromIdx = draggedIndex;
+      draggedIndex = null;
+      clearDragOverClasses();
+
+      if (targetIdx !== fromIdx) {
+        void reorderTierTest(fromIdx, targetIdx);
+      }
+    });
+
+    item.addEventListener("dragend", () => {
+      item.classList.remove("dragging");
+      clearDragOverClasses();
+      draggedIndex = null;
+    });
+
+    // Mobile Touch / Pointer Drag on the handle
+    const handle = item.querySelector(".test-item-drag-handle");
+    if (handle) {
+      let isPointerDragging = false;
+
+      handle.addEventListener("pointerdown", (e) => {
+        if (e.pointerType === "mouse") return;
+        isPointerDragging = true;
+        draggedIndex = idx;
+        item.classList.add("dragging");
+        try {
+          handle.setPointerCapture(e.pointerId);
+        } catch (_) {}
+        e.preventDefault();
+        e.stopPropagation();
+      });
+
+      handle.addEventListener("pointermove", (e) => {
+        if (!isPointerDragging) return;
+        e.preventDefault();
+
+        const underEl = document.elementFromPoint(e.clientX, e.clientY);
+        const targetItem = underEl?.closest(".test-item");
+
+        clearDragOverClasses();
+        item.classList.add("dragging");
+
+        if (targetItem && targetItem !== item && dom.testList?.contains(targetItem)) {
+          const rect = targetItem.getBoundingClientRect();
+          const midY = rect.top + rect.height / 2;
+          if (e.clientY < midY) {
+            targetItem.classList.add("drag-over-top");
+          } else {
+            targetItem.classList.add("drag-over-bottom");
+          }
+        }
+      });
+
+      const finishPointerDrag = (e) => {
+        if (!isPointerDragging) return;
+        isPointerDragging = false;
+        try {
+          handle.releasePointerCapture(e.pointerId);
+        } catch (_) {}
+
+        const underEl = document.elementFromPoint(e.clientX, e.clientY);
+        const targetItem = underEl?.closest(".test-item");
+        const fromIdx = draggedIndex;
+
+        clearDragOverClasses();
+        draggedIndex = null;
+
+        if (targetItem && targetItem !== item && dom.testList?.contains(targetItem)) {
+          const targetIdx = Number.parseInt(targetItem.dataset.index, 10);
+          if (!Number.isNaN(targetIdx) && fromIdx !== null) {
+            const rect = targetItem.getBoundingClientRect();
+            const isAfter = e.clientY >= rect.top + rect.height / 2;
+            let newIdx = isAfter
+              ? (fromIdx < targetIdx ? targetIdx : targetIdx + 1)
+              : (fromIdx < targetIdx ? targetIdx - 1 : targetIdx);
+            newIdx = Math.max(0, Math.min(newIdx, activeTier.tests.length - 1));
+            if (newIdx !== fromIdx) {
+              void reorderTierTest(fromIdx, newIdx);
+            }
+          }
+        }
+      };
+
+      handle.addEventListener("pointerup", finishPointerDrag);
+      handle.addEventListener("pointercancel", finishPointerDrag);
+    }
+
+    // Select test on card click (excluding drag handle)
+    item.addEventListener("click", (e) => {
+      if (e.target.closest(".test-item-drag-handle")) {
+        return;
+      }
       void loadTestIntoForm(idx);
       if (dom.workspaceView) dom.workspaceView.classList.add("view-editor");
     });
+
     dom.testList.appendChild(item);
   });
 }
@@ -638,7 +843,7 @@ export async function autoCalculateTargetsFromTelemetry(overrideStartS = null, o
       // Telemetry not available for this track + car combination
       if (dom.telemetryMissingCard) dom.telemetryMissingCard.style.display = "block";
       if (dom.btnExportSingleTelemetryScript) dom.btnExportSingleTelemetryScript.style.display = "inline-flex";
-      showAISpeedStatus(`⚠️ No telemetry profile for ${carId} @ ${trackId}. Upload profile below or record in AC.`);
+      showAISpeedStatus(`No telemetry profile for ${carId} @ ${trackId}. Upload profile below or record in AC.`);
     }
   } catch (err) {
     console.warn("Client-side telemetry targets error:", err);
@@ -1027,7 +1232,10 @@ async function handleFormSubmit(e) {
   const originalHtml = submitBtn ? submitBtn.innerHTML : "";
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.innerHTML = `<span>Saving & Building Miniature...</span>`;
+    submitBtn.setAttribute("title", "Saving test...");
+    if (!submitBtn.classList.contains("btn-icon-only")) {
+      submitBtn.innerHTML = `<span>Saving & Building Miniature...</span>`;
+    }
   }
 
   try {
@@ -1062,46 +1270,297 @@ async function handleFormSubmit(e) {
 }
 
 /**
- * Attach track & car search/filter DOM listeners.
+ * Attach track & car Material-UI (MUI) style Autocomplete combobox listeners.
  */
 function setupSearchFilterListeners() {
-  if (dom.inputSearchTrack) {
-    dom.inputSearchTrack.addEventListener("input", () => {
-      populateTrackDropdown();
-    });
-    dom.inputSearchTrack.addEventListener("keydown", (e) => {
-      void handleTrackSearchKeydown(e);
-    });
-  }
+  initTrackAutocomplete();
+  initCarAutocomplete();
+}
 
-  if (dom.btnClearTrackSearch) {
-    dom.btnClearTrackSearch.addEventListener("click", () => {
-      const currentVal = dom.selectTrack?.value ?? "";
-      if (dom.inputSearchTrack) {
-        dom.inputSearchTrack.value = "";
-        populateTrackDropdown(currentVal);
-        dom.inputSearchTrack.focus();
+/**
+ * Material-UI Autocomplete implementation for Kunos Tracks.
+ */
+function initTrackAutocomplete() {
+  const container = document.getElementById("autocomplete-track");
+  const input = dom.inputSearchTrack;
+  const popper = document.getElementById("track-options-list");
+  const clearBtn = dom.btnClearTrackSearch;
+  const select = dom.selectTrack;
+  if (!container || !input || !popper || !select) return;
+
+  let highlightedIndex = -1;
+  let currentMatches = [];
+
+  const renderPopper = (query = "") => {
+    currentMatches = filterTracks(query);
+    popper.innerHTML = "";
+    highlightedIndex = -1;
+
+    if (currentMatches.length === 0) {
+      popper.innerHTML = '<div class="mui-autocomplete-empty">No matching Kunos tracks found</div>';
+      return;
+    }
+
+    currentMatches.forEach((t, idx) => {
+      const item = document.createElement("div");
+      item.className = "mui-autocomplete-item";
+      if (t.track_id === select.value) {
+        item.classList.add("selected");
+      }
+      const layoutCount = t.layouts?.length || 1;
+      const layoutBadge = layoutCount > 1 ? `${layoutCount} layouts` : "1 layout";
+      item.innerHTML = `
+        <div class="mui-item-main">
+          <span class="mui-item-title">${escapeHtml(t.name)}</span>
+          <span class="mui-item-sub">${escapeHtml(t.track_id)}</span>
+        </div>
+        <span class="mui-item-badge">${layoutBadge}</span>
+      `;
+
+      item.addEventListener("click", () => {
+        selectTrackItem(t);
+      });
+
+      popper.appendChild(item);
+    });
+  };
+
+  const selectTrackItem = (t) => {
+    select.value = t.track_id;
+    input.value = `${t.name} (${t.track_id})`;
+    if (clearBtn) clearBtn.style.display = "block";
+    closePopper();
+    select.dispatchEvent(new Event("change"));
+  };
+
+  const openPopper = () => {
+    container.classList.add("open");
+    popper.style.display = "block";
+    input.setAttribute("aria-expanded", "true");
+    const q = input.value.trim().toLowerCase();
+    // If the input already has full track name, filter with empty string to show full catalog
+    const isExact = state.tracks.some((t) => `${t.name} (${t.track_id})` === input.value.trim());
+    renderPopper(isExact ? "" : q);
+  };
+
+  const closePopper = () => {
+    container.classList.remove("open");
+    popper.style.display = "none";
+    input.setAttribute("aria-expanded", "false");
+    highlightedIndex = -1;
+  };
+
+  input.addEventListener("focus", openPopper);
+  input.addEventListener("click", openPopper);
+
+  input.addEventListener("input", () => {
+    const q = input.value.trim().toLowerCase();
+    if (clearBtn) clearBtn.style.display = q ? "block" : "none";
+    if (popper.style.display === "none") {
+      openPopper();
+    } else {
+      renderPopper(q);
+    }
+  });
+
+  input.addEventListener("keydown", (e) => {
+    const items = popper.querySelectorAll(".mui-autocomplete-item");
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (popper.style.display === "none") openPopper();
+      if (items.length > 0) {
+        highlightedIndex = (highlightedIndex + 1) % items.length;
+        updateHighlight(items);
+      }
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (popper.style.display === "none") openPopper();
+      if (items.length > 0) {
+        highlightedIndex = (highlightedIndex - 1 + items.length) % items.length;
+        updateHighlight(items);
+      }
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (highlightedIndex >= 0 && highlightedIndex < currentMatches.length) {
+        selectTrackItem(currentMatches[highlightedIndex]);
+      } else if (currentMatches.length > 0) {
+        selectTrackItem(currentMatches[0]);
+      }
+    } else if (e.key === "Escape") {
+      closePopper();
+    }
+  });
+
+  const updateHighlight = (items) => {
+    items.forEach((item, idx) => {
+      item.classList.toggle("highlighted", idx === highlightedIndex);
+      if (idx === highlightedIndex) {
+        item.scrollIntoView({ block: "nearest" });
       }
     });
-  }
+  };
 
-  if (dom.inputSearchCar) {
-    dom.inputSearchCar.addEventListener("input", () => {
-      populateCarDropdown();
+  if (clearBtn) {
+    clearBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      input.value = "";
+      select.value = "";
+      clearBtn.style.display = "none";
+      openPopper();
+      input.focus();
+      select.dispatchEvent(new Event("change"));
     });
-    dom.inputSearchCar.addEventListener("keydown", handleCarSearchKeydown);
   }
 
-  if (dom.btnClearCarSearch) {
-    dom.btnClearCarSearch.addEventListener("click", () => {
-      const currentVal = dom.selectCar?.value ?? "";
-      if (dom.inputSearchCar) {
-        dom.inputSearchCar.value = "";
-        populateCarDropdown(currentVal);
-        dom.inputSearchCar.focus();
+  document.addEventListener("click", (e) => {
+    if (!container.contains(e.target)) {
+      closePopper();
+    }
+  });
+}
+
+/**
+ * Material-UI Autocomplete implementation for Kunos Cars.
+ */
+function initCarAutocomplete() {
+  const container = document.getElementById("autocomplete-car");
+  const input = dom.inputSearchCar;
+  const popper = document.getElementById("car-options-list");
+  const clearBtn = dom.btnClearCarSearch;
+  const select = dom.selectCar;
+  if (!container || !input || !popper || !select) return;
+
+  let highlightedIndex = -1;
+  let currentMatches = [];
+
+  const renderPopper = (query = "") => {
+    currentMatches = filterCars(query);
+    popper.innerHTML = "";
+    highlightedIndex = -1;
+
+    if (currentMatches.length === 0) {
+      popper.innerHTML = '<div class="mui-autocomplete-empty">No matching Kunos cars found</div>';
+      return;
+    }
+
+    currentMatches.forEach((c) => {
+      const item = document.createElement("div");
+      item.className = "mui-autocomplete-item";
+      if (c.car_id === select.value) {
+        item.classList.add("selected");
+      }
+      const badge = c.drivetrain ? c.drivetrain : (c.brand || "KUNOS");
+      item.innerHTML = `
+        <div class="mui-item-main">
+          <span class="mui-item-title">${escapeHtml(c.name)}</span>
+          <span class="mui-item-sub">${escapeHtml(c.car_id)} ${c.brand ? "• " + escapeHtml(c.brand) : ""}</span>
+        </div>
+        <span class="mui-item-badge">${escapeHtml(badge)}</span>
+      `;
+
+      item.addEventListener("click", () => {
+        selectCarItem(c);
+      });
+
+      popper.appendChild(item);
+    });
+  };
+
+  const selectCarItem = (c) => {
+    select.value = c.car_id;
+    const brandStr = c.brand ? ` (${c.brand})` : "";
+    input.value = `${c.name}${brandStr}`;
+    if (clearBtn) clearBtn.style.display = "block";
+    closePopper();
+    select.dispatchEvent(new Event("change"));
+  };
+
+  const openPopper = () => {
+    container.classList.add("open");
+    popper.style.display = "block";
+    input.setAttribute("aria-expanded", "true");
+    const q = input.value.trim().toLowerCase();
+    const isExact = state.cars.some((c) => {
+      const brandStr = c.brand ? ` (${c.brand})` : "";
+      return `${c.name}${brandStr}` === input.value.trim();
+    });
+    renderPopper(isExact ? "" : q);
+  };
+
+  const closePopper = () => {
+    container.classList.remove("open");
+    popper.style.display = "none";
+    input.setAttribute("aria-expanded", "false");
+    highlightedIndex = -1;
+  };
+
+  input.addEventListener("focus", openPopper);
+  input.addEventListener("click", openPopper);
+
+  input.addEventListener("input", () => {
+    const q = input.value.trim().toLowerCase();
+    if (clearBtn) clearBtn.style.display = q ? "block" : "none";
+    if (popper.style.display === "none") {
+      openPopper();
+    } else {
+      renderPopper(q);
+    }
+  });
+
+  input.addEventListener("keydown", (e) => {
+    const items = popper.querySelectorAll(".mui-autocomplete-item");
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (popper.style.display === "none") openPopper();
+      if (items.length > 0) {
+        highlightedIndex = (highlightedIndex + 1) % items.length;
+        updateHighlight(items);
+      }
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (popper.style.display === "none") openPopper();
+      if (items.length > 0) {
+        highlightedIndex = (highlightedIndex - 1 + items.length) % items.length;
+        updateHighlight(items);
+      }
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (highlightedIndex >= 0 && highlightedIndex < currentMatches.length) {
+        selectCarItem(currentMatches[highlightedIndex]);
+      } else if (currentMatches.length > 0) {
+        selectCarItem(currentMatches[0]);
+      }
+    } else if (e.key === "Escape") {
+      closePopper();
+    }
+  });
+
+  const updateHighlight = (items) => {
+    items.forEach((item, idx) => {
+      item.classList.toggle("highlighted", idx === highlightedIndex);
+      if (idx === highlightedIndex) {
+        item.scrollIntoView({ block: "nearest" });
       }
     });
+  };
+
+  if (clearBtn) {
+    clearBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      input.value = "";
+      select.value = "";
+      clearBtn.style.display = "none";
+      openPopper();
+      input.focus();
+      select.dispatchEvent(new Event("change"));
+    });
   }
+
+  document.addEventListener("click", (e) => {
+    if (!container.contains(e.target)) {
+      closePopper();
+    }
+  });
 }
 
 /**
