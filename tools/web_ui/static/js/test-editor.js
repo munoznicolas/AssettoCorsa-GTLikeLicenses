@@ -266,9 +266,7 @@ export function populateCarDropdown(selectedCarId = null) {
   for (const c of state.cars) {
     const opt = document.createElement("option");
     opt.value = c.car_id;
-    const brandStr = c.brand ? ` (${c.brand})` : "";
-    const dtStr = c.drivetrain ? ` [${c.drivetrain}]` : "";
-    opt.textContent = `${c.name}${brandStr}${dtStr}`;
+    opt.textContent = c.name;
     if (c.car_id === activeCarId) {
       opt.selected = true;
     }
@@ -279,8 +277,7 @@ export function populateCarDropdown(selectedCarId = null) {
     dom.selectCar.value = activeCarId;
     const found = state.cars.find((c) => c.car_id === activeCarId);
     if (found && dom.inputSearchCar) {
-      const brandStr = found.brand ? ` (${found.brand})` : "";
-      dom.inputSearchCar.value = `${found.name}${brandStr}`;
+      dom.inputSearchCar.value = found.name;
       if (dom.btnClearCarSearch) dom.btnClearCarSearch.style.display = "block";
     }
   } else if (dom.inputSearchCar) {
@@ -1452,13 +1449,10 @@ function initCarAutocomplete() {
       if (c.car_id === select.value) {
         item.classList.add("selected");
       }
-      const badge = c.drivetrain ? c.drivetrain : (c.brand || "KUNOS");
       item.innerHTML = `
         <div class="mui-item-main">
           <span class="mui-item-title">${escapeHtml(c.name)}</span>
-          <span class="mui-item-sub">${escapeHtml(c.car_id)} ${c.brand ? "• " + escapeHtml(c.brand) : ""}</span>
         </div>
-        <span class="mui-item-badge">${escapeHtml(badge)}</span>
       `;
 
       item.addEventListener("click", () => {
@@ -1471,8 +1465,7 @@ function initCarAutocomplete() {
 
   const selectCarItem = (c) => {
     select.value = c.car_id;
-    const brandStr = c.brand ? ` (${c.brand})` : "";
-    input.value = `${c.name}${brandStr}`;
+    input.value = c.name;
     if (clearBtn) clearBtn.style.display = "block";
     closePopper();
     select.dispatchEvent(new Event("change"));
@@ -1485,7 +1478,10 @@ function initCarAutocomplete() {
     const q = input.value.trim().toLowerCase();
     const isExact = state.cars.some((c) => {
       const brandStr = c.brand ? ` (${c.brand})` : "";
-      return `${c.name}${brandStr}` === input.value.trim();
+      return (
+        c.name.toLowerCase() === input.value.trim().toLowerCase() ||
+        `${c.name}${brandStr}`.toLowerCase() === input.value.trim().toLowerCase()
+      );
     });
     renderPopper(isExact ? "" : q);
   };

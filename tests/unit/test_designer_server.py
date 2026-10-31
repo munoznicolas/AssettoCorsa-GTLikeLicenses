@@ -322,5 +322,25 @@ class TestDesignerServer(unittest.TestCase):
         self.assertNotIn("dom.inputSearchTrack.value = `${found.name} (${found.track_id})`;", js)
 
 
+    def test_car_autocomplete_only_shows_name(self):
+        """Verify that manufacturer and carid are removed from car autocomplete dropdown and search input."""
+        editor_js_path = os.path.join(REPO_ROOT, "tools", "web_ui", "static", "js", "test-editor.js")
+        with open(editor_js_path, "r", encoding="utf-8") as f:
+            js = f.read()
+
+        # In initCarAutocomplete, items must only render car name (no car_id or brand sub-item or badge)
+        self.assertNotIn('<span class="mui-item-sub">${escapeHtml(c.car_id)}', js)
+        self.assertNotIn('<span class="mui-item-badge">${escapeHtml(badge)}</span>', js)
+        self.assertIn('<span class="mui-item-title">${escapeHtml(c.name)}</span>', js)
+
+        # In selectCarItem, input.value must be c.name only
+        self.assertIn("input.value = c.name;", js)
+        self.assertNotIn("input.value = `${c.name}${brandStr}`;", js)
+
+        # In populateCarDropdown, input.value must be found.name only
+        self.assertIn("dom.inputSearchCar.value = found.name;", js)
+        self.assertNotIn("dom.inputSearchCar.value = `${found.name}${brandStr}`;", js)
+
+
 if __name__ == "__main__":
     unittest.main()
