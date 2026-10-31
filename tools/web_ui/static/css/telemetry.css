@@ -69,7 +69,14 @@
 
 .game-pills {
   display: flex;
+  flex-direction: column;
   gap: 6px;
+}
+
+.pills-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
   flex-wrap: wrap;
 }
 
